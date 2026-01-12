@@ -2,25 +2,62 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { WalletProvider, useWallet } from "@/contexts/WalletContext";
+import Login from "./pages/Login";
+import Onboarding from "./pages/Onboarding";
+import Home from "./pages/Home";
+import Send from "./pages/Send";
+import Receive from "./pages/Receive";
+import History from "./pages/History";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, walletStatus } = useWallet();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+  
+  if (walletStatus === 'not_created') {
+    return <Navigate to="/onboarding" replace />;
+  }
+  
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  const { isAuthenticated } = useWallet();
+
+  return (
+    <Routes>
+      <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Login />} />
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/send" element={<ProtectedRoute><Send /></ProtectedRoute>} />
+      <Route path="/receive" element={<ProtectedRoute><Receive /></ProtectedRoute>} />
+      <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/profile/*" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <WalletProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </TooltipProvider>
+    </WalletProvider>
   </QueryClientProvider>
 );
 
