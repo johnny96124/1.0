@@ -16,14 +16,10 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, walletStatus } = useWallet();
+  const { isAuthenticated } = useWallet();
   
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
-  }
-  
-  if (walletStatus === 'not_created') {
-    return <Navigate to="/onboarding" replace />;
   }
   
   return <>{children}</>;
