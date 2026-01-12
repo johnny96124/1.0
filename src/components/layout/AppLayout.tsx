@@ -9,9 +9,11 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children, showNav = true, showSecurityBanner = true }: AppLayoutProps) {
+  const showBanner = showNav && showSecurityBanner;
+  
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto relative">
-      {showSecurityBanner && <SecurityBanner />}
+      {showBanner && <SecurityBanner />}
       <main className={`flex-1 ${showNav ? 'pb-20' : ''}`}>
         {children}
       </main>
