@@ -19,7 +19,7 @@ export default function LoginPage() {
     setLoadingProvider(provider);
     try {
       await login(provider);
-      navigate('/onboarding');
+      navigate('/home');
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
