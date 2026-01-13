@@ -34,7 +34,8 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Welcome />} />
+      <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Login />} />
+      <Route path="/welcome" element={isAuthenticated ? <Navigate to="/home" replace /> : <Welcome />} />
       <Route path="/login" element={isAuthenticated ? <Navigate to="/home" replace /> : <Login />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/create-wallet" element={<ProtectedRoute><CreateWallet /></ProtectedRoute>} />
