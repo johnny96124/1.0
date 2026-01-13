@@ -97,6 +97,9 @@ export default function LoginPage() {
   return (
     <div className="h-full bg-background flex flex-col overflow-hidden">
       {/* Illustration Carousel Area */}
+      {/* Top spacing to push content down */}
+      <div className="pt-8" />
+      
       <Carousel
         className="flex-shrink-0"
         setApi={setApi}
@@ -114,7 +117,7 @@ export default function LoginPage() {
         <CarouselContent className="ml-0">
           {slides.map((slide, index) => (
             <CarouselItem key={index} className="pl-0">
-              <div className="relative h-48 flex items-center justify-center">
+              <div className="relative h-52 flex items-center justify-center">
                 {/* Background Gradient - Blue tones */}
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent" />
                 
