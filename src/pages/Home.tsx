@@ -11,25 +11,25 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 
-// Empty state component when no wallet exists
+// Empty state component when no wallet exists - guides user to create first wallet
 function EmptyWalletState() {
   const navigate = useNavigate();
 
   return (
     <AppLayout showNav={false}>
-      <div className="h-full flex flex-col items-center px-6 pt-24">
+      <div className="h-full flex flex-col items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="text-center max-w-sm w-full"
         >
-          {/* Wallet icon - static */}
+          {/* Wallet icon */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="w-20 h-20 mx-auto mb-5 rounded-2xl gradient-primary flex items-center justify-center shadow-xl"
+            className="w-20 h-20 mx-auto mb-6 rounded-2xl gradient-primary flex items-center justify-center shadow-xl"
           >
             <Wallet className="w-10 h-10 text-primary-foreground" />
           </motion.div>
@@ -40,20 +40,20 @@ function EmptyWalletState() {
           <p className="text-muted-foreground text-sm mb-1">
             只需 1 分钟完成安全设置
           </p>
-          <p className="text-xs text-muted-foreground mb-6">
+          <p className="text-xs text-muted-foreground mb-8">
             您的资产由多重签名技术保护，安全可靠
           </p>
 
           {/* Feature highlights */}
-          <div className="space-y-2 mb-6">
+          <div className="space-y-3 mb-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50"
+              className="flex items-center gap-4 p-3 rounded-xl bg-background"
             >
-              <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-success" />
+              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
+                <Shield className="w-5 h-5 text-success" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground text-sm">银行级安全</p>
@@ -65,10 +65,10 @@ function EmptyWalletState() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50"
+              className="flex items-center gap-4 p-3 rounded-xl bg-background"
             >
-              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-                <Lock className="w-4 h-4 text-accent" />
+              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                <Lock className="w-5 h-5 text-accent" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground text-sm">完全掌控</p>
@@ -80,10 +80,10 @@ function EmptyWalletState() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50"
+              className="flex items-center gap-4 p-3 rounded-xl bg-background"
             >
-              <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-warning" />
+              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-warning" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground text-sm">可恢复</p>
@@ -96,7 +96,7 @@ function EmptyWalletState() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="space-y-2"
+            className="space-y-3"
           >
             <Button
               size="lg"
