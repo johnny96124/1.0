@@ -96,30 +96,31 @@ export default function LoginPage() {
 
   return (
     <div className="h-full bg-background flex flex-col overflow-hidden">
-      {/* Illustration Carousel Area */}
-      {/* Top spacing to push content down */}
-      <div className="pt-8" />
-      
-      <Carousel
-        className="flex-shrink-0"
-        setApi={setApi}
-        opts={{
-          align: 'start',
-          loop: true,
-        }}
-        plugins={[
-          Autoplay({
-            delay: 3000,
-            stopOnInteraction: true,
-          }),
-        ]}
-      >
-        <CarouselContent className="ml-0">
-          {slides.map((slide, index) => (
-            <CarouselItem key={index} className="pl-0">
-              <div className="relative h-52 flex items-center justify-center">
-                {/* Background Gradient - Blue tones */}
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-primary/5 to-transparent" />
+      {/* Top Gradient Background - covers top spacing and illustration area */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/15 via-primary/8 to-transparent" />
+        
+        {/* Top spacing to push content down */}
+        <div className="pt-10" />
+        
+        <Carousel
+          className="flex-shrink-0 relative z-10"
+          setApi={setApi}
+          opts={{
+            align: 'start',
+            loop: true,
+          }}
+          plugins={[
+            Autoplay({
+              delay: 3000,
+              stopOnInteraction: true,
+            }),
+          ]}
+        >
+          <CarouselContent className="ml-0">
+            {slides.map((slide, index) => (
+              <CarouselItem key={index} className="pl-0">
+                <div className="relative h-52 flex items-center justify-center">
                 
                 {/* Animated Background Orbs */}
                 <motion.div
@@ -219,6 +220,7 @@ export default function LoginPage() {
           ))}
         </CarouselContent>
       </Carousel>
+    </div>
 
       {/* Title & Progress Indicators */}
       <div className="px-6 pt-4">
