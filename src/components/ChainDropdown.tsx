@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
+import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from 'sonner';
 
 interface ChainDropdownProps {
@@ -52,7 +53,7 @@ export function ChainDropdown({
             className
           )}
         >
-          <span className="text-base">{selectedChainInfo?.icon}</span>
+          <ChainIcon chainId={selectedChainInfo?.icon || 'all'} size="md" />
           <span>{selectedChainInfo?.shortName}</span>
           <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
         </Button>
@@ -76,7 +77,7 @@ export function ChainDropdown({
               )}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <span className="text-xl shrink-0">{chain.icon}</span>
+                <ChainIcon chainId={chain.icon} size="lg" className="shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className={cn(
                     "font-medium text-sm",

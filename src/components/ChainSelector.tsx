@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { ChainId, ChainInfo, SUPPORTED_CHAINS } from '@/types/wallet';
+import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
 
 interface ChainSelectorProps {
@@ -39,7 +40,9 @@ export function ChainSelector({
               transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
             />
           )}
-          <span className="relative z-10">{chain.icon}</span>
+          <span className="relative z-10">
+            <ChainIcon chainId={chain.icon} size="sm" />
+          </span>
           <span className="relative z-10">{chain.shortName}</span>
         </button>
       ))}

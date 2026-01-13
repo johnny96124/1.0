@@ -11,6 +11,8 @@ import { useWallet, aggregateAssets } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { ChainSelector } from '@/components/ChainSelector';
 import { AddressDisplay } from '@/components/AddressDisplay';
+import { CryptoIcon } from '@/components/CryptoIcon';
+import { ChainIcon } from '@/components/ChainIcon';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 
 export default function AssetDetailPage() {
@@ -84,7 +86,7 @@ export default function AssetDetailPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <span className="text-2xl">{assetData.icon}</span>
+            <CryptoIcon symbol={assetData.symbol} size="lg" />
             <div>
               <h1 className="text-lg font-bold text-foreground">{assetData.symbol}</h1>
               <p className="text-xs text-muted-foreground">{assetData.name}</p>
@@ -180,7 +182,7 @@ export default function AssetDetailPage() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-lg">{chainInfo?.icon}</span>
+                          <ChainIcon chainId={chain.network} size="md" />
                           <span className="font-medium text-foreground text-sm">
                             {chainInfo?.name}
                           </span>
