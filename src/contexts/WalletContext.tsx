@@ -12,12 +12,17 @@ const mockAssets: Asset[] = [
   { symbol: 'USDT', name: 'Tether USD', balance: 8500.50, usdValue: 8500.50, change24h: 0.01, icon: 'USDT', network: 'ethereum' },
   { symbol: 'USDC', name: 'USD Coin', balance: 3230.00, usdValue: 3230.00, change24h: 0.00, icon: 'USDC', network: 'ethereum' },
   { symbol: 'ETH', name: 'Ethereum', balance: 2.45, usdValue: 8575.00, change24h: 2.34, icon: 'ETH', network: 'ethereum' },
+  { symbol: 'BTC', name: 'Bitcoin', balance: 0.125, usdValue: 12187.50, change24h: 1.85, icon: 'BTC', network: 'ethereum' },
+  { symbol: 'LINK', name: 'Chainlink', balance: 150, usdValue: 2775.00, change24h: 1.9, icon: 'LINK', network: 'ethereum' },
   // Tron chain
   { symbol: 'USDT', name: 'Tether USD', balance: 2500.00, usdValue: 2500.00, change24h: 0.01, icon: 'USDT', network: 'tron' },
   { symbol: 'TRX', name: 'Tron', balance: 5000, usdValue: 550.00, change24h: -1.2, icon: 'TRX', network: 'tron' },
   // BSC chain
   { symbol: 'USDT', name: 'Tether USD', balance: 1580.00, usdValue: 1580.00, change24h: 0.01, icon: 'USDT', network: 'bsc' },
   { symbol: 'BNB', name: 'BNB', balance: 3.5, usdValue: 2100.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
+  { symbol: 'SOL', name: 'Solana', balance: 12.5, usdValue: 2312.50, change24h: 3.2, icon: 'SOL', network: 'ethereum' },
+  { symbol: 'MATIC', name: 'Polygon', balance: 2500, usdValue: 1300.00, change24h: 2.8, icon: 'MATIC', network: 'ethereum' },
+  { symbol: 'DOGE', name: 'Dogecoin', balance: 5000, usdValue: 1900.00, change24h: 5.2, icon: 'DOGE', network: 'bsc' },
 ];
 
 const mockTransactions: Transaction[] = [
@@ -189,6 +194,9 @@ interface WalletContextType extends WalletState {
   // Device actions
   addDevice: (device: Device) => void;
   removeDevice: (id: string) => void;
+  
+  // Asset actions
+  addToken: (symbol: string, name: string, network: ChainId, price: number, change24h: number) => void;
   
   // Security config
   updateSecurityConfig: (config: Partial<SecurityConfig>) => void;
@@ -419,6 +427,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setSecurityConfig(prev => ({ ...prev, ...config }));
   }, []);
 
+  const addToken = useCallback((symbol: string, name: string, network: ChainId, price: number, change24h: number) => {
+    // Check if token already exists on this network
+    const exists = assets.some(a => a.symbol === symbol && a.network === network);
+    if (exists) return;
+    
+    const newAsset: Asset = {
+      symbol,
+      name,
+      balance: 0,
+      usdValue: 0,
+      change24h,
+      icon: symbol,
+      network,
+    };
+    setAssets(prev => [...prev, newAsset]);
+  }, [assets]);
+
   const value: WalletContextType = {
     isAuthenticated,
     userInfo,
@@ -447,6 +472,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     removeContact,
     addDevice,
     removeDevice,
+    addToken,
     updateSecurityConfig,
     onboardingStep,
     setOnboardingStep,

@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
   TrendingUp, TrendingDown, Wallet, Plus, Shield,
-  CheckCircle2, AlertCircle, Sparkles, Lock, Settings
+  CheckCircle2, AlertCircle, Sparkles, Lock, Settings, Search
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -13,7 +13,10 @@ import { useWallet, aggregateAssets } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { ChainDropdown } from '@/components/ChainDropdown';
 import { CryptoIcon } from '@/components/CryptoIcon';
+import { TokenSearch } from '@/components/TokenSearch';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
+import { TokenInfo } from '@/lib/tokens';
+import { toast } from 'sonner';
 
 // Empty state component when no wallet exists - guides user to create first wallet
 function EmptyWalletState() {
@@ -144,8 +147,19 @@ function maskEmail(email: string) {
 export default function HomePage() {
   const [hideBalance, setHideBalance] = useState(false);
   const [selectedChain, setSelectedChain] = useState<ChainId>('all');
+  const [showTokenSearch, setShowTokenSearch] = useState(false);
   const navigate = useNavigate();
-  const { assets, transactions, currentWallet, walletStatus, userInfo } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, userInfo, addToken } = useWallet();
+
+  // Get list of already added token symbols for each network
+  const addedSymbols = useMemo(() => {
+    return assets.map(a => a.symbol);
+  }, [assets]);
+
+  const handleAddToken = (token: TokenInfo, network: ChainId) => {
+    addToken(token.symbol, token.name, network, token.price, token.change24h);
+    toast.success(`已添加 ${token.symbol} (${network})`);
+  };
 
   // Show empty state when no wallet exists
   if (walletStatus === 'not_created') {
@@ -329,8 +343,14 @@ export default function HomePage() {
         >
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-semibold text-foreground text-sm">资产</h2>
-            <Button variant="ghost" size="sm" className="text-muted-foreground text-xs h-7">
-              管理
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-accent text-xs h-7 gap-1"
+              onClick={() => setShowTokenSearch(true)}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              添加代币
             </Button>
           </div>
 
@@ -470,6 +490,24 @@ export default function HomePage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Token Search Modal */}
+      <AnimatePresence>
+        {showTokenSearch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background"
+          >
+            <TokenSearch
+              addedSymbols={addedSymbols}
+              onAddToken={handleAddToken}
+              onClose={() => setShowTokenSearch(false)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AppLayout>
   );
 }
