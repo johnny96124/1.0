@@ -183,7 +183,7 @@ export default function HistoryPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end"
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end"
             onClick={() => setSelectedTx(null)}
           >
             <motion.div
@@ -192,7 +192,7 @@ export default function HistoryPage() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md mx-auto bg-card rounded-t-2xl p-6"
+              className="w-full bg-card rounded-t-2xl p-6 pb-8 max-h-[80%] overflow-auto"
             >
               <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-6" />
               
