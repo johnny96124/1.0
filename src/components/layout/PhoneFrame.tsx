@@ -11,8 +11,8 @@ export function PhoneFrame({ children }: PhoneFrameProps) {
         {/* 顶部刘海 */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[28px] bg-slate-800 rounded-b-2xl z-50" />
         
-        {/* 内容区域 */}
-        <div className="h-full overflow-auto">
+        {/* 内容区域 - 为刘海和底部横条留出空间 */}
+        <div className="h-full overflow-auto pt-7 pb-6">
           {children}
         </div>
         
