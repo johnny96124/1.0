@@ -3,13 +3,13 @@ import { motion } from 'framer-motion';
 import { Shield, Lock, Zap, Wallet, CreditCard, TrendingUp, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import Autoplay from 'embla-carousel-autoplay';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
-
 interface SlideData {
   icon: React.ReactNode;
   iconBg: string;
@@ -84,8 +84,14 @@ export default function WelcomePage() {
         setApi={setApi}
         opts={{
           align: 'start',
-          loop: false,
+          loop: true,
         }}
+        plugins={[
+          Autoplay({
+            delay: 3000,
+            stopOnInteraction: true,
+          }),
+        ]}
       >
         <CarouselContent className="flex-1 ml-0">
           {slides.map((slide, index) => (
