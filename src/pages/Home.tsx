@@ -17,26 +17,21 @@ function EmptyWalletState() {
 
   return (
     <AppLayout showNav={false}>
-      <div className="h-full flex flex-col items-center justify-center px-6 py-6">
+      <div className="h-full flex flex-col items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="text-center max-w-sm"
+          className="text-center max-w-sm w-full"
         >
-          {/* Animated wallet icon */}
+          {/* Wallet icon - static */}
           <motion.div
-            initial={{ y: 20 }}
-            animate={{ y: 0 }}
-            transition={{ 
-              duration: 2, 
-              repeat: Infinity, 
-              repeatType: "reverse",
-              ease: "easeInOut"
-            }}
-            className="w-24 h-24 mx-auto mb-6 rounded-3xl gradient-primary flex items-center justify-center shadow-xl"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="w-20 h-20 mx-auto mb-5 rounded-2xl gradient-primary flex items-center justify-center shadow-xl"
           >
-            <Wallet className="w-12 h-12 text-primary-foreground" />
+            <Wallet className="w-10 h-10 text-primary-foreground" />
           </motion.div>
 
           <h1 className="text-xl font-bold text-foreground mb-2">
