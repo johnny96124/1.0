@@ -29,23 +29,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-full bg-background flex flex-col">
       {/* Hero Section */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pt-8">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center mb-8 shadow-lg"
+          className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center mb-6 shadow-lg"
         >
-          <Shield className="w-10 h-10 text-primary-foreground" />
+          <Shield className="w-8 h-8 text-primary-foreground" />
         </motion.div>
 
         <motion.h1
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-2xl font-bold text-foreground text-center mb-2"
+          className="text-xl font-bold text-foreground text-center mb-2"
         >
           欢迎使用商户钱包
         </motion.h1>
@@ -54,7 +54,7 @@ export default function LoginPage() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-muted-foreground text-center text-sm max-w-[280px]"
+          className="text-muted-foreground text-center text-sm max-w-[260px]"
         >
           安全管理您的收款与结算资金
         </motion.p>
@@ -64,7 +64,7 @@ export default function LoginPage() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="flex items-center gap-4 mt-8"
+          className="flex items-center gap-4 mt-6"
         >
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="w-1.5 h-1.5 rounded-full bg-success" />
@@ -82,7 +82,7 @@ export default function LoginPage() {
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="px-6 pb-12 space-y-3"
+        className="px-6 pb-8 space-y-3"
       >
         <Button
           variant="default"

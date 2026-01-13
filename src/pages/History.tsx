@@ -67,18 +67,18 @@ export default function HistoryPage() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6">
-        <h1 className="text-2xl font-bold text-foreground mb-6">交易记录</h1>
+      <div className="px-4 py-4">
+        <h1 className="text-xl font-bold text-foreground mb-4">交易记录</h1>
 
         {/* Search & Filter */}
-        <div className="space-y-3 mb-6">
+        <div className="space-y-2 mb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="搜索交易..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-12"
+              className="pl-9 h-10"
             />
           </div>
 

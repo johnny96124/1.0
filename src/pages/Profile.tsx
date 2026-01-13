@@ -28,22 +28,22 @@ export default function ProfilePage() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6">
+      <div className="px-4 py-4">
         {/* Profile Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-elevated p-6 mb-6"
+          className="card-elevated p-4 mb-4"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center">
-              <User className="w-8 h-8 text-primary-foreground" />
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center">
+              <User className="w-6 h-6 text-primary-foreground" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-bold text-foreground">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base font-bold text-foreground">
                 {currentWallet?.name || '我的钱包'}
               </h2>
-              <p className="text-sm text-muted-foreground font-mono">
+              <p className="text-xs text-muted-foreground font-mono truncate">
                 {currentWallet?.address || '未创建'}
               </p>
             </div>
@@ -56,27 +56,27 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className={cn(
-            'card-elevated p-4 mb-6',
+            'card-elevated p-3 mb-4',
             securityScore < 60 ? 'border-warning/30 bg-warning/5' : 'border-success/30 bg-success/5'
           )}
         >
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               {securityScore >= 80 ? (
-                <CheckCircle2 className="w-5 h-5 text-success" />
+                <CheckCircle2 className="w-4 h-4 text-success" />
               ) : (
-                <AlertTriangle className="w-5 h-5 text-warning" />
+                <AlertTriangle className="w-4 h-4 text-warning" />
               )}
-              <span className="font-medium text-foreground">安全等级</span>
+              <span className="font-medium text-foreground text-sm">安全等级</span>
             </div>
             <span className={cn(
-              'text-2xl font-bold',
+              'text-xl font-bold',
               securityScore >= 80 ? 'text-success' : 'text-warning'
             )}>
               {securityScore}%
             </span>
           </div>
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${securityScore}%` }}
@@ -87,7 +87,7 @@ export default function ProfilePage() {
               )}
             />
           </div>
-          <div className="mt-3 text-sm text-muted-foreground">
+          <div className="mt-2 text-xs text-muted-foreground">
             {!backupStatus.cloudBackup && <p>• 未完成云备份</p>}
             {securityScore === 100 && <p>✓ 已开启全部安全保护</p>}
           </div>
@@ -98,7 +98,7 @@ export default function ProfilePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="card-elevated overflow-hidden mb-6"
+          className="card-elevated overflow-hidden mb-4"
         >
           {menuItems.map((item, index) => {
             const Icon = item.icon;
@@ -107,17 +107,17 @@ export default function ProfilePage() {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  'w-full p-4 flex items-center gap-4 hover:bg-muted/50 transition-colors',
+                  'w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors',
                   index !== menuItems.length - 1 && 'border-b border-border'
                 )}
               >
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-muted-foreground" />
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                  <Icon className="w-4 h-4 text-muted-foreground" />
                 </div>
-                <span className="flex-1 text-left font-medium text-foreground">
+                <span className="flex-1 text-left font-medium text-foreground text-sm">
                   {item.label}
                 </span>
-                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </button>
             );
           })}
@@ -132,12 +132,12 @@ export default function ProfilePage() {
             logout();
             navigate('/');
           }}
-          className="w-full card-elevated p-4 flex items-center gap-4 text-destructive hover:bg-destructive/5 transition-colors"
+          className="w-full card-elevated p-3 flex items-center gap-3 text-destructive hover:bg-destructive/5 transition-colors"
         >
-          <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-            <LogOut className="w-5 h-5" />
+          <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+            <LogOut className="w-4 h-4" />
           </div>
-          <span className="font-medium">退出登录</span>
+          <span className="font-medium text-sm">退出登录</span>
         </motion.button>
       </div>
     </AppLayout>

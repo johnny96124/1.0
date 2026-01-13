@@ -17,7 +17,7 @@ function EmptyWalletState() {
 
   return (
     <AppLayout showNav={false}>
-      <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+      <div className="h-full flex flex-col items-center justify-center px-6 py-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -34,31 +34,31 @@ function EmptyWalletState() {
               repeatType: "reverse",
               ease: "easeInOut"
             }}
-            className="w-32 h-32 mx-auto mb-8 rounded-3xl gradient-primary flex items-center justify-center shadow-xl"
+            className="w-24 h-24 mx-auto mb-6 rounded-3xl gradient-primary flex items-center justify-center shadow-xl"
           >
-            <Wallet className="w-16 h-16 text-primary-foreground" />
+            <Wallet className="w-12 h-12 text-primary-foreground" />
           </motion.div>
 
-          <h1 className="text-2xl font-bold text-foreground mb-3">
+          <h1 className="text-xl font-bold text-foreground mb-2">
             开始创建您的钱包
           </h1>
-          <p className="text-muted-foreground mb-2">
+          <p className="text-muted-foreground text-sm mb-1">
             只需 1 分钟完成安全设置
           </p>
-          <p className="text-sm text-muted-foreground mb-8">
+          <p className="text-xs text-muted-foreground mb-6">
             您的资产由多重签名技术保护，安全可靠
           </p>
 
           {/* Feature highlights */}
-          <div className="space-y-3 mb-8">
+          <div className="space-y-2 mb-6">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="flex items-center gap-3 p-3 rounded-xl bg-muted/50"
+              className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50"
             >
-              <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
-                <Shield className="w-5 h-5 text-success" />
+              <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-success" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground text-sm">银行级安全</p>
@@ -70,10 +70,10 @@ function EmptyWalletState() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex items-center gap-3 p-3 rounded-xl bg-muted/50"
+              className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50"
             >
-              <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                <Lock className="w-5 h-5 text-accent" />
+              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                <Lock className="w-4 h-4 text-accent" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground text-sm">完全掌控</p>
@@ -85,10 +85,10 @@ function EmptyWalletState() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
-              className="flex items-center gap-3 p-3 rounded-xl bg-muted/50"
+              className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/50"
             >
-              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-warning" />
+              <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-warning" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground text-sm">可恢复</p>
@@ -101,11 +101,11 @@ function EmptyWalletState() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="space-y-3"
+            className="space-y-2"
           >
             <Button
               size="lg"
-              className="w-full h-14 text-base gradient-primary"
+              className="w-full h-12 text-base gradient-primary"
               onClick={() => navigate('/onboarding')}
             >
               <Plus className="w-5 h-5 mr-2" />
@@ -149,9 +149,9 @@ export default function HomePage() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6">
+      <div className="px-4 py-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
               <Wallet className="w-5 h-5 text-primary-foreground" />
@@ -174,15 +174,15 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-elevated p-6 mb-6"
+          className="card-elevated p-4 mb-4"
         >
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-muted-foreground">总资产</span>
             <button onClick={() => setHideBalance(!hideBalance)}>
               {hideBalance ? (
-                <EyeOff className="w-5 h-5 text-muted-foreground" />
+                <EyeOff className="w-4 h-4 text-muted-foreground" />
               ) : (
-                <Eye className="w-5 h-5 text-muted-foreground" />
+                <Eye className="w-4 h-4 text-muted-foreground" />
               )}
             </button>
           </div>
@@ -191,7 +191,7 @@ export default function HomePage() {
             key={hideBalance ? 'hidden' : 'shown'}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-3xl font-bold text-foreground mb-6"
+            className="text-2xl font-bold text-foreground mb-4"
           >
             {hideBalance ? '****.**' : formatCurrency(totalBalance)}
           </motion.p>
@@ -199,7 +199,7 @@ export default function HomePage() {
           {/* Quick Actions */}
           <div className="flex gap-3">
             <Button
-              className="flex-1 h-12 gradient-accent text-accent-foreground"
+              className="flex-1 h-10 gradient-accent text-accent-foreground"
               onClick={() => navigate('/send')}
             >
               <Send className="w-4 h-4 mr-2" />
@@ -207,7 +207,7 @@ export default function HomePage() {
             </Button>
             <Button
               variant="outline"
-              className="flex-1 h-12"
+              className="flex-1 h-10"
               onClick={() => navigate('/receive')}
             >
               <QrCode className="w-4 h-4 mr-2" />
@@ -222,22 +222,22 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="card-elevated p-4 mb-6 border-warning/30 bg-warning/5"
+            className="card-elevated p-3 mb-4 border-warning/30 bg-warning/5"
           >
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
-                <Shield className="w-5 h-5 text-warning" />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+                <Shield className="w-4 h-4 text-warning" />
               </div>
-              <div className="flex-1">
-                <p className="font-medium text-foreground">完善安全设置</p>
-                <p className="text-sm text-muted-foreground mt-0.5">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-foreground text-sm">完善安全设置</p>
+                <p className="text-xs text-muted-foreground truncate">
                   完成备份以解锁全部转账功能
                 </p>
               </div>
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="text-warning"
+                className="text-warning shrink-0"
                 onClick={() => navigate('/onboarding')}
               >
                 去完成
@@ -251,39 +251,39 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-6"
+          className="mb-4"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-foreground">资产</h2>
-            <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-foreground text-sm">资产</h2>
+            <Button variant="ghost" size="sm" className="text-muted-foreground text-xs h-7">
               管理
             </Button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {assets.map((asset, index) => (
               <motion.div
                 key={asset.symbol}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 * index }}
-                className="card-elevated p-4 flex items-center justify-between"
+                className="card-elevated p-3 flex items-center justify-between"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xl">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-lg">
                     {asset.icon}
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{asset.symbol}</p>
-                    <p className="text-sm text-muted-foreground">{asset.name}</p>
+                    <p className="font-medium text-foreground text-sm">{asset.symbol}</p>
+                    <p className="text-xs text-muted-foreground">{asset.name}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium text-foreground">
+                  <p className="font-medium text-foreground text-sm">
                     {hideBalance ? '****' : asset.balance.toLocaleString()}
                   </p>
                   <div className="flex items-center gap-1 justify-end">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       {hideBalance ? '**' : formatCurrency(asset.usdValue)}
                     </span>
                     {asset.change24h !== 0 && (
@@ -312,49 +312,47 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-semibold text-foreground">最近交易</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold text-foreground text-sm">最近交易</h2>
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-muted-foreground"
+              className="text-muted-foreground text-xs h-7"
               onClick={() => navigate('/history')}
             >
               查看全部
             </Button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {transactions.slice(0, 3).map((tx, index) => (
               <motion.div
                 key={tx.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 * index }}
-                className="card-elevated p-4 flex items-center justify-between"
+                className="card-elevated p-3 flex items-center justify-between"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <div className={cn(
-                    'w-10 h-10 rounded-full flex items-center justify-center',
+                    'w-8 h-8 rounded-full flex items-center justify-center',
                     tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
                   )}>
                     {tx.type === 'receive' ? (
-                      <TrendingDown className="w-5 h-5 text-success rotate-180" />
+                      <TrendingDown className="w-4 h-4 text-success rotate-180" />
                     ) : (
-                      <Send className="w-5 h-5 text-accent" />
+                      <Send className="w-4 h-4 text-accent" />
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">
+                    <p className="font-medium text-foreground text-sm">
                       {tx.counterpartyLabel || tx.counterparty}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <span className="text-xs text-muted-foreground">
                         {new Date(tx.timestamp).toLocaleDateString('zh-CN', {
                           month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
+                          day: 'numeric'
                         })}
                       </span>
                       {tx.status === 'pending' && (
@@ -374,7 +372,7 @@ export default function HomePage() {
                 </div>
                 <div className="text-right">
                   <p className={cn(
-                    'font-medium',
+                    'font-medium text-sm',
                     tx.type === 'receive' ? 'text-success' : 'text-foreground'
                   )}>
                     {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
@@ -385,9 +383,9 @@ export default function HomePage() {
           </div>
 
           {transactions.length === 0 && (
-            <div className="card-elevated p-8 text-center">
-              <p className="text-muted-foreground">暂无交易记录</p>
-              <p className="text-sm text-muted-foreground mt-1">
+            <div className="card-elevated p-6 text-center">
+              <p className="text-muted-foreground text-sm">暂无交易记录</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 分享收款地址给付款方开始收款
               </p>
             </div>
