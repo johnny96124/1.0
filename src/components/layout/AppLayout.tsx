@@ -14,7 +14,7 @@ export function AppLayout({ children, showNav = true, showSecurityBanner = true 
   return (
     <div className="h-full bg-background flex flex-col relative">
       {showBanner && <SecurityBanner />}
-      <main className={`flex-1 flex flex-col ${showNav ? 'pb-20' : ''}`}>
+      <main className={`flex-1 flex flex-col overflow-auto ${showNav ? 'pb-20' : ''}`}>
         {children}
       </main>
       {showNav && <BottomNav />}
