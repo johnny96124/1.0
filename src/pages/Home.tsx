@@ -307,36 +307,6 @@ export default function HomePage() {
           </div>
         </motion.div>
 
-        {/* Security Score Card */}
-        {walletStatus !== 'fully_secure' && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="card-elevated p-3 mb-4 border-warning/30 bg-warning/5"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
-                <Shield className="w-4 h-4 text-warning" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground text-sm">完善安全设置</p>
-                <p className="text-xs text-muted-foreground truncate">
-                  完成备份以解锁全部转账功能
-                </p>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="text-warning shrink-0"
-                onClick={() => navigate('/onboarding')}
-              >
-                去完成
-              </Button>
-            </div>
-          </motion.div>
-        )}
-
         {/* Assets */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
