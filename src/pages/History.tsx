@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, Filter, Send, TrendingDown, 
@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { Transaction } from '@/types/wallet';
+import { PullToRefresh } from '@/components/PullToRefresh';
+import { toast } from 'sonner';
 
 export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,6 +45,13 @@ export default function HistoryPage() {
     return groups;
   }, {} as Record<string, Transaction[]>);
 
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    // Simulate API call to refresh transactions
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    toast.success('交易记录已刷新');
+  }, []);
+
   const getStatusIcon = (status: Transaction['status']) => {
     switch (status) {
       case 'confirmed':
@@ -67,8 +76,9 @@ export default function HistoryPage() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-4">
-        <h1 className="text-xl font-bold text-foreground mb-4">交易记录</h1>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="px-4 py-4">
+          <h1 className="text-xl font-bold text-foreground mb-4">交易记录</h1>
 
         {/* Search & Filter */}
         <div className="space-y-2 mb-4">
@@ -176,107 +186,108 @@ export default function HistoryPage() {
             </div>
           )}
         </div>
+        </div>
+      </PullToRefresh>
 
-        {/* Transaction Detail Modal */}
-        {selectedTx && (
+      {/* Transaction Detail Modal */}
+      {selectedTx && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end"
+          onClick={() => setSelectedTx(null)}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end"
-            onClick={() => setSelectedTx(null)}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full bg-card rounded-t-2xl p-6 pb-8 max-h-[80%] overflow-auto"
           >
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full bg-card rounded-t-2xl p-6 pb-8 max-h-[80%] overflow-auto"
-            >
-              <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-6" />
-              
-              <div className="text-center mb-6">
-                <div className={cn(
-                  'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
-                  selectedTx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
-                )}>
-                  {selectedTx.type === 'receive' ? (
-                    <TrendingDown className="w-8 h-8 text-success rotate-180" />
-                  ) : (
-                    <Send className="w-8 h-8 text-accent" />
-                  )}
-                </div>
-                <p className={cn(
-                  'text-2xl font-bold',
-                  selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
-                )}>
-                  {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
-                </p>
-                <p className="text-muted-foreground">
-                  ${selectedTx.usdValue.toLocaleString()}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">状态</span>
-                  <span className="flex items-center gap-1 font-medium">
-                    {getStatusIcon(selectedTx.status)}
-                    {getStatusText(selectedTx.status)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    {selectedTx.type === 'receive' ? '付款方' : '收款方'}
-                  </span>
-                  <span className="font-medium font-mono text-sm">
-                    {selectedTx.counterparty}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">网络</span>
-                  <span className="font-medium">{selectedTx.network}</span>
-                </div>
-                {selectedTx.fee && (
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">网络费用</span>
-                    <span className="font-medium">${selectedTx.fee}</span>
-                  </div>
+            <div className="w-12 h-1 bg-muted rounded-full mx-auto mb-6" />
+            
+            <div className="text-center mb-6">
+              <div className={cn(
+                'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
+                selectedTx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
+              )}>
+                {selectedTx.type === 'receive' ? (
+                  <TrendingDown className="w-8 h-8 text-success rotate-180" />
+                ) : (
+                  <Send className="w-8 h-8 text-accent" />
                 )}
+              </div>
+              <p className={cn(
+                'text-2xl font-bold',
+                selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
+              )}>
+                {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
+              </p>
+              <p className="text-muted-foreground">
+                ${selectedTx.usdValue.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">状态</span>
+                <span className="flex items-center gap-1 font-medium">
+                  {getStatusIcon(selectedTx.status)}
+                  {getStatusText(selectedTx.status)}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">
+                  {selectedTx.type === 'receive' ? '付款方' : '收款方'}
+                </span>
+                <span className="font-medium font-mono text-sm">
+                  {selectedTx.counterparty}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">网络</span>
+                <span className="font-medium">{selectedTx.network}</span>
+              </div>
+              {selectedTx.fee && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">时间</span>
-                  <span className="font-medium">
-                    {new Date(selectedTx.timestamp).toLocaleString('zh-CN')}
-                  </span>
+                  <span className="text-muted-foreground">网络费用</span>
+                  <span className="font-medium">${selectedTx.fee}</span>
                 </div>
-                <div className="flex justify-between items-start">
-                  <span className="text-muted-foreground">交易哈希</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm">
-                      {selectedTx.txHash.slice(0, 8)}...{selectedTx.txHash.slice(-6)}
-                    </span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">时间</span>
+                <span className="font-medium">
+                  {new Date(selectedTx.timestamp).toLocaleString('zh-CN')}
+                </span>
+              </div>
+              <div className="flex justify-between items-start">
+                <span className="text-muted-foreground">交易哈希</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm">
+                    {selectedTx.txHash.slice(0, 8)}...{selectedTx.txHash.slice(-6)}
+                  </span>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
+            </div>
 
-              <Button
-                variant="outline"
-                className="w-full mt-6"
-                onClick={() => setSelectedTx(null)}
-              >
-                关闭
-              </Button>
-            </motion.div>
+            <Button
+              variant="outline"
+              className="w-full mt-6"
+              onClick={() => setSelectedTx(null)}
+            >
+              关闭
+            </Button>
           </motion.div>
-        )}
-      </div>
+        </motion.div>
+      )}
     </AppLayout>
   );
 }
