@@ -7,6 +7,7 @@ import { WalletProvider, useWallet } from "@/contexts/WalletContext";
 import { PhoneFrame } from "@/components/layout/PhoneFrame";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
+import CreateWallet from "./pages/CreateWallet";
 import Home from "./pages/Home";
 import Send from "./pages/Send";
 import Receive from "./pages/Receive";
@@ -33,6 +34,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Login />} />
       <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/create-wallet" element={<ProtectedRoute><CreateWallet /></ProtectedRoute>} />
       <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
       <Route path="/send" element={<ProtectedRoute><Send /></ProtectedRoute>} />
       <Route path="/receive" element={<ProtectedRoute><Receive /></ProtectedRoute>} />
