@@ -46,7 +46,7 @@ export function TokenSearch({ addedSymbols, onAddToken, onClose }: TokenSearchPr
   };
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background overflow-hidden relative">
       {/* Header */}
       <div className="px-4 py-3 border-b border-border">
         <div className="flex items-center justify-between mb-3">
@@ -169,7 +169,7 @@ export function TokenSearch({ addedSymbols, onAddToken, onClose }: TokenSearchPr
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-end"
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-end z-10"
             onClick={() => setSelectedToken(null)}
           >
             <motion.div
@@ -177,7 +177,7 @@ export function TokenSearch({ addedSymbols, onAddToken, onClose }: TokenSearchPr
               animate={{ y: 0 }}
               exit={{ y: 100 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full bg-card rounded-t-2xl p-4 border-t border-border"
+              className="w-full bg-card rounded-t-2xl p-4 pb-6 border-t border-border max-h-[70%] overflow-auto"
             >
               <div className="flex items-center gap-3 mb-4">
                 <CryptoIcon symbol={selectedToken.symbol} size="lg" />
