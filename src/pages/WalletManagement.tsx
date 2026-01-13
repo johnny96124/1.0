@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Wallet, ChevronRight, Plus, Check,
-  CheckCircle2, AlertTriangle, Shield, Trash2
+  ArrowLeft, Wallet, Plus, Check,
+  CheckCircle2, AlertTriangle, Shield, MoreHorizontal,
+  Edit3, Eye, Trash2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -10,6 +11,21 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 export default function WalletManagementPage() {
   const navigate = useNavigate();
@@ -17,12 +33,18 @@ export default function WalletManagementPage() {
     wallets, currentWallet, switchWallet, 
     walletStatus, backupStatus, assets 
   } = useWallet();
-  const [selectedWallet, setSelectedWallet] = useState<string | null>(null);
+  
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [selectedWalletForRename, setSelectedWalletForRename] = useState<string | null>(null);
+  const [newWalletName, setNewWalletName] = useState('');
+  const [backupStatusDialogOpen, setBackupStatusDialogOpen] = useState(false);
+  const [selectedWalletForBackup, setSelectedWalletForBackup] = useState<any>(null);
 
-  // Calculate security score
-  const securityScore = walletStatus === 'fully_secure' ? 100 : 
-                        walletStatus === 'backup_complete' ? 80 :
-                        walletStatus === 'created_no_backup' ? 40 : 0;
+  // Calculate security score based on how many wallets are backed up
+  const backedUpCount = wallets.filter(w => w.isBackedUp).length;
+  const securityScore = wallets.length > 0 
+    ? Math.round((backedUpCount / wallets.length) * 100) 
+    : 0;
 
   // Calculate total balance for a wallet
   const getWalletBalance = (walletId: string) => {
@@ -33,12 +55,25 @@ export default function WalletManagementPage() {
     return totalAssets * 0.3;
   };
 
-  const handleSelectWallet = (walletId: string) => {
-    if (walletId !== currentWallet?.id) {
-      switchWallet(walletId);
-      toast.success('已切换钱包');
+  const handleRenameWallet = (walletId: string, currentName: string) => {
+    setSelectedWalletForRename(walletId);
+    setNewWalletName(currentName);
+    setRenameDialogOpen(true);
+  };
+
+  const confirmRename = () => {
+    if (newWalletName.trim()) {
+      // In real app, this would call a context method to update the wallet name
+      toast.success(`钱包已重命名为 "${newWalletName}"`);
+      setRenameDialogOpen(false);
+      setSelectedWalletForRename(null);
+      setNewWalletName('');
     }
-    setSelectedWallet(null);
+  };
+
+  const handleViewBackupStatus = (wallet: any) => {
+    setSelectedWalletForBackup(wallet);
+    setBackupStatusDialogOpen(true);
   };
 
   return (
@@ -90,24 +125,14 @@ export default function WalletManagementPage() {
               />
             </div>
             <div className="space-y-1 text-sm">
-              {!backupStatus.cloudBackup && (
-                <p className="text-muted-foreground">• 未完成云备份</p>
+              {backedUpCount < wallets.length && (
+                <p className="text-muted-foreground">• {wallets.length - backedUpCount} 个钱包未完成备份</p>
               )}
               {securityScore === 100 && (
                 <p className="text-success flex items-center gap-1">
                   <Check className="w-3.5 h-3.5" />
-                  已开启全部安全保护
+                  所有钱包已完成备份
                 </p>
-              )}
-              {securityScore < 100 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-accent p-0 h-auto"
-                  onClick={() => navigate('/onboarding')}
-                >
-                  完善安全设置 →
-                </Button>
               )}
             </div>
           </motion.div>
@@ -133,62 +158,58 @@ export default function WalletManagementPage() {
 
             <div className="space-y-2">
               {wallets.map((wallet, index) => {
-                const isActive = wallet.id === currentWallet?.id;
                 const balance = getWalletBalance(wallet.id);
+                const isBackedUp = wallet.isBackedUp;
                 
                 return (
-                  <motion.button
+                  <motion.div
                     key={wallet.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
-                    onClick={() => handleSelectWallet(wallet.id)}
-                    className={cn(
-                      "w-full card-elevated p-4 flex items-center gap-3 transition-colors",
-                      isActive 
-                        ? "border-accent/30 bg-accent/5" 
-                        : "hover:bg-muted/30"
-                    )}
+                    className="w-full card-elevated p-4 flex items-center gap-3"
                   >
                     {/* Wallet Icon */}
-                    <div className={cn(
-                      "w-12 h-12 rounded-full flex items-center justify-center shrink-0",
-                      isActive ? "gradient-primary" : "bg-muted"
-                    )}>
-                      <Wallet className={cn(
-                        "w-6 h-6",
-                        isActive ? "text-primary-foreground" : "text-muted-foreground"
-                      )} />
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-muted">
+                      <Wallet className="w-6 h-6 text-muted-foreground" />
                     </div>
                     
                     {/* Wallet Info */}
                     <div className="flex-1 text-left min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className={cn(
-                          "font-semibold",
-                          isActive ? "text-accent" : "text-foreground"
-                        )}>
+                        <p className="font-semibold text-foreground">
                           {wallet.name}
                         </p>
-                        {isActive && (
-                          <span className="text-xs bg-accent/20 text-accent px-1.5 py-0.5 rounded">
-                            当前
-                          </span>
+                        {!isBackedUp && (
+                          <Badge variant="outline" className="text-xs border-warning/50 text-warning bg-warning/10">
+                            未备份
+                          </Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
                         ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
-                      <p className="text-xs text-muted-foreground font-mono truncate">
-                        {wallet.addresses?.ethereum 
-                          ? `${wallet.addresses.ethereum.slice(0, 8)}...${wallet.addresses.ethereum.slice(-6)}`
-                          : '未创建地址'}
-                      </p>
                     </div>
                     
-                    {/* Chevron */}
-                    <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
-                  </motion.button>
+                    {/* Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="shrink-0">
+                          <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleRenameWallet(wallet.id, wallet.name)}>
+                          <Edit3 className="w-4 h-4 mr-2" />
+                          修改名称
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewBackupStatus(wallet)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          查看备份状态
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </motion.div>
                 );
               })}
             </div>
@@ -215,6 +236,85 @@ export default function WalletManagementPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Rename Dialog */}
+      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>修改钱包名称</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              value={newWalletName}
+              onChange={(e) => setNewWalletName(e.target.value)}
+              placeholder="输入新的钱包名称"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRenameDialogOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={confirmRename}>
+              确认
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Backup Status Dialog */}
+      <Dialog open={backupStatusDialogOpen} onOpenChange={setBackupStatusDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>备份状态</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            {selectedWalletForBackup && (
+              <>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <Wallet className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{selectedWalletForBackup.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedWalletForBackup.isBackedUp ? '已备份' : '未备份'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className={cn(
+                  'p-3 rounded-lg',
+                  selectedWalletForBackup.isBackedUp ? 'bg-success/10' : 'bg-warning/10'
+                )}>
+                  {selectedWalletForBackup.isBackedUp ? (
+                    <div className="flex items-center gap-2 text-success">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="text-sm font-medium">该钱包已完成安全备份</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-warning">
+                        <AlertTriangle className="w-5 h-5" />
+                        <span className="text-sm font-medium">该钱包尚未备份</span>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        className="w-full"
+                        onClick={() => {
+                          setBackupStatusDialogOpen(false);
+                          navigate('/backup');
+                        }}
+                      >
+                        立即备份
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
