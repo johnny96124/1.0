@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { 
   Wallet, Asset, Transaction, Contact, Device, 
   SecurityConfig, BackupStatus, WalletStatus, WalletState,
-  RiskColor, ChainId, AggregatedAsset
+  RiskColor, ChainId, AggregatedAsset, UserInfo
 } from '@/types/wallet';
 
 // Mock data for demonstration - multi-chain assets
@@ -201,6 +201,7 @@ const WalletContext = createContext<WalletContextType | null>(null);
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [currentWallet, setCurrentWallet] = useState<Wallet | null>(null);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -218,6 +219,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // Simulate login delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsAuthenticated(true);
+    
+    // Set user info based on login provider
+    const mockUserInfo: UserInfo = {
+      email: provider === 'google' ? 'user@gmail.com' : provider === 'apple' ? 'user@icloud.com' : 'user@example.com',
+      avatar: undefined, // Can add avatar URL here
+    };
+    setUserInfo(mockUserInfo);
     
     // Simulate existing user with wallet - login goes directly to home
     const defaultWallet: Wallet = {
@@ -247,6 +255,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);
+    setUserInfo(null);
     setCurrentWallet(null);
     setWallets([]);
     setAssets([]);
@@ -411,6 +420,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const value: WalletContextType = {
     isAuthenticated,
+    userInfo,
     currentWallet,
     wallets,
     assets,

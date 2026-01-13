@@ -3,15 +3,15 @@ import { motion } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
   TrendingUp, TrendingDown, Wallet, Plus, Shield,
-  CheckCircle2, AlertCircle, Sparkles, Lock
+  CheckCircle2, AlertCircle, Sparkles, Lock, Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useWallet, aggregateAssets } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
-import { ChainSelector } from '@/components/ChainSelector';
-import { AddressDisplay } from '@/components/AddressDisplay';
+import { ChainDropdown } from '@/components/ChainDropdown';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 
 // Empty state component when no wallet exists - guides user to create first wallet
@@ -125,11 +125,26 @@ function EmptyWalletState() {
   );
 }
 
+// Helper to format balance with different sizes for integer and decimal parts
+function formatBalanceParts(value: number) {
+  const [integer, decimal] = value.toFixed(2).split('.');
+  const formattedInteger = parseInt(integer).toLocaleString('en-US');
+  return { integer: formattedInteger, decimal };
+}
+
+// Helper to mask email for privacy
+function maskEmail(email: string) {
+  const [name, domain] = email.split('@');
+  if (!domain) return email;
+  const maskedName = name.length > 2 ? `${name[0]}***${name[name.length - 1]}` : name;
+  return `${maskedName}@${domain}`;
+}
+
 export default function HomePage() {
   const [hideBalance, setHideBalance] = useState(false);
   const [selectedChain, setSelectedChain] = useState<ChainId>('all');
   const navigate = useNavigate();
-  const { assets, transactions, currentWallet, walletStatus, backupStatus } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, userInfo } = useWallet();
 
   // Show empty state when no wallet exists
   if (walletStatus === 'not_created') {
@@ -162,37 +177,29 @@ export default function HomePage() {
     return transactions.filter(tx => tx.network === selectedChain);
   }, [transactions, selectedChain]);
 
-  // Get current address for selected chain
-  const currentAddress = useMemo(() => {
-    if (!currentWallet?.addresses) return null;
-    if (selectedChain === 'all') return currentWallet.addresses.ethereum;
-    return currentWallet.addresses[selectedChain];
-  }, [currentWallet, selectedChain]);
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-    }).format(value);
-  };
-
   const getChainName = (chainId: ChainId) => {
     return SUPPORTED_CHAINS.find(c => c.id === chainId)?.shortName || chainId;
   };
 
+  const balanceParts = formatBalanceParts(totalBalance);
+
   return (
     <AppLayout>
       <div className="px-4 py-4">
-        {/* Header */}
+        {/* Header - User Info */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-primary-foreground" />
-            </div>
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={userInfo?.avatar} alt="User avatar" />
+              <AvatarFallback className="bg-accent/20 text-accent font-semibold">
+                {userInfo?.email?.[0]?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
             <div>
-              <p className="text-sm text-muted-foreground">当前钱包</p>
-              <p className="font-semibold text-foreground">{currentWallet?.name || '主钱包'}</p>
+              <p className="text-sm text-muted-foreground">欢迎回来</p>
+              <p className="font-semibold text-foreground text-sm">
+                {userInfo?.email ? maskEmail(userInfo.email) : '用户'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -207,79 +214,80 @@ export default function HomePage() {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate('/profile/wallets')}
+              onClick={() => navigate('/profile')}
             >
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              <Settings className="w-5 h-5 text-muted-foreground" />
             </Button>
           </div>
         </div>
 
-        {/* Address Display */}
-        {currentAddress && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-3"
-          >
-            <AddressDisplay 
-              address={currentAddress} 
-              label={selectedChain !== 'all' ? getChainName(selectedChain) : undefined}
-            />
-          </motion.div>
-        )}
+        {/* Chain Dropdown */}
+        <div className="mb-4">
+          <ChainDropdown
+            selectedChain={selectedChain}
+            onSelectChain={setSelectedChain}
+            addresses={currentWallet?.addresses}
+          />
+        </div>
 
-        {/* Chain Selector */}
-        <ChainSelector
-          selectedChain={selectedChain}
-          onSelectChain={setSelectedChain}
-          className="mb-4"
-        />
-
-        {/* Balance Card */}
+        {/* Balance Card with Light Gradient Overlay */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card-elevated p-4 mb-4"
+          className="relative overflow-hidden card-elevated p-4 mb-4"
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">
-              {selectedChain === 'all' ? '总资产' : `${getChainName(selectedChain)} 资产`}
-            </span>
-            <button onClick={() => setHideBalance(!hideBalance)}>
-              {hideBalance ? (
-                <EyeOff className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <Eye className="w-4 h-4 text-muted-foreground" />
-              )}
-            </button>
-          </div>
+          {/* Light gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-success/8 pointer-events-none" />
+          <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-radial from-success/10 to-transparent rounded-full blur-2xl pointer-events-none" />
           
-          <motion.p
-            key={`${hideBalance}-${selectedChain}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-2xl font-bold text-foreground mb-4"
-          >
-            {hideBalance ? '****.**' : formatCurrency(totalBalance)}
-          </motion.p>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground">
+                {selectedChain === 'all' ? '总资产' : `${getChainName(selectedChain)} 资产`}
+              </span>
+              <button onClick={() => setHideBalance(!hideBalance)}>
+                {hideBalance ? (
+                  <EyeOff className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <Eye className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+            </div>
+            
+            <motion.div
+              key={`${hideBalance}-${selectedChain}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-baseline gap-0.5 mb-4"
+            >
+              {hideBalance ? (
+                <span className="text-3xl font-bold text-foreground">****.**</span>
+              ) : (
+                <>
+                  <span className="text-3xl font-bold text-foreground">${balanceParts.integer}</span>
+                  <span className="text-lg font-medium text-muted-foreground">.{balanceParts.decimal}</span>
+                </>
+              )}
+            </motion.div>
 
-          {/* Quick Actions */}
-          <div className="flex gap-3">
-            <Button
-              className="flex-1 h-10 gradient-accent text-accent-foreground"
-              onClick={() => navigate('/send')}
-            >
-              <Send className="w-4 h-4 mr-2" />
-              转账
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 h-10"
-              onClick={() => navigate('/receive')}
-            >
-              <QrCode className="w-4 h-4 mr-2" />
-              收款
-            </Button>
+            {/* Quick Actions */}
+            <div className="flex gap-3">
+              <Button
+                className="flex-1 h-10 gradient-accent text-accent-foreground"
+                onClick={() => navigate('/send')}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                转账
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 h-10"
+                onClick={() => navigate('/receive')}
+              >
+                <QrCode className="w-4 h-4 mr-2" />
+                收款
+              </Button>
+            </div>
           </div>
         </motion.div>
 
@@ -358,7 +366,7 @@ export default function HomePage() {
                     </p>
                     <div className="flex items-center gap-1 justify-end">
                       <span className="text-xs text-muted-foreground">
-                        {hideBalance ? '**' : formatCurrency(asset.totalUsdValue)}
+                        {hideBalance ? '**' : `$${asset.totalUsdValue.toLocaleString()}`}
                       </span>
                       {asset.change24h !== 0 && (
                         <span className={cn(
@@ -444,7 +452,6 @@ export default function HomePage() {
                       {tx.status === 'confirmed' && (
                         <span className="text-xs text-success flex items-center gap-0.5">
                           <CheckCircle2 className="w-3 h-3" />
-                          已完成
                         </span>
                       )}
                     </div>
@@ -457,22 +464,13 @@ export default function HomePage() {
                   )}>
                     {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
                   </p>
+                  <p className="text-xs text-muted-foreground">
+                    ${tx.usdValue.toLocaleString()}
+                  </p>
                 </div>
               </motion.div>
             ))}
           </div>
-
-          {filteredTransactions.length === 0 && (
-            <div className="card-elevated p-6 text-center">
-              <p className="text-muted-foreground text-sm">暂无交易记录</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {selectedChain === 'all' 
-                  ? '分享收款地址给付款方开始收款'
-                  : `暂无 ${getChainName(selectedChain)} 链上的交易`
-                }
-              </p>
-            </div>
-          )}
         </motion.div>
       </div>
     </AppLayout>
