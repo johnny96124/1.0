@@ -16,8 +16,8 @@ export function BottomNav() {
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">
-      <div className="flex items-center justify-around h-16 px-2 max-w-md mx-auto">
+    <nav className="absolute bottom-0 left-0 right-0 bg-card border-t border-border z-40">
+      <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
@@ -55,8 +55,6 @@ export function BottomNav() {
           );
         })}
       </div>
-      {/* Safe area padding for iOS */}
-      <div className="h-safe-area-inset-bottom bg-card" />
     </nav>
   );
 }
