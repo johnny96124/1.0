@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { ChainDropdown } from '@/components/ChainDropdown';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { TokenSearch } from '@/components/TokenSearch';
+import { PullToRefresh } from '@/components/PullToRefresh';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
 import { toast } from 'sonner';
@@ -161,6 +162,13 @@ export default function HomePage() {
     toast.success(`已添加 ${token.symbol} (${network})`);
   };
 
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    // Simulate API call to refresh balances
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    toast.success('余额已刷新');
+  }, []);
+
   // Show empty state when no wallet exists
   if (walletStatus === 'not_created') {
     return <EmptyWalletState />;
@@ -200,7 +208,8 @@ export default function HomePage() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-4">
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="px-4 py-4">
         {/* Header - User Info */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -490,6 +499,7 @@ export default function HomePage() {
           </div>
         </motion.div>
       </div>
+      </PullToRefresh>
 
       {/* Token Search Modal */}
       <AnimatePresence>
