@@ -14,6 +14,7 @@ import Send from "./pages/Send";
 import Receive from "./pages/Receive";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
+import WalletManagement from "./pages/WalletManagement";
 import AssetDetail from "./pages/AssetDetail";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +46,7 @@ function AppRoutes() {
       <Route path="/asset/:symbol" element={<ProtectedRoute><AssetDetail /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/profile/wallets" element={<ProtectedRoute><WalletManagement /></ProtectedRoute>} />
       <Route path="/profile/*" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

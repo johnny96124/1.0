@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
 import { 
-  User, Wallet, Shield, Smartphone, Users, 
-  Bell, HelpCircle, LogOut, ChevronRight,
-  CheckCircle2, AlertTriangle
+  Wallet, Shield, Smartphone, Users, 
+  Bell, HelpCircle, LogOut, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 
@@ -20,78 +20,35 @@ const menuItems = [
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { currentWallet, walletStatus, backupStatus, logout } = useWallet();
+  const { userInfo, logout } = useWallet();
 
-  const securityScore = walletStatus === 'fully_secure' ? 100 : 
-                        walletStatus === 'backup_complete' ? 80 :
-                        walletStatus === 'created_no_backup' ? 40 : 0;
+  // Get user display name from email
+  const displayName = userInfo?.email?.split('@')[0] || '用户';
 
   return (
     <AppLayout>
       <div className="px-4 py-4">
-        {/* Profile Header */}
+        {/* Profile Header - User Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="card-elevated p-4 mb-4"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center">
-              <User className="w-6 h-6 text-primary-foreground" />
-            </div>
+          <div className="flex items-center gap-4">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={userInfo?.avatar} alt="User avatar" />
+              <AvatarFallback className="bg-accent/20 text-accent text-xl font-semibold">
+                {displayName[0]?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
-              <h2 className="text-base font-bold text-foreground">
-                {currentWallet?.name || '我的钱包'}
+              <h2 className="text-lg font-bold text-foreground">
+                {displayName}
               </h2>
-              <p className="text-xs text-muted-foreground font-mono truncate">
-                {currentWallet?.addresses?.ethereum 
-                  ? `${currentWallet.addresses.ethereum.slice(0, 8)}...${currentWallet.addresses.ethereum.slice(-6)}`
-                  : '未创建'}
+              <p className="text-sm text-muted-foreground truncate">
+                {userInfo?.email || '未设置邮箱'}
               </p>
             </div>
-          </div>
-        </motion.div>
-
-        {/* Security Score */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className={cn(
-            'card-elevated p-3 mb-4',
-            securityScore < 60 ? 'border-warning/30 bg-warning/5' : 'border-success/30 bg-success/5'
-          )}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              {securityScore >= 80 ? (
-                <CheckCircle2 className="w-4 h-4 text-success" />
-              ) : (
-                <AlertTriangle className="w-4 h-4 text-warning" />
-              )}
-              <span className="font-medium text-foreground text-sm">安全等级</span>
-            </div>
-            <span className={cn(
-              'text-xl font-bold',
-              securityScore >= 80 ? 'text-success' : 'text-warning'
-            )}>
-              {securityScore}%
-            </span>
-          </div>
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${securityScore}%` }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className={cn(
-                'h-full rounded-full',
-                securityScore >= 80 ? 'bg-success' : 'bg-warning'
-              )}
-            />
-          </div>
-          <div className="mt-2 text-xs text-muted-foreground">
-            {!backupStatus.cloudBackup && <p>• 未完成云备份</p>}
-            {securityScore === 100 && <p>✓ 已开启全部安全保护</p>}
           </div>
         </motion.div>
 
@@ -99,7 +56,7 @@ export default function ProfilePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.1 }}
           className="card-elevated overflow-hidden mb-4"
         >
           {menuItems.map((item, index) => {
@@ -107,7 +64,13 @@ export default function ProfilePage() {
             return (
               <button
                 key={item.path}
-                onClick={() => navigate(item.path)}
+                onClick={() => {
+                  if (item.path === '/profile/wallets') {
+                    navigate('/profile/wallets');
+                  } else {
+                    navigate(item.path);
+                  }
+                }}
                 className={cn(
                   'w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors',
                   index !== menuItems.length - 1 && 'border-b border-border'
@@ -129,7 +92,7 @@ export default function ProfilePage() {
         <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 0.2 }}
           onClick={() => {
             logout();
             navigate('/');
