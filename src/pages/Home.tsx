@@ -156,13 +156,23 @@ export default function HomePage() {
               <p className="font-semibold text-foreground">{currentWallet?.name || '主钱包'}</p>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/profile/wallets')}
-          >
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="text-accent"
+              onClick={() => navigate('/create-wallet')}
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={() => navigate('/profile/wallets')}
+            >
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </Button>
+          </div>
         </div>
 
         {/* Balance Card */}
