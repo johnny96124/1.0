@@ -4,11 +4,18 @@ import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 
 export function SecurityBanner() {
-  const { walletStatus, backupStatus } = useWallet();
+  const { walletStatus, backupStatus, currentWallet } = useWallet();
 
   const getBannerConfig = () => {
+    // Only show backup warning if current wallet is not backed up
+    const isCurrentWalletBackedUp = currentWallet?.isBackedUp ?? false;
+
     switch (walletStatus) {
       case 'created_no_backup':
+        // Only show if current wallet specifically is not backed up
+        if (isCurrentWalletBackedUp) {
+          return { show: false };
+        }
         return {
           type: 'error' as const,
           icon: ShieldAlert,
@@ -36,6 +43,19 @@ export function SecurityBanner() {
           show: true,
         };
       default:
+        // Also check if current wallet needs backup even when walletStatus is fully_secure
+        // (happens when switching to an unbacked wallet)
+        if (!isCurrentWalletBackedUp && currentWallet) {
+          return {
+            type: 'error' as const,
+            icon: ShieldAlert,
+            title: '请完成资产保险箱备份',
+            description: '备份未完成将限制转账功能',
+            action: '立即备份',
+            actionPath: '/backup',
+            show: true,
+          };
+        }
         return { show: false };
     }
   };
