@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useWallet, aggregateAssets } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { ChainDropdown } from '@/components/ChainDropdown';
+import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 
 // Empty state component when no wallet exists - guides user to create first wallet
@@ -344,9 +345,7 @@ export default function HomePage() {
                 className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-lg">
-                    {asset.icon}
-                  </div>
+                  <CryptoIcon symbol={asset.symbol} size="md" />
                   <div className="text-left">
                     <p className="font-medium text-foreground text-sm">{asset.symbol}</p>
                     <p className="text-xs text-muted-foreground">

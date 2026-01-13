@@ -1,0 +1,50 @@
+import { useState } from 'react';
+import { getChainIconUrl } from '@/lib/crypto-icons';
+import { cn } from '@/lib/utils';
+import { Globe } from 'lucide-react';
+
+interface ChainIconProps {
+  chainId: string;
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}
+
+const sizeMap = {
+  sm: 'w-4 h-4',
+  md: 'w-5 h-5',
+  lg: 'w-6 h-6',
+};
+
+export function ChainIcon({ chainId, size = 'md', className }: ChainIconProps) {
+  const [hasError, setHasError] = useState(false);
+  
+  // For 'all' chains, show a globe icon
+  if (chainId === 'all') {
+    return (
+      <Globe className={cn(sizeMap[size], 'text-accent', className)} />
+    );
+  }
+  
+  const iconUrl = getChainIconUrl(chainId);
+  
+  if (hasError) {
+    return (
+      <div className={cn(
+        sizeMap[size],
+        'rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-muted-foreground',
+        className
+      )}>
+        {chainId.slice(0, 2).toUpperCase()}
+      </div>
+    );
+  }
+  
+  return (
+    <img
+      src={iconUrl}
+      alt={`${chainId} chain icon`}
+      className={cn(sizeMap[size], 'rounded-full object-contain', className)}
+      onError={() => setHasError(true)}
+    />
+  );
+}

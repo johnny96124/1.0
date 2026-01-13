@@ -23,10 +23,10 @@ export interface ChainInfo {
 }
 
 export const SUPPORTED_CHAINS: ChainInfo[] = [
-  { id: 'all', name: '全部网络', shortName: 'All', icon: '🌐', color: 'hsl(var(--accent))' },
-  { id: 'ethereum', name: 'Ethereum', shortName: 'ETH', icon: '⟠', color: 'hsl(217 91% 60%)' },
-  { id: 'tron', name: 'Tron', shortName: 'TRX', icon: '💎', color: 'hsl(0 84% 60%)' },
-  { id: 'bsc', name: 'BNB Chain', shortName: 'BNB', icon: '🔶', color: 'hsl(38 92% 50%)' },
+  { id: 'all', name: '全部网络', shortName: 'All', icon: 'all', color: 'hsl(var(--accent))' },
+  { id: 'ethereum', name: 'Ethereum', shortName: 'ETH', icon: 'ethereum', color: 'hsl(217 91% 60%)' },
+  { id: 'tron', name: 'Tron', shortName: 'TRX', icon: 'tron', color: 'hsl(0 84% 60%)' },
+  { id: 'bsc', name: 'BNB Chain', shortName: 'BNB', icon: 'bsc', color: 'hsl(38 92% 50%)' },
 ];
 
 export interface Wallet {
