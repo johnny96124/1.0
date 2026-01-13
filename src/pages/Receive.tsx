@@ -55,16 +55,16 @@ export default function ReceivePage() {
 
   return (
     <AppLayout>
-      <div className="px-4 py-6">
+      <div className="px-4 py-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-2xl font-bold text-foreground mb-6">收款</h1>
+          <h1 className="text-xl font-bold text-foreground mb-4">收款</h1>
 
           {/* Network Selector */}
-          <div className="mb-6">
-            <label className="text-sm font-medium text-muted-foreground mb-2 block">
+          <div className="mb-4">
+            <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
               选择网络
             </label>
             <button
@@ -110,16 +110,16 @@ export default function ReceivePage() {
           <motion.div
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
-            className="card-elevated p-6 text-center mb-6"
+            className="card-elevated p-4 text-center mb-4"
           >
-            <div className="w-48 h-48 mx-auto bg-foreground rounded-xl p-3 mb-4">
+            <div className="w-36 h-36 mx-auto bg-foreground rounded-xl p-2 mb-3">
               <div className="w-full h-full bg-background rounded-lg flex items-center justify-center">
                 {/* Simulated QR Code */}
-                <div className="grid grid-cols-5 gap-1">
+                <div className="grid grid-cols-5 gap-0.5">
                   {Array.from({ length: 25 }).map((_, i) => (
                     <div
                       key={i}
-                      className={`w-6 h-6 rounded-sm ${
+                      className={`w-5 h-5 rounded-sm ${
                         Math.random() > 0.4 ? 'bg-foreground' : 'bg-transparent'
                       }`}
                     />
@@ -128,20 +128,20 @@ export default function ReceivePage() {
               </div>
             </div>
             
-            <p className="text-sm text-muted-foreground mb-2">
+            <p className="text-xs text-muted-foreground mb-2">
               使用 {selectedNetwork.name} 网络转账到以下地址
             </p>
             
-            <div className="bg-muted/50 rounded-xl p-3 font-mono text-sm break-all text-foreground">
+            <div className="bg-muted/50 rounded-xl p-2 font-mono text-xs break-all text-foreground">
               {fullAddress}
             </div>
           </motion.div>
 
           {/* Actions */}
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3 mb-4">
             <Button
               variant="outline"
-              className="flex-1 h-12"
+              className="flex-1 h-10"
               onClick={handleCopy}
             >
               {copied ? (
@@ -152,7 +152,7 @@ export default function ReceivePage() {
               复制地址
             </Button>
             <Button
-              className="flex-1 h-12"
+              className="flex-1 h-10"
               onClick={handleShare}
             >
               <Share2 className="w-4 h-4 mr-2" />
@@ -161,12 +161,12 @@ export default function ReceivePage() {
           </div>
 
           {/* Warning */}
-          <div className="card-elevated p-4 border-warning/30 bg-warning/5">
-            <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+          <div className="card-elevated p-3 border-warning/30 bg-warning/5">
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-warning shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-foreground">重要提示</p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="font-medium text-foreground text-sm">重要提示</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   请确保付款方选择相同的网络（{selectedNetwork.name}），否则可能导致资金丢失。
                 </p>
               </div>

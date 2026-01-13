@@ -60,9 +60,9 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-full bg-background flex flex-col">
       {/* Progress Header */}
-      <div className="px-6 pt-6 pb-4">
+      <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <button 
@@ -119,7 +119,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Step Content */}
-      <div className="flex-1 px-6">
+      <div className="flex-1 px-4 overflow-auto">
         <AnimatePresence mode="wait">
           {isRecoveryMode ? (
             // Recovery Flow
@@ -191,23 +191,23 @@ function BiometricStep({ onComplete }: { onComplete: () => void }) {
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
+          className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-4"
         >
-          <Fingerprint className="w-12 h-12 text-accent" />
+          <Fingerprint className="w-10 h-10 text-accent" />
         </motion.div>
         
-        <h2 className="text-xl font-bold text-foreground mb-2">
+        <h2 className="text-lg font-bold text-foreground mb-2">
           开启生物识别验证
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[280px]">
+        <p className="text-muted-foreground text-sm max-w-[260px]">
           为了保护资金安全，请开启面容 ID 或指纹验证
         </p>
       </div>
 
-      <div className="pb-8 space-y-3">
+      <div className="pb-6 space-y-2">
         <Button
           size="lg"
-          className="w-full h-14 text-base font-medium"
+          className="w-full h-12 text-base font-medium"
           onClick={handleEnable}
           disabled={isLoading}
         >
@@ -221,7 +221,7 @@ function BiometricStep({ onComplete }: { onComplete: () => void }) {
         <Button
           variant="ghost"
           size="lg"
-          className="w-full h-14 text-base text-muted-foreground"
+          className="w-full h-12 text-base text-muted-foreground"
           onClick={onComplete}
         >
           暂时跳过
@@ -292,20 +292,20 @@ function PinStep({ onComplete }: { onComplete: () => void }) {
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
+          className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4"
         >
-          <Lock className="w-12 h-12 text-accent" />
+          <Lock className="w-8 h-8 text-accent" />
         </motion.div>
         
-        <h2 className="text-xl font-bold text-foreground mb-2">
+        <h2 className="text-lg font-bold text-foreground mb-1">
           {step === 'enter' ? '设置 6 位 PIN 码' : '再次确认 PIN 码'}
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[280px]">
+        <p className="text-muted-foreground text-sm max-w-[260px]">
           PIN 用于关键操作确认，如转账和恢复
         </p>
 
         {/* PIN Display */}
-        <div className="flex gap-3 mt-8 mb-4">
+        <div className="flex gap-3 mt-6 mb-3">
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <motion.div
               key={i}
@@ -314,7 +314,7 @@ function PinStep({ onComplete }: { onComplete: () => void }) {
                 scale: currentPin.length > i ? 1.1 : 1,
                 backgroundColor: currentPin.length > i ? 'hsl(var(--accent))' : 'hsl(var(--muted))'
               }}
-              className="w-4 h-4 rounded-full"
+              className="w-3 h-3 rounded-full"
             />
           ))}
         </div>
@@ -332,14 +332,14 @@ function PinStep({ onComplete }: { onComplete: () => void }) {
       </div>
 
       {/* Number Pad */}
-      <div className="pb-8">
-        <div className="grid grid-cols-3 gap-3 max-w-[280px] mx-auto">
+      <div className="pb-4">
+        <div className="grid grid-cols-3 gap-2 max-w-[240px] mx-auto">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, '⌫'].map((num, i) => (
             <Button
               key={i}
               variant="ghost"
               className={cn(
-                'h-16 text-2xl font-medium rounded-xl',
+                'h-12 text-xl font-medium rounded-xl',
                 num === '' && 'invisible'
               )}
               onClick={() => {
