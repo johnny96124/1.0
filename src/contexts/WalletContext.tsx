@@ -236,23 +236,38 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
     setUserInfo(mockUserInfo);
     
-    // Simulate existing user with wallet - login goes directly to home
-    const defaultWallet: Wallet = {
-      id: `wallet-default`,
-      name: '我的钱包',
-      addresses: {
-        all: '',
-        ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-        tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
-        bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+    // Simulate existing user with multiple wallets - login goes directly to home
+    const mockWallets: Wallet[] = [
+      {
+        id: 'wallet-1',
+        name: '我的钱包',
+        addresses: {
+          all: '',
+          ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+          tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
+          bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+        },
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        isBackedUp: true,
+        isBiometricEnabled: true,
       },
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Created 7 days ago
-      isBackedUp: true,
-      isBiometricEnabled: true,
-    };
+      {
+        id: 'wallet-2',
+        name: '商务钱包',
+        addresses: {
+          all: '',
+          ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+          tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
+          bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+        },
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        isBackedUp: true,
+        isBiometricEnabled: false,
+      },
+    ];
     
-    setWallets([defaultWallet]);
-    setCurrentWallet(defaultWallet);
+    setWallets(mockWallets);
+    setCurrentWallet(mockWallets[0]);
     setAssets(mockAssets);
     setTransactions(mockTransactions);
     setContacts(mockContacts);

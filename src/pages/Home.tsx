@@ -3,18 +3,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
   TrendingUp, TrendingDown, Wallet, Plus, Shield,
-  CheckCircle2, AlertCircle, Sparkles, Lock, Settings, Search
+  CheckCircle2, AlertCircle, Sparkles, Lock, Settings, Search, ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useWallet, aggregateAssets } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { ChainDropdown } from '@/components/ChainDropdown';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { TokenSearch } from '@/components/TokenSearch';
 import { PullToRefresh } from '@/components/PullToRefresh';
+import { WalletSwitcher } from '@/components/WalletSwitcher';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
 import { toast } from 'sonner';
@@ -149,6 +149,7 @@ export default function HomePage() {
   const [hideBalance, setHideBalance] = useState(false);
   const [selectedChain, setSelectedChain] = useState<ChainId>('all');
   const [showTokenSearch, setShowTokenSearch] = useState(false);
+  const [showWalletSwitcher, setShowWalletSwitcher] = useState(false);
   const navigate = useNavigate();
   const { assets, transactions, currentWallet, walletStatus, userInfo, addToken } = useWallet();
 
@@ -210,39 +211,32 @@ export default function HomePage() {
     <AppLayout>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4">
-        {/* Header - User Info */}
+        {/* Header - Wallet Selector */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={userInfo?.avatar} alt="User avatar" />
-              <AvatarFallback className="bg-accent/20 text-accent font-semibold">
-                {userInfo?.email?.[0]?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm text-muted-foreground">欢迎回来</p>
-              <p className="font-semibold text-foreground text-sm">
-                {userInfo?.email ? maskEmail(userInfo.email) : '用户'}
-              </p>
+          <button 
+            onClick={() => setShowWalletSwitcher(true)}
+            className="flex items-center gap-3"
+          >
+            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-primary-foreground" />
             </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="text-accent"
-              onClick={() => navigate('/create-wallet')}
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => navigate('/profile')}
-            >
-              <Settings className="w-5 h-5 text-muted-foreground" />
-            </Button>
-          </div>
+            <div className="text-left">
+              <p className="text-xs text-muted-foreground">当前钱包</p>
+              <div className="flex items-center gap-1">
+                <p className="font-semibold text-foreground text-sm">
+                  {currentWallet?.name || '我的钱包'}
+                </p>
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </div>
+          </button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => navigate('/profile')}
+          >
+            <Settings className="w-5 h-5 text-muted-foreground" />
+          </Button>
         </div>
 
         {/* Balance Card with Light Gradient Overlay */}
@@ -518,6 +512,16 @@ export default function HomePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Wallet Switcher */}
+      <WalletSwitcher
+        isOpen={showWalletSwitcher}
+        onClose={() => setShowWalletSwitcher(false)}
+        onCreateNew={() => {
+          setShowWalletSwitcher(false);
+          navigate('/create-wallet');
+        }}
+      />
     </AppLayout>
   );
 }
