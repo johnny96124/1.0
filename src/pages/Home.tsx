@@ -221,15 +221,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Chain Dropdown */}
-        <div className="mb-4">
-          <ChainDropdown
-            selectedChain={selectedChain}
-            onSelectChain={setSelectedChain}
-            addresses={currentWallet?.addresses}
-          />
-        </div>
-
         {/* Balance Card with Light Gradient Overlay */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -242,16 +233,23 @@ export default function HomePage() {
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">
-                {selectedChain === 'all' ? '总资产' : `${getChainName(selectedChain)} 资产`}
-              </span>
-              <button onClick={() => setHideBalance(!hideBalance)}>
-                {hideBalance ? (
-                  <EyeOff className="w-4 h-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="w-4 h-4 text-muted-foreground" />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {selectedChain === 'all' ? '总资产' : `${getChainName(selectedChain)} 资产`}
+                </span>
+                <button onClick={() => setHideBalance(!hideBalance)}>
+                  {hideBalance ? (
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
+              <ChainDropdown
+                selectedChain={selectedChain}
+                onSelectChain={setSelectedChain}
+                addresses={currentWallet?.addresses}
+              />
             </div>
             
             <motion.div
