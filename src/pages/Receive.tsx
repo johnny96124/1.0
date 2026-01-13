@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Share2, CheckCircle2, ChevronDown, Info } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
+import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 
-const networks = [
-  { id: 'eth', name: 'Ethereum (ERC-20)', icon: '⟠' },
-  { id: 'tron', name: 'Tron (TRC-20)', icon: '🔺' },
-  { id: 'bsc', name: 'BNB Chain', icon: '🟡' },
-];
+const networks = SUPPORTED_CHAINS.filter(c => c.id !== 'all').map(c => ({
+  id: c.id as Exclude<ChainId, 'all'>,
+  name: c.name,
+  icon: c.icon,
+}));
 
 export default function ReceivePage() {
   const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
@@ -19,9 +20,11 @@ export default function ReceivePage() {
   const { currentWallet } = useWallet();
   const { toast } = useToast();
 
-  // Generate a mock address (in real app, this would be network-specific)
-  const address = currentWallet?.address || '0x1234...5678';
-  const fullAddress = '0x1234567890abcdef1234567890abcdef12345678';
+  // Get the address for the selected network
+  const fullAddress = useMemo(() => {
+    if (!currentWallet?.addresses) return '0x1234567890abcdef1234567890abcdef12345678';
+    return currentWallet.addresses[selectedNetwork.id] || '地址生成中...';
+  }, [currentWallet, selectedNetwork.id]);
 
   const handleCopy = async () => {
     try {

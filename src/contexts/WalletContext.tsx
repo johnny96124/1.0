@@ -2,14 +2,21 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { 
   Wallet, Asset, Transaction, Contact, Device, 
   SecurityConfig, BackupStatus, WalletStatus, WalletState,
-  RiskColor
+  RiskColor, ChainId, AggregatedAsset
 } from '@/types/wallet';
 
-// Mock data for demonstration
+// Mock data for demonstration - multi-chain assets
 const mockAssets: Asset[] = [
-  { symbol: 'USDT', name: 'Tether USD', balance: 12580.50, usdValue: 12580.50, change24h: 0.01, icon: '💵' },
-  { symbol: 'USDC', name: 'USD Coin', balance: 5230.00, usdValue: 5230.00, change24h: 0.00, icon: '🔵' },
-  { symbol: 'ETH', name: 'Ethereum', balance: 2.45, usdValue: 8575.00, change24h: 2.34, icon: '⟠' },
+  // Ethereum chain
+  { symbol: 'USDT', name: 'Tether USD', balance: 8500.50, usdValue: 8500.50, change24h: 0.01, icon: '💵', network: 'ethereum' },
+  { symbol: 'USDC', name: 'USD Coin', balance: 3230.00, usdValue: 3230.00, change24h: 0.00, icon: '🔵', network: 'ethereum' },
+  { symbol: 'ETH', name: 'Ethereum', balance: 2.45, usdValue: 8575.00, change24h: 2.34, icon: '⟠', network: 'ethereum' },
+  // Tron chain
+  { symbol: 'USDT', name: 'Tether USD', balance: 2500.00, usdValue: 2500.00, change24h: 0.01, icon: '💵', network: 'tron' },
+  { symbol: 'TRX', name: 'Tron', balance: 5000, usdValue: 550.00, change24h: -1.2, icon: '💎', network: 'tron' },
+  // BSC chain
+  { symbol: 'USDT', name: 'Tether USD', balance: 1580.00, usdValue: 1580.00, change24h: 0.01, icon: '💵', network: 'bsc' },
+  { symbol: 'BNB', name: 'BNB', balance: 3.5, usdValue: 2100.00, change24h: 1.5, icon: '🔶', network: 'bsc' },
 ];
 
 const mockTransactions: Transaction[] = [
@@ -24,7 +31,7 @@ const mockTransactions: Transaction[] = [
     counterpartyLabel: 'ABC Trading Co.',
     timestamp: new Date(Date.now() - 3600000),
     txHash: '0xabc...def',
-    network: 'Ethereum',
+    network: 'ethereum',
     riskScore: 'green',
   },
   {
@@ -34,11 +41,11 @@ const mockTransactions: Transaction[] = [
     symbol: 'USDT',
     usdValue: 800,
     status: 'confirmed',
-    counterparty: '0x8765...4321',
+    counterparty: 'T9yD14...xK3m',
     counterpartyLabel: 'Supplier XYZ',
     timestamp: new Date(Date.now() - 86400000),
-    txHash: '0xdef...abc',
-    network: 'Ethereum',
+    txHash: 'abc123...def',
+    network: 'tron',
     fee: 2.5,
     riskScore: 'green',
   },
@@ -52,8 +59,22 @@ const mockTransactions: Transaction[] = [
     counterparty: '0x9999...1111',
     timestamp: new Date(Date.now() - 1800000),
     txHash: '0x111...222',
-    network: 'Ethereum',
+    network: 'ethereum',
     riskScore: 'yellow',
+  },
+  {
+    id: '4',
+    type: 'send',
+    amount: 1.5,
+    symbol: 'BNB',
+    usdValue: 900,
+    status: 'confirmed',
+    counterparty: '0xBnb...addr',
+    timestamp: new Date(Date.now() - 172800000),
+    txHash: '0xbnb...hash',
+    network: 'bsc',
+    fee: 0.001,
+    riskScore: 'green',
   },
 ];
 
@@ -62,7 +83,7 @@ const mockContacts: Contact[] = [
     id: '1',
     name: 'ABC Trading Co.',
     address: '0x1234567890abcdef1234567890abcdef12345678',
-    network: 'Ethereum',
+    network: 'ethereum',
     tags: ['Customer', 'Verified'],
     isOfficial: false,
     isWhitelisted: true,
@@ -71,8 +92,8 @@ const mockContacts: Contact[] = [
   {
     id: '2',
     name: 'Supplier XYZ',
-    address: '0x8765432109abcdef8765432109abcdef87654321',
-    network: 'Ethereum',
+    address: 'T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb',
+    network: 'tron',
     tags: ['Supplier'],
     isOfficial: false,
     isWhitelisted: true,
@@ -82,7 +103,7 @@ const mockContacts: Contact[] = [
     id: '3',
     name: 'PSP Official Settlement',
     address: '0xOFFICIAL1234567890abcdef1234567890abcd',
-    network: 'Ethereum',
+    network: 'ethereum',
     tags: ['Official'],
     isOfficial: true,
     isWhitelisted: true,
@@ -113,6 +134,33 @@ const defaultBackupStatus: BackupStatus = {
   cloudBackup: false,
   fileBackup: false,
 };
+
+// Helper function to aggregate assets across chains
+export function aggregateAssets(assets: Asset[]): AggregatedAsset[] {
+  const grouped = assets.reduce((acc, asset) => {
+    if (!acc[asset.symbol]) {
+      acc[asset.symbol] = {
+        symbol: asset.symbol,
+        name: asset.name,
+        totalBalance: 0,
+        totalUsdValue: 0,
+        change24h: asset.change24h,
+        icon: asset.icon,
+        chains: [],
+      };
+    }
+    acc[asset.symbol].totalBalance += asset.balance;
+    acc[asset.symbol].totalUsdValue += asset.usdValue;
+    acc[asset.symbol].chains.push({
+      network: asset.network,
+      balance: asset.balance,
+      usdValue: asset.usdValue,
+    });
+    return acc;
+  }, {} as Record<string, AggregatedAsset>);
+  
+  return Object.values(grouped).sort((a, b) => b.totalUsdValue - a.totalUsdValue);
+}
 
 interface WalletContextType extends WalletState {
   // Auth actions
@@ -175,11 +223,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const defaultWallet: Wallet = {
       id: `wallet-default`,
       name: '我的钱包',
-      address: `0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6)}`,
+      addresses: {
+        all: '',
+        ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+        tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
+        bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+      },
       createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Created 7 days ago
       isBackedUp: true,
       isBiometricEnabled: true,
-      network: 'Ethereum',
     };
     
     setWallets([defaultWallet]);
@@ -212,11 +264,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const newWallet: Wallet = {
       id: `wallet-${Date.now()}`,
       name,
-      address: `0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6)}`,
+      addresses: {
+        all: '',
+        ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+        tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
+        bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+      },
       createdAt: new Date(),
       isBackedUp: false,
       isBiometricEnabled: hasBiometric,
-      network: 'Ethereum',
     };
     
     setWallets(prev => [...prev, newWallet]);
