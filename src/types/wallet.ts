@@ -122,9 +122,16 @@ export interface BackupStatus {
   fileBackup: boolean;
 }
 
+// User info
+export interface UserInfo {
+  email: string;
+  avatar?: string;
+}
+
 // App-level state
 export interface WalletState {
   isAuthenticated: boolean;
+  userInfo: UserInfo | null;
   currentWallet: Wallet | null;
   wallets: Wallet[];
   assets: Asset[];
