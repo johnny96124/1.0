@@ -95,7 +95,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-full flex flex-col overflow-hidden" style={{ background: 'linear-gradient(to bottom, hsl(var(--primary) / 0.15) 0%, hsl(var(--primary) / 0.08) 30%, hsl(var(--background)) 60%)' }}>
+    <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Top Gradient Background - covers top spacing and illustration area */}
       <div className="relative">
         
