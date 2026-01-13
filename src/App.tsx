@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { WalletProvider, useWallet } from "@/contexts/WalletContext";
+import { PhoneFrame } from "@/components/layout/PhoneFrame";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
@@ -50,7 +51,9 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <AppRoutes />
+          <PhoneFrame>
+            <AppRoutes />
+          </PhoneFrame>
         </BrowserRouter>
       </TooltipProvider>
     </WalletProvider>
