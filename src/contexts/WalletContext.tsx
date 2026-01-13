@@ -171,15 +171,26 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsAuthenticated(true);
     
-    // Check if user has existing wallet (simulated)
-    const hasExistingWallet = false; // For demo, always new user
+    // Simulate existing user with wallet - login goes directly to home
+    const defaultWallet: Wallet = {
+      id: `wallet-default`,
+      name: '我的钱包',
+      address: `0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6)}`,
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Created 7 days ago
+      isBackedUp: true,
+      isBiometricEnabled: true,
+      network: 'Ethereum',
+    };
     
-    if (hasExistingWallet) {
-      // Would check for device share here
-      setWalletStatus('not_created');
-    } else {
-      setWalletStatus('not_created');
-    }
+    setWallets([defaultWallet]);
+    setCurrentWallet(defaultWallet);
+    setAssets(mockAssets);
+    setTransactions(mockTransactions);
+    setContacts(mockContacts);
+    setDevices(mockDevices);
+    setWalletStatus('fully_secure');
+    setHasPin(true);
+    setHasBiometric(true);
   }, []);
 
   const logout = useCallback(() => {
