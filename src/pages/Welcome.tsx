@@ -96,7 +96,7 @@ export default function WelcomePage() {
         <CarouselContent className="flex-1 ml-0">
           {slides.map((slide, index) => (
             <CarouselItem key={index} className="h-full pl-0">
-              <div className="h-full flex flex-col justify-between py-8">
+              <div className="h-full flex flex-col py-8">
                 {/* Illustration Area */}
                 <div className="relative h-52 flex items-center justify-center">
                   {/* Background Gradient */}
@@ -245,63 +245,46 @@ export default function WelcomePage() {
                   </div>
 
                   {/* Brand */}
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="flex items-center gap-2 mb-3"
-                  >
+                  <div className="flex items-center gap-2 mb-3">
                     <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                       <Shield className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <span className="text-sm font-semibold text-foreground">商户钱包</span>
-                  </motion.div>
+                  </div>
 
                   {/* Title & Description */}
-                  <motion.h1 
-                    key={`title-${index}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-2xl font-bold text-foreground mb-2 leading-tight"
-                  >
+                  <h1 className="text-2xl font-bold text-foreground mb-2 leading-tight">
                     {slide.title}
-                  </motion.h1>
-                  <motion.p 
-                    key={`desc-${index}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-muted-foreground text-sm leading-relaxed"
-                  >
+                  </h1>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
                     {slide.description}
-                  </motion.p>
-                </div>
-
-                {/* Buttons - Inside each slide but positioned at bottom */}
-                <div className="px-6 pt-6 flex gap-3">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="flex-1 h-12 text-base font-medium"
-                    onClick={handleLogin}
-                  >
-                    注册
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="lg"
-                    className="flex-1 h-12 text-base font-medium"
-                    onClick={handleLogin}
-                  >
-                    登录
-                  </Button>
+                  </p>
                 </div>
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
       </Carousel>
+
+      {/* Fixed Buttons at Bottom */}
+      <div className="px-6 pb-8 pt-4 flex gap-3 bg-background">
+        <Button
+          variant="outline"
+          size="lg"
+          className="flex-1 h-12 text-base font-medium"
+          onClick={handleLogin}
+        >
+          注册
+        </Button>
+        <Button
+          variant="default"
+          size="lg"
+          className="flex-1 h-12 text-base font-medium"
+          onClick={handleLogin}
+        >
+          登录
+        </Button>
+      </div>
     </div>
   );
 }
