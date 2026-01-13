@@ -18,12 +18,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+} from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 
@@ -237,37 +237,37 @@ export default function WalletManagementPage() {
         </div>
       </div>
 
-      {/* Rename Dialog */}
-      <Dialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>修改钱包名称</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
+      {/* Rename Drawer */}
+      <Drawer open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>修改钱包名称</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-4">
             <Input
               value={newWalletName}
               onChange={(e) => setNewWalletName(e.target.value)}
               placeholder="输入新的钱包名称"
             />
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setRenameDialogOpen(false)}>
+          <DrawerFooter className="flex-row gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setRenameDialogOpen(false)}>
               取消
             </Button>
-            <Button onClick={confirmRename}>
+            <Button className="flex-1" onClick={confirmRename}>
               确认
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
-      {/* Backup Status Dialog */}
-      <Dialog open={backupStatusDialogOpen} onOpenChange={setBackupStatusDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>备份状态</DialogTitle>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
+      {/* Backup Status Drawer */}
+      <Drawer open={backupStatusDialogOpen} onOpenChange={setBackupStatusDialogOpen}>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>备份状态</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-4">
             {selectedWalletForBackup && (
               <>
                 <div className="flex items-center gap-3">
@@ -292,13 +292,12 @@ export default function WalletManagementPage() {
                       <span className="text-sm font-medium">该钱包已完成安全备份</span>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div className="flex items-center gap-2 text-warning">
                         <AlertTriangle className="w-5 h-5" />
                         <span className="text-sm font-medium">该钱包尚未备份</span>
                       </div>
                       <Button 
-                        size="sm" 
                         className="w-full"
                         onClick={() => {
                           setBackupStatusDialogOpen(false);
@@ -313,8 +312,8 @@ export default function WalletManagementPage() {
               </>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
+        </DrawerContent>
+      </Drawer>
     </AppLayout>
   );
 }
