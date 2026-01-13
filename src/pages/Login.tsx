@@ -20,10 +20,44 @@ interface SlideData {
   floatingIcons: React.ReactNode[];
 }
 
+// Color themes for each slide
+const colorThemes = [
+  {
+    iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-400',
+    orbColor: 'bg-blue-500/20',
+    orbColor2: 'bg-cyan-400/15',
+    dotColor: 'bg-blue-400/40',
+    dotColor2: 'bg-cyan-400/30',
+    floatingBg: ['bg-blue-500/90', 'bg-cyan-500/80', 'bg-blue-400/70'],
+    sparkleColor: 'bg-blue-400',
+    pulseColor: 'bg-blue-500',
+  },
+  {
+    iconBg: 'bg-gradient-to-br from-violet-500 to-purple-400',
+    orbColor: 'bg-violet-500/20',
+    orbColor2: 'bg-purple-400/15',
+    dotColor: 'bg-violet-400/40',
+    dotColor2: 'bg-purple-400/30',
+    floatingBg: ['bg-violet-500/90', 'bg-purple-500/80', 'bg-violet-400/70'],
+    sparkleColor: 'bg-violet-400',
+    pulseColor: 'bg-violet-500',
+  },
+  {
+    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-400',
+    orbColor: 'bg-emerald-500/20',
+    orbColor2: 'bg-teal-400/15',
+    dotColor: 'bg-emerald-400/40',
+    dotColor2: 'bg-teal-400/30',
+    floatingBg: ['bg-emerald-500/90', 'bg-teal-500/80', 'bg-emerald-400/70'],
+    sparkleColor: 'bg-emerald-400',
+    pulseColor: 'bg-emerald-500',
+  },
+];
+
 const slides: SlideData[] = [
   {
     icon: <Shield className="w-10 h-10 text-white" />,
-    iconBg: 'bg-gradient-to-br from-primary to-primary/80',
+    iconBg: colorThemes[0].iconBg,
     title: '安全管理您的数字资产',
     floatingIcons: [
       <Wallet className="w-5 h-5" />,
@@ -33,7 +67,7 @@ const slides: SlideData[] = [
   },
   {
     icon: <Lock className="w-10 h-10 text-white" />,
-    iconBg: 'bg-gradient-to-br from-primary to-primary/80',
+    iconBg: colorThemes[1].iconBg,
     title: '顶级安全，无忧交易',
     floatingIcons: [
       <Shield className="w-5 h-5" />,
@@ -43,7 +77,7 @@ const slides: SlideData[] = [
   },
   {
     icon: <Wallet className="w-10 h-10 text-white" />,
-    iconBg: 'bg-gradient-to-br from-primary to-primary/80',
+    iconBg: colorThemes[2].iconBg,
     title: '快速收款，即时到账',
     floatingIcons: [
       <TrendingUp className="w-5 h-5" />,
@@ -128,7 +162,7 @@ export default function LoginPage() {
                     opacity: [0.3, 0.5, 0.3],
                   }}
                   transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute top-4 left-1/4 w-20 h-20 rounded-full blur-3xl bg-primary/20"
+                  className={`absolute top-4 left-1/4 w-20 h-20 rounded-full blur-3xl ${colorThemes[index].orbColor}`}
                 />
                 <motion.div
                   animate={{ 
@@ -136,7 +170,7 @@ export default function LoginPage() {
                     opacity: [0.2, 0.4, 0.2],
                   }}
                   transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                  className="absolute bottom-4 right-1/4 w-24 h-24 rounded-full blur-3xl bg-primary/15"
+                  className={`absolute bottom-4 right-1/4 w-24 h-24 rounded-full blur-3xl ${colorThemes[index].orbColor2}`}
                 />
                 
                 {/* Main Icon with Orbiting Elements */}
@@ -148,15 +182,15 @@ export default function LoginPage() {
                     className="absolute inset-0 w-36 h-36 -m-4"
                     style={{ transformOrigin: 'center' }}
                   >
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-primary/40" />
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary/30" />
+                    <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full ${colorThemes[index].dotColor}`} />
+                    <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full ${colorThemes[index].dotColor2}`} />
                   </motion.div>
 
                   {/* Floating Icons */}
                   <motion.div
                     animate={{ y: [0, -8, 0], x: [0, 3, 0] }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute -top-5 -right-3 w-8 h-8 rounded-xl flex items-center justify-center shadow-lg bg-primary/90 text-white"
+                    className={`absolute -top-5 -right-3 w-8 h-8 rounded-xl flex items-center justify-center shadow-lg ${colorThemes[index].floatingBg[0]} text-white`}
                   >
                     {slide.floatingIcons[0]}
                   </motion.div>
@@ -164,7 +198,7 @@ export default function LoginPage() {
                   <motion.div
                     animate={{ y: [0, 5, 0], x: [0, -2, 0] }}
                     transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                    className="absolute -bottom-2 -left-5 w-6 h-6 rounded-lg flex items-center justify-center shadow-md bg-primary/80 text-white"
+                    className={`absolute -bottom-2 -left-5 w-6 h-6 rounded-lg flex items-center justify-center shadow-md ${colorThemes[index].floatingBg[1]} text-white`}
                   >
                     {slide.floatingIcons[1]}
                   </motion.div>
@@ -172,7 +206,7 @@ export default function LoginPage() {
                   <motion.div
                     animate={{ y: [0, -4, 0], rotate: [0, 6, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                    className="absolute top-1/2 -right-8 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center shadow-md bg-primary/70 text-white"
+                    className={`absolute top-1/2 -right-8 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center shadow-md ${colorThemes[index].floatingBg[2]} text-white`}
                   >
                     {slide.floatingIcons[2]}
                   </motion.div>
@@ -188,7 +222,7 @@ export default function LoginPage() {
                     <motion.div
                       animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }}
                       transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-                      className="absolute inset-0 rounded-2xl bg-primary"
+                      className={`absolute inset-0 rounded-2xl ${colorThemes[index].pulseColor}`}
                     />
                     
                     {/* Icon Box */}
@@ -206,12 +240,12 @@ export default function LoginPage() {
                   <motion.div
                     animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
                     transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-                    className="absolute -top-1 left-0 w-1.5 h-1.5 rounded-full bg-primary"
+                    className={`absolute -top-1 left-0 w-1.5 h-1.5 rounded-full ${colorThemes[index].sparkleColor}`}
                   />
                   <motion.div
                     animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
                     transition={{ duration: 2, repeat: Infinity, delay: 0.7 }}
-                    className="absolute bottom-2 -right-2 w-1 h-1 rounded-full bg-primary"
+                    className={`absolute bottom-2 -right-2 w-1 h-1 rounded-full ${colorThemes[index].sparkleColor}`}
                   />
                 </div>
               </div>
