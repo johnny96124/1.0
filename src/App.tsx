@@ -14,6 +14,7 @@ import Send from "./pages/Send";
 import Receive from "./pages/Receive";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
+import AssetDetail from "./pages/AssetDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ function AppRoutes() {
       <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
       <Route path="/send" element={<ProtectedRoute><Send /></ProtectedRoute>} />
       <Route path="/receive" element={<ProtectedRoute><Receive /></ProtectedRoute>} />
+      <Route path="/asset/:symbol" element={<ProtectedRoute><AssetDetail /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/profile/*" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

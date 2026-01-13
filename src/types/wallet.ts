@@ -11,14 +11,31 @@ export type WalletStatus =
 export type RiskLevel = 'low' | 'medium' | 'high';
 export type RiskColor = 'green' | 'yellow' | 'red';
 
+// Supported chains
+export type ChainId = 'all' | 'ethereum' | 'tron' | 'bsc';
+
+export interface ChainInfo {
+  id: ChainId;
+  name: string;
+  shortName: string;
+  icon: string;
+  color: string;
+}
+
+export const SUPPORTED_CHAINS: ChainInfo[] = [
+  { id: 'all', name: '全部网络', shortName: 'All', icon: '🌐', color: 'hsl(var(--accent))' },
+  { id: 'ethereum', name: 'Ethereum', shortName: 'ETH', icon: '⟠', color: 'hsl(217 91% 60%)' },
+  { id: 'tron', name: 'Tron', shortName: 'TRX', icon: '💎', color: 'hsl(0 84% 60%)' },
+  { id: 'bsc', name: 'BNB Chain', shortName: 'BNB', icon: '🔶', color: 'hsl(38 92% 50%)' },
+];
+
 export interface Wallet {
   id: string;
   name: string;
-  address: string;
+  addresses: Record<ChainId, string>; // Multi-chain addresses
   createdAt: Date;
   isBackedUp: boolean;
   isBiometricEnabled: boolean;
-  network: string;
 }
 
 export interface Asset {
@@ -28,6 +45,18 @@ export interface Asset {
   usdValue: number;
   change24h: number;
   icon: string;
+  network: ChainId; // Which chain this asset is on
+}
+
+// Aggregated asset for display when viewing "All" chains
+export interface AggregatedAsset {
+  symbol: string;
+  name: string;
+  totalBalance: number;
+  totalUsdValue: number;
+  change24h: number;
+  icon: string;
+  chains: { network: ChainId; balance: number; usdValue: number }[];
 }
 
 export interface Transaction {

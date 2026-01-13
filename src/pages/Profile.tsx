@@ -44,7 +44,9 @@ export default function ProfilePage() {
                 {currentWallet?.name || '我的钱包'}
               </h2>
               <p className="text-xs text-muted-foreground font-mono truncate">
-                {currentWallet?.address || '未创建'}
+                {currentWallet?.addresses?.ethereum 
+                  ? `${currentWallet.addresses.ethereum.slice(0, 8)}...${currentWallet.addresses.ethereum.slice(-6)}`
+                  : '未创建'}
               </p>
             </div>
           </div>
