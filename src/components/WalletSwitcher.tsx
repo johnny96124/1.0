@@ -3,6 +3,7 @@ import { Check, Plus, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
+import { getWalletTotalBalance } from '@/contexts/WalletContext';
 
 interface WalletSwitcherProps {
   isOpen: boolean;
@@ -11,19 +12,7 @@ interface WalletSwitcherProps {
 }
 
 export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherProps) {
-  const { wallets, currentWallet, switchWallet, assets } = useWallet();
-
-  // Calculate total balance for a wallet (simplified - uses shared assets for demo)
-  const getWalletBalance = (walletId: string) => {
-    // In real app, each wallet would have its own assets
-    // For demo, distribute mock balances across wallets
-    const totalAssets = assets.reduce((sum, a) => sum + a.usdValue, 0);
-    if (walletId === wallets[0]?.id) {
-      return totalAssets;
-    }
-    // Secondary wallets show smaller demo balances
-    return totalAssets * 0.3;
-  };
+  const { wallets, currentWallet, switchWallet } = useWallet();
 
   const handleSelect = (walletId: string) => {
     if (walletId !== currentWallet?.id) {
@@ -61,7 +50,7 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherP
             <div className="space-y-2 mb-4">
               {wallets.map((wallet) => {
                 const isActive = wallet.id === currentWallet?.id;
-                const balance = getWalletBalance(wallet.id);
+                const balance = getWalletTotalBalance(wallet.id);
                 
                 return (
                   <motion.button

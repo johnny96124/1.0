@@ -47,8 +47,14 @@ const walletAssetsMap: Record<string, Asset[]> = {
 };
 
 // Helper to get assets for a wallet
-const getAssetsForWallet = (walletId: string): Asset[] => {
+export const getAssetsForWallet = (walletId: string): Asset[] => {
   return walletAssetsMap[walletId] || mockAssetsNewWallet;
+};
+
+// Helper to get total balance for a wallet
+export const getWalletTotalBalance = (walletId: string): number => {
+  const assets = getAssetsForWallet(walletId);
+  return assets.reduce((sum, a) => sum + a.usdValue, 0);
 };
 
 // Mock transactions per wallet
