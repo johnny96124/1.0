@@ -5,9 +5,9 @@ import {
   RiskColor, ChainId, AggregatedAsset, UserInfo
 } from '@/types/wallet';
 
-// Mock data for demonstration - multi-chain assets
-// Icons now use symbol for dynamic CDN lookup
-const mockAssets: Asset[] = [
+// Mock data for demonstration - wallet-specific assets
+// Each wallet has its own assets
+const mockAssetsWallet1: Asset[] = [
   // Ethereum chain
   { symbol: 'USDT', name: 'Tether USD', balance: 8500.50, usdValue: 8500.50, change24h: 0.01, icon: 'USDT', network: 'ethereum' },
   { symbol: 'USDC', name: 'USD Coin', balance: 3230.00, usdValue: 3230.00, change24h: 0.00, icon: 'USDC', network: 'ethereum' },
@@ -25,7 +25,34 @@ const mockAssets: Asset[] = [
   { symbol: 'DOGE', name: 'Dogecoin', balance: 5000, usdValue: 1900.00, change24h: 5.2, icon: 'DOGE', network: 'bsc' },
 ];
 
-const mockTransactions: Transaction[] = [
+const mockAssetsWallet2: Asset[] = [
+  // Ethereum chain - different balances for business wallet
+  { symbol: 'USDT', name: 'Tether USD', balance: 25000.00, usdValue: 25000.00, change24h: 0.01, icon: 'USDT', network: 'ethereum' },
+  { symbol: 'USDC', name: 'USD Coin', balance: 15000.00, usdValue: 15000.00, change24h: 0.00, icon: 'USDC', network: 'ethereum' },
+  { symbol: 'ETH', name: 'Ethereum', balance: 5.8, usdValue: 20300.00, change24h: 2.34, icon: 'ETH', network: 'ethereum' },
+  // Tron chain
+  { symbol: 'USDT', name: 'Tether USD', balance: 8000.00, usdValue: 8000.00, change24h: 0.01, icon: 'USDT', network: 'tron' },
+  { symbol: 'TRX', name: 'Tron', balance: 12000, usdValue: 1320.00, change24h: -1.2, icon: 'TRX', network: 'tron' },
+  // BSC chain
+  { symbol: 'BNB', name: 'BNB', balance: 8.2, usdValue: 4920.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
+];
+
+// Mock assets for newly created wallets (empty)
+const mockAssetsNewWallet: Asset[] = [];
+
+// Wallet ID to assets mapping
+const walletAssetsMap: Record<string, Asset[]> = {
+  'wallet-1': mockAssetsWallet1,
+  'wallet-2': mockAssetsWallet2,
+};
+
+// Helper to get assets for a wallet
+const getAssetsForWallet = (walletId: string): Asset[] => {
+  return walletAssetsMap[walletId] || mockAssetsNewWallet;
+};
+
+// Mock transactions per wallet
+const mockTransactionsWallet1: Transaction[] = [
   {
     id: '1',
     type: 'receive',
@@ -83,6 +110,63 @@ const mockTransactions: Transaction[] = [
     riskScore: 'green',
   },
 ];
+
+const mockTransactionsWallet2: Transaction[] = [
+  {
+    id: 'biz-1',
+    type: 'receive',
+    amount: 15000,
+    symbol: 'USDT',
+    usdValue: 15000,
+    status: 'confirmed',
+    counterparty: '0xCorp...8888',
+    counterpartyLabel: 'Corporate Client A',
+    timestamp: new Date(Date.now() - 7200000),
+    txHash: '0xbiz1...hash',
+    network: 'ethereum',
+    riskScore: 'green',
+  },
+  {
+    id: 'biz-2',
+    type: 'send',
+    amount: 5000,
+    symbol: 'USDT',
+    usdValue: 5000,
+    status: 'confirmed',
+    counterparty: 'T8Biz...Tron',
+    counterpartyLabel: 'Partner Company',
+    timestamp: new Date(Date.now() - 43200000),
+    txHash: 'tronbiz...hash',
+    network: 'tron',
+    fee: 5.0,
+    riskScore: 'green',
+  },
+  {
+    id: 'biz-3',
+    type: 'receive',
+    amount: 3.5,
+    symbol: 'ETH',
+    usdValue: 12250,
+    status: 'confirmed',
+    counterparty: '0xVend...or99',
+    counterpartyLabel: 'Vendor Payment',
+    timestamp: new Date(Date.now() - 259200000),
+    txHash: '0xeth...vendor',
+    network: 'ethereum',
+    riskScore: 'green',
+  },
+];
+
+// Wallet ID to transactions mapping
+const walletTransactionsMap: Record<string, Transaction[]> = {
+  'wallet-1': mockTransactionsWallet1,
+  'wallet-2': mockTransactionsWallet2,
+};
+
+// Helper to get transactions for a wallet
+const getTransactionsForWallet = (walletId: string): Transaction[] => {
+  return walletTransactionsMap[walletId] || [];
+};
 
 const mockContacts: Contact[] = [
   {
@@ -268,8 +352,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     
     setWallets(mockWallets);
     setCurrentWallet(mockWallets[0]);
-    setAssets(mockAssets);
-    setTransactions(mockTransactions);
+    setAssets(getAssetsForWallet('wallet-1'));
+    setTransactions(getTransactionsForWallet('wallet-1'));
     setContacts(mockContacts);
     setDevices(mockDevices);
     setWalletStatus('fully_secure');
@@ -308,10 +392,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       isBiometricEnabled: hasBiometric,
     };
     
+    // Register new wallet in the assets map
+    walletAssetsMap[newWallet.id] = [];
+    walletTransactionsMap[newWallet.id] = [];
+    
     setWallets(prev => [...prev, newWallet]);
     setCurrentWallet(newWallet);
-    setAssets(mockAssets);
-    setTransactions(mockTransactions);
+    setAssets(getAssetsForWallet(newWallet.id));
+    setTransactions(getTransactionsForWallet(newWallet.id));
     setContacts(mockContacts);
     setDevices(mockDevices);
     setWalletStatus('created_no_backup');
@@ -323,6 +411,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const wallet = wallets.find(w => w.id === walletId);
     if (wallet) {
       setCurrentWallet(wallet);
+      // Load wallet-specific assets and transactions
+      setAssets(getAssetsForWallet(walletId));
+      setTransactions(getTransactionsForWallet(walletId));
     }
   }, [wallets]);
 
