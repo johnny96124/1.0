@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Fingerprint, Lock, CloudUpload,
   CheckCircle2, Loader2, ArrowLeft, Eye, EyeOff,
-  AlertTriangle, Cloud, HardDrive, Upload, Wallet
+  AlertTriangle, Cloud, HardDrive, Upload, Wallet, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,14 +12,23 @@ import { Progress } from '@/components/ui/progress';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 
-// Create wallet steps
-const createSteps = [
-  { id: 1, title: '命名钱包', icon: Wallet },
-  { id: 2, title: '安全验证', icon: Fingerprint },
-  { id: 3, title: '设置 PIN', icon: Lock },
-  { id: 4, title: '创建钱包', icon: Shield },
-  { id: 5, title: '备份保险箱', icon: CloudUpload },
-];
+// Dynamic steps based on whether it's the first wallet
+const getSteps = (isFirstWallet: boolean) => {
+  if (isFirstWallet) {
+    return [
+      { id: 1, title: '命名钱包', icon: Wallet, component: 'name' },
+      { id: 2, title: '安全验证', icon: Fingerprint, component: 'biometric' },
+      { id: 3, title: '设置 PIN', icon: Lock, component: 'pin' },
+      { id: 4, title: '创建钱包', icon: Shield, component: 'create' },
+      { id: 5, title: '备份保险箱', icon: CloudUpload, component: 'backup' },
+    ];
+  }
+  return [
+    { id: 1, title: '命名钱包', icon: Wallet, component: 'name' },
+    { id: 2, title: '创建钱包', icon: Shield, component: 'create' },
+    { id: 3, title: '备份保险箱', icon: CloudUpload, component: 'backup' },
+  ];
+};
 
 export default function CreateWalletPage() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -27,8 +36,10 @@ export default function CreateWalletPage() {
   const navigate = useNavigate();
   const { wallets } = useWallet();
 
-  const steps = createSteps;
+  const isFirstWallet = wallets.length === 0;
+  const steps = getSteps(isFirstWallet);
   const progress = (currentStep / steps.length) * 100;
+  const currentComponent = steps[currentStep - 1]?.component;
 
   const handleStepComplete = async () => {
     if (currentStep < steps.length) {
@@ -42,15 +53,19 @@ export default function CreateWalletPage() {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else {
-      navigate('/home');
+      // First step: go to welcome page for first wallet, home for subsequent
+      navigate(isFirstWallet ? '/welcome' : '/home');
     }
   };
 
-  // Auto generate wallet name
+  // Auto generate wallet name suggestion
   useEffect(() => {
     const existingCount = wallets.length;
     setWalletName(`钱包 ${existingCount + 1}`);
   }, [wallets.length]);
+
+  // Get all existing wallet names for duplicate check
+  const existingWalletNames = wallets.map(w => w.name);
 
   return (
     <div className="h-full bg-background flex flex-col">
@@ -114,25 +129,35 @@ export default function CreateWalletPage() {
       {/* Step Content */}
       <div className="flex-1 px-4 overflow-auto">
         <AnimatePresence mode="wait">
-          {currentStep === 1 && (
+          {currentComponent === 'name' && (
             <NameWalletStep 
               key="name" 
               walletName={walletName}
               setWalletName={setWalletName}
+              existingNames={existingWalletNames}
               onComplete={handleStepComplete} 
             />
           )}
-          {currentStep === 2 && (
+          {currentComponent === 'biometric' && (
             <BiometricStep key="biometric" onComplete={handleStepComplete} />
           )}
-          {currentStep === 3 && (
+          {currentComponent === 'pin' && (
             <PinStep key="pin" onComplete={handleStepComplete} />
           )}
-          {currentStep === 4 && (
-            <CreateWalletStep key="create" walletName={walletName} onComplete={handleStepComplete} />
+          {currentComponent === 'create' && (
+            <CreateWalletStep 
+              key="create" 
+              walletName={walletName} 
+              isFirstWallet={isFirstWallet}
+              onComplete={handleStepComplete} 
+            />
           )}
-          {currentStep === 5 && (
-            <BackupStep key="backup" onComplete={handleStepComplete} />
+          {currentComponent === 'backup' && (
+            <BackupStep 
+              key="backup" 
+              isFirstWallet={isFirstWallet}
+              onComplete={handleStepComplete} 
+            />
           )}
         </AnimatePresence>
       </div>
@@ -140,17 +165,32 @@ export default function CreateWalletPage() {
   );
 }
 
-// Step 1: Name Wallet
+// Step 1: Name Wallet with duplicate detection
 function NameWalletStep({ 
   walletName, 
-  setWalletName, 
+  setWalletName,
+  existingNames,
   onComplete 
 }: { 
   walletName: string;
   setWalletName: (name: string) => void;
+  existingNames: string[];
   onComplete: () => void;
 }) {
   const [error, setError] = useState('');
+  const [warning, setWarning] = useState('');
+
+  const handleNameChange = (name: string) => {
+    setWalletName(name);
+    setError('');
+    
+    // Check for duplicate names
+    if (existingNames.includes(name.trim())) {
+      setWarning('该名称已被使用，建议更换');
+    } else {
+      setWarning('');
+    }
+  };
 
   const handleContinue = () => {
     if (!walletName.trim()) {
@@ -191,10 +231,7 @@ function NameWalletStep({
         <div className="w-full max-w-[280px]">
           <Input
             value={walletName}
-            onChange={(e) => {
-              setWalletName(e.target.value);
-              setError('');
-            }}
+            onChange={(e) => handleNameChange(e.target.value)}
             placeholder="输入钱包名称"
             className="text-center h-12 text-base"
             maxLength={20}
@@ -207,6 +244,16 @@ function NameWalletStep({
             >
               <AlertTriangle className="w-4 h-4" />
               {error}
+            </motion.p>
+          )}
+          {warning && !error && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-sm text-warning mt-2 flex items-center justify-center gap-1"
+            >
+              <AlertTriangle className="w-4 h-4" />
+              {warning}
             </motion.p>
           )}
           <p className="text-xs text-muted-foreground mt-2">
@@ -228,7 +275,7 @@ function NameWalletStep({
   );
 }
 
-// Step 2: Biometric
+// Step 2: Biometric (only for first wallet)
 function BiometricStep({ onComplete }: { onComplete: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const { enableBiometric } = useWallet();
@@ -300,7 +347,7 @@ function BiometricStep({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// Step 3: PIN
+// Step 3: PIN (only for first wallet)
 function PinStep({ onComplete }: { onComplete: () => void }) {
   const [pin, setPinValue] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
@@ -426,28 +473,49 @@ function PinStep({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// Step 4: Create Wallet
-function CreateWalletStep({ walletName, onComplete }: { walletName: string; onComplete: () => void }) {
+// Step 4: Create Wallet with success animation
+function CreateWalletStep({ 
+  walletName, 
+  isFirstWallet,
+  onComplete 
+}: { 
+  walletName: string; 
+  isFirstWallet: boolean;
+  onComplete: () => void;
+}) {
   const [phase, setPhase] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
   const { createWallet } = useWallet();
 
-  const phases = [
-    '正在为您创建安全账户…',
-    '正在完成安全初始化…',
-    '即将完成…'
-  ];
+  // Shorter phases for non-first wallet
+  const phases = isFirstWallet 
+    ? [
+        '正在为您创建安全账户…',
+        '正在完成安全初始化…',
+        '即将完成…'
+      ]
+    : [
+        '正在创建钱包…',
+        '即将完成…'
+      ];
 
   useEffect(() => {
     const createAndAnimate = async () => {
       const phaseInterval = setInterval(() => {
         setPhase(p => Math.min(p + 1, phases.length - 1));
-      }, 1000);
+      }, isFirstWallet ? 1000 : 600);
 
       try {
         await createWallet(walletName);
         clearInterval(phaseInterval);
         setPhase(phases.length - 1);
-        setTimeout(onComplete, 500);
+        
+        // Show success animation
+        setTimeout(() => {
+          setIsComplete(true);
+          // Move to next step after showing success
+          setTimeout(onComplete, 1200);
+        }, 500);
       } catch (error) {
         clearInterval(phaseInterval);
         console.error('Create wallet failed:', error);
@@ -455,7 +523,7 @@ function CreateWalletStep({ walletName, onComplete }: { walletName: string; onCo
     };
 
     createAndAnimate();
-  }, [walletName]);
+  }, [walletName, isFirstWallet]);
 
   return (
     <motion.div
@@ -464,49 +532,129 @@ function CreateWalletStep({ walletName, onComplete }: { walletName: string; onCo
       exit={{ opacity: 0, x: -20 }}
       className="flex flex-col h-full items-center justify-center text-center"
     >
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-        className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
-      >
-        <Shield className="w-12 h-12 text-accent" />
-      </motion.div>
-      
       <AnimatePresence mode="wait">
-        <motion.p
-          key={phase}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="text-lg font-medium text-foreground"
-        >
-          {phases[phase]}
-        </motion.p>
-      </AnimatePresence>
-
-      <p className="text-sm text-muted-foreground mt-2">
-        正在创建: {walletName}
-      </p>
-
-      <div className="flex gap-2 mt-6">
-        {[0, 1, 2].map((i) => (
+        {!isComplete ? (
           <motion.div
-            key={i}
-            animate={{ 
-              scale: phase >= i ? [1, 1.2, 1] : 1,
-              opacity: phase >= i ? 1 : 0.3
-            }}
-            transition={{ duration: 0.3, delay: i * 0.1 }}
-            className="w-2 h-2 rounded-full bg-accent"
-          />
-        ))}
-      </div>
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="flex flex-col items-center"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+              className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
+            >
+              <Shield className="w-12 h-12 text-accent" />
+            </motion.div>
+            
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={phase}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-lg font-medium text-foreground"
+              >
+                {phases[phase]}
+              </motion.p>
+            </AnimatePresence>
+
+            <p className="text-sm text-muted-foreground mt-2">
+              正在创建: {walletName}
+            </p>
+
+            <div className="flex gap-2 mt-6">
+              {phases.map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ 
+                    scale: phase >= i ? [1, 1.2, 1] : 1,
+                    opacity: phase >= i ? 1 : 0.3
+                  }}
+                  transition={{ duration: 0.3, delay: i * 0.1 }}
+                  className="w-2 h-2 rounded-full bg-accent"
+                />
+              ))}
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center"
+          >
+            {/* Success animation */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: [0, 1.2, 1] }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-6 relative"
+            >
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                <CheckCircle2 className="w-12 h-12 text-success" />
+              </motion.div>
+              
+              {/* Sparkle effects */}
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ 
+                    scale: [0, 1, 0],
+                    opacity: [0, 1, 0],
+                    x: Math.cos((i * 60 * Math.PI) / 180) * 50,
+                    y: Math.sin((i * 60 * Math.PI) / 180) * 50,
+                  }}
+                  transition={{ delay: 0.3 + i * 0.05, duration: 0.6 }}
+                  className="absolute"
+                >
+                  <Sparkles className="w-4 h-4 text-success" />
+                </motion.div>
+              ))}
+            </motion.div>
+            
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-xl font-bold text-foreground mb-2"
+            >
+              {isFirstWallet ? '钱包创建成功！' : '新钱包已就绪！'}
+            </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-muted-foreground text-sm"
+            >
+              {isFirstWallet 
+                ? '现在让我们备份您的钱包' 
+                : `"${walletName}" 已添加到您的账户`
+              }
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
-// Step 5: Backup
-function BackupStep({ onComplete }: { onComplete: () => void }) {
+// Step 5: Backup with differentiated guidance
+function BackupStep({ 
+  isFirstWallet,
+  onComplete 
+}: { 
+  isFirstWallet: boolean;
+  onComplete: () => void;
+}) {
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -571,10 +719,13 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
           </motion.div>
           
           <h2 className="text-lg font-bold text-foreground mb-2">
-            备份您的钱包
+            {isFirstWallet ? '备份您的钱包' : '更新备份'}
           </h2>
           <p className="text-muted-foreground text-sm max-w-[280px] mb-6">
-            备份确保您在更换设备或丢失手机时能够恢复资产
+            {isFirstWallet 
+              ? '备份确保您在更换设备或丢失手机时能够恢复资产'
+              : '建议更新备份以包含新添加的钱包'
+            }
           </p>
 
           {/* Backup options */}
@@ -621,7 +772,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
             稍后备份
           </Button>
           <p className="text-xs text-center text-muted-foreground mt-2">
-            未备份将限制转账功能
+            {isFirstWallet ? '未备份将限制转账功能' : '您可以随时在设置中完成备份'}
           </p>
         </div>
       </motion.div>
