@@ -327,57 +327,80 @@ export default function HomePage() {
             </Button>
           </div>
 
-          <div className="space-y-1.5">
-            {displayAssets.map((asset, index) => (
-              <motion.button
-                key={asset.symbol}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-                onClick={() => navigate(`/asset/${asset.symbol}`)}
-                className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+          {displayAssets.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="card-elevated p-8 flex flex-col items-center justify-center text-center"
+            >
+              <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                <Wallet className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground mb-1">暂无资产</p>
+              <p className="text-xs text-muted-foreground/70 mb-3">添加代币开始管理您的资产</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={() => setShowTokenSearch(true)}
               >
-                <div className="flex items-center gap-2">
-                  <CryptoIcon symbol={asset.symbol} size="md" />
-                  <div className="text-left">
-                    <p className="font-medium text-foreground text-sm">{asset.symbol}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {asset.name}
-                      {selectedChain === 'all' && asset.chains.length > 1 && (
-                        <span className="ml-1 text-accent">· {asset.chains.length} 链</span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right flex items-center gap-2">
-                  <div>
-                    <p className="font-medium text-foreground text-sm">
-                      {hideBalance ? '****' : asset.totalBalance.toLocaleString()}
-                    </p>
-                    <div className="flex items-center gap-1 justify-end">
-                      <span className="text-xs text-muted-foreground">
-                        {hideBalance ? '**' : `$${asset.totalUsdValue.toLocaleString()}`}
-                      </span>
-                      {asset.change24h !== 0 && (
-                        <span className={cn(
-                          'text-xs flex items-center',
-                          asset.change24h > 0 ? 'text-success' : 'text-destructive'
-                        )}>
-                          {asset.change24h > 0 ? (
-                            <TrendingUp className="w-3 h-3" />
-                          ) : (
-                            <TrendingDown className="w-3 h-3" />
-                          )}
-                          {Math.abs(asset.change24h)}%
-                        </span>
-                      )}
+                <Plus className="w-3.5 h-3.5" />
+                添加代币
+              </Button>
+            </motion.div>
+          ) : (
+            <div className="space-y-1.5">
+              {displayAssets.map((asset, index) => (
+                <motion.button
+                  key={asset.symbol}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  onClick={() => navigate(`/asset/${asset.symbol}`)}
+                  className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <CryptoIcon symbol={asset.symbol} size="md" />
+                    <div className="text-left">
+                      <p className="font-medium text-foreground text-sm">{asset.symbol}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {asset.name}
+                        {selectedChain === 'all' && asset.chains.length > 1 && (
+                          <span className="ml-1 text-accent">· {asset.chains.length} 链</span>
+                        )}
+                      </p>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </motion.button>
-            ))}
-          </div>
+                  <div className="text-right flex items-center gap-2">
+                    <div>
+                      <p className="font-medium text-foreground text-sm">
+                        {hideBalance ? '****' : asset.totalBalance.toLocaleString()}
+                      </p>
+                      <div className="flex items-center gap-1 justify-end">
+                        <span className="text-xs text-muted-foreground">
+                          {hideBalance ? '**' : `$${asset.totalUsdValue.toLocaleString()}`}
+                        </span>
+                        {asset.change24h !== 0 && (
+                          <span className={cn(
+                            'text-xs flex items-center',
+                            asset.change24h > 0 ? 'text-success' : 'text-destructive'
+                          )}>
+                            {asset.change24h > 0 ? (
+                              <TrendingUp className="w-3 h-3" />
+                            ) : (
+                              <TrendingDown className="w-3 h-3" />
+                            )}
+                            {Math.abs(asset.change24h)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </motion.button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Recent Transactions */}
@@ -398,39 +421,52 @@ export default function HomePage() {
             </Button>
           </div>
 
-          <div className="space-y-1.5">
-            {filteredTransactions.slice(0, 3).map((tx, index) => (
-              <motion.div
-                key={tx.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * index }}
-                className="card-elevated p-3 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <div className={cn(
-                    'w-8 h-8 rounded-full flex items-center justify-center',
-                    tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
-                  )}>
-                    {tx.type === 'receive' ? (
-                      <TrendingDown className="w-4 h-4 text-success rotate-180" />
-                    ) : (
-                      <Send className="w-4 h-4 text-accent" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground text-sm">
-                      {tx.counterpartyLabel || tx.counterparty}
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(tx.timestamp).toLocaleDateString('zh-CN', {
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                      <span className="text-xs text-muted-foreground/60">·</span>
-                      <span className="text-xs text-muted-foreground">
+          {filteredTransactions.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="card-elevated p-8 flex flex-col items-center justify-center text-center"
+            >
+              <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                <Send className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground mb-1">暂无交易记录</p>
+              <p className="text-xs text-muted-foreground/70">您的交易记录将在此显示</p>
+            </motion.div>
+          ) : (
+            <div className="space-y-1.5">
+              {filteredTransactions.slice(0, 3).map((tx, index) => (
+                <motion.div
+                  key={tx.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className="card-elevated p-3 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={cn(
+                      'w-8 h-8 rounded-full flex items-center justify-center',
+                      tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
+                    )}>
+                      {tx.type === 'receive' ? (
+                        <TrendingDown className="w-4 h-4 text-success rotate-180" />
+                      ) : (
+                        <Send className="w-4 h-4 text-accent" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground text-sm">
+                        {tx.counterpartyLabel || tx.counterparty}
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(tx.timestamp).toLocaleDateString('zh-CN', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                        <span className="text-xs text-muted-foreground/60">·</span>
+                        <span className="text-xs text-muted-foreground">
                         {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
                       </span>
                       {tx.status === 'pending' && (
@@ -460,7 +496,8 @@ export default function HomePage() {
                 </div>
               </motion.div>
             ))}
-          </div>
+            </div>
+          )}
         </motion.div>
       </div>
       </PullToRefresh>
