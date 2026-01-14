@@ -58,11 +58,14 @@ export default function CreateWalletPage() {
     }
   };
 
-  // Auto generate wallet name suggestion
+  // Auto generate wallet name suggestion only on mount
   useEffect(() => {
-    const existingCount = wallets.length;
-    setWalletName(`钱包 ${existingCount + 1}`);
-  }, [wallets.length]);
+    if (walletName === '') {
+      const existingCount = wallets.length;
+      setWalletName(`钱包 ${existingCount + 1}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Get all existing wallet names for duplicate check
   const existingWalletNames = wallets.map(w => w.name);
@@ -90,17 +93,17 @@ export default function CreateWalletPage() {
         <Progress value={progress} className="h-1" />
         
         {/* Step indicators */}
-        <div className="flex items-center justify-between mt-6">
+        <div className="flex items-center mt-6">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isComplete = currentStep > step.id;
             const isCurrent = currentStep === step.id;
             
             return (
-              <div key={step.id} className="flex items-center">
+              <div key={step.id} className="flex items-center flex-1 last:flex-none">
                 <div
                   className={cn(
-                    'w-8 h-8 rounded-full flex items-center justify-center transition-all',
+                    'w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0',
                     isComplete && 'bg-success text-success-foreground',
                     isCurrent && 'bg-accent text-accent-foreground',
                     !isComplete && !isCurrent && 'bg-muted text-muted-foreground'
@@ -115,7 +118,7 @@ export default function CreateWalletPage() {
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      'w-4 h-0.5 mx-0.5',
+                      'flex-1 h-0.5',
                       currentStep > step.id ? 'bg-success' : 'bg-muted'
                     )}
                   />
