@@ -5,13 +5,13 @@ import {
   CheckCircle2, Loader2, Shield, MoreHorizontal,
   Info, ChevronRight
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
-import { RiskColor, SUPPORTED_CHAINS } from '@/types/wallet';
+import { RiskColor, SUPPORTED_CHAINS, ChainId } from '@/types/wallet';
 import { QRScanner } from '@/components/QRScanner';
 import { ParsedQRData } from '@/lib/qr-parser';
 import { NumericKeypad } from '@/components/NumericKeypad';
@@ -20,16 +20,21 @@ import { AddressBar } from '@/components/AddressBar';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { NetworkFeeSelector, FeeTier } from '@/components/NetworkFeeSelector';
+import { ContactDrawer } from '@/components/ContactDrawer';
 
 export default function SendPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { 
     assets, contacts, scanAddressRisk, sendTransaction, walletStatus,
     getLimitStatus, checkTransferLimit 
   } = useWallet();
+
+  // Handle prefilled data from contact detail page
+  const prefilledData = location.state as { prefilledAddress?: string; prefilledNetwork?: ChainId } | null;
   
   const [step, setStep] = useState<'address' | 'amount' | 'confirm' | 'auth' | 'success'>('address');
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState(prefilledData?.prefilledAddress || '');
   const [selectedContact, setSelectedContact] = useState<typeof contacts[0] | null>(null);
   const [amount, setAmount] = useState('');
   const [selectedAsset, setSelectedAsset] = useState(assets[0]);
@@ -42,6 +47,7 @@ export default function SendPage() {
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [feeTier, setFeeTier] = useState<FeeTier>('standard');
   const [showAssetPicker, setShowAssetPicker] = useState(false);
+  const [showContactDrawer, setShowContactDrawer] = useState(false);
 
   // Get limit status
   const limitStatus = getLimitStatus();
@@ -192,7 +198,12 @@ export default function SendPage() {
                       >
                         <Scan className="w-5 h-5 text-muted-foreground" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-10 w-10">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-10 w-10"
+                        onClick={() => setShowContactDrawer(true)}
+                      >
                         <Users className="w-5 h-5 text-muted-foreground" />
                       </Button>
                     </div>
@@ -244,9 +255,19 @@ export default function SendPage() {
 
                 {/* Contacts */}
                 <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-3">常用联系人</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-muted-foreground">常用联系人</h3>
+                    {contacts.length > 3 && (
+                      <button
+                        onClick={() => setShowContactDrawer(true)}
+                        className="text-xs text-primary hover:text-primary/80"
+                      >
+                        查看全部
+                      </button>
+                    )}
+                  </div>
                   <div className="space-y-2">
-                    {contacts.slice(0, 4).map((contact) => (
+                    {contacts.slice(0, 3).map((contact) => (
                       <button
                         key={contact.id}
                         onClick={() => handleSelectContact(contact)}
@@ -267,9 +288,12 @@ export default function SendPage() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground font-mono mt-1">
-                              {contact.address.slice(0, 8)}...{contact.address.slice(-6)}
-                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <ChainIcon chainId={contact.network as ChainId} size="xs" />
+                              <p className="text-sm text-muted-foreground font-mono">
+                                {contact.address.slice(0, 8)}...{contact.address.slice(-6)}
+                              </p>
+                            </div>
                           </div>
                           {selectedContact?.id === contact.id && (
                             <CheckCircle2 className="w-5 h-5 text-accent" />
@@ -277,6 +301,16 @@ export default function SendPage() {
                         </div>
                       </button>
                     ))}
+                    
+                    {contacts.length === 0 && (
+                      <button
+                        onClick={() => navigate('/profile/contacts/add')}
+                        className="w-full p-4 rounded-xl border border-dashed border-border text-center text-muted-foreground hover:border-accent/50 hover:text-foreground transition-colors"
+                      >
+                        <Users className="w-5 h-5 mx-auto mb-2" />
+                        <p className="text-sm">添加常用联系人</p>
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -548,6 +582,14 @@ export default function SendPage() {
         isOpen={showQRScanner}
         onClose={() => setShowQRScanner(false)}
         onScan={handleQRScan}
+      />
+
+      {/* Contact Drawer */}
+      <ContactDrawer
+        open={showContactDrawer}
+        onOpenChange={setShowContactDrawer}
+        contacts={contacts}
+        onSelect={handleSelectContact}
       />
     </AppLayout>
   );
