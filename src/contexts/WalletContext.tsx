@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { 
   Wallet, Asset, Transaction, Contact, Device, 
   SecurityConfig, BackupStatus, WalletStatus, WalletState,
-  RiskColor, ChainId, AggregatedAsset, UserInfo
+  RiskColor, ChainId, AggregatedAsset, UserInfo, LimitStatus
 } from '@/types/wallet';
 
 // Mock data for demonstration - wallet-specific assets
@@ -221,6 +221,11 @@ const mockDevices: Device[] = [
 const defaultSecurityConfig: SecurityConfig = {
   singleTransactionLimit: 10000,
   dailyLimit: 50000,
+  monthlyLimit: 200000,
+  dailyUsed: 4500,
+  monthlyUsed: 18000,
+  lastDailyReset: new Date(),
+  lastMonthlyReset: new Date(),
   requireSatoshiTest: true,
   whitelistBypass: false,
   highRiskAction: 'block',
@@ -276,6 +281,10 @@ interface WalletContextType extends WalletState {
   // Transaction actions
   sendTransaction: (to: string, amount: number, symbol: string, memo?: string) => Promise<string>;
   scanAddressRisk: (address: string) => Promise<{ score: RiskColor; reasons: string[] }>;
+  
+  // Limit actions
+  getLimitStatus: () => LimitStatus;
+  checkTransferLimit: (amount: number) => { allowed: boolean; reason?: string };
   
   // Contact actions
   addContact: (contact: Omit<Contact, 'id'>) => void;
@@ -556,6 +565,33 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setAssets(prev => [...prev, newAsset]);
   }, [assets]);
 
+  const getLimitStatus = useCallback((): LimitStatus => {
+    return {
+      singleLimit: securityConfig.singleTransactionLimit,
+      dailyLimit: securityConfig.dailyLimit,
+      dailyUsed: securityConfig.dailyUsed,
+      dailyRemaining: securityConfig.dailyLimit - securityConfig.dailyUsed,
+      monthlyLimit: securityConfig.monthlyLimit,
+      monthlyUsed: securityConfig.monthlyUsed,
+      monthlyRemaining: securityConfig.monthlyLimit - securityConfig.monthlyUsed,
+    };
+  }, [securityConfig]);
+
+  const checkTransferLimit = useCallback((amount: number): { allowed: boolean; reason?: string } => {
+    if (amount > securityConfig.singleTransactionLimit) {
+      return { allowed: false, reason: `超出单笔限额 $${securityConfig.singleTransactionLimit.toLocaleString()}` };
+    }
+    const dailyRemaining = securityConfig.dailyLimit - securityConfig.dailyUsed;
+    if (amount > dailyRemaining) {
+      return { allowed: false, reason: `超出今日剩余额度 $${dailyRemaining.toLocaleString()}` };
+    }
+    const monthlyRemaining = securityConfig.monthlyLimit - securityConfig.monthlyUsed;
+    if (amount > monthlyRemaining) {
+      return { allowed: false, reason: `超出本月剩余额度 $${monthlyRemaining.toLocaleString()}` };
+    }
+    return { allowed: true };
+  }, [securityConfig]);
+
   const value: WalletContextType = {
     isAuthenticated,
     userInfo,
@@ -580,6 +616,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     completeFileBackup,
     sendTransaction,
     scanAddressRisk,
+    getLimitStatus,
+    checkTransferLimit,
     addContact,
     removeContact,
     addDevice,

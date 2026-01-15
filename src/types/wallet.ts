@@ -101,9 +101,24 @@ export interface Device {
 export interface SecurityConfig {
   singleTransactionLimit: number;
   dailyLimit: number;
+  monthlyLimit: number;
+  dailyUsed: number;
+  monthlyUsed: number;
+  lastDailyReset: Date;
+  lastMonthlyReset: Date;
   requireSatoshiTest: boolean;
   whitelistBypass: boolean;
   highRiskAction: 'block' | 'warn';
+}
+
+export interface LimitStatus {
+  singleLimit: number;
+  dailyLimit: number;
+  dailyUsed: number;
+  dailyRemaining: number;
+  monthlyLimit: number;
+  monthlyUsed: number;
+  monthlyRemaining: number;
 }
 
 export interface AddressRiskScan {

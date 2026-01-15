@@ -12,10 +12,16 @@ import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { RiskColor } from '@/types/wallet';
+import { QRScanner } from '@/components/QRScanner';
+import { TransferLimitCard } from '@/components/TransferLimitCard';
+import { ParsedQRData } from '@/lib/qr-parser';
 
 export default function SendPage() {
   const navigate = useNavigate();
-  const { assets, contacts, scanAddressRisk, sendTransaction, walletStatus } = useWallet();
+  const { 
+    assets, contacts, scanAddressRisk, sendTransaction, walletStatus,
+    getLimitStatus, checkTransferLimit 
+  } = useWallet();
   
   const [step, setStep] = useState<'address' | 'amount' | 'confirm' | 'auth' | 'success'>('address');
   const [address, setAddress] = useState('');
@@ -28,6 +34,12 @@ export default function SendPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSatoshiTest, setShowSatoshiTest] = useState(false);
   const [confirmRisk, setConfirmRisk] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+
+  // Get limit status
+  const limitStatus = getLimitStatus();
+  const currentAmount = parseFloat(amount) || 0;
+  const limitCheck = checkTransferLimit(currentAmount);
 
   // Scan address risk when address changes
   useEffect(() => {
@@ -52,10 +64,25 @@ export default function SendPage() {
     setAddress(contact.address);
   };
 
+  const handleQRScan = (data: ParsedQRData) => {
+    setAddress(data.address);
+    setSelectedContact(null);
+    
+    // Auto-fill amount if provided
+    if (data.amount) {
+      setAmount(data.amount.toString());
+    }
+    
+    // Auto-fill memo if provided
+    if (data.memo) {
+      setMemo(data.memo);
+    }
+  };
+
   const handleContinue = () => {
     if (step === 'address' && address && (!riskScore || riskScore.score !== 'red')) {
       setStep('amount');
-    } else if (step === 'amount' && parseFloat(amount) > 0) {
+    } else if (step === 'amount' && parseFloat(amount) > 0 && limitCheck.allowed) {
       setStep('confirm');
     } else if (step === 'confirm') {
       if (riskScore?.score === 'yellow' && !confirmRisk) return;
@@ -78,7 +105,7 @@ export default function SendPage() {
   };
 
   const isLimitedTransfer = walletStatus === 'created_no_backup';
-  const transferLimit = isLimitedTransfer ? 50 : 10000;
+  const transferLimit = isLimitedTransfer ? 50 : limitStatus.singleLimit;
 
   return (
     <AppLayout showNav={false} showSecurityBanner={false}>
@@ -95,7 +122,7 @@ export default function SendPage() {
           <h1 className="text-lg font-semibold">转账</h1>
         </div>
 
-        {/* Limit Warning */}
+        {/* Limit Warning for unbacked wallet */}
         {isLimitedTransfer && (
           <div className="mx-4 mt-4 p-3 bg-warning/10 border border-warning/20 rounded-xl">
             <p className="text-sm text-warning">
@@ -104,7 +131,7 @@ export default function SendPage() {
           </div>
         )}
 
-        <div className="flex-1 px-4 py-4">
+        <div className="flex-1 px-4 py-4 overflow-y-auto">
           <AnimatePresence mode="wait">
             {/* Step 1: Address */}
             {step === 'address' && (
@@ -130,7 +157,12 @@ export default function SendPage() {
                       className="h-14 pr-20"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-10 w-10">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-10 w-10"
+                        onClick={() => setShowQRScanner(true)}
+                      >
                         <Scan className="w-5 h-5 text-muted-foreground" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-10 w-10">
@@ -278,6 +310,20 @@ export default function SendPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Transfer Limit Card */}
+                {!isLimitedTransfer && (
+                  <TransferLimitCard 
+                    limitStatus={{
+                      singleLimit: limitStatus.singleLimit,
+                      dailyLimit: limitStatus.dailyLimit,
+                      dailyUsed: limitStatus.dailyUsed,
+                      monthlyLimit: limitStatus.monthlyLimit,
+                      monthlyUsed: limitStatus.monthlyUsed,
+                    }}
+                    currentAmount={currentAmount}
+                  />
+                )}
 
                 {/* Fee estimate */}
                 <div className="card-elevated p-4">
@@ -479,7 +525,7 @@ export default function SendPage() {
               onClick={handleContinue}
               disabled={
                 (step === 'address' && (!address || riskScore?.score === 'red')) ||
-                (step === 'amount' && (!amount || parseFloat(amount) <= 0 || parseFloat(amount) > transferLimit)) ||
+                (step === 'amount' && (!amount || parseFloat(amount) <= 0 || !limitCheck.allowed)) ||
                 (step === 'confirm' && riskScore?.score === 'yellow' && !confirmRisk)
               }
             >
@@ -488,6 +534,13 @@ export default function SendPage() {
           </div>
         )}
       </div>
+
+      {/* QR Scanner Modal */}
+      <QRScanner
+        isOpen={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onScan={handleQRScan}
+      />
     </AppLayout>
   );
 }
