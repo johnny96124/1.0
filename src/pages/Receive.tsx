@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
+import { ChainIcon } from '@/components/ChainIcon';
 
 const networks = SUPPORTED_CHAINS.filter(c => c.id !== 'all').map(c => ({
   id: c.id as Exclude<ChainId, 'all'>,
   name: c.name,
   icon: c.icon,
+  shortName: c.shortName,
 }));
 
 export default function ReceivePage() {
@@ -75,8 +77,11 @@ export default function ReceivePage() {
               className="w-full card-elevated p-4 flex items-center justify-between"
             >
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{selectedNetwork.icon}</span>
-                <span className="font-medium text-foreground">{selectedNetwork.name}</span>
+                <ChainIcon chainId={selectedNetwork.icon} size="lg" />
+                <div className="flex flex-col items-start">
+                  <span className="font-semibold text-foreground">{selectedNetwork.name}</span>
+                  <span className="text-xs text-muted-foreground">{selectedNetwork.shortName}</span>
+                </div>
               </div>
               <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${showNetworkSelect ? 'rotate-180' : ''}`} />
             </button>
@@ -85,7 +90,7 @@ export default function ReceivePage() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="mt-2 card-elevated overflow-hidden"
+                className="mt-2 card-elevated overflow-hidden z-50"
               >
                 {networks.map((network) => (
                   <button
@@ -98,8 +103,11 @@ export default function ReceivePage() {
                       selectedNetwork.id === network.id ? 'bg-accent/5' : ''
                     }`}
                   >
-                    <span className="text-2xl">{network.icon}</span>
-                    <span className="font-medium text-foreground">{network.name}</span>
+                    <ChainIcon chainId={network.icon} size="lg" />
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium text-foreground">{network.name}</span>
+                      <span className="text-xs text-muted-foreground">{network.shortName}</span>
+                    </div>
                     {selectedNetwork.id === network.id && (
                       <CheckCircle2 className="w-5 h-5 text-accent ml-auto" />
                     )}
