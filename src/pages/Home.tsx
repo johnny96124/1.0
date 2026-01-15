@@ -397,10 +397,10 @@ export default function HomePage() {
                 {showAllAssets && displayAssets.slice(INITIAL_ASSETS_COUNT).map((asset, index) => (
                   <motion.button
                     key={asset.symbol}
-                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                    animate={{ opacity: 1, height: 'auto', marginTop: 6 }}
-                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                    transition={{ duration: 0.2, delay: index * 0.03 }}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
                     onClick={() => navigate(`/asset/${asset.symbol}`)}
                     className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors overflow-hidden"
                   >
