@@ -41,7 +41,6 @@ export default function SendPage() {
   const [confirmRisk, setConfirmRisk] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [feeTier, setFeeTier] = useState<FeeTier>('standard');
-  const [isUsdMode, setIsUsdMode] = useState(true);
   const [showAssetPicker, setShowAssetPicker] = useState(false);
 
   // Get limit status
@@ -306,13 +305,12 @@ export default function SendPage() {
                   <AmountDisplay
                     amount={amount}
                     symbol={selectedAsset.symbol}
-                    usdValue={currentAmount * tokenPrice}
-                    isUsdMode={isUsdMode}
-                    onToggleMode={() => setIsUsdMode(!isUsdMode)}
                     tokenPrice={tokenPrice}
+                    maxBalance={selectedAsset.balance}
+                    onMaxClick={() => setAmount(selectedAsset.balance.toString())}
                   />
                   
-                  {/* Balance Info */}
+                  {/* Balance Info with Max Button */}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
                     <span>可用:</span>
                     <button 
@@ -323,6 +321,12 @@ export default function SendPage() {
                       <span className="font-medium text-foreground">{selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
+                    <button
+                      onClick={() => setAmount(selectedAsset.balance.toString())}
+                      className="px-3 py-1 text-xs font-medium text-accent bg-accent/10 rounded-full hover:bg-accent/20 transition-colors"
+                    >
+                      全部
+                    </button>
                   </div>
                 </div>
 
@@ -332,7 +336,7 @@ export default function SendPage() {
                     size="lg"
                     className="w-full h-14 text-lg font-semibold bg-accent hover:bg-accent/90"
                     onClick={handleContinue}
-                    disabled={!amount || parseFloat(amount) <= 0 || !limitCheck.allowed}
+                    disabled={!amount || parseFloat(amount) <= 0 || parseFloat(amount) > selectedAsset.balance || !limitCheck.allowed}
                   >
                     发送
                   </Button>
