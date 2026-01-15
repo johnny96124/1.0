@@ -57,10 +57,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <WalletProvider>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
         <BrowserRouter>
           <PhoneFrame>
+            <Toaster />
+            <Sonner />
             <AppRoutes />
           </PhoneFrame>
         </BrowserRouter>
