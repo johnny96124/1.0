@@ -15,6 +15,9 @@ import Receive from "./pages/Receive";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
 import WalletManagement from "./pages/WalletManagement";
+import Contacts from "./pages/Contacts";
+import ContactForm from "./pages/ContactForm";
+import ContactDetail from "./pages/ContactDetail";
 import AssetDetail from "./pages/AssetDetail";
 import NotFound from "./pages/NotFound";
 
@@ -47,6 +50,10 @@ function AppRoutes() {
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/profile/wallets" element={<ProtectedRoute><WalletManagement /></ProtectedRoute>} />
+      <Route path="/profile/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
+      <Route path="/profile/contacts/add" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />
+      <Route path="/profile/contacts/edit/:id" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />
+      <Route path="/profile/contacts/:id" element={<ProtectedRoute><ContactDetail /></ProtectedRoute>} />
       <Route path="/profile/*" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
