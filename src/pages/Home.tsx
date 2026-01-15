@@ -152,8 +152,12 @@ export default function HomePage() {
   const [showTokenSearch, setShowTokenSearch] = useState(false);
   const [showWalletSwitcher, setShowWalletSwitcher] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [showAllAssets, setShowAllAssets] = useState(false);
   const navigate = useNavigate();
   const { assets, transactions, currentWallet, walletStatus, userInfo, addToken } = useWallet();
+
+  // Number of assets to show initially
+  const INITIAL_ASSETS_COUNT = 5;
 
   // Get list of already added token symbols for each network
   const addedSymbols = useMemo(() => {
@@ -352,40 +356,64 @@ export default function HomePage() {
             </motion.div>
           ) : (
             <div className="space-y-1.5">
-              {displayAssets.map((asset, index) => (
+              <AnimatePresence mode="popLayout">
+                {(showAllAssets ? displayAssets : displayAssets.slice(0, INITIAL_ASSETS_COUNT)).map((asset, index) => (
+                  <motion.button
+                    key={asset.symbol}
+                    layout
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ delay: 0.05 * index }}
+                    onClick={() => navigate(`/asset/${asset.symbol}`)}
+                    className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CryptoIcon symbol={asset.symbol} size="md" />
+                      <div className="text-left">
+                        <p className="font-medium text-foreground text-sm">{asset.symbol}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {asset.name}
+                          {selectedChain === 'all' && asset.chains.length > 1 && (
+                            <span className="ml-1 text-accent">· {asset.chains.length} 链</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                      <div className="text-right flex items-center gap-2">
+                      <div>
+                        <p className="font-medium text-foreground text-sm">
+                          {hideBalance ? '****' : asset.totalBalance.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {hideBalance ? '**' : `$${asset.totalUsdValue.toLocaleString()}`}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  </motion.button>
+                ))}
+              </AnimatePresence>
+              
+              {/* Show more / Show less button */}
+              {displayAssets.length > INITIAL_ASSETS_COUNT && (
                 <motion.button
-                  key={asset.symbol}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 * index }}
-                  onClick={() => navigate(`/asset/${asset.symbol}`)}
-                  className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+                  layout
+                  onClick={() => setShowAllAssets(!showAllAssets)}
+                  className="w-full py-3 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted/30"
                 >
-                  <div className="flex items-center gap-2">
-                    <CryptoIcon symbol={asset.symbol} size="md" />
-                    <div className="text-left">
-                      <p className="font-medium text-foreground text-sm">{asset.symbol}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {asset.name}
-                        {selectedChain === 'all' && asset.chains.length > 1 && (
-                          <span className="ml-1 text-accent">· {asset.chains.length} 链</span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                    <div className="text-right flex items-center gap-2">
-                    <div>
-                      <p className="font-medium text-foreground text-sm">
-                        {hideBalance ? '****' : asset.totalBalance.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {hideBalance ? '**' : `$${asset.totalUsdValue.toLocaleString()}`}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </div>
+                  <motion.div
+                    animate={{ rotate: showAllAssets ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </motion.div>
+                  {showAllAssets 
+                    ? '收起' 
+                    : `展开更多 (${displayAssets.length - INITIAL_ASSETS_COUNT} 个)`
+                  }
                 </motion.button>
-              ))}
+              )}
             </div>
           )}
         </motion.div>
