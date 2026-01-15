@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
   TrendingDown, Wallet, Plus, Shield,
-  CheckCircle2, AlertCircle, Sparkles, Lock, Settings, ChevronDown
+  CheckCircle2, AlertCircle, Sparkles, Lock, Settings, ChevronDown, Clock, XCircle, Copy, ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -15,7 +15,7 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { TokenSearch } from '@/components/TokenSearch';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { WalletSwitcher } from '@/components/WalletSwitcher';
-import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
+import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
 import { toast } from 'sonner';
 
@@ -150,6 +150,7 @@ export default function HomePage() {
   const [selectedChain, setSelectedChain] = useState<ChainId>('all');
   const [showTokenSearch, setShowTokenSearch] = useState(false);
   const [showWalletSwitcher, setShowWalletSwitcher] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const navigate = useNavigate();
   const { assets, transactions, currentWallet, walletStatus, userInfo, addToken } = useWallet();
 
@@ -421,12 +422,13 @@ export default function HomePage() {
           ) : (
             <div className="space-y-1.5">
               {filteredTransactions.slice(0, 3).map((tx, index) => (
-                <motion.div
+                <motion.button
                   key={tx.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 * index }}
-                  className="card-elevated p-3 flex items-center justify-between"
+                  onClick={() => setSelectedTx(tx)}
+                  className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <div className={cn(
@@ -452,35 +454,38 @@ export default function HomePage() {
                         </span>
                         <span className="text-xs text-muted-foreground/60">·</span>
                         <span className="text-xs text-muted-foreground">
-                        {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
-                      </span>
-                      {tx.status === 'pending' && (
-                        <span className="text-xs text-warning flex items-center gap-0.5">
-                          <AlertCircle className="w-3 h-3" />
-                          处理中
+                          {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
                         </span>
-                      )}
-                      {tx.status === 'confirmed' && (
-                        <span className="text-xs text-success flex items-center gap-0.5">
-                          <CheckCircle2 className="w-3 h-3" />
-                        </span>
-                      )}
+                        {tx.status === 'pending' && (
+                          <span className="text-xs text-warning flex items-center gap-0.5">
+                            <AlertCircle className="w-3 h-3" />
+                            处理中
+                          </span>
+                        )}
+                        {tx.status === 'confirmed' && (
+                          <span className="text-xs text-success flex items-center gap-0.5">
+                            <CheckCircle2 className="w-3 h-3" />
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className={cn(
-                    'font-medium text-sm',
-                    tx.type === 'receive' ? 'text-success' : 'text-foreground'
-                  )}>
-                    {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    ${tx.usdValue.toLocaleString()}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="text-right flex items-center gap-2">
+                    <div>
+                      <p className={cn(
+                        'font-medium text-sm',
+                        tx.type === 'receive' ? 'text-success' : 'text-foreground'
+                      )}>
+                        {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        ${tx.usdValue.toLocaleString()}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </motion.button>
+              ))}
             </div>
           )}
         </motion.div>
@@ -514,6 +519,119 @@ export default function HomePage() {
           navigate('/create-wallet');
         }}
       />
+
+      {/* Transaction Detail Drawer */}
+      <AnimatePresence>
+        {selectedTx && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end"
+            onClick={() => setSelectedTx(null)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full bg-card rounded-t-2xl p-6 pb-8 max-h-[80%] overflow-auto"
+            >
+              {/* Drawer Handle */}
+              <div className="flex justify-center mb-4">
+                <div className="w-10 h-1 bg-muted rounded-full" />
+              </div>
+
+              {/* Transaction Status */}
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 rounded-full bg-muted mx-auto flex items-center justify-center mb-3">
+                  {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-5 h-5 text-success" />}
+                  {selectedTx.status === 'pending' && <Clock className="w-5 h-5 text-warning" />}
+                  {selectedTx.status === 'failed' && <XCircle className="w-5 h-5 text-destructive" />}
+                </div>
+                <p className="font-semibold text-lg">
+                  {selectedTx.type === 'receive' ? '收款' : '转账'}
+                  {selectedTx.status === 'confirmed' && '已完成'}
+                  {selectedTx.status === 'pending' && '处理中'}
+                  {selectedTx.status === 'failed' && '失败'}
+                </p>
+              </div>
+
+              {/* Amount */}
+              <div className="text-center mb-6">
+                <p className={cn(
+                  'text-3xl font-bold',
+                  selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
+                )}>
+                  {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
+                </p>
+                <p className="text-muted-foreground">
+                  ≈ ${selectedTx.usdValue.toLocaleString()}
+                </p>
+              </div>
+
+              {/* Details */}
+              <div className="space-y-4">
+                <div className="flex justify-between py-2 border-b border-border">
+                  <span className="text-muted-foreground">
+                    {selectedTx.type === 'receive' ? '付款方' : '收款方'}
+                  </span>
+                  <span className="font-medium text-foreground">
+                    {selectedTx.counterpartyLabel || 
+                      `${selectedTx.counterparty.slice(0, 8)}...${selectedTx.counterparty.slice(-6)}`}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-2 border-b border-border">
+                  <span className="text-muted-foreground">网络</span>
+                  <span className="font-medium text-foreground">
+                    {SUPPORTED_CHAINS.find(c => c.id === selectedTx.network)?.name}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-2 border-b border-border">
+                  <span className="text-muted-foreground">时间</span>
+                  <span className="font-medium text-foreground">
+                    {new Date(selectedTx.timestamp).toLocaleString('zh-CN')}
+                  </span>
+                </div>
+
+                {selectedTx.txHash && (
+                  <div className="flex justify-between items-center py-2 border-b border-border">
+                    <span className="text-muted-foreground">交易哈希</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground text-sm">
+                        {selectedTx.txHash.slice(0, 8)}...{selectedTx.txHash.slice(-6)}
+                      </span>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(selectedTx.txHash!);
+                          toast.success('已复制到剪贴板');
+                        }}
+                        className="p-1 hover:bg-muted rounded"
+                      >
+                        <Copy className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      <button className="p-1 hover:bg-muted rounded">
+                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                className="w-full mt-6"
+                onClick={() => setSelectedTx(null)}
+              >
+                关闭
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AppLayout>
   );
 }
