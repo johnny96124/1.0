@@ -544,14 +544,24 @@ export default function HomePage() {
                 <div className="w-10 h-1 bg-muted rounded-full" />
               </div>
 
-              {/* Transaction Status */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 rounded-full bg-muted mx-auto flex items-center justify-center mb-3">
-                  {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-5 h-5 text-success" />}
-                  {selectedTx.status === 'pending' && <Clock className="w-5 h-5 text-warning" />}
-                  {selectedTx.status === 'failed' && <XCircle className="w-5 h-5 text-destructive" />}
+              {/* Transaction Status Badge */}
+              <div className="text-center mb-5">
+                <div className={cn(
+                  "w-14 h-14 rounded-full mx-auto flex items-center justify-center mb-3",
+                  selectedTx.status === 'confirmed' && "bg-success/15",
+                  selectedTx.status === 'pending' && "bg-warning/15",
+                  selectedTx.status === 'failed' && "bg-destructive/15"
+                )}>
+                  {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-7 h-7 text-success" />}
+                  {selectedTx.status === 'pending' && <Clock className="w-7 h-7 text-warning" />}
+                  {selectedTx.status === 'failed' && <XCircle className="w-7 h-7 text-destructive" />}
                 </div>
-                <p className="font-semibold text-lg">
+                <p className={cn(
+                  "font-semibold text-lg",
+                  selectedTx.status === 'confirmed' && "text-success",
+                  selectedTx.status === 'pending' && "text-warning",
+                  selectedTx.status === 'failed' && "text-destructive"
+                )}>
                   {selectedTx.type === 'receive' ? '收款' : '转账'}
                   {selectedTx.status === 'confirmed' && '已完成'}
                   {selectedTx.status === 'pending' && '处理中'}
@@ -559,20 +569,24 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Amount with Token Icon */}
-              <div className="text-center mb-6">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <CryptoIcon symbol={selectedTx.symbol} size="lg" />
+              {/* Amount Card with Token Icon */}
+              <div className="bg-muted/30 rounded-2xl p-5 mb-6 border border-border/50">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-background shadow-sm flex items-center justify-center">
+                    <CryptoIcon symbol={selectedTx.symbol} size="lg" />
+                  </div>
+                  <div className="text-center">
+                    <p className={cn(
+                      'text-3xl font-bold tracking-tight',
+                      selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
+                    )}>
+                      {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
+                    </p>
+                    <p className="text-muted-foreground mt-1">
+                      ≈ ${selectedTx.usdValue.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-                <p className={cn(
-                  'text-3xl font-bold',
-                  selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
-                )}>
-                  {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
-                </p>
-                <p className="text-muted-foreground">
-                  ≈ ${selectedTx.usdValue.toLocaleString()}
-                </p>
               </div>
 
               {/* Details */}
