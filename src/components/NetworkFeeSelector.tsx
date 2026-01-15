@@ -1,8 +1,13 @@
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, X, Zap, Clock, Turtle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 
 export type FeeTier = 'slow' | 'standard' | 'fast';
 
@@ -52,108 +57,6 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
   const [isOpen, setIsOpen] = useState(false);
   const currentOption = FEE_OPTIONS.find(opt => opt.tier === selectedTier) || FEE_OPTIONS[1];
 
-  const modal = (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[100]"
-            onClick={() => setIsOpen(false)}
-          />
-          
-          {/* Modal Content */}
-          <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
-            className="fixed inset-x-0 bottom-0 z-[101] bg-card rounded-t-2xl overflow-hidden shadow-xl"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">网络费用</h3>
-                <p className="text-sm text-muted-foreground">{networkName} 网络</p>
-              </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 -mr-2 hover:bg-muted rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-foreground" />
-              </button>
-            </div>
-
-            {/* Fee Options */}
-            <div className="p-4 space-y-3">
-              {FEE_OPTIONS.map((option) => (
-                <button
-                  key={option.tier}
-                  onClick={() => {
-                    onSelect(option.tier);
-                    setIsOpen(false);
-                  }}
-                  className={cn(
-                    "w-full flex items-center gap-4 p-4 rounded-xl border transition-all",
-                    selectedTier === option.tier 
-                      ? "border-accent bg-accent/5" 
-                      : "border-border hover:border-accent/50"
-                  )}
-                >
-                  {/* Icon */}
-                  <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
-                    option.tier === 'slow' && "bg-muted text-muted-foreground",
-                    option.tier === 'standard' && "bg-accent/10 text-accent",
-                    option.tier === 'fast' && "bg-warning/10 text-warning"
-                  )}>
-                    {option.icon}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 text-left">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">{option.label}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {option.labelEn}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      预计确认时间 {option.time}
-                    </p>
-                  </div>
-
-                  {/* Fee */}
-                  <div className="text-right shrink-0">
-                    <p className="font-semibold text-foreground">${option.fee.toFixed(2)}</p>
-                  </div>
-
-                  {/* Selected Indicator */}
-                  {selectedTier === option.tier && (
-                    <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="w-2 h-2 bg-accent-foreground rounded-full"
-                      />
-                    </div>
-                  )}
-                </button>
-              ))}
-
-              {/* Info Note */}
-              <p className="text-xs text-muted-foreground text-center mt-4 px-4">
-                网络费用取决于当前网络拥堵程度，实际费用可能略有浮动
-              </p>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
-
   return (
     <>
       {/* Trigger Card */}
@@ -176,8 +79,82 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
         </div>
       </button>
 
-      {/* Portal for Modal */}
-      {createPortal(modal, document.body)}
+      {/* Bottom Drawer */}
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerContent className="max-h-[85vh]">
+          {/* Header */}
+          <DrawerHeader className="flex flex-row items-start justify-between p-4 pb-2 text-left">
+            <div>
+              <DrawerTitle className="text-lg font-semibold text-foreground">网络费用</DrawerTitle>
+              <p className="text-sm text-muted-foreground mt-1">{networkName} 网络</p>
+            </div>
+            <DrawerClose asChild>
+              <button className="p-2 -mr-2 -mt-1 hover:bg-muted rounded-full transition-colors">
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </DrawerClose>
+          </DrawerHeader>
+
+          {/* Fee Options */}
+          <div className="p-4 pt-2 space-y-3">
+            {FEE_OPTIONS.map((option) => (
+              <button
+                key={option.tier}
+                onClick={() => {
+                  onSelect(option.tier);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  "w-full flex items-center gap-4 p-4 rounded-xl border transition-all",
+                  selectedTier === option.tier 
+                    ? "border-accent bg-accent/5" 
+                    : "border-border hover:border-accent/50"
+                )}
+              >
+                {/* Icon */}
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
+                  option.tier === 'slow' && "bg-muted text-muted-foreground",
+                  option.tier === 'standard' && "bg-accent/10 text-accent",
+                  option.tier === 'fast' && "bg-warning/10 text-warning"
+                )}>
+                  {option.icon}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">{option.label}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {option.labelEn}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    预计确认时间 {option.time}
+                  </p>
+                </div>
+
+                {/* Fee */}
+                <div className="text-right shrink-0">
+                  <p className="font-semibold text-foreground">${option.fee.toFixed(2)}</p>
+                </div>
+
+                {/* Selected Indicator */}
+                {selectedTier === option.tier && (
+                  <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
+                    <div className="w-2 h-2 bg-accent-foreground rounded-full" />
+                  </div>
+                )}
+              </button>
+            ))}
+
+            {/* Info Note */}
+            <p className="text-xs text-muted-foreground text-center pt-2 pb-4">
+              网络费用取决于当前网络拥堵程度，实际费用可能略有浮动
+            </p>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }
