@@ -356,17 +356,53 @@ export default function HomePage() {
             </motion.div>
           ) : (
             <div className="space-y-1.5">
-              <AnimatePresence mode="popLayout">
-                {(showAllAssets ? displayAssets : displayAssets.slice(0, INITIAL_ASSETS_COUNT)).map((asset, index) => (
+              {/* Always visible assets (first N items) */}
+              {displayAssets.slice(0, INITIAL_ASSETS_COUNT).map((asset, index) => (
+                <motion.button
+                  key={asset.symbol}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 * index }}
+                  onClick={() => navigate(`/asset/${asset.symbol}`)}
+                  className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <CryptoIcon symbol={asset.symbol} size="md" />
+                    <div className="text-left">
+                      <p className="font-medium text-foreground text-sm">{asset.symbol}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {asset.name}
+                        {selectedChain === 'all' && asset.chains.length > 1 && (
+                          <span className="ml-1 text-accent">· {asset.chains.length} 链</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right flex items-center gap-2">
+                    <div>
+                      <p className="font-medium text-foreground text-sm">
+                        {hideBalance ? '****' : asset.totalBalance.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {hideBalance ? '**' : `$${asset.totalUsdValue.toLocaleString()}`}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </motion.button>
+              ))}
+              
+              {/* Expandable assets (items beyond initial count) */}
+              <AnimatePresence initial={false}>
+                {showAllAssets && displayAssets.slice(INITIAL_ASSETS_COUNT).map((asset, index) => (
                   <motion.button
                     key={asset.symbol}
-                    layout
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    transition={{ delay: 0.05 * index }}
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: 'auto', marginTop: 6 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    transition={{ duration: 0.2, delay: index * 0.03 }}
                     onClick={() => navigate(`/asset/${asset.symbol}`)}
-                    className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+                    className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors overflow-hidden"
                   >
                     <div className="flex items-center gap-2">
                       <CryptoIcon symbol={asset.symbol} size="md" />
@@ -380,7 +416,7 @@ export default function HomePage() {
                         </p>
                       </div>
                     </div>
-                      <div className="text-right flex items-center gap-2">
+                    <div className="text-right flex items-center gap-2">
                       <div>
                         <p className="font-medium text-foreground text-sm">
                           {hideBalance ? '****' : asset.totalBalance.toLocaleString()}
@@ -397,8 +433,7 @@ export default function HomePage() {
               
               {/* Show more / Show less button */}
               {displayAssets.length > INITIAL_ASSETS_COUNT && (
-                <motion.button
-                  layout
+                <button
                   onClick={() => setShowAllAssets(!showAllAssets)}
                   className="w-full py-3 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted/30"
                 >
@@ -412,7 +447,7 @@ export default function HomePage() {
                     ? '收起' 
                     : `展开更多 (${displayAssets.length - INITIAL_ASSETS_COUNT} 个)`
                   }
-                </motion.button>
+                </button>
               )}
             </div>
           )}
