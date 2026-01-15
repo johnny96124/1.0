@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Send, QrCode, TrendingUp, TrendingDown, 
+  ArrowLeft, Send, QrCode, TrendingDown, 
   CheckCircle2, AlertCircle, ChevronRight, Clock, XCircle, Copy, ExternalLink
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -144,24 +144,9 @@ export default function AssetDetailPage() {
             <p className="text-3xl font-bold text-foreground mb-1">
               {displayBalance.balance.toLocaleString()} {assetData.symbol}
             </p>
-            <div className="flex items-center justify-center gap-2">
-              <span className="text-lg text-muted-foreground">
-                {formatCurrency(displayBalance.usdValue)}
-              </span>
-              {assetData.change24h !== 0 && (
-                <span className={cn(
-                  'text-sm flex items-center',
-                  assetData.change24h > 0 ? 'text-success' : 'text-destructive'
-                )}>
-                  {assetData.change24h > 0 ? (
-                    <TrendingUp className="w-4 h-4 mr-0.5" />
-                  ) : (
-                    <TrendingDown className="w-4 h-4 mr-0.5" />
-                  )}
-                  {Math.abs(assetData.change24h)}%
-                </span>
-              )}
-            </div>
+            <p className="text-lg text-muted-foreground">
+              {formatCurrency(displayBalance.usdValue)}
+            </p>
           </motion.div>
 
           {/* Quick Actions */}

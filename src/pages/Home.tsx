@@ -2,8 +2,8 @@ import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
-  TrendingUp, TrendingDown, Wallet, Plus, Shield,
-  CheckCircle2, AlertCircle, Sparkles, Lock, Settings, Search, ChevronDown
+  TrendingDown, Wallet, Plus, Shield,
+  CheckCircle2, AlertCircle, Sparkles, Lock, Settings, ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -371,29 +371,14 @@ export default function HomePage() {
                       </p>
                     </div>
                   </div>
-                  <div className="text-right flex items-center gap-2">
+                    <div className="text-right flex items-center gap-2">
                     <div>
                       <p className="font-medium text-foreground text-sm">
                         {hideBalance ? '****' : asset.totalBalance.toLocaleString()}
                       </p>
-                      <div className="flex items-center gap-1 justify-end">
-                        <span className="text-xs text-muted-foreground">
-                          {hideBalance ? '**' : `$${asset.totalUsdValue.toLocaleString()}`}
-                        </span>
-                        {asset.change24h !== 0 && (
-                          <span className={cn(
-                            'text-xs flex items-center',
-                            asset.change24h > 0 ? 'text-success' : 'text-destructive'
-                          )}>
-                            {asset.change24h > 0 ? (
-                              <TrendingUp className="w-3 h-3" />
-                            ) : (
-                              <TrendingDown className="w-3 h-3" />
-                            )}
-                            {Math.abs(asset.change24h)}%
-                          </span>
-                        )}
-                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {hideBalance ? '**' : `$${asset.totalUsdValue.toLocaleString()}`}
+                      </p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-muted-foreground" />
                   </div>
