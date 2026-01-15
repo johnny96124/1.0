@@ -77,7 +77,7 @@ export default function ReceivePage() {
               className="w-full card-elevated p-4 flex items-center justify-between"
             >
               <div className="flex items-center gap-3">
-                <ChainIcon chainId={selectedNetwork.icon} size="lg" />
+                <ChainIcon chainId={selectedNetwork.id} size="lg" />
                 <div className="flex flex-col items-start">
                   <span className="font-semibold text-foreground">{selectedNetwork.name}</span>
                   <span className="text-xs text-muted-foreground">{selectedNetwork.shortName}</span>
@@ -103,7 +103,7 @@ export default function ReceivePage() {
                       selectedNetwork.id === network.id ? 'bg-accent/5' : ''
                     }`}
                   >
-                    <ChainIcon chainId={network.icon} size="lg" />
+                    <ChainIcon chainId={network.id} size="lg" />
                     <div className="flex flex-col items-start">
                       <span className="font-medium text-foreground">{network.name}</span>
                       <span className="text-xs text-muted-foreground">{network.shortName}</span>
