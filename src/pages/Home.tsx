@@ -544,48 +544,57 @@ export default function HomePage() {
                 <div className="w-10 h-1 bg-muted rounded-full" />
               </div>
 
-              {/* Transaction Status Badge */}
-              <div className="text-center mb-5">
-                <div className={cn(
-                  "w-14 h-14 rounded-full mx-auto flex items-center justify-center mb-3",
-                  selectedTx.status === 'confirmed' && "bg-success/15",
-                  selectedTx.status === 'pending' && "bg-warning/15",
-                  selectedTx.status === 'failed' && "bg-destructive/15"
-                )}>
-                  {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-7 h-7 text-success" />}
-                  {selectedTx.status === 'pending' && <Clock className="w-7 h-7 text-warning" />}
-                  {selectedTx.status === 'failed' && <XCircle className="w-7 h-7 text-destructive" />}
-                </div>
-                <p className={cn(
-                  "font-semibold text-lg",
-                  selectedTx.status === 'confirmed' && "text-success",
-                  selectedTx.status === 'pending' && "text-warning",
-                  selectedTx.status === 'failed' && "text-destructive"
-                )}>
-                  {selectedTx.type === 'receive' ? '收款' : '转账'}
-                  {selectedTx.status === 'confirmed' && '已完成'}
-                  {selectedTx.status === 'pending' && '处理中'}
-                  {selectedTx.status === 'failed' && '失败'}
-                </p>
-              </div>
-
-              {/* Amount Card with Token Icon */}
-              <div className="bg-muted/30 rounded-2xl p-5 mb-6 border border-border/50">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-background shadow-sm flex items-center justify-center">
-                    <CryptoIcon symbol={selectedTx.symbol} size="lg" />
-                  </div>
-                  <div className="text-center">
-                    <p className={cn(
-                      'text-3xl font-bold tracking-tight',
-                      selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
+              {/* Hero Section: Token Icon + Amount */}
+              <div className="relative mb-6">
+                {/* Large Token Icon as Hero */}
+                <div className="flex justify-center mb-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
+                      <CryptoIcon symbol={selectedTx.symbol} size="xl" />
+                    </div>
+                    {/* Status Badge Overlay */}
+                    <div className={cn(
+                      "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-card",
+                      selectedTx.status === 'confirmed' && "bg-success",
+                      selectedTx.status === 'pending' && "bg-warning",
+                      selectedTx.status === 'failed' && "bg-destructive"
                     )}>
-                      {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
-                    </p>
-                    <p className="text-muted-foreground mt-1">
-                      ≈ ${selectedTx.usdValue.toLocaleString()}
-                    </p>
+                      {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                      {selectedTx.status === 'pending' && <Clock className="w-3.5 h-3.5 text-white" />}
+                      {selectedTx.status === 'failed' && <XCircle className="w-3.5 h-3.5 text-white" />}
+                    </div>
                   </div>
+                </div>
+
+                {/* Amount Display */}
+                <div className="text-center">
+                  <p className={cn(
+                    'text-3xl font-bold tracking-tight',
+                    selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
+                  )}>
+                    {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
+                  </p>
+                  <p className="text-muted-foreground text-sm mt-1">
+                    ≈ ${selectedTx.usdValue.toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Status Tag */}
+                <div className="flex justify-center mt-3">
+                  <span className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                    selectedTx.status === 'confirmed' && "bg-success/10 text-success",
+                    selectedTx.status === 'pending' && "bg-warning/10 text-warning",
+                    selectedTx.status === 'failed' && "bg-destructive/10 text-destructive"
+                  )}>
+                    {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-3 h-3" />}
+                    {selectedTx.status === 'pending' && <Clock className="w-3 h-3" />}
+                    {selectedTx.status === 'failed' && <XCircle className="w-3 h-3" />}
+                    {selectedTx.type === 'receive' ? '收款' : '转账'}
+                    {selectedTx.status === 'confirmed' && '已完成'}
+                    {selectedTx.status === 'pending' && '处理中'}
+                    {selectedTx.status === 'failed' && '失败'}
+                  </span>
                 </div>
               </div>
 
