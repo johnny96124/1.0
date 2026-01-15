@@ -12,6 +12,7 @@ import { useWallet, aggregateAssets } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { ChainDropdown } from '@/components/ChainDropdown';
 import { CryptoIcon } from '@/components/CryptoIcon';
+import { ChainIcon } from '@/components/ChainIcon';
 import { TokenSearch } from '@/components/TokenSearch';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { WalletSwitcher } from '@/components/WalletSwitcher';
@@ -558,8 +559,11 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Amount */}
+              {/* Amount with Token Icon */}
               <div className="text-center mb-6">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <CryptoIcon symbol={selectedTx.symbol} size="lg" />
+                </div>
                 <p className={cn(
                   'text-3xl font-bold',
                   selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
@@ -573,21 +577,28 @@ export default function HomePage() {
 
               {/* Details */}
               <div className="space-y-4">
-                <div className="flex justify-between py-2 border-b border-border">
+                <div className="flex justify-between items-start py-2 border-b border-border">
                   <span className="text-muted-foreground">
                     {selectedTx.type === 'receive' ? '付款方' : '收款方'}
                   </span>
-                  <span className="font-medium text-foreground">
-                    {selectedTx.counterpartyLabel || 
-                      `${selectedTx.counterparty.slice(0, 8)}...${selectedTx.counterparty.slice(-6)}`}
-                  </span>
+                  <div className="text-right">
+                    {selectedTx.counterpartyLabel && (
+                      <p className="font-medium text-foreground">{selectedTx.counterpartyLabel}</p>
+                    )}
+                    <p className="text-sm text-muted-foreground font-mono">
+                      {`${selectedTx.counterparty.slice(0, 10)}...${selectedTx.counterparty.slice(-8)}`}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex justify-between py-2 border-b border-border">
+                <div className="flex justify-between items-center py-2 border-b border-border">
                   <span className="text-muted-foreground">网络</span>
-                  <span className="font-medium text-foreground">
-                    {SUPPORTED_CHAINS.find(c => c.id === selectedTx.network)?.name}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <ChainIcon chainId={selectedTx.network} size="sm" />
+                    <span className="font-medium text-foreground">
+                      {SUPPORTED_CHAINS.find(c => c.id === selectedTx.network)?.name}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex justify-between py-2 border-b border-border">
