@@ -97,11 +97,12 @@ export default function ReceivePage() {
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas context not available');
       
-      // Set canvas size with padding
+      // Set canvas size with padding and space for text
       const padding = 40;
-      const size = 300;
-      canvas.width = size + padding * 2;
-      canvas.height = size + padding * 2;
+      const qrSize = 300;
+      const textAreaHeight = 100;
+      canvas.width = qrSize + padding * 2;
+      canvas.height = qrSize + padding * 2 + textAreaHeight;
       
       // Fill white background
       ctx.fillStyle = '#ffffff';
@@ -114,8 +115,24 @@ export default function ReceivePage() {
       
       const img = new Image();
       img.onload = () => {
-        ctx.drawImage(img, padding, padding, size, size);
+        // Draw QR code
+        ctx.drawImage(img, padding, padding, qrSize, qrSize);
         URL.revokeObjectURL(svgUrl);
+        
+        // Draw network name
+        ctx.fillStyle = '#1a1a1a';
+        ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(selectedNetwork.name, canvas.width / 2, qrSize + padding + 35);
+        
+        // Draw address (split into two lines if too long)
+        ctx.fillStyle = '#666666';
+        ctx.font = '12px monospace';
+        const midPoint = Math.ceil(fullAddress.length / 2);
+        const line1 = fullAddress.slice(0, midPoint);
+        const line2 = fullAddress.slice(midPoint);
+        ctx.fillText(line1, canvas.width / 2, qrSize + padding + 60);
+        ctx.fillText(line2, canvas.width / 2, qrSize + padding + 78);
         
         // Download the image
         const link = document.createElement('a');
