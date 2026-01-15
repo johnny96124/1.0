@@ -288,6 +288,7 @@ interface WalletContextType extends WalletState {
   
   // Contact actions
   addContact: (contact: Omit<Contact, 'id'>) => void;
+  updateContact: (id: string, updates: Partial<Contact>) => void;
   removeContact: (id: string) => void;
   
   // Device actions
@@ -532,6 +533,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setContacts(prev => [...prev, newContact]);
   }, []);
 
+  const updateContact = useCallback((id: string, updates: Partial<Contact>) => {
+    setContacts(prev => prev.map(c => 
+      c.id === id ? { ...c, ...updates } : c
+    ));
+  }, []);
+
   const removeContact = useCallback((id: string) => {
     setContacts(prev => prev.filter(c => c.id !== id));
   }, []);
@@ -619,6 +626,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     getLimitStatus,
     checkTransferLimit,
     addContact,
+    updateContact,
     removeContact,
     addDevice,
     removeDevice,
