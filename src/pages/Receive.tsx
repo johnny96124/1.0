@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Share2, CheckCircle2, ChevronDown, Info, Search, Star } from 'lucide-react';
+import { Copy, Download, CheckCircle2, ChevronDown, Info, Search, Star } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -39,6 +39,8 @@ export default function ReceivePage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
   const { currentWallet } = useWallet();
   const { toast } = useToast();
 
@@ -82,25 +84,72 @@ export default function ReceivePage() {
     }
   }, [fullAddress, toast]);
 
-  const handleShare = useCallback(async () => {
+  const handleSaveQRCode = useCallback(async () => {
+    if (!qrRef.current) return;
+    
+    setSaving(true);
     try {
-      await navigator.share({
-        title: '收款地址',
-        text: `我的${selectedNetwork.name}收款地址: ${fullAddress}`,
-      });
-      toast({
-        title: '分享成功',
-        description: '收款信息已准备分享',
-      });
+      const svg = qrRef.current.querySelector('svg');
+      if (!svg) throw new Error('QR code not found');
+      
+      // Create canvas
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas context not available');
+      
+      // Set canvas size with padding
+      const padding = 40;
+      const size = 300;
+      canvas.width = size + padding * 2;
+      canvas.height = size + padding * 2;
+      
+      // Fill white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Convert SVG to image
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+      
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, padding, padding, size, size);
+        URL.revokeObjectURL(svgUrl);
+        
+        // Download the image
+        const link = document.createElement('a');
+        link.download = `${selectedNetwork.name}_收款码_${fullAddress.slice(0, 8)}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        setSaving(false);
+        toast({
+          title: '保存成功',
+          description: '二维码已保存到本地',
+        });
+      };
+      
+      img.onerror = () => {
+        URL.revokeObjectURL(svgUrl);
+        setSaving(false);
+        toast({
+          title: '保存失败',
+          description: '请重试或截图保存',
+          variant: 'destructive',
+        });
+      };
+      
+      img.src = svgUrl;
     } catch (error) {
-      // User cancelled or share not supported, fallback to copy
-      await handleCopy();
+      setSaving(false);
       toast({
-        title: '已复制到剪贴板',
-        description: '您可以将地址粘贴分享给他人',
+        title: '保存失败',
+        description: '请重试或截图保存',
+        variant: 'destructive',
       });
     }
-  }, [selectedNetwork.name, fullAddress, handleCopy, toast]);
+  }, [selectedNetwork.name, fullAddress, toast]);
 
   const handleSelectNetwork = (network: typeof networks[0]) => {
     setSelectedNetwork(network);
@@ -223,7 +272,7 @@ export default function ReceivePage() {
             animate={{ scale: 1 }}
             className="card-elevated p-4 text-center mb-4"
           >
-            <div className="w-40 h-40 mx-auto bg-white rounded-xl p-3 mb-3 shadow-sm">
+            <div ref={qrRef} className="w-40 h-40 mx-auto bg-white rounded-xl p-3 mb-3 shadow-sm">
               <QRCodeSVG
                 value={fullAddress}
                 size={136}
@@ -258,10 +307,11 @@ export default function ReceivePage() {
             </Button>
             <Button
               className="flex-1 h-10"
-              onClick={handleShare}
+              onClick={handleSaveQRCode}
+              disabled={saving}
             >
-              <Share2 className="w-4 h-4 mr-2" />
-              分享
+              <Download className="w-4 h-4 mr-2" />
+              {saving ? '保存中...' : '保存二维码'}
             </Button>
           </div>
 
