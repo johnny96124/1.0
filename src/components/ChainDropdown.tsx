@@ -39,7 +39,8 @@ export function ChainDropdown({
     e.stopPropagation();
     navigator.clipboard.writeText(address);
     setCopiedChain(chainId);
-    toast.success('地址已复制');
+    const chainName = SUPPORTED_CHAINS.find(c => c.id === chainId)?.shortName || chainId;
+    toast.success(`${chainName} 地址已复制`);
     setTimeout(() => setCopiedChain(null), 2000);
   };
 
