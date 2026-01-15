@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Scan, Users, AlertTriangle, 
-  CheckCircle2, Loader2, Shield, ChevronDown,
+  CheckCircle2, Loader2, Shield,
   Info
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -11,10 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
-import { RiskColor } from '@/types/wallet';
+import { RiskColor, SUPPORTED_CHAINS } from '@/types/wallet';
 import { QRScanner } from '@/components/QRScanner';
 import { TransferLimitCard } from '@/components/TransferLimitCard';
 import { ParsedQRData } from '@/lib/qr-parser';
+import { TokenSelector } from '@/components/TokenSelector';
+import { NetworkFeeSelector, FeeTier } from '@/components/NetworkFeeSelector';
+import { ChainIcon } from '@/components/ChainIcon';
 
 export default function SendPage() {
   const navigate = useNavigate();
@@ -35,6 +38,7 @@ export default function SendPage() {
   const [showSatoshiTest, setShowSatoshiTest] = useState(false);
   const [confirmRisk, setConfirmRisk] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [feeTier, setFeeTier] = useState<FeeTier>('standard');
 
   // Get limit status
   const limitStatus = getLimitStatus();
@@ -283,11 +287,11 @@ export default function SendPage() {
                   </label>
                   <div className="card-elevated p-4">
                     <div className="flex items-center gap-3">
-                      <button className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">
-                        <span className="text-xl">{selectedAsset.icon}</span>
-                        <span className="font-medium">{selectedAsset.symbol}</span>
-                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                      </button>
+                      <TokenSelector
+                        assets={assets}
+                        selectedAsset={selectedAsset}
+                        onSelect={setSelectedAsset}
+                      />
                       <Input
                         type="number"
                         placeholder="0.00"
@@ -297,9 +301,13 @@ export default function SendPage() {
                       />
                     </div>
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-                      <span className="text-sm text-muted-foreground">
-                        可用余额: {selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}
-                      </span>
+                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <span>可用余额: {selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
+                        <span className="text-xs bg-muted px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <ChainIcon chainId={selectedAsset.network} size="sm" />
+                          {SUPPORTED_CHAINS.find(c => c.id === selectedAsset.network)?.shortName}
+                        </span>
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -325,13 +333,12 @@ export default function SendPage() {
                   />
                 )}
 
-                {/* Fee estimate */}
-                <div className="card-elevated p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">预计网络费用</span>
-                    <span className="text-sm font-medium">~$2.50</span>
-                  </div>
-                </div>
+                {/* Fee selector */}
+                <NetworkFeeSelector
+                  selectedTier={feeTier}
+                  onSelect={setFeeTier}
+                  networkName={SUPPORTED_CHAINS.find(c => c.id === selectedAsset.network)?.name}
+                />
 
                 {/* Memo */}
                 <div>
@@ -378,13 +385,23 @@ export default function SendPage() {
                     </p>
                   </div>
                   <div className="h-px bg-border" />
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">网络</span>
-                    <span className="text-sm font-medium">Ethereum</span>
+                    <div className="flex items-center gap-2">
+                      <ChainIcon chainId={selectedAsset.network} size="sm" />
+                      <span className="text-sm font-medium">
+                        {SUPPORTED_CHAINS.find(c => c.id === selectedAsset.network)?.name}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-muted-foreground">网络费用</span>
-                    <span className="text-sm font-medium">~$2.50</span>
+                    <span className="text-sm font-medium">
+                      ~${feeTier === 'slow' ? '0.80' : feeTier === 'fast' ? '5.00' : '2.50'}
+                      <span className="text-xs text-muted-foreground ml-1">
+                        ({feeTier === 'slow' ? '经济' : feeTier === 'fast' ? '快速' : '标准'})
+                      </span>
+                    </span>
                   </div>
                   {memo && (
                     <div className="flex justify-between">
