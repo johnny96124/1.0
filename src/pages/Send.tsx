@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Scan, Users, AlertTriangle, 
-  CheckCircle2, Loader2, Shield,
-  Info
+  CheckCircle2, Loader2, Shield, MoreHorizontal,
+  Info, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -13,11 +13,13 @@ import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { RiskColor, SUPPORTED_CHAINS } from '@/types/wallet';
 import { QRScanner } from '@/components/QRScanner';
-import { TransferLimitCard } from '@/components/TransferLimitCard';
 import { ParsedQRData } from '@/lib/qr-parser';
-import { TokenSelector } from '@/components/TokenSelector';
-import { NetworkFeeSelector, FeeTier } from '@/components/NetworkFeeSelector';
+import { NumericKeypad } from '@/components/NumericKeypad';
+import { AmountDisplay } from '@/components/AmountDisplay';
+import { AddressBar } from '@/components/AddressBar';
+import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
+import { NetworkFeeSelector, FeeTier } from '@/components/NetworkFeeSelector';
 
 export default function SendPage() {
   const navigate = useNavigate();
@@ -39,11 +41,18 @@ export default function SendPage() {
   const [confirmRisk, setConfirmRisk] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [feeTier, setFeeTier] = useState<FeeTier>('standard');
+  const [isUsdMode, setIsUsdMode] = useState(true);
+  const [showAssetPicker, setShowAssetPicker] = useState(false);
 
   // Get limit status
   const limitStatus = getLimitStatus();
   const currentAmount = parseFloat(amount) || 0;
   const limitCheck = checkTransferLimit(currentAmount);
+
+  // Mock token price (in real app, fetch from API)
+  const tokenPrice = selectedAsset.symbol === 'USDT' || selectedAsset.symbol === 'USDC' ? 1 : 
+                     selectedAsset.symbol === 'ETH' ? 3500 : 
+                     selectedAsset.symbol === 'BTC' ? 97500 : 1;
 
   // Scan address risk when address changes
   useEffect(() => {
@@ -54,7 +63,6 @@ export default function SendPage() {
         setRiskScore(result);
         setIsScanning(false);
         
-        // Show satoshi test for new/unknown addresses
         if (result.score === 'yellow' || !contacts.find(c => c.address.includes(address.slice(0, 10)))) {
           setShowSatoshiTest(true);
         }
@@ -71,16 +79,21 @@ export default function SendPage() {
   const handleQRScan = (data: ParsedQRData) => {
     setAddress(data.address);
     setSelectedContact(null);
-    
-    // Auto-fill amount if provided
-    if (data.amount) {
-      setAmount(data.amount.toString());
+    if (data.amount) setAmount(data.amount.toString());
+    if (data.memo) setMemo(data.memo);
+  };
+
+  const handleKeypadInput = (key: string) => {
+    if (key === '.' && amount.includes('.')) return;
+    if (amount === '0' && key !== '.') {
+      setAmount(key);
+    } else {
+      setAmount(prev => prev + key);
     }
-    
-    // Auto-fill memo if provided
-    if (data.memo) {
-      setMemo(data.memo);
-    }
+  };
+
+  const handleKeypadDelete = () => {
+    setAmount(prev => prev.slice(0, -1));
   };
 
   const handleContinue = () => {
@@ -97,7 +110,6 @@ export default function SendPage() {
   const handleAuth = async () => {
     setIsLoading(true);
     try {
-      // Simulate biometric auth
       await new Promise(resolve => setTimeout(resolve, 1000));
       await sendTransaction(address, parseFloat(amount), selectedAsset.symbol, memo);
       setStep('success');
@@ -111,31 +123,43 @@ export default function SendPage() {
   const isLimitedTransfer = walletStatus === 'created_no_backup';
   const transferLimit = isLimitedTransfer ? 50 : limitStatus.singleLimit;
 
+  const getStepTitle = () => {
+    switch (step) {
+      case 'address': return '转账';
+      case 'amount': return '输入金额';
+      case 'confirm': return '确认转账';
+      case 'auth': return '验证身份';
+      case 'success': return '转账成功';
+    }
+  };
+
   return (
     <AppLayout showNav={false} showSecurityBanner={false}>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full bg-background">
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => step === 'address' ? navigate(-1) : setStep('address')}
+        <div className="flex items-center justify-between px-4 py-3 shrink-0">
+          <button
+            onClick={() => step === 'address' ? navigate(-1) : setStep(step === 'amount' ? 'address' : step === 'confirm' ? 'amount' : 'address')}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-lg font-semibold">转账</h1>
+            <ArrowLeft className="w-5 h-5 text-foreground" />
+          </button>
+          <h1 className="text-lg font-semibold text-foreground">{getStepTitle()}</h1>
+          <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">
+            <MoreHorizontal className="w-5 h-5 text-foreground" />
+          </button>
         </div>
 
         {/* Limit Warning for unbacked wallet */}
-        {isLimitedTransfer && (
-          <div className="mx-4 mt-4 p-3 bg-warning/10 border border-warning/20 rounded-xl">
+        {isLimitedTransfer && step !== 'success' && (
+          <div className="mx-4 mb-3 p-3 bg-warning/10 border border-warning/20 rounded-xl">
             <p className="text-sm text-warning">
               ⚠️ 未完成备份，单笔限额 {transferLimit} USDT
             </p>
           </div>
         )}
 
-        <div className="flex-1 px-4 py-4 overflow-y-auto">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <AnimatePresence mode="wait">
             {/* Step 1: Address */}
             {step === 'address' && (
@@ -144,7 +168,7 @@ export default function SendPage() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="space-y-4"
+                className="flex-1 px-4 py-4 overflow-y-auto space-y-4"
               >
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
@@ -158,7 +182,7 @@ export default function SendPage() {
                         setAddress(e.target.value);
                         setSelectedContact(null);
                       }}
-                      className="h-14 pr-20"
+                      className="h-14 pr-20 text-base"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                       <Button 
@@ -181,10 +205,9 @@ export default function SendPage() {
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="space-y-2"
                   >
                     {isScanning ? (
-                      <div className="flex items-center gap-2 text-muted-foreground">
+                      <div className="flex items-center gap-2 text-muted-foreground p-4">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         <span className="text-sm">风险评估中…</span>
                       </div>
@@ -215,13 +238,6 @@ export default function SendPage() {
                             </>
                           )}
                         </div>
-                        {riskScore.reasons.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {riskScore.reasons.map((reason, i) => (
-                              <p key={i} className="text-sm text-muted-foreground">• {reason}</p>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     )}
                   </motion.div>
@@ -231,7 +247,7 @@ export default function SendPage() {
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground mb-3">常用联系人</h3>
                   <div className="space-y-2">
-                    {contacts.slice(0, 3).map((contact) => (
+                    {contacts.slice(0, 4).map((contact) => (
                       <button
                         key={contact.id}
                         onClick={() => handleSelectContact(contact)}
@@ -246,11 +262,6 @@ export default function SendPage() {
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="font-medium text-foreground">{contact.name}</p>
-                              {contact.isOfficial && (
-                                <span className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">
-                                  官方
-                                </span>
-                              )}
                               {contact.isWhitelisted && (
                                 <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">
                                   白名单
@@ -258,7 +269,7 @@ export default function SendPage() {
                               )}
                             </div>
                             <p className="text-sm text-muted-foreground font-mono mt-1">
-                              {contact.address.slice(0, 10)}...{contact.address.slice(-8)}
+                              {contact.address.slice(0, 8)}...{contact.address.slice(-6)}
                             </p>
                           </div>
                           {selectedContact?.id === contact.id && (
@@ -272,68 +283,113 @@ export default function SendPage() {
               </motion.div>
             )}
 
-            {/* Step 2: Amount */}
+            {/* Step 2: Amount - Mobile Optimized */}
             {step === 'amount' && (
               <motion.div
                 key="amount"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="space-y-4"
+                className="flex-1 flex flex-col"
               >
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">
-                    转账金额
-                  </label>
-                  <div className="card-elevated p-4">
-                    <div className="flex items-center gap-3">
-                      <TokenSelector
-                        assets={assets}
-                        selectedAsset={selectedAsset}
-                        onSelect={setSelectedAsset}
-                      />
-                      <Input
-                        type="number"
-                        placeholder="0.00"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        className="text-2xl font-bold border-0 p-0 h-auto focus-visible:ring-0"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <span>可用余额: {selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
-                        <span className="text-xs bg-muted px-1.5 py-0.5 rounded flex items-center gap-1">
-                          <ChainIcon chainId={selectedAsset.network} size="sm" />
-                          {SUPPORTED_CHAINS.find(c => c.id === selectedAsset.network)?.shortName}
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setAmount(selectedAsset.balance.toString())}
-                      >
-                        全部转出
-                      </Button>
+                {/* Address Bar */}
+                <div className="px-4 pt-2">
+                  <AddressBar
+                    address={address}
+                    label={selectedContact?.name}
+                    onClear={() => setStep('address')}
+                  />
+                </div>
+
+                {/* Amount Display - Centered */}
+                <div className="flex-1 flex flex-col items-center justify-center px-4">
+                  <AmountDisplay
+                    amount={amount}
+                    symbol={selectedAsset.symbol}
+                    usdValue={currentAmount * tokenPrice}
+                    isUsdMode={isUsdMode}
+                    onToggleMode={() => setIsUsdMode(!isUsdMode)}
+                    tokenPrice={tokenPrice}
+                  />
+                  
+                  {/* Balance Info */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                    <span>可用:</span>
+                    <button 
+                      onClick={() => setShowAssetPicker(true)}
+                      className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
+                    >
+                      <CryptoIcon symbol={selectedAsset.symbol} size="sm" />
+                      <span className="font-medium text-foreground">{selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Send Button */}
+                <div className="px-4 pb-2">
+                  <Button
+                    size="lg"
+                    className="w-full h-14 text-lg font-semibold bg-accent hover:bg-accent/90"
+                    onClick={handleContinue}
+                    disabled={!amount || parseFloat(amount) <= 0 || !limitCheck.allowed}
+                  >
+                    发送
+                  </Button>
+                </div>
+
+                {/* Numeric Keypad */}
+                <NumericKeypad
+                  onInput={handleKeypadInput}
+                  onDelete={handleKeypadDelete}
+                />
+              </motion.div>
+            )}
+
+            {/* Step 3: Confirm */}
+            {step === 'confirm' && (
+              <motion.div
+                key="confirm"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex-1 px-4 py-4 overflow-y-auto space-y-4"
+              >
+                {/* Amount Card */}
+                <div className="card-elevated p-6 text-center">
+                  <CryptoIcon symbol={selectedAsset.symbol} size="xl" className="mx-auto mb-3" />
+                  <p className="text-3xl font-bold text-foreground">
+                    {amount} {selectedAsset.symbol}
+                  </p>
+                  <p className="text-muted-foreground mt-1">
+                    ≈ ${(parseFloat(amount) * tokenPrice).toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Details Card */}
+                <div className="card-elevated p-4 space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">收款方</p>
+                    <p className="font-medium text-foreground mt-1">
+                      {selectedContact?.name || '未知地址'}
+                    </p>
+                    <p className="text-sm font-mono text-muted-foreground mt-0.5">
+                      {address.slice(0, 12)}...{address.slice(-10)}
+                    </p>
+                  </div>
+                  <div className="h-px bg-border" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">网络</span>
+                    <div className="flex items-center gap-2">
+                      <ChainIcon chainId={selectedAsset.network} size="sm" />
+                      <span className="text-sm font-medium text-foreground">
+                        {SUPPORTED_CHAINS.find(c => c.id === selectedAsset.network)?.name}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Transfer Limit Card */}
-                {!isLimitedTransfer && (
-                  <TransferLimitCard 
-                    limitStatus={{
-                      singleLimit: limitStatus.singleLimit,
-                      dailyLimit: limitStatus.dailyLimit,
-                      dailyUsed: limitStatus.dailyUsed,
-                      monthlyLimit: limitStatus.monthlyLimit,
-                      monthlyUsed: limitStatus.monthlyUsed,
-                    }}
-                    currentAmount={currentAmount}
-                  />
-                )}
-
-                {/* Fee selector */}
+                {/* Fee Selector */}
                 <NetworkFeeSelector
                   selectedTier={feeTier}
                   onSelect={setFeeTier}
@@ -352,64 +408,6 @@ export default function SendPage() {
                     className="h-12"
                   />
                 </div>
-              </motion.div>
-            )}
-
-            {/* Step 3: Confirm */}
-            {step === 'confirm' && (
-              <motion.div
-                key="confirm"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="space-y-4"
-              >
-                <div className="card-elevated p-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-2">转账金额</p>
-                  <p className="text-3xl font-bold text-foreground">
-                    {amount} {selectedAsset.symbol}
-                  </p>
-                  <p className="text-muted-foreground mt-1">
-                    ≈ ${(parseFloat(amount) || 0).toLocaleString()}
-                  </p>
-                </div>
-
-                <div className="card-elevated p-4 space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">收款方</p>
-                    <p className="font-medium text-foreground mt-1">
-                      {selectedContact?.name || '未知地址'}
-                    </p>
-                    <p className="text-sm font-mono text-muted-foreground mt-0.5">
-                      {address.slice(0, 16)}...{address.slice(-12)}
-                    </p>
-                  </div>
-                  <div className="h-px bg-border" />
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">网络</span>
-                    <div className="flex items-center gap-2">
-                      <ChainIcon chainId={selectedAsset.network} size="sm" />
-                      <span className="text-sm font-medium">
-                        {SUPPORTED_CHAINS.find(c => c.id === selectedAsset.network)?.name}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">网络费用</span>
-                    <span className="text-sm font-medium">
-                      ~${feeTier === 'slow' ? '0.80' : feeTier === 'fast' ? '5.00' : '2.50'}
-                      <span className="text-xs text-muted-foreground ml-1">
-                        ({feeTier === 'slow' ? '经济' : feeTier === 'fast' ? '快速' : '标准'})
-                      </span>
-                    </span>
-                  </div>
-                  {memo && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">备注</span>
-                      <span className="text-sm font-medium">{memo}</span>
-                    </div>
-                  )}
-                </div>
 
                 {/* Satoshi Test Suggestion */}
                 {showSatoshiTest && (
@@ -421,14 +419,6 @@ export default function SendPage() {
                         <p className="text-sm text-muted-foreground mt-1">
                           确认对方地址可正常到账后再转大额
                         </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-3"
-                          onClick={() => setAmount('0.01')}
-                        >
-                          进行测试转账（0.01 {selectedAsset.symbol}）
-                        </Button>
                       </div>
                     </div>
                   </div>
@@ -458,7 +448,7 @@ export default function SendPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="flex flex-col items-center justify-center text-center py-12"
+                className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12"
               >
                 <motion.div
                   animate={{ scale: [1, 1.1, 1] }}
@@ -476,13 +466,11 @@ export default function SendPage() {
                 
                 <Button
                   size="lg"
-                  className="w-full h-14 mt-8"
+                  className="w-full h-14 mt-8 bg-accent hover:bg-accent/90"
                   onClick={handleAuth}
                   disabled={isLoading}
                 >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  ) : null}
+                  {isLoading && <Loader2 className="w-5 h-5 mr-2 animate-spin" />}
                   确认并转账
                 </Button>
               </motion.div>
@@ -494,7 +482,7 @@ export default function SendPage() {
                 key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center text-center py-12"
+                className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12"
               >
                 <motion.div
                   initial={{ scale: 0 }}
@@ -514,7 +502,7 @@ export default function SendPage() {
                 <div className="w-full space-y-3 mt-8">
                   <Button
                     size="lg"
-                    className="w-full h-14"
+                    className="w-full h-14 bg-accent hover:bg-accent/90"
                     onClick={() => navigate('/history')}
                   >
                     查看交易记录
@@ -533,16 +521,15 @@ export default function SendPage() {
           </AnimatePresence>
         </div>
 
-        {/* Bottom Action */}
-        {(step === 'address' || step === 'amount' || step === 'confirm') && (
-          <div className="p-4 border-t border-border">
+        {/* Bottom Action - Only for address and confirm steps */}
+        {(step === 'address' || step === 'confirm') && (
+          <div className="p-4 border-t border-border shrink-0">
             <Button
               size="lg"
-              className="w-full h-14"
+              className="w-full h-14 bg-accent hover:bg-accent/90"
               onClick={handleContinue}
               disabled={
                 (step === 'address' && (!address || riskScore?.score === 'red')) ||
-                (step === 'amount' && (!amount || parseFloat(amount) <= 0 || !limitCheck.allowed)) ||
                 (step === 'confirm' && riskScore?.score === 'yellow' && !confirmRisk)
               }
             >
