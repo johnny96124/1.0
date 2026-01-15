@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Share2, CheckCircle2, ChevronDown, Info, Search, Star } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +24,13 @@ const networks = SUPPORTED_CHAINS.filter(c => c.id !== 'all').map(c => ({
   shortName: c.shortName,
 }));
 
+// Mock addresses for each chain (real format)
+const MOCK_ADDRESSES: Record<Exclude<ChainId, 'all'>, string> = {
+  ethereum: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD91',
+  tron: 'TN7qZLpmCvTnfbXnYFMBEZAjuZwKyxqvMb',
+  bsc: '0x8B4c5A9d3E7f1C2b0A6D8E9F4C3B2A1E7D6C5B4A',
+};
+
 // Frequently used networks (can be customized based on user history)
 const frequentNetworkIds = ['ethereum', 'tron'];
 
@@ -34,10 +42,12 @@ export default function ReceivePage() {
   const { currentWallet } = useWallet();
   const { toast } = useToast();
 
-  // Get the address for the selected network
+  // Get the address for the selected network - memoized to prevent QR refresh
   const fullAddress = useMemo(() => {
-    if (!currentWallet?.addresses) return '0x1234567890abcdef1234567890abcdef12345678';
-    return currentWallet.addresses[selectedNetwork.id] || '地址生成中...';
+    if (currentWallet?.addresses?.[selectedNetwork.id]) {
+      return currentWallet.addresses[selectedNetwork.id];
+    }
+    return MOCK_ADDRESSES[selectedNetwork.id];
   }, [currentWallet, selectedNetwork.id]);
 
   // Filter and sort networks
@@ -54,7 +64,7 @@ export default function ReceivePage() {
     return { frequentNetworks: frequent, otherNetworks: others };
   }, [searchQuery]);
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(fullAddress);
       setCopied(true);
@@ -70,19 +80,27 @@ export default function ReceivePage() {
         variant: 'destructive',
       });
     }
-  };
+  }, [fullAddress, toast]);
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     try {
       await navigator.share({
         title: '收款地址',
         text: `我的${selectedNetwork.name}收款地址: ${fullAddress}`,
       });
+      toast({
+        title: '分享成功',
+        description: '收款信息已准备分享',
+      });
     } catch (error) {
-      // User cancelled or share not supported
-      handleCopy();
+      // User cancelled or share not supported, fallback to copy
+      await handleCopy();
+      toast({
+        title: '已复制到剪贴板',
+        description: '您可以将地址粘贴分享给他人',
+      });
     }
-  };
+  }, [selectedNetwork.name, fullAddress, handleCopy, toast]);
 
   const handleSelectNetwork = (network: typeof networks[0]) => {
     setSelectedNetwork(network);
@@ -205,20 +223,14 @@ export default function ReceivePage() {
             animate={{ scale: 1 }}
             className="card-elevated p-4 text-center mb-4"
           >
-            <div className="w-36 h-36 mx-auto bg-foreground rounded-xl p-2 mb-3">
-              <div className="w-full h-full bg-background rounded-lg flex items-center justify-center">
-                {/* Simulated QR Code */}
-                <div className="grid grid-cols-5 gap-0.5">
-                  {Array.from({ length: 25 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-5 h-5 rounded-sm ${
-                        Math.random() > 0.4 ? 'bg-foreground' : 'bg-transparent'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+            <div className="w-40 h-40 mx-auto bg-white rounded-xl p-3 mb-3 shadow-sm">
+              <QRCodeSVG
+                value={fullAddress}
+                size={136}
+                level="M"
+                includeMargin={false}
+                className="w-full h-full"
+              />
             </div>
             
             <p className="text-xs text-muted-foreground mb-2">
