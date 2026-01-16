@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Camera, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Camera, Check, Phone, Mail, Lock, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,23 +8,73 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 export default function PersonalInfo() {
   const navigate = useNavigate();
   const { userInfo } = useWallet();
   
   const [nickname, setNickname] = useState(userInfo?.email?.split('@')[0] || '');
-  const [email, setEmail] = useState(userInfo?.email || '');
+  const [phone, setPhone] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isPhoneBound, setIsPhoneBound] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  const handleSendCode = async () => {
+    if (!phone || phone.length < 11) {
+      toast.error('请输入正确的手机号');
+      return;
+    }
+    
+    setIsSendingCode(true);
+    // Simulate sending code
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsSendingCode(false);
+    setShowVerification(true);
+    toast.success('验证码已发送');
+    
+    // Start countdown
+    setCountdown(60);
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleVerifyPhone = async () => {
+    if (verificationCode.length !== 6) {
+      toast.error('请输入6位验证码');
+      return;
+    }
+    
+    setIsVerifying(true);
+    // Simulate verification
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsVerifying(false);
+    setIsPhoneBound(true);
+    setShowVerification(false);
+    toast.success('手机号绑定成功');
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800));
     setIsSaving(false);
     toast.success('个人信息已更新');
     navigate(-1);
   };
+
+  const maskedPhone = isPhoneBound && phone ? 
+    phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : '';
 
   return (
     <AppLayout showNav={false}>
@@ -44,7 +94,7 @@ export default function PersonalInfo() {
           <h1 className="text-xl font-bold text-foreground">个人信息</h1>
         </motion.div>
 
-        <div className="flex-1 px-4 pb-6">
+        <div className="flex-1 px-4 pb-6 overflow-auto">
           {/* Avatar Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -84,29 +134,145 @@ export default function PersonalInfo() {
               />
             </div>
 
-            {/* Email */}
+            {/* Email (Read-only for OAuth) */}
             <div className="card-elevated p-4 space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">邮箱</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  邮箱
+                </label>
+                <Badge variant="secondary" className="text-xs bg-accent/10 text-accent">
+                  <Lock className="w-3 h-3 mr-1" />
+                  OAuth 绑定
+                </Badge>
+              </div>
               <Input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="请输入邮箱"
-                type="email"
-                className="bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-accent"
+                value={userInfo?.email || ''}
+                readOnly
+                className="bg-muted/30 border-0 text-muted-foreground cursor-not-allowed"
               />
-              <p className="text-xs text-muted-foreground">用于接收重要通知和找回账户</p>
+              <p className="text-xs text-muted-foreground">通过第三方账号登录，邮箱不可修改</p>
+            </div>
+
+            {/* Phone Number */}
+            <div className="card-elevated p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  手机号
+                </label>
+                {isPhoneBound && (
+                  <Badge className="text-xs bg-green-500/10 text-green-600 dark:text-green-400">
+                    <ShieldCheck className="w-3 h-3 mr-1" />
+                    已验证
+                  </Badge>
+                )}
+              </div>
+              
+              {isPhoneBound ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={maskedPhone}
+                    readOnly
+                    className="bg-muted/30 border-0 text-foreground"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setIsPhoneBound(false);
+                      setPhone('');
+                      setVerificationCode('');
+                    }}
+                    className="shrink-0"
+                  >
+                    更换
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+                      placeholder="请输入手机号"
+                      type="tel"
+                      className="bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-accent"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSendCode}
+                      disabled={isSendingCode || countdown > 0 || phone.length < 11}
+                      className="shrink-0 min-w-[88px]"
+                    >
+                      {isSendingCode ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                          className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full"
+                        />
+                      ) : countdown > 0 ? (
+                        `${countdown}s`
+                      ) : (
+                        '获取验证码'
+                      )}
+                    </Button>
+                  </div>
+                  
+                  <AnimatePresence>
+                    {showVerification && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="space-y-3 overflow-hidden"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            placeholder="请输入6位验证码"
+                            className="bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-accent"
+                          />
+                          <Button
+                            onClick={handleVerifyPhone}
+                            disabled={isVerifying || verificationCode.length !== 6}
+                            className="shrink-0 bg-accent hover:bg-accent/90"
+                          >
+                            {isVerifying ? (
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                                className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full"
+                              />
+                            ) : (
+                              '验证'
+                            )}
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          验证码已发送至 {phone}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
+              
+              <p className="text-xs text-muted-foreground">
+                绑定手机号可用于安全验证和找回账户
+              </p>
             </div>
 
             {/* User ID (Read-only) */}
             <div className="card-elevated p-4 space-y-2">
               <label className="text-sm font-medium text-muted-foreground">用户 ID</label>
-              <div className="flex items-center gap-2">
-                <Input
-                  value="UID-2024-XXXX-XXXX"
-                  readOnly
-                  className="bg-muted/30 border-0 text-muted-foreground"
-                />
-              </div>
+              <Input
+                value="UID-2024-XXXX-XXXX"
+                readOnly
+                className="bg-muted/30 border-0 text-muted-foreground cursor-not-allowed"
+              />
               <p className="text-xs text-muted-foreground">用于客服查询，不可修改</p>
             </div>
           </motion.div>
