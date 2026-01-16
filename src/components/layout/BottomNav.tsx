@@ -1,14 +1,24 @@
 import { motion } from 'framer-motion';
-import { Home, Send, QrCode, History, User } from 'lucide-react';
+import { Home, History, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { path: '/home', icon: Home, label: '首页' },
-  { path: '/send', icon: Send, label: '转账' },
-  { path: '/receive', icon: QrCode, label: '收款' },
-  { path: '/history', icon: History, label: '记录' },
-  { path: '/profile', icon: User, label: '我的' },
+  { 
+    path: '/home', 
+    icon: Home,
+    label: '首页' 
+  },
+  { 
+    path: '/history', 
+    icon: History,
+    label: '记录' 
+  },
+  { 
+    path: '/profile', 
+    icon: User,
+    label: '我的' 
+  },
 ];
 
 export function BottomNav() {
@@ -17,41 +27,57 @@ export function BottomNav() {
 
   return (
     <nav className="absolute bottom-0 left-0 right-0 bg-card border-t border-border z-40">
-      <div className="flex items-center justify-around h-16 px-2">
+      <div className="flex items-center justify-around h-16 px-6">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
 
           return (
-            <button
+            <motion.button
               key={item.path}
               onClick={() => navigate(item.path)}
-              className="relative flex flex-col items-center justify-center w-16 h-full"
+              className="relative flex flex-col items-center justify-center flex-1 h-full"
+              whileTap={{ scale: 0.95 }}
             >
-              <div className="relative">
+              <div className="relative flex items-center justify-center">
                 {isActive && (
                   <motion.div
-                    layoutId="nav-indicator"
-                    className="absolute inset-0 bg-accent/15 rounded-xl -m-2"
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    layoutId="nav-bg"
+                    className="absolute w-12 h-12 bg-accent/10 rounded-full"
+                    initial={false}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
-                <Icon
-                  className={cn(
-                    'w-5 h-5 relative z-10 transition-colors',
-                    isActive ? 'text-accent' : 'text-muted-foreground'
-                  )}
-                />
+                <motion.div
+                  animate={{
+                    scale: isActive ? 1.1 : 1,
+                  }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                >
+                  <Icon
+                    className={cn(
+                      'w-5 h-5 relative z-10 transition-all duration-200',
+                      isActive 
+                        ? 'text-accent stroke-[2.5px]' 
+                        : 'text-muted-foreground stroke-[1.5px]'
+                    )}
+                    fill={isActive ? 'currentColor' : 'none'}
+                    fillOpacity={isActive ? 0.15 : 0}
+                  />
+                </motion.div>
               </div>
-              <span
+              <motion.span
                 className={cn(
-                  'text-[10px] mt-1 font-medium transition-colors',
+                  'text-[10px] mt-1.5 font-medium transition-colors duration-200',
                   isActive ? 'text-accent' : 'text-muted-foreground'
                 )}
+                animate={{
+                  fontWeight: isActive ? 600 : 500,
+                }}
               >
                 {item.label}
-              </span>
-            </button>
+              </motion.span>
+            </motion.button>
           );
         })}
       </div>
