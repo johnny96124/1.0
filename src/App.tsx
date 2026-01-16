@@ -15,6 +15,10 @@ import Receive from "./pages/Receive";
 import History from "./pages/History";
 import Profile from "./pages/Profile";
 import WalletManagement from "./pages/WalletManagement";
+import Security from "./pages/Security";
+import DeviceManagement from "./pages/DeviceManagement";
+import Notifications from "./pages/Notifications";
+import Help from "./pages/Help";
 import Contacts from "./pages/Contacts";
 import ContactForm from "./pages/ContactForm";
 import ContactDetail from "./pages/ContactDetail";
@@ -50,6 +54,10 @@ function AppRoutes() {
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/profile/wallets" element={<ProtectedRoute><WalletManagement /></ProtectedRoute>} />
+      <Route path="/profile/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
+      <Route path="/profile/devices" element={<ProtectedRoute><DeviceManagement /></ProtectedRoute>} />
+      <Route path="/profile/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+      <Route path="/profile/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
       <Route path="/profile/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
       <Route path="/profile/contacts/add" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />
       <Route path="/profile/contacts/edit/:id" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />
