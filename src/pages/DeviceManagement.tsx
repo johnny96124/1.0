@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Smartphone, Monitor, Tablet, MapPin, Clock, 
-  Trash2, AlertTriangle, ChevronRight, X
+  Trash2, X
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -223,23 +223,6 @@ export default function DeviceManagementPage() {
           </div>
         </motion.div>
 
-        {/* Security Alert */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="card-elevated p-4 border-l-4 border-l-yellow-500"
-        >
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <h4 className="font-medium text-foreground text-sm">安全提醒</h4>
-              <p className="text-xs text-muted-foreground mt-1">
-                如发现可疑设备，请立即移除并修改密码
-              </p>
-            </div>
-          </div>
-        </motion.div>
 
         {/* Login History */}
         <motion.div
