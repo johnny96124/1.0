@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Send, TrendingDown, 
   CheckCircle2, AlertCircle, XCircle,
-  ExternalLink, Copy, ChevronRight, Clock, ArrowUpDown,
-  ArrowDownAZ, ArrowDownWideNarrow, Calendar
+  ExternalLink, Copy, ChevronRight, Clock
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
@@ -16,33 +15,15 @@ import { PullToRefresh } from '@/components/PullToRefresh';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from 'sonner';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from '@/components/ui/dropdown-menu';
-
-type SortOption = 'time-desc' | 'time-asc' | 'amount-desc' | 'amount-asc';
-
-const sortOptions: { value: SortOption; label: string; icon: React.ReactNode }[] = [
-  { value: 'time-desc', label: '时间降序（最新）', icon: <Calendar className="w-4 h-4" /> },
-  { value: 'time-asc', label: '时间升序（最早）', icon: <Calendar className="w-4 h-4" /> },
-  { value: 'amount-desc', label: '金额降序（最大）', icon: <ArrowDownWideNarrow className="w-4 h-4" /> },
-  { value: 'amount-asc', label: '金额升序（最小）', icon: <ArrowDownWideNarrow className="w-4 h-4 rotate-180" /> },
-];
 
 export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'send' | 'receive'>('all');
-  const [sortBy, setSortBy] = useState<SortOption>('time-desc');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const { transactions } = useWallet();
 
-  const filteredAndSortedTransactions = useMemo(() => {
-    let result = transactions.filter(tx => {
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(tx => {
       if (filter !== 'all' && tx.type !== filter) return false;
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -55,29 +36,11 @@ export default function HistoryPage() {
       }
       return true;
     });
-
-    // Sort
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case 'time-desc':
-          return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
-        case 'time-asc':
-          return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-        case 'amount-desc':
-          return b.usdValue - a.usdValue;
-        case 'amount-asc':
-          return a.usdValue - b.usdValue;
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [transactions, filter, searchQuery, sortBy]);
+  }, [transactions, filter, searchQuery]);
 
   // Group by date
   const groupedTransactions = useMemo(() => {
-    return filteredAndSortedTransactions.reduce((groups, tx) => {
+    return filteredTransactions.reduce((groups, tx) => {
       const date = new Date(tx.timestamp).toLocaleDateString('zh-CN', {
         year: 'numeric',
         month: 'long',
@@ -87,7 +50,7 @@ export default function HistoryPage() {
       groups[date].push(tx);
       return groups;
     }, {} as Record<string, Transaction[]>);
-  }, [filteredAndSortedTransactions]);
+  }, [filteredTransactions]);
 
   // Pull to refresh handler
   const handleRefresh = useCallback(async () => {
@@ -116,8 +79,6 @@ export default function HistoryPage() {
         return '失败';
     }
   };
-
-  const currentSortLabel = sortOptions.find(s => s.value === sortBy)?.label || '排序';
 
   return (
     <AppLayout>
@@ -155,36 +116,6 @@ export default function HistoryPage() {
               </Button>
             ))}
           </div>
-
-          {/* Sort Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="w-full justify-between">
-                <div className="flex items-center gap-2">
-                  <ArrowUpDown className="w-4 h-4" />
-                  <span>{currentSortLabel}</span>
-                </div>
-                <ChevronRight className="w-4 h-4 rotate-90" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>排序方式</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {sortOptions.map((option) => (
-                <DropdownMenuItem 
-                  key={option.value}
-                  onClick={() => setSortBy(option.value)}
-                  className={cn(
-                    'flex items-center gap-2',
-                    sortBy === option.value && 'bg-accent/50'
-                  )}
-                >
-                  {option.icon}
-                  <span>{option.label}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         {/* Transactions List */}
@@ -255,7 +186,7 @@ export default function HistoryPage() {
             </motion.div>
           ))}
 
-          {filteredAndSortedTransactions.length === 0 && (
+          {filteredTransactions.length === 0 && (
             <div className="card-elevated p-8 text-center">
               <p className="text-muted-foreground">暂无交易记录</p>
             </div>
