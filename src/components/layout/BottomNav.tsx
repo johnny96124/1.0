@@ -78,8 +78,7 @@ export function BottomNav() {
         {/* Outer glow */}
         <div className="absolute -inset-[1px] rounded-[23px] bg-gradient-to-b from-white/50 to-white/20 dark:from-white/20 dark:to-white/5 -z-10 blur-[0.5px]" />
         
-        {/* Content */}
-        <div className="relative flex items-center justify-around h-16 px-4">
+                <div className="relative flex items-center justify-around h-14 px-4">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -89,7 +88,7 @@ export function BottomNav() {
               <motion.button
                 key={item.path}
                 onClick={(e) => handleClick(e, item.path)}
-                className="relative flex flex-col items-center justify-center flex-1 h-full overflow-hidden rounded-2xl"
+                className="relative flex items-center justify-center w-14 h-14 overflow-hidden rounded-2xl"
                 whileTap={{ scale: 0.92 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               >
@@ -134,18 +133,6 @@ export function BottomNav() {
                     />
                   </motion.div>
                 </div>
-                
-                {/* Label */}
-                <motion.span
-                  className={cn(
-                    'text-[10px] mt-1 transition-all duration-200',
-                    isActive 
-                      ? 'text-accent font-semibold' 
-                      : 'text-muted-foreground/70 font-medium'
-                  )}
-                >
-                  {item.label}
-                </motion.span>
               </motion.button>
             );
           })}
