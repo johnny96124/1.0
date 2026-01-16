@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { 
-  Wallet, Shield, Smartphone, Users, 
+  Wallet, Shield, Smartphone, Users, User, BookUser,
   Bell, HelpCircle, LogOut, ChevronRight
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,10 +10,11 @@ import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
+  { icon: User, label: '个人信息', path: '/profile/info', badge: null },
   { icon: Wallet, label: '钱包管理', path: '/profile/wallets', badge: null },
   { icon: Shield, label: '安全与风控', path: '/profile/security', badge: null },
   { icon: Smartphone, label: '设备管理', path: '/profile/devices', badge: null },
-  { icon: Users, label: '地址簿', path: '/profile/contacts', badge: null },
+  { icon: BookUser, label: '地址簿', path: '/profile/contacts', badge: null },
   { icon: Bell, label: '通知设置', path: '/profile/notifications', badge: null },
   { icon: HelpCircle, label: '帮助与支持', path: '/profile/help', badge: null },
 ];
@@ -28,6 +29,15 @@ export default function ProfilePage() {
   return (
     <AppLayout>
       <div className="px-4 py-4">
+        {/* Page Title */}
+        <motion.h1
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-xl font-bold text-foreground mb-4"
+        >
+          账户设置
+        </motion.h1>
+
         {/* Profile Header - User Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
