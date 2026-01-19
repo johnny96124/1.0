@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { 
   Wallet, Asset, Transaction, Contact, Device, 
   SecurityConfig, BackupStatus, WalletStatus, WalletState,
-  RiskColor, ChainId, AggregatedAsset, UserInfo, LimitStatus
+  RiskColor, ChainId, AggregatedAsset, UserInfo, LimitStatus,
+  PSPProvider, PSPConnection, PSPConnectionStatus
 } from '@/types/wallet';
 
 // Mock data for demonstration - wallet-specific assets
@@ -263,6 +264,87 @@ const defaultBackupStatus: BackupStatus = {
   fileBackup: false,
 };
 
+// Mock PSP data
+const mockPSPConnections: PSPConnection[] = [
+  {
+    id: 'psp-conn-1',
+    pspId: 'psp-1',
+    psp: {
+      id: 'psp-1',
+      name: 'PayGlobal',
+      logo: '',
+      description: '全球领先的跨境支付服务商，提供安全、快速的支付解决方案',
+      officialUrl: 'https://payglobal.example.com',
+      isVerified: true,
+      rating: 4.8,
+      contact: {
+        email: 'support@payglobal.com',
+        phone: '+86 400-888-8888',
+        supportUrl: 'https://payglobal.example.com/support',
+      },
+      feeConfig: {
+        collection: 0.5,
+        withdrawal: 1.0,
+        transfer: 0.3,
+        minWithdrawal: 100,
+      },
+      availableServices: ['collection', 'transfer', 'withdrawal', 'deposit'],
+    },
+    status: 'active',
+    connectedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    permissions: {
+      readBalance: true,
+      readTransactions: true,
+      collection: true,
+      transfer: true,
+      withdrawal: true,
+    },
+    stats: {
+      totalTransactions: 156,
+      totalVolume: 125000,
+      lastTransactionAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    },
+  },
+  {
+    id: 'psp-conn-2',
+    pspId: 'psp-2',
+    psp: {
+      id: 'psp-2',
+      name: 'FastPay Asia',
+      logo: '',
+      description: '亚太区领先的B2B支付解决方案提供商',
+      officialUrl: 'https://fastpay.example.com',
+      isVerified: true,
+      rating: 4.5,
+      contact: {
+        email: 'contact@fastpay.com',
+        phone: '+852 3000-8888',
+      },
+      feeConfig: {
+        collection: 0.4,
+        withdrawal: 0.8,
+        transfer: 0.25,
+        minWithdrawal: 50,
+      },
+      availableServices: ['collection', 'transfer', 'withdrawal', 'settlement'],
+    },
+    status: 'active',
+    connectedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+    permissions: {
+      readBalance: true,
+      readTransactions: true,
+      collection: true,
+      transfer: true,
+      withdrawal: false,
+    },
+    stats: {
+      totalTransactions: 42,
+      totalVolume: 38500,
+      lastTransactionAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    },
+  },
+];
+
 // Helper function to aggregate assets across chains
 export function aggregateAssets(assets: Asset[]): AggregatedAsset[] {
   const grouped = assets.reduce((acc, asset) => {
@@ -331,6 +413,12 @@ interface WalletContextType extends WalletState {
   // Onboarding state
   onboardingStep: number;
   setOnboardingStep: (step: number) => void;
+  
+  // PSP actions
+  pspConnections: PSPConnection[];
+  connectPSP: (psp: PSPProvider, permissions: Record<string, boolean>) => Promise<void>;
+  disconnectPSP: (connectionId: string) => Promise<void>;
+  suspendPSP: (connectionId: string) => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | null>(null);
@@ -350,6 +438,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [hasPin, setHasPin] = useState(false);
   const [hasBiometric, setHasBiometric] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
+  const [pspConnections, setPspConnections] = useState<PSPConnection[]>([]);
 
   const login = useCallback(async (provider: 'apple' | 'google' | 'email') => {
     // Simulate login delay
@@ -402,6 +491,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setWalletStatus('fully_secure');
     setHasPin(true);
     setHasBiometric(true);
+    setPspConnections(mockPSPConnections);
   }, []);
 
   const logout = useCallback(() => {
@@ -415,6 +505,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setHasPin(false);
     setHasBiometric(false);
     setOnboardingStep(0);
+    setPspConnections([]);
   }, []);
 
   const createWallet = useCallback(async (name: string): Promise<Wallet> => {
@@ -626,7 +717,40 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return { allowed: true };
   }, [securityConfig]);
 
-  const value: WalletContextType = {
+  // PSP actions
+  const connectPSP = useCallback(async (psp: PSPProvider, permissions: Record<string, boolean>) => {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const newConnection: PSPConnection = {
+      id: `psp-conn-${Date.now()}`,
+      pspId: psp.id,
+      psp,
+      status: 'active',
+      connectedAt: new Date(),
+      permissions: {
+        readBalance: permissions.readBalance ?? true,
+        readTransactions: permissions.readTransactions ?? true,
+        collection: permissions.collection ?? true,
+        transfer: permissions.transfer ?? true,
+        withdrawal: permissions.withdrawal ?? true,
+      },
+      stats: { totalTransactions: 0, totalVolume: 0 },
+    };
+    setPspConnections(prev => [...prev, newConnection]);
+  }, []);
+
+  const disconnectPSP = useCallback(async (connectionId: string) => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setPspConnections(prev => prev.filter(c => c.id !== connectionId));
+  }, []);
+
+  const suspendPSP = useCallback(async (connectionId: string) => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setPspConnections(prev => prev.map(c => 
+      c.id === connectionId 
+        ? { ...c, status: (c.status === 'suspended' ? 'active' : 'suspended') as PSPConnectionStatus }
+        : c
+    ));
+  }, []);
     isAuthenticated,
     userInfo,
     currentWallet,
@@ -661,6 +785,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     updateSecurityConfig,
     onboardingStep,
     setOnboardingStep,
+    pspConnections,
+    connectPSP,
+    disconnectPSP,
+    suspendPSP,
   };
 
   return (
