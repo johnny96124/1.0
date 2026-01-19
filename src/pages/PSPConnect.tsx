@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
-  ScanLine, Keyboard, Link2, ChevronRight, 
-  Shield, CheckCircle2, AlertCircle, Building2,
-  Eye, EyeOff, Lock, ArrowRight
+  Shield, CheckCircle2, Building2,
+  Lock, ArrowRight, Search, ChevronRight, Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -22,30 +21,93 @@ import {
 } from '@/components/ui/drawer';
 import { Checkbox } from '@/components/ui/checkbox';
 
-type ConnectMethod = 'scan' | 'code' | 'link';
-
-// Mock PSP data for demo
-const mockPSPInfo: PSPProvider = {
-  id: 'psp-demo-1',
-  name: 'PayGlobal',
-  logo: '',
-  description: '全球领先的跨境支付服务商，提供安全、快速的支付解决方案',
-  officialUrl: 'https://payglobal.example.com',
-  isVerified: true,
-  rating: 4.8,
-  contact: {
-    email: 'support@payglobal.com',
-    phone: '+86 400-888-8888',
-    supportUrl: 'https://payglobal.example.com/support',
+// Mock available PSPs list
+const availablePSPs: PSPProvider[] = [
+  {
+    id: 'psp-1',
+    name: 'PayGlobal',
+    logo: '',
+    description: '全球领先的跨境支付服务商，提供安全、快速的支付解决方案',
+    officialUrl: 'https://payglobal.example.com',
+    isVerified: true,
+    rating: 4.8,
+    contact: {
+      email: 'support@payglobal.com',
+      phone: '+86 400-888-8888',
+      supportUrl: 'https://payglobal.example.com/support',
+    },
+    feeConfig: {
+      collection: 0.5,
+      withdrawal: 1.0,
+      transfer: 0.3,
+      minWithdrawal: 100,
+    },
+    availableServices: ['collection', 'transfer', 'withdrawal', 'deposit'],
   },
-  feeConfig: {
-    collection: 0.5,
-    withdrawal: 1.0,
-    transfer: 0.3,
-    minWithdrawal: 100,
+  {
+    id: 'psp-2',
+    name: 'FastPay Asia',
+    logo: '',
+    description: '亚洲区域专业支付服务商，专注亚太地区跨境业务',
+    officialUrl: 'https://fastpay.example.com',
+    isVerified: true,
+    rating: 4.6,
+    contact: {
+      email: 'support@fastpay.com',
+      phone: '+86 400-666-6666',
+      supportUrl: 'https://fastpay.example.com/support',
+    },
+    feeConfig: {
+      collection: 0.4,
+      withdrawal: 0.8,
+      transfer: 0.25,
+      minWithdrawal: 50,
+    },
+    availableServices: ['collection', 'transfer', 'withdrawal'],
   },
-  availableServices: ['collection', 'transfer', 'withdrawal', 'deposit'],
-};
+  {
+    id: 'psp-3',
+    name: 'UniPay',
+    logo: '',
+    description: '一站式全球支付解决方案，支持200+国家和地区',
+    officialUrl: 'https://unipay.example.com',
+    isVerified: true,
+    rating: 4.5,
+    contact: {
+      email: 'support@unipay.com',
+      phone: '+86 400-555-5555',
+      supportUrl: 'https://unipay.example.com/support',
+    },
+    feeConfig: {
+      collection: 0.6,
+      withdrawal: 1.2,
+      transfer: 0.35,
+      minWithdrawal: 100,
+    },
+    availableServices: ['collection', 'transfer', 'withdrawal', 'deposit'],
+  },
+  {
+    id: 'psp-4',
+    name: 'CrossBorder Pay',
+    logo: '',
+    description: '专业跨境电商支付服务，高效便捷的结算体验',
+    officialUrl: 'https://crossborderpay.example.com',
+    isVerified: false,
+    rating: 4.2,
+    contact: {
+      email: 'support@cbpay.com',
+      phone: '+86 400-333-3333',
+      supportUrl: 'https://crossborderpay.example.com/support',
+    },
+    feeConfig: {
+      collection: 0.55,
+      withdrawal: 0.9,
+      transfer: 0.3,
+      minWithdrawal: 80,
+    },
+    availableServices: ['collection', 'transfer'],
+  },
+];
 
 // Permission descriptions
 const permissionLabels: Record<string, { label: string; desc: string }> = {
@@ -58,13 +120,11 @@ const permissionLabels: Record<string, { label: string; desc: string }> = {
 
 export default function PSPConnectPage() {
   const navigate = useNavigate();
-  const { connectPSP } = useWallet();
+  const { connectPSP, pspConnections } = useWallet();
   
-  const [method, setMethod] = useState<ConnectMethod>('code');
-  const [authCode, setAuthCode] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAuthDrawer, setShowAuthDrawer] = useState(false);
-  const [pspInfo, setPspInfo] = useState<PSPProvider | null>(null);
+  const [selectedPSP, setSelectedPSP] = useState<PSPProvider | null>(null);
   const [permissions, setPermissions] = useState({
     readBalance: true,
     readTransactions: true,
@@ -74,22 +134,19 @@ export default function PSPConnectPage() {
   });
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Handle code verification
-  const handleVerifyCode = async () => {
-    if (authCode.length < 6) {
-      toast.error('请输入有效的授权码');
-      return;
-    }
+  // Filter PSPs by search query and exclude already connected
+  const connectedIds = pspConnections?.map(c => c.psp.id) || [];
+  const filteredPSPs = availablePSPs.filter(psp => {
+    const matchesSearch = psp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      psp.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const notConnected = !connectedIds.includes(psp.id);
+    return matchesSearch && notConnected;
+  });
 
-    setIsLoading(true);
-    
-    // Simulate API verification
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Demo: show mock PSP info
-    setPspInfo(mockPSPInfo);
+  // Handle PSP selection
+  const handleSelectPSP = (psp: PSPProvider) => {
+    setSelectedPSP(psp);
     setShowAuthDrawer(true);
-    setIsLoading(false);
   };
 
   // Handle permission toggle
@@ -102,15 +159,15 @@ export default function PSPConnectPage() {
 
   // Handle final connection
   const handleConnect = async () => {
-    if (!pspInfo) return;
+    if (!selectedPSP) return;
     
     setIsConnecting(true);
     
     try {
-      await connectPSP(pspInfo, permissions);
+      await connectPSP(selectedPSP, permissions);
       
       toast.success('连接成功', {
-        description: `已成功连接 ${pspInfo.name}`,
+        description: `已成功连接 ${selectedPSP.name}`,
       });
       
       setShowAuthDrawer(false);
@@ -122,12 +179,6 @@ export default function PSPConnectPage() {
     }
   };
 
-  const methods = [
-    { id: 'scan' as ConnectMethod, icon: ScanLine, label: '扫码连接', desc: '扫描服务商提供的二维码' },
-    { id: 'code' as ConnectMethod, icon: Keyboard, label: '授权码', desc: '输入服务商提供的授权码' },
-    { id: 'link' as ConnectMethod, icon: Link2, label: '邀请链接', desc: '通过邀请链接直接连接' },
-  ];
-
   return (
     <AppLayout 
       title="添加服务商" 
@@ -135,164 +186,83 @@ export default function PSPConnectPage() {
       onBack={() => navigate(-1)}
     >
       <div className="px-4 py-4">
-        {/* Method Selection */}
+        {/* Search */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-2 mb-6"
+          className="mb-4"
         >
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">选择连接方式</h2>
-          {methods.map((m) => {
-            const Icon = m.icon;
-            const isActive = method === m.id;
-            
-            return (
-              <button
-                key={m.id}
-                onClick={() => setMethod(m.id)}
-                className={cn(
-                  'w-full p-4 rounded-xl flex items-center gap-3 transition-all border',
-                  isActive 
-                    ? 'border-accent bg-accent/5' 
-                    : 'border-border bg-card hover:bg-muted/30'
-                )}
-              >
-                <div className={cn(
-                  'w-10 h-10 rounded-full flex items-center justify-center',
-                  isActive ? 'bg-accent/10' : 'bg-muted'
-                )}>
-                  <Icon className={cn('w-5 h-5', isActive ? 'text-accent' : 'text-muted-foreground')} />
-                </div>
-                <div className="flex-1 text-left">
-                  <p className={cn('font-medium text-sm', isActive ? 'text-foreground' : 'text-foreground/80')}>
-                    {m.label}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{m.desc}</p>
-                </div>
-                <div className={cn(
-                  'w-5 h-5 rounded-full border-2 flex items-center justify-center',
-                  isActive ? 'border-accent' : 'border-muted-foreground/30'
-                )}>
-                  {isActive && <div className="w-2.5 h-2.5 rounded-full bg-accent" />}
-                </div>
-              </button>
-            );
-          })}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="搜索服务商..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </motion.div>
 
-        {/* Method Content */}
-        <AnimatePresence mode="wait">
-          {method === 'code' && (
-            <motion.div
-              key="code"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-4"
-            >
-              <div className="card-elevated p-4">
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  输入授权码
-                </label>
-                <Input
-                  placeholder="请输入 6-12 位授权码"
-                  value={authCode}
-                  onChange={(e) => setAuthCode(e.target.value.toUpperCase())}
-                  className="text-center text-lg tracking-widest font-mono"
-                  maxLength={12}
-                />
-                <p className="text-xs text-muted-foreground mt-2">
-                  授权码由服务商提供，通常为 6-12 位字母数字组合
-                </p>
-              </div>
-
-              <Button 
-                className="w-full h-12 gradient-accent"
-                onClick={handleVerifyCode}
-                disabled={authCode.length < 6 || isLoading}
+        {/* PSP List */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="space-y-2"
+        >
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">
+            可用服务商 ({filteredPSPs.length})
+          </h2>
+          
+          {filteredPSPs.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Building2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">未找到匹配的服务商</p>
+            </div>
+          ) : (
+            filteredPSPs.map((psp, index) => (
+              <motion.button
+                key={psp.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => handleSelectPSP(psp)}
+                className="w-full card-elevated p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors text-left"
               >
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                      className="w-4 h-4 border-2 border-current border-t-transparent rounded-full"
-                    />
-                    验证中...
-                  </span>
-                ) : (
-                  <>
-                    验证授权码
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </>
-                )}
-              </Button>
-            </motion.div>
-          )}
-
-          {method === 'scan' && (
-            <motion.div
-              key="scan"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-4"
-            >
-              <div className="card-elevated p-8 flex flex-col items-center justify-center">
-                <div className="w-48 h-48 rounded-2xl bg-muted/50 border-2 border-dashed border-muted-foreground/20 flex items-center justify-center mb-4">
-                  <ScanLine className="w-16 h-16 text-muted-foreground/30" />
+                {/* PSP Logo */}
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0">
+                  {psp.logo ? (
+                    <img src={psp.logo} alt={psp.name} className="w-8 h-8 object-contain" />
+                  ) : (
+                    <Building2 className="w-6 h-6 text-accent" />
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground text-center">
-                  点击下方按钮打开相机，扫描服务商提供的二维码
-                </p>
-              </div>
 
-              <Button 
-                className="w-full h-12 gradient-accent"
-                onClick={() => {
-                  // TODO: Implement QR scanner
-                  toast.info('扫码功能即将上线');
-                }}
-              >
-                <ScanLine className="w-4 h-4 mr-2" />
-                打开扫码
-              </Button>
-            </motion.div>
+                {/* PSP Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h3 className="font-semibold text-foreground text-sm truncate">{psp.name}</h3>
+                    {psp.isVerified && (
+                      <Shield className="w-3.5 h-3.5 text-accent shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-1">{psp.description}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-0.5">
+                      <Star className="w-3 h-3 text-warning fill-warning" />
+                      <span className="text-xs text-muted-foreground">{psp.rating}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">·</span>
+                    <span className="text-xs text-muted-foreground">收款 {psp.feeConfig.collection}%</span>
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </motion.button>
+            ))
           )}
-
-          {method === 'link' && (
-            <motion.div
-              key="link"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="space-y-4"
-            >
-              <div className="card-elevated p-4">
-                <label className="text-sm font-medium text-foreground mb-2 block">
-                  粘贴邀请链接
-                </label>
-                <Input
-                  placeholder="https://..."
-                  className="text-sm"
-                />
-                <p className="text-xs text-muted-foreground mt-2">
-                  将服务商发送的邀请链接粘贴到上方输入框
-                </p>
-              </div>
-
-              <Button 
-                className="w-full h-12 gradient-accent"
-                onClick={() => {
-                  toast.info('链接连接功能即将上线');
-                }}
-              >
-                解析链接
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </motion.div>
 
         {/* Security Notice */}
         <motion.div
@@ -320,44 +290,44 @@ export default function PSPConnectPage() {
           </DrawerHeader>
 
           <div className="px-4 pb-8 overflow-y-auto">
-            {pspInfo && (
+            {selectedPSP && (
               <>
                 {/* PSP Info Card */}
                 <div className="card-elevated p-4 mb-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
-                      {pspInfo.logo ? (
-                        <img src={pspInfo.logo} alt={pspInfo.name} className="w-10 h-10" />
+                      {selectedPSP.logo ? (
+                        <img src={selectedPSP.logo} alt={selectedPSP.name} className="w-10 h-10" />
                       ) : (
                         <Building2 className="w-7 h-7 text-accent" />
                       )}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground">{pspInfo.name}</h3>
-                        {pspInfo.isVerified && (
+                        <h3 className="font-semibold text-foreground">{selectedPSP.name}</h3>
+                        {selectedPSP.isVerified && (
                           <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-accent/10">
                             <Shield className="w-3 h-3 text-accent" />
                             <span className="text-xs text-accent font-medium">已认证</span>
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">{pspInfo.description}</p>
+                      <p className="text-xs text-muted-foreground">{selectedPSP.description}</p>
                     </div>
                   </div>
 
                   {/* Fee Info */}
                   <div className="grid grid-cols-3 gap-2 p-3 rounded-lg bg-muted/50">
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-foreground">{pspInfo.feeConfig.collection}%</p>
+                      <p className="text-lg font-semibold text-foreground">{selectedPSP.feeConfig.collection}%</p>
                       <p className="text-xs text-muted-foreground">收款费率</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-foreground">{pspInfo.feeConfig.transfer}%</p>
+                      <p className="text-lg font-semibold text-foreground">{selectedPSP.feeConfig.transfer}%</p>
                       <p className="text-xs text-muted-foreground">转账费率</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-foreground">{pspInfo.feeConfig.withdrawal}%</p>
+                      <p className="text-lg font-semibold text-foreground">{selectedPSP.feeConfig.withdrawal}%</p>
                       <p className="text-xs text-muted-foreground">出金费率</p>
                     </div>
                   </div>
