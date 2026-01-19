@@ -751,6 +751,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         : c
     ));
   }, []);
+
+  const value = {
     isAuthenticated,
     userInfo,
     currentWallet,
