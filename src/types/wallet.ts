@@ -143,6 +143,102 @@ export interface UserInfo {
   avatar?: string;
 }
 
+// ============= PSP (Payment Service Provider) Types =============
+
+// Service types offered by PSP
+export type PSPServiceType = 
+  | 'collection'  // 收款
+  | 'transfer'    // 转账
+  | 'withdrawal'  // 出金
+  | 'deposit'     // 入金
+  | 'settlement'; // 结算
+
+// PSP connection status
+export type PSPConnectionStatus = 'active' | 'suspended' | 'pending' | 'expired';
+
+// PSP Provider information
+export interface PSPProvider {
+  id: string;
+  name: string;
+  logo: string;
+  description: string;
+  officialUrl?: string;
+  isVerified: boolean; // 官方认证
+  rating?: number; // 评分 1-5
+  
+  // Contact info
+  contact: {
+    email?: string;
+    phone?: string;
+    supportUrl?: string;
+  };
+  
+  // Fee configuration
+  feeConfig: {
+    collection: number; // 收款费率 %
+    withdrawal: number; // 提现费率 %
+    transfer: number; // 转账费率 %
+    minWithdrawal?: number; // 最低提现金额
+  };
+  
+  // Available services
+  availableServices: PSPServiceType[];
+}
+
+// User's connection to a PSP
+export interface PSPConnection {
+  id: string;
+  pspId: string;
+  psp: PSPProvider;
+  
+  // Connection status
+  status: PSPConnectionStatus;
+  connectedAt: Date;
+  expiresAt?: Date;
+  
+  // Authorized permissions
+  permissions: {
+    readBalance: boolean;
+    readTransactions: boolean;
+    collection: boolean;
+    transfer: boolean;
+    withdrawal: boolean;
+  };
+  
+  // Limit settings
+  limits?: {
+    dailyTransfer: number;
+    singleTransfer: number;
+    dailyWithdrawal: number;
+  };
+  
+  // Statistics
+  stats: {
+    totalTransactions: number;
+    totalVolume: number;
+    lastTransactionAt?: Date;
+  };
+}
+
+// PSP announcement
+export interface PSPAnnouncement {
+  id: string;
+  pspId: string;
+  type: 'update' | 'maintenance' | 'promotion' | 'alert';
+  title: string;
+  content: string;
+  publishedAt: Date;
+  isRead: boolean;
+}
+
+// PSP authorization request (for connecting)
+export interface PSPAuthRequest {
+  code: string; // Authorization code
+  pspInfo: PSPProvider;
+  requestedPermissions: string[];
+  expiresAt: Date;
+}
+
 // App-level state
 export interface WalletState {
   isAuthenticated: boolean;
