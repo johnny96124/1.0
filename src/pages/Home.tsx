@@ -16,6 +16,7 @@ import { ChainIcon } from '@/components/ChainIcon';
 import { TokenSearch } from '@/components/TokenSearch';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { WalletSwitcher } from '@/components/WalletSwitcher';
+import { PSPQuickEntry } from '@/components/PSPQuickEntry';
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
 import { toast } from 'sonner';
@@ -312,6 +313,9 @@ export default function HomePage() {
             </div>
           </div>
         </motion.div>
+
+        {/* PSP Quick Entry */}
+        <PSPQuickEntry />
 
         {/* Assets */}
         <motion.div
