@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
-  Plus, ChevronRight, ScanLine, Shield, 
+  Plus, ChevronRight, Shield, 
   CheckCircle2, Clock, AlertCircle, Building2,
-  Star, Sparkles
+  Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -136,13 +135,6 @@ export default function PSPCenterPage() {
       title="服务商管理" 
       showBack 
       onBack={() => navigate(-1)}
-      rightAction={
-        pspConnections && pspConnections.length > 0 ? (
-          <Button variant="ghost" size="icon" onClick={handleConnect}>
-            <Plus className="w-5 h-5" />
-          </Button>
-        ) : undefined
-      }
     >
       <div className="px-4 py-4">
         {/* Stats Card - only show if has connections */}
@@ -173,8 +165,10 @@ export default function PSPCenterPage() {
                   <p className="text-xs text-muted-foreground">总交易</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">
-                    ${pspConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0).toLocaleString()}
+                  <p className="text-2xl font-bold text-foreground truncate">
+                    ${pspConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0) >= 1000000 
+                      ? `${(pspConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0) / 1000000).toFixed(1)}M`
+                      : pspConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0).toLocaleString()}
                   </p>
                   <p className="text-xs text-muted-foreground">总交易额</p>
                 </div>
@@ -183,7 +177,7 @@ export default function PSPCenterPage() {
           </motion.div>
         )}
 
-        {/* Connect Button - Scan QR */}
+        {/* Connect Button */}
         {pspConnections && pspConnections.length > 0 && (
           <motion.button
             initial={{ opacity: 0, y: 20 }}
@@ -193,11 +187,11 @@ export default function PSPCenterPage() {
             className="w-full card-elevated p-4 flex items-center gap-3 mb-4 hover:bg-muted/30 transition-colors"
           >
             <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center">
-              <ScanLine className="w-5 h-5 text-accent-foreground" />
+              <Plus className="w-5 h-5 text-accent-foreground" />
             </div>
             <div className="flex-1 text-left">
               <p className="font-medium text-foreground text-sm">添加新服务商</p>
-              <p className="text-xs text-muted-foreground">扫码或输入授权码连接</p>
+              <p className="text-xs text-muted-foreground">从服务商列表中选择</p>
             </div>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </motion.button>
