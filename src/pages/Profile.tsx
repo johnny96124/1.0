@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { 
   Wallet, Shield, Smartphone, Users, User, BookUser,
-  Bell, HelpCircle, LogOut, ChevronRight
+  Bell, HelpCircle, LogOut, ChevronRight, Building2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 const menuItems = [
   { icon: User, label: '个人信息', path: '/profile/info', badge: null },
   { icon: Wallet, label: '钱包管理', path: '/profile/wallets', badge: null },
+  { icon: Building2, label: '服务商管理', path: '/psp', badge: null },
   { icon: Shield, label: '安全与风控', path: '/profile/security', badge: null },
   { icon: Smartphone, label: '设备管理', path: '/profile/devices', badge: null },
   { icon: BookUser, label: '地址簿', path: '/profile/contacts', badge: null },

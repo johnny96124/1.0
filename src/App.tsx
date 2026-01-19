@@ -24,6 +24,9 @@ import Contacts from "./pages/Contacts";
 import ContactForm from "./pages/ContactForm";
 import ContactDetail from "./pages/ContactDetail";
 import AssetDetail from "./pages/AssetDetail";
+import PSPCenter from "./pages/PSPCenter";
+import PSPConnect from "./pages/PSPConnect";
+import PSPDetail from "./pages/PSPDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +68,9 @@ function AppRoutes() {
       <Route path="/profile/contacts/edit/:id" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />
       <Route path="/profile/contacts/:id" element={<ProtectedRoute><ContactDetail /></ProtectedRoute>} />
       <Route path="/profile/*" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/psp" element={<ProtectedRoute><PSPCenter /></ProtectedRoute>} />
+      <Route path="/psp/connect" element={<ProtectedRoute><PSPConnect /></ProtectedRoute>} />
+      <Route path="/psp/:id" element={<ProtectedRoute><PSPDetail /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
