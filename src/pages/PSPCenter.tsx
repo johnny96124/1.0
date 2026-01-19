@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { PSPConnection, PSPConnectionStatus } from '@/types/wallet';
 import { cn } from '@/lib/utils';
+import { PSPLogo } from '@/components/PSPLogo';
 
 // Status badge component
 function StatusBadge({ status }: { status: PSPConnectionStatus }) {
@@ -58,13 +59,7 @@ function PSPCard({ connection, onClick }: { connection: PSPConnection; onClick: 
       className="w-full card-elevated p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors text-left"
     >
       {/* PSP Logo */}
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center shrink-0 overflow-hidden">
-        {psp.logo ? (
-          <img src={psp.logo} alt={psp.name} className="w-8 h-8 object-contain" />
-        ) : (
-          <Building2 className="w-6 h-6 text-accent" />
-        )}
-      </div>
+      <PSPLogo pspId={psp.id} pspName={psp.name} />
 
       {/* PSP Info */}
       <div className="flex-1 min-w-0">
