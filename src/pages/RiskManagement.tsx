@@ -185,101 +185,124 @@ export default function RiskManagement() {
             </div>
           </motion.div>
           
-          {/* Tabs */}
-          <div className="px-4 mt-4">
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
-              <TabsList className="w-full grid grid-cols-4 h-9">
-                <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
-                <TabsTrigger value="red" className="text-xs">高风险</TabsTrigger>
-                <TabsTrigger value="yellow" className="text-xs">可疑</TabsTrigger>
-                <TabsTrigger value="handled" className="text-xs">已处置</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          
-          {/* Transaction List */}
-          <div className="px-4 mt-4 pb-6">
-            {filteredTransactions.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-12 text-center"
-              >
-                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                  <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground">
-                  {activeTab === 'handled' ? '暂无已处置交易' : '暂无风险交易'}
-                </p>
-              </motion.div>
-            ) : (
-              <div className="space-y-2">
-                <AnimatePresence mode="popLayout">
-                  {filteredTransactions.map((tx, index) => {
-                    const riskConfig = tx.riskScore === 'red' || tx.riskScore === 'yellow' 
-                      ? getRiskConfig(tx.riskScore) 
-                      : null;
-                    const isHandled = tx.disposalStatus !== 'pending';
-                    
-                    return (
-                      <motion.button
-                        key={tx.id}
-                        layout
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ delay: 0.03 * index }}
-                        onClick={() => setSelectedTx(tx)}
-                        className={cn(
-                          "w-full p-3 rounded-xl border text-left transition-colors",
-                          isHandled 
-                            ? "bg-muted/30 border-border/50" 
-                            : "bg-card border-border hover:bg-muted/30"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <CryptoIcon symbol={tx.symbol} size="md" />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className={cn(
-                                "font-medium text-sm",
-                                isHandled ? "text-muted-foreground" : "text-foreground"
-                              )}>
-                                +{tx.amount.toLocaleString()} {tx.symbol}
-                              </p>
-                              {riskConfig && !isHandled && (
-                                <span className={cn(
-                                  "text-xs px-1.5 py-0.5 rounded",
-                                  riskConfig.bg,
-                                  riskConfig.color
-                                )}>
-                                  {riskConfig.label}
-                                </span>
-                              )}
-                              {isHandled && (
-                                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                                  {tx.disposalStatus === 'returned' ? '已退回' : '已知晓'}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground truncate">
-                              来自 {formatAddress(tx.counterparty)}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1 text-muted-foreground">
-                            <span className="text-xs">
-                              {format(tx.timestamp, 'MM/dd HH:mm')}
-                            </span>
-                            <ChevronRight className="w-4 h-4" />
-                          </div>
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                </AnimatePresence>
+          {/* Empty State - When no risk transactions at all */}
+          {riskTransactions.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="flex flex-col items-center justify-center px-4 py-16 text-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-4">
+                <Shield className="w-10 h-10 text-success" />
               </div>
-            )}
-          </div>
+              <h2 className="text-lg font-semibold text-foreground mb-2">账户安全无风险</h2>
+              <p className="text-sm text-muted-foreground max-w-xs">
+                当前没有检测到任何可疑或高风险的入款交易，您的账户状态良好。
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-4">
+                系统会持续监控入款交易的风险状态
+              </p>
+            </motion.div>
+          ) : (
+            <>
+              {/* Tabs */}
+              <div className="px-4 mt-4">
+                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
+                  <TabsList className="w-full grid grid-cols-4 h-9">
+                    <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
+                    <TabsTrigger value="red" className="text-xs">高风险</TabsTrigger>
+                    <TabsTrigger value="yellow" className="text-xs">可疑</TabsTrigger>
+                    <TabsTrigger value="handled" className="text-xs">已处置</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+              
+              {/* Transaction List */}
+              <div className="px-4 mt-4 pb-6">
+                {filteredTransactions.length === 0 ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center justify-center py-12 text-center"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                      <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground">
+                      {activeTab === 'handled' ? '暂无已处置交易' : '暂无风险交易'}
+                    </p>
+                  </motion.div>
+                ) : (
+                  <div className="space-y-2">
+                    <AnimatePresence mode="popLayout">
+                      {filteredTransactions.map((tx, index) => {
+                        const riskConfig = tx.riskScore === 'red' || tx.riskScore === 'yellow' 
+                          ? getRiskConfig(tx.riskScore) 
+                          : null;
+                        const isHandled = tx.disposalStatus !== 'pending';
+                        
+                        return (
+                          <motion.button
+                            key={tx.id}
+                            layout
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            transition={{ delay: 0.03 * index }}
+                            onClick={() => setSelectedTx(tx)}
+                            className={cn(
+                              "w-full p-3 rounded-xl border text-left transition-colors",
+                              isHandled 
+                                ? "bg-muted/30 border-border/50" 
+                                : "bg-card border-border hover:bg-muted/30"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <CryptoIcon symbol={tx.symbol} size="md" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <p className={cn(
+                                    "font-medium text-sm",
+                                    isHandled ? "text-muted-foreground" : "text-foreground"
+                                  )}>
+                                    +{tx.amount.toLocaleString()} {tx.symbol}
+                                  </p>
+                                  {riskConfig && !isHandled && (
+                                    <span className={cn(
+                                      "text-xs px-1.5 py-0.5 rounded",
+                                      riskConfig.bg,
+                                      riskConfig.color
+                                    )}>
+                                      {riskConfig.label}
+                                    </span>
+                                  )}
+                                  {isHandled && (
+                                    <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                      {tx.disposalStatus === 'returned' ? '已退回' : '已知晓'}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  来自 {formatAddress(tx.counterparty)}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <span className="text-xs">
+                                  {format(tx.timestamp, 'MM/dd HH:mm')}
+                                </span>
+                                <ChevronRight className="w-4 h-4" />
+                              </div>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
       
