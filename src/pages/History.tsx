@@ -264,8 +264,8 @@ export default function HistoryPage() {
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">
                   {date}
                 </h3>
-                <div className="space-y-2">
-                  {txs.map((tx) => {
+                <div className="space-y-1.5">
+                  {txs.map((tx, index) => {
                     const riskConfig = tx.riskScore && tx.riskScore !== 'green' 
                       ? getRiskConfig(tx.riskScore) 
                       : null;
@@ -274,34 +274,36 @@ export default function HistoryPage() {
                     return (
                       <motion.button
                         key={tx.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.05 * index }}
                         onClick={() => setSelectedTx(tx)}
-                        whileTap={{ scale: 0.98 }}
                         className={cn(
-                          "w-full card-elevated p-4 flex items-center justify-between text-left",
+                          "w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors",
                           isPendingRisk && "border-l-4",
                           isPendingRisk && tx.riskScore === 'red' && "border-l-destructive",
                           isPendingRisk && tx.riskScore === 'yellow' && "border-l-warning"
                         )}
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           <div className={cn(
-                            'w-10 h-10 rounded-full flex items-center justify-center',
+                            'w-8 h-8 rounded-full flex items-center justify-center',
                             tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
                           )}>
                             {tx.type === 'receive' ? (
-                              <TrendingDown className="w-5 h-5 text-success rotate-180" />
+                              <TrendingDown className="w-4 h-4 text-success rotate-180" />
                             ) : (
-                              <Send className="w-5 h-5 text-accent" />
+                              <Send className="w-4 h-4 text-accent" />
                             )}
                           </div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium text-foreground">
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-medium text-foreground text-sm">
                                 {tx.type === 'receive' ? '转入' : '转出'}
                               </p>
                               {riskConfig && isPendingRisk && (
                                 <span className={cn(
-                                  "text-xs px-1.5 py-0.5 rounded",
+                                  "text-[10px] px-1.5 py-0.5 rounded",
                                   riskConfig.bg,
                                   riskConfig.color
                                 )}>
@@ -309,34 +311,41 @@ export default function HistoryPage() {
                                 </span>
                               )}
                               {tx.disposalStatus === 'returned' && (
-                                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                                   已退回
                                 </span>
                               )}
                               {tx.disposalStatus === 'acknowledged' && (
-                                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                                   已知晓
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              {getStatusIcon(tx.status)}
+                            <div className="flex items-center gap-1">
                               <span className="text-xs text-muted-foreground truncate max-w-[100px]">
                                 {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
                               </span>
+                              <span className="text-xs text-muted-foreground/60">·</span>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(tx.timestamp).toLocaleTimeString('zh-CN', {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
+                                {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
                               </span>
+                              {tx.status === 'pending' && (
+                                <span className="text-xs text-warning flex items-center gap-0.5">
+                                  <Clock className="w-3 h-3" />
+                                </span>
+                              )}
+                              {tx.status === 'confirmed' && (
+                                <span className="text-xs text-success flex items-center gap-0.5">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
                         <div className="text-right flex items-center gap-2">
                           <div>
                             <p className={cn(
-                              'font-medium',
+                              'font-medium text-sm',
                               tx.type === 'receive' ? 'text-success' : 'text-foreground'
                             )}>
                               {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
@@ -358,20 +367,20 @@ export default function HistoryPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="card-elevated p-8 text-center"
+                className="card-elevated p-8 flex flex-col items-center justify-center text-center"
               >
-                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
                   {filter === 'risk' ? (
-                    <Shield className="w-8 h-8 text-success" />
+                    <Shield className="w-6 h-6 text-success" />
                   ) : (
-                    <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
+                    <Send className="w-6 h-6 text-muted-foreground" />
                   )}
                 </div>
-                <p className="text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-1">
                   {filter === 'risk' ? '暂无待处置风险交易' : '暂无交易记录'}
                 </p>
                 {filter === 'risk' && (
-                  <p className="text-xs text-muted-foreground/60 mt-1">
+                  <p className="text-xs text-muted-foreground/70">
                     账户安全状态良好
                   </p>
                 )}
