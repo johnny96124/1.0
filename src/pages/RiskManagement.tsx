@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Shield, ShieldAlert, AlertTriangle, CheckCircle2,
@@ -20,6 +20,7 @@ import {
 import { Transaction, AccountRiskStatus } from '@/types/wallet';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { PullToRefresh } from '@/components/PullToRefresh';
 
 type TabValue = 'all' | 'red' | 'yellow' | 'handled';
 
@@ -119,6 +120,13 @@ export default function RiskManagement() {
     navigate(`/risk-management/return/${txId}`);
   };
   
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    // Simulate API call to refresh risk transactions
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    toast({ title: '已刷新', description: '风险交易列表已更新' });
+  }, []);
+  
   return (
     <AppLayout showNav={false}>
       <div className="flex flex-col h-full">
@@ -134,7 +142,7 @@ export default function RiskManagement() {
           <h1 className="font-semibold text-foreground">风险资金处置</h1>
         </div>
         
-        <div className="flex-1 overflow-y-auto">
+        <PullToRefresh onRefresh={handleRefresh} className="flex-1">
           {/* Status Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -303,7 +311,7 @@ export default function RiskManagement() {
               </div>
             </>
           )}
-        </div>
+        </PullToRefresh>
       </div>
       
       {/* Transaction Detail Drawer */}
