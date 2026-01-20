@@ -246,28 +246,49 @@ export default function HistoryPage() {
             </Tabs>
             
             {/* Risk Toggle */}
-            <button
+            <motion.button
               onClick={() => setRiskOnly(!riskOnly)}
+              whileTap={{ scale: 0.95 }}
+              animate={{
+                backgroundColor: riskOnly ? 'hsl(var(--destructive) / 0.1)' : 'hsl(var(--muted) / 0.5)',
+                borderColor: riskOnly ? 'hsl(var(--destructive) / 0.3)' : 'hsl(var(--border))',
+              }}
+              transition={{ duration: 0.2 }}
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors shrink-0",
-                riskOnly 
-                  ? "bg-destructive/10 border-destructive/30 text-destructive" 
-                  : "bg-muted/50 border-border text-muted-foreground"
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg border shrink-0",
+                riskOnly ? "text-destructive" : "text-muted-foreground"
               )}
             >
-              <ShieldAlert className="w-4 h-4" />
+              <motion.div
+                animate={{ 
+                  rotate: riskOnly ? [0, -10, 10, -5, 0] : 0,
+                  scale: riskOnly ? [1, 1.2, 1] : 1
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <ShieldAlert className="w-4 h-4" />
+              </motion.div>
               <span className="text-xs font-medium">风险</span>
-              {riskCount > 0 && (
-                <span className={cn(
-                  "w-4 h-4 text-[10px] rounded-full flex items-center justify-center",
-                  riskOnly 
-                    ? "bg-destructive text-destructive-foreground" 
-                    : "bg-destructive/80 text-destructive-foreground"
-                )}>
-                  {riskCount}
-                </span>
-              )}
-            </button>
+              <AnimatePresence mode="wait">
+                {riskCount > 0 && (
+                  <motion.span
+                    key="badge"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                    className={cn(
+                      "w-4 h-4 text-[10px] rounded-full flex items-center justify-center",
+                      riskOnly 
+                        ? "bg-destructive text-destructive-foreground" 
+                        : "bg-destructive/80 text-destructive-foreground"
+                    )}
+                  >
+                    {riskCount}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
           </div>
 
           {/* Transactions List */}
