@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { 
   Plus, ChevronRight, Shield, 
   CheckCircle2, Clock, AlertCircle, Building2,
-  Sparkles
+  Sparkles, FileCheck, UserCheck, Send
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -21,7 +21,7 @@ function StatusBadge({ status }: { status: PSPConnectionStatus }) {
       className: 'bg-success/10 text-success' 
     },
     pending: { 
-      label: '待验证', 
+      label: '审核中', 
       icon: Clock, 
       className: 'bg-warning/10 text-warning' 
     },
@@ -47,7 +47,86 @@ function StatusBadge({ status }: { status: PSPConnectionStatus }) {
   );
 }
 
-// PSP Card component
+// Review progress component for pending connections
+function ReviewProgress({ connection }: { connection: PSPConnection }) {
+  const steps = [
+    { id: 'submitted', label: '已提交', icon: Send, completed: true },
+    { id: 'reviewing', label: '资料审核', icon: FileCheck, completed: false },
+    { id: 'approved', label: '审核通过', icon: UserCheck, completed: false },
+  ];
+
+  // Simulate progress based on connection time (for demo)
+  const submittedDate = new Date(connection.connectedAt);
+  const now = new Date();
+  const hoursPassed = (now.getTime() - submittedDate.getTime()) / (1000 * 60 * 60);
+  
+  // Step 1 always completed, step 2 in progress after 1 hour
+  const currentStep = hoursPassed > 24 ? 2 : hoursPassed > 1 ? 1 : 0;
+
+  return (
+    <div className="mt-3 pt-3 border-t border-border/50">
+      <div className="flex items-center justify-between">
+        {steps.map((step, index) => {
+          const isCompleted = index < currentStep;
+          const isCurrent = index === currentStep;
+          const StepIcon = step.icon;
+          
+          return (
+            <div key={step.id} className="flex flex-col items-center flex-1">
+              {/* Step indicator with connecting line */}
+              <div className="flex items-center w-full">
+                {index > 0 && (
+                  <div 
+                    className={cn(
+                      "flex-1 h-0.5 -mr-1",
+                      isCompleted || isCurrent ? "bg-accent" : "bg-border"
+                    )}
+                  />
+                )}
+                <div 
+                  className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center shrink-0 z-10",
+                    isCompleted ? "bg-accent text-accent-foreground" : 
+                    isCurrent ? "bg-accent/20 text-accent ring-2 ring-accent/30" : 
+                    "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {isCompleted ? (
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  ) : (
+                    <StepIcon className="w-3 h-3" />
+                  )}
+                </div>
+                {index < steps.length - 1 && (
+                  <div 
+                    className={cn(
+                      "flex-1 h-0.5 -ml-1",
+                      isCompleted ? "bg-accent" : "bg-border"
+                    )}
+                  />
+                )}
+              </div>
+              {/* Step label */}
+              <span 
+                className={cn(
+                  "text-[10px] mt-1.5 text-center",
+                  isCompleted || isCurrent ? "text-foreground font-medium" : "text-muted-foreground"
+                )}
+              >
+                {step.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[10px] text-muted-foreground text-center mt-2">
+        预计 1-3 个工作日完成审核
+      </p>
+    </div>
+  );
+}
+
+// PSP Card component for active connections
 function PSPCard({ connection, onClick }: { connection: PSPConnection; onClick: () => void }) {
   const { psp, status, stats } = connection;
 
@@ -85,6 +164,49 @@ function PSPCard({ connection, onClick }: { connection: PSPConnection; onClick: 
   );
 }
 
+// PSP Card for pending connections with review progress
+function PendingPSPCard({ connection, onClick }: { connection: PSPConnection; onClick: () => void }) {
+  const { psp, status } = connection;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="card-elevated p-4"
+    >
+      <button
+        onClick={onClick}
+        className="w-full flex items-center gap-3 hover:bg-muted/30 transition-colors text-left"
+      >
+        {/* PSP Logo */}
+        <PSPLogo pspId={psp.id} pspName={psp.name} />
+
+        {/* PSP Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <h3 className="font-semibold text-foreground text-sm truncate">{psp.name}</h3>
+            {psp.isVerified && (
+              <Shield className="w-3.5 h-3.5 text-accent shrink-0" />
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            申请时间: {new Date(connection.connectedAt).toLocaleDateString('zh-CN')}
+          </p>
+        </div>
+
+        {/* Status & Arrow */}
+        <div className="flex items-center gap-2">
+          <StatusBadge status={status} />
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </div>
+      </button>
+
+      {/* Review Progress */}
+      <ReviewProgress connection={connection} />
+    </motion.div>
+  );
+}
+
 // Empty state component
 function EmptyState({ onConnect }: { onConnect: () => void }) {
   return (
@@ -115,7 +237,8 @@ export default function PSPCenterPage() {
   const { pspConnections } = useWallet();
   
   const activeConnections = pspConnections?.filter(c => c.status === 'active') || [];
-  const otherConnections = pspConnections?.filter(c => c.status !== 'active') || [];
+  const pendingConnections = pspConnections?.filter(c => c.status === 'pending') || [];
+  const otherConnections = pspConnections?.filter(c => c.status !== 'active' && c.status !== 'pending') || [];
 
   const handleConnect = () => {
     navigate('/psp/connect');
@@ -132,8 +255,8 @@ export default function PSPCenterPage() {
       onBack={() => navigate(-1)}
     >
       <div className="px-4 py-4">
-        {/* Stats Card - only show if has connections */}
-        {pspConnections && pspConnections.length > 0 && (
+        {/* Stats Card - only show if has active connections */}
+        {activeConnections.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -151,15 +274,15 @@ export default function PSPCenterPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-2xl font-bold text-foreground">
-                    {pspConnections.reduce((sum, c) => sum + c.stats.totalTransactions, 0)}
+                    {activeConnections.reduce((sum, c) => sum + c.stats.totalTransactions, 0)}
                   </p>
                   <p className="text-xs text-muted-foreground">总交易</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground truncate">
-                    ${pspConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0) >= 1000000 
-                      ? `${(pspConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0) / 1000000).toFixed(1)}M`
-                      : pspConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0).toLocaleString()}
+                    ${activeConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0) >= 1000000 
+                      ? `${(activeConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0) / 1000000).toFixed(1)}M`
+                      : activeConnections.reduce((sum, c) => sum + c.stats.totalVolume, 0).toLocaleString()}
                   </p>
                   <p className="text-xs text-muted-foreground">总交易额</p>
                 </div>
@@ -193,19 +316,44 @@ export default function PSPCenterPage() {
           <EmptyState onConnect={handleConnect} />
         )}
 
-        {/* Active Connections */}
-        {activeConnections.length > 0 && (
+        {/* Pending Connections - Show first with review progress */}
+        {pendingConnections.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
             className="mb-4"
           >
-            <h2 className="text-sm font-medium text-muted-foreground mb-2 px-1">
+            <h2 className="text-sm font-medium text-warning mb-2 px-1 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" />
+              待审核 ({pendingConnections.length})
+            </h2>
+            <div className="space-y-3">
+              {pendingConnections.map((connection) => (
+                <PendingPSPCard 
+                  key={connection.id} 
+                  connection={connection}
+                  onClick={() => handleViewDetail(connection)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Active Connections */}
+        {activeConnections.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-4"
+          >
+            <h2 className="text-sm font-medium text-success mb-2 px-1 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" />
               已连接 ({activeConnections.length})
             </h2>
             <div className="space-y-2">
-              {activeConnections.map((connection, index) => (
+              {activeConnections.map((connection) => (
                 <PSPCard 
                   key={connection.id} 
                   connection={connection}
@@ -216,12 +364,12 @@ export default function PSPCenterPage() {
           </motion.div>
         )}
 
-        {/* Other Connections */}
+        {/* Other Connections (suspended, expired) */}
         {otherConnections.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.4 }}
           >
             <h2 className="text-sm font-medium text-muted-foreground mb-2 px-1">
               其他 ({otherConnections.length})
