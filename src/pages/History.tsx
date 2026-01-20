@@ -148,14 +148,14 @@ export default function HistoryPage() {
                           <Send className="w-5 h-5 text-accent" />
                         )}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="font-medium text-foreground">
-                          {tx.counterpartyLabel || tx.counterparty.slice(0, 10) + '...'}
+                          {tx.type === 'receive' ? '转入' : '转出'}
                         </p>
                         <div className="flex items-center gap-2">
                           {getStatusIcon(tx.status)}
-                          <span className="text-xs text-muted-foreground">
-                            {getStatusText(tx.status)}
+                          <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                            {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
                           </span>
                           <span className="text-xs text-muted-foreground">
                             {new Date(tx.timestamp).toLocaleTimeString('zh-CN', {
