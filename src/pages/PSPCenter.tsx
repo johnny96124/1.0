@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, ChevronRight, Shield, 
   CheckCircle2, Clock, AlertCircle, Building2,
-  Sparkles, FileCheck, UserCheck, Send, XCircle, RefreshCw
+  Sparkles, FileCheck, UserCheck, Send, XCircle, RefreshCw,
+  Search, Filter, X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
-import { PSPConnection, PSPConnectionStatus } from '@/types/wallet';
+import { PSPConnection, PSPConnectionStatus, PSPServiceType } from '@/types/wallet';
 import { cn } from '@/lib/utils';
 import { PSPLogo } from '@/components/PSPLogo';
 
@@ -325,17 +327,78 @@ function RejectedPSPCard({ connection, onClick, onReapply }: {
   );
 }
 
+// Service type options for filtering
+const serviceTypeOptions = [
+  { id: 'collection', label: '收款' },
+  { id: 'transfer', label: '转账' },
+  { id: 'withdrawal', label: '出金' },
+  { id: 'deposit', label: '入金' },
+] as const;
+
 export default function PSPCenterPage() {
   const navigate = useNavigate();
   const { pspConnections } = useWallet();
   const [activeTab, setActiveTab] = useState<TabId>('active');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  // Toggle service filter
+  const toggleService = (serviceId: string) => {
+    setSelectedServices(prev => 
+      prev.includes(serviceId) 
+        ? prev.filter(s => s !== serviceId)
+        : [...prev, serviceId]
+    );
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedServices([]);
+    setVerifiedOnly(false);
+  };
+
+  const hasActiveFilters = searchQuery || selectedServices.length > 0 || verifiedOnly;
   
-  const activeConnections = pspConnections?.filter(c => c.status === 'active') || [];
-  const pendingConnections = pspConnections?.filter(c => c.status === 'pending') || [];
-  const rejectedConnections = pspConnections?.filter(c => c.status === 'rejected') || [];
-  const otherConnections = pspConnections?.filter(c => 
+  // Filter connections based on search and filters
+  const filterConnections = (connections: PSPConnection[]) => {
+    return connections.filter(conn => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = conn.psp.name.toLowerCase().includes(query);
+        const matchesDesc = conn.psp.description?.toLowerCase().includes(query);
+        if (!matchesName && !matchesDesc) return false;
+      }
+      
+      // Verified filter
+      if (verifiedOnly && !conn.psp.isVerified) return false;
+      
+      // Service type filter
+      if (selectedServices.length > 0) {
+        const pspServices = conn.psp.availableServices || [];
+        const hasMatchingService = selectedServices.some(s => pspServices.includes(s as PSPServiceType));
+        if (!hasMatchingService) return false;
+      }
+      
+      return true;
+    });
+  };
+
+  const allActiveConnections = pspConnections?.filter(c => c.status === 'active') || [];
+  const allPendingConnections = pspConnections?.filter(c => c.status === 'pending') || [];
+  const allRejectedConnections = pspConnections?.filter(c => c.status === 'rejected') || [];
+  const allOtherConnections = pspConnections?.filter(c => 
     c.status !== 'active' && c.status !== 'pending' && c.status !== 'rejected'
   ) || [];
+
+  // Filtered connections
+  const activeConnections = useMemo(() => filterConnections(allActiveConnections), [allActiveConnections, searchQuery, selectedServices, verifiedOnly]);
+  const pendingConnections = useMemo(() => filterConnections(allPendingConnections), [allPendingConnections, searchQuery, selectedServices, verifiedOnly]);
+  const rejectedConnections = useMemo(() => filterConnections(allRejectedConnections), [allRejectedConnections, searchQuery, selectedServices, verifiedOnly]);
+  const otherConnections = useMemo(() => filterConnections(allOtherConnections), [allOtherConnections, searchQuery, selectedServices, verifiedOnly]);
 
   const getConnectionsByTab = (tab: TabId): PSPConnection[] => {
     switch (tab) {
@@ -346,8 +409,14 @@ export default function PSPCenterPage() {
     }
   };
 
+  // Use unfiltered counts for tab badges
   const getTabCount = (tab: TabId): number => {
-    return getConnectionsByTab(tab).length;
+    switch (tab) {
+      case 'active': return allActiveConnections.length;
+      case 'pending': return allPendingConnections.length;
+      case 'rejected': return allRejectedConnections.length;
+      case 'other': return allOtherConnections.length;
+    }
   };
 
   // Filter out tabs with no connections (except current tab)
@@ -436,9 +505,150 @@ export default function PSPCenterPage() {
           <EmptyState onConnect={handleConnect} />
         )}
 
-        {/* Tab Navigation */}
+        {/* Search and Filter Section */}
         {pspConnections && pspConnections.length > 0 && (
           <div className="px-4 mt-4">
+            {/* Search Bar */}
+            <div className="flex gap-2 mb-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="搜索服务商..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-8"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    <X className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                  </button>
+                )}
+              </div>
+              <Button
+                variant={showFilters ? "default" : "outline"}
+                size="icon"
+                onClick={() => setShowFilters(!showFilters)}
+                className={cn(
+                  "shrink-0",
+                  hasActiveFilters && !showFilters && "border-accent text-accent"
+                )}
+              >
+                <Filter className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Filter Panel */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden mb-3"
+                >
+                  <div className="p-3 rounded-xl bg-muted/30 space-y-3">
+                    {/* Service Type Filters */}
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">服务类型</p>
+                      <div className="flex flex-wrap gap-2">
+                        {serviceTypeOptions.map(service => (
+                          <button
+                            key={service.id}
+                            onClick={() => toggleService(service.id)}
+                            className={cn(
+                              'px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
+                              selectedServices.includes(service.id)
+                                ? 'bg-accent text-accent-foreground'
+                                : 'bg-background border border-border text-muted-foreground hover:bg-muted'
+                            )}
+                          >
+                            {service.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Verified Filter */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">仅显示已认证</span>
+                      <button
+                        onClick={() => setVerifiedOnly(!verifiedOnly)}
+                        className={cn(
+                          'w-10 h-6 rounded-full transition-colors relative',
+                          verifiedOnly ? 'bg-accent' : 'bg-muted'
+                        )}
+                      >
+                        <div className={cn(
+                          'w-4 h-4 rounded-full bg-white absolute top-1 transition-transform',
+                          verifiedOnly ? 'translate-x-5' : 'translate-x-1'
+                        )} />
+                      </button>
+                    </div>
+
+                    {/* Clear Filters */}
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearFilters}
+                        className="w-full text-xs"
+                      >
+                        <X className="w-3 h-3 mr-1" />
+                        清除筛选条件
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Active Filters Pills */}
+            {hasActiveFilters && !showFilters && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-wrap gap-2 mb-3"
+              >
+                {selectedServices.map(serviceId => {
+                  const service = serviceTypeOptions.find(s => s.id === serviceId);
+                  return (
+                    <span
+                      key={serviceId}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs"
+                    >
+                      {service?.label}
+                      <button onClick={() => toggleService(serviceId)}>
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  );
+                })}
+                {verifiedOnly && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-accent/10 text-accent text-xs">
+                    <Shield className="w-3 h-3" />
+                    已认证
+                    <button onClick={() => setVerifiedOnly(false)}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                )}
+                <button
+                  onClick={clearFilters}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  清除全部
+                </button>
+              </motion.div>
+            )}
+          </div>
+        )}
+
+        {/* Tab Navigation */}
+        {pspConnections && pspConnections.length > 0 && (
+          <div className="px-4">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {visibleTabs.map((tab) => {
                 const Icon = tab.icon;
@@ -494,11 +704,28 @@ export default function PSPCenterPage() {
                       {activeTab === 'other' && <AlertCircle className="w-8 h-8 text-muted-foreground" />}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {activeTab === 'active' && '暂无已连接的服务商'}
-                      {activeTab === 'pending' && '暂无待审核的申请'}
-                      {activeTab === 'rejected' && '暂无被拒绝的申请'}
-                      {activeTab === 'other' && '暂无其他状态的服务商'}
+                      {hasActiveFilters ? (
+                        '没有找到匹配的服务商'
+                      ) : (
+                        <>
+                          {activeTab === 'active' && '暂无已连接的服务商'}
+                          {activeTab === 'pending' && '暂无待审核的申请'}
+                          {activeTab === 'rejected' && '暂无被拒绝的申请'}
+                          {activeTab === 'other' && '暂无其他状态的服务商'}
+                        </>
+                      )}
                     </p>
+                    {hasActiveFilters ? (
+                      <Button onClick={clearFilters} variant="outline" size="sm" className="mt-3">
+                        <X className="w-4 h-4 mr-1" />
+                        清除筛选
+                      </Button>
+                    ) : activeTab === 'active' && (
+                      <Button onClick={handleConnect} variant="outline" size="sm" className="mt-3">
+                        <Plus className="w-4 h-4 mr-1" />
+                        添加服务商
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   currentConnections.map((connection) => {
