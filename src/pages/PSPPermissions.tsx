@@ -117,7 +117,7 @@ export default function PSPPermissionsPage() {
       showBack 
       onBack={() => navigate(-1)}
     >
-      <div className="px-4 py-4 flex flex-col h-full">
+      <div className="px-4 py-4 pb-24 flex flex-col">
         {/* PSP Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
