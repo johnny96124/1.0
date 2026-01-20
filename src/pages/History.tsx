@@ -174,14 +174,17 @@ export default function HistoryPage() {
         <div className="px-4 py-4">
           <h1 className="text-xl font-bold text-foreground mb-4">交易与安全</h1>
 
-          {/* Account Security Status Card */}
+          {/* Account Security Status Card - Clickable when there are pending risks */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
+            whileTap={riskStatus.pendingRiskCount > 0 ? { scale: 0.98 } : undefined}
+            onClick={() => riskStatus.pendingRiskCount > 0 && navigate('/risk-management')}
             className={cn(
-              "p-4 rounded-2xl border mb-4",
+              "p-4 rounded-2xl border mb-4 transition-colors",
               statusConfig.bg,
-              statusConfig.border
+              statusConfig.border,
+              riskStatus.pendingRiskCount > 0 && "cursor-pointer active:opacity-90"
             )}
           >
             <div className="flex items-center gap-3">
@@ -193,9 +196,12 @@ export default function HistoryPage() {
                 <p className="text-sm text-muted-foreground">{statusConfig.sublabel}</p>
               </div>
               {riskStatus.pendingRiskCount > 0 && (
-                <div className="text-right">
-                  <p className="text-lg font-bold text-foreground">{riskStatus.pendingRiskCount}</p>
-                  <p className="text-xs text-muted-foreground">待处置</p>
+                <div className="text-right flex items-center gap-2">
+                  <div>
+                    <p className="text-lg font-bold text-foreground">{riskStatus.pendingRiskCount}</p>
+                    <p className="text-xs text-muted-foreground">待处置</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
               )}
             </div>
