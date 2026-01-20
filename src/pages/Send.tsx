@@ -43,11 +43,20 @@ export default function SendPage() {
   // Handle prefilled data from contact detail page
   const prefilledData = location.state as { prefilledAddress?: string; prefilledNetwork?: ChainId } | null;
   
+  // Parse asset from URL query params (e.g., /send?asset=USDC)
+  const searchParams = new URLSearchParams(location.search);
+  const assetFromUrl = searchParams.get('asset');
+  
+  // Find the matching asset from URL param, or fall back to first asset
+  const initialAsset = assetFromUrl 
+    ? assets.find(a => a.symbol.toUpperCase() === assetFromUrl.toUpperCase()) || assets[0]
+    : assets[0];
+  
   const [step, setStep] = useState<'address' | 'amount' | 'confirm' | 'auth' | 'success'>('address');
   const [address, setAddress] = useState(prefilledData?.prefilledAddress || '');
   const [selectedContact, setSelectedContact] = useState<typeof contacts[0] | null>(null);
   const [amount, setAmount] = useState('');
-  const [selectedAsset, setSelectedAsset] = useState(assets[0]);
+  const [selectedAsset, setSelectedAsset] = useState(initialAsset);
   const [memo, setMemo] = useState('');
   const [riskScore, setRiskScore] = useState<{ score: RiskColor; reasons: string[] } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
