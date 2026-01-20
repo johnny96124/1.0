@@ -21,7 +21,8 @@ import { Transaction, AccountRiskStatus } from '@/types/wallet';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { PullToRefresh } from '@/components/PullToRefresh';
-import { BiometricVerifyDialog } from '@/components/BiometricVerifyDialog';
+
+type TabValue = 'all' | 'red' | 'yellow' | 'handled';
 
 // Helper to get status config
 const getStatusConfig = (status: AccountRiskStatus) => {
@@ -77,15 +78,11 @@ const formatAddress = (address: string, showFull = false) => {
   return `${address.slice(0, 8)}...${address.slice(-6)}`;
 };
 
-type TabValue = 'all' | 'red' | 'yellow' | 'handled';
-
 export default function RiskManagement() {
   const navigate = useNavigate();
   const { getAccountRiskStatus, getRiskTransactions, acknowledgeRiskTx } = useWallet();
   const [activeTab, setActiveTab] = useState<TabValue>('all');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
-  const [showBiometricDialog, setShowBiometricDialog] = useState(false);
-  const [pendingAction, setPendingAction] = useState<{ type: 'acknowledge' | 'return'; txId: string } | null>(null);
   
   const riskStatus = getAccountRiskStatus();
   const statusConfig = getStatusConfig(riskStatus.status);
@@ -112,34 +109,15 @@ export default function RiskManagement() {
     toast({ title: '地址已复制', variant: 'default' });
   };
   
-  // Request biometric verification before acknowledging
-  const requestAcknowledge = (txId: string) => {
-    setPendingAction({ type: 'acknowledge', txId });
-    setShowBiometricDialog(true);
+  const handleAcknowledge = (txId: string) => {
+    acknowledgeRiskTx(txId);
+    setSelectedTx(null);
+    toast({ title: '已标记为已知晓', description: '该交易已从待处置列表中移除' });
   };
   
-  // Request biometric verification before returning
-  const requestReturn = (txId: string) => {
-    setPendingAction({ type: 'return', txId });
-    setShowBiometricDialog(true);
-  };
-  
-  // Execute after biometric verification
-  const handleBiometricSuccess = () => {
-    setShowBiometricDialog(false);
-    
-    if (!pendingAction) return;
-    
-    if (pendingAction.type === 'acknowledge') {
-      acknowledgeRiskTx(pendingAction.txId);
-      setSelectedTx(null);
-      toast({ title: '已标记为已知晓', description: '该交易已从待处置列表中移除' });
-    } else if (pendingAction.type === 'return') {
-      setSelectedTx(null);
-      navigate(`/risk-management/return/${pendingAction.txId}`);
-    }
-    
-    setPendingAction(null);
+  const handleReturn = (txId: string) => {
+    setSelectedTx(null);
+    navigate(`/risk-management/return/${txId}`);
   };
   
   // Pull to refresh handler
@@ -466,7 +444,7 @@ export default function RiskManagement() {
                   <Button
                     variant="destructive"
                     className="w-full gap-2"
-                    onClick={() => requestReturn(selectedTx.id)}
+                    onClick={() => handleReturn(selectedTx.id)}
                   >
                     <RotateCcw className="w-4 h-4" />
                     退回资金
@@ -474,7 +452,7 @@ export default function RiskManagement() {
                   <Button
                     variant="outline"
                     className="w-full gap-2"
-                    onClick={() => requestAcknowledge(selectedTx.id)}
+                    onClick={() => handleAcknowledge(selectedTx.id)}
                   >
                     <Eye className="w-4 h-4" />
                     我已知晓风险
@@ -485,18 +463,6 @@ export default function RiskManagement() {
           )}
         </DrawerContent>
       </Drawer>
-      
-      {/* Biometric Verification Dialog */}
-      <BiometricVerifyDialog
-        isOpen={showBiometricDialog}
-        onClose={() => {
-          setShowBiometricDialog(false);
-          setPendingAction(null);
-        }}
-        onSuccess={handleBiometricSuccess}
-        title="安全验证"
-        description="处置风险资金需要验证您的身份"
-      />
     </AppLayout>
   );
 }
