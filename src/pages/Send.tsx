@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Scan, Users, AlertTriangle, 
   CheckCircle2, Loader2, Shield, MoreHorizontal,
-  Info, ChevronRight
+  Info, ChevronRight, ShieldAlert
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -21,13 +21,23 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { NetworkFeeSelector, FeeTier } from '@/components/NetworkFeeSelector';
 import { ContactDrawer } from '@/components/ContactDrawer';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function SendPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { 
     assets, contacts, scanAddressRisk, sendTransaction, walletStatus,
-    getLimitStatus, checkTransferLimit 
+    getLimitStatus, checkTransferLimit, isPSPAddress, getAccountRiskStatus
   } = useWallet();
 
   // Handle prefilled data from contact detail page
@@ -48,6 +58,9 @@ export default function SendPage() {
   const [feeTier, setFeeTier] = useState<FeeTier>('standard');
   const [showAssetPicker, setShowAssetPicker] = useState(false);
   const [showContactDrawer, setShowContactDrawer] = useState(false);
+  const [showPSPWarningDialog, setShowPSPWarningDialog] = useState(false);
+  const [showPSPBlockedDialog, setShowPSPBlockedDialog] = useState(false);
+  const [pspInfo, setPspInfo] = useState<{ isPSP: boolean; pspName?: string } | null>(null);
 
   // Get limit status
   const limitStatus = getLimitStatus();
@@ -105,11 +118,32 @@ export default function SendPage() {
     if (step === 'address' && address && (!riskScore || riskScore.score !== 'red')) {
       setStep('amount');
     } else if (step === 'amount' && parseFloat(amount) > 0 && limitCheck.allowed) {
+      // Check PSP address and account risk status before confirming
+      const pspCheck = isPSPAddress(address);
+      setPspInfo(pspCheck);
+      
+      if (pspCheck.isPSP) {
+        const accountRisk = getAccountRiskStatus();
+        if (accountRisk.status === 'restricted') {
+          // Block transfer to PSP if account is restricted
+          setShowPSPBlockedDialog(true);
+          return;
+        } else if (accountRisk.status === 'warning') {
+          // Show warning dialog if account has warning status
+          setShowPSPWarningDialog(true);
+          return;
+        }
+      }
       setStep('confirm');
     } else if (step === 'confirm') {
       if (riskScore?.score === 'yellow' && !confirmRisk) return;
       setStep('auth');
     }
+  };
+
+  const handlePSPWarningConfirm = () => {
+    setShowPSPWarningDialog(false);
+    setStep('confirm');
   };
 
   const handleAuth = async () => {
@@ -591,6 +625,61 @@ export default function SendPage() {
         contacts={contacts}
         onSelect={handleSelectContact}
       />
+
+      {/* PSP Warning Dialog - Account has warning status */}
+      <AlertDialog open={showPSPWarningDialog} onOpenChange={setShowPSPWarningDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center mx-auto mb-2">
+              <AlertTriangle className="w-6 h-6 text-warning" />
+            </div>
+            <AlertDialogTitle className="text-center">存在可疑来款</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              您的账户存在未处置的可疑收款，向{pspInfo?.pspName || '服务商'}转账可能导致资金被冻结。建议先处置可疑收款后再操作。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
+            <AlertDialogAction
+              onClick={() => navigate('/risk-management')}
+              className="w-full bg-accent hover:bg-accent/90"
+            >
+              前往处置
+            </AlertDialogAction>
+            <AlertDialogCancel
+              onClick={handlePSPWarningConfirm}
+              className="w-full"
+            >
+              我知晓风险，继续转账
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* PSP Blocked Dialog - Account is restricted */}
+      <AlertDialog open={showPSPBlockedDialog} onOpenChange={setShowPSPBlockedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-2">
+              <ShieldAlert className="w-6 h-6 text-destructive" />
+            </div>
+            <AlertDialogTitle className="text-center">转账受限</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              您的账户存在未处置的高风险收款，向{pspInfo?.pspName || '服务商'}的转账已被限制。请先处置高风险收款以解除限制。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-col gap-2">
+            <AlertDialogAction
+              onClick={() => navigate('/risk-management')}
+              className="w-full bg-accent hover:bg-accent/90"
+            >
+              前往处置
+            </AlertDialogAction>
+            <AlertDialogCancel className="w-full">
+              取消
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
