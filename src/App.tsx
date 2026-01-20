@@ -28,6 +28,8 @@ import PSPCenter from "./pages/PSPCenter";
 import PSPConnect from "./pages/PSPConnect";
 import PSPDetail from "./pages/PSPDetail";
 import PSPPermissions from "./pages/PSPPermissions";
+import RiskManagement from "./pages/RiskManagement";
+import RiskReturn from "./pages/RiskReturn";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -73,6 +75,8 @@ function AppRoutes() {
       <Route path="/psp/connect" element={<ProtectedRoute><PSPConnect /></ProtectedRoute>} />
       <Route path="/psp/:id" element={<ProtectedRoute><PSPDetail /></ProtectedRoute>} />
       <Route path="/psp/:id/permissions" element={<ProtectedRoute><PSPPermissions /></ProtectedRoute>} />
+      <Route path="/risk-management" element={<ProtectedRoute><RiskManagement /></ProtectedRoute>} />
+      <Route path="/risk-management/return/:txId" element={<ProtectedRoute><RiskReturn /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
