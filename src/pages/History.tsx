@@ -406,49 +406,49 @@ export default function HistoryPage() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full bg-card rounded-t-2xl p-6 pb-8 max-h-[85%] overflow-auto"
+              className="w-full bg-card rounded-t-2xl p-5 pb-6"
             >
               {/* Drawer Handle */}
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center mb-3">
                 <div className="w-10 h-1 bg-muted rounded-full" />
               </div>
 
               {/* Hero Section: Token Icon + Amount */}
-              <div className="relative mb-6">
-                <div className="flex justify-center mb-4">
+              <div className="relative mb-4">
+                <div className="flex justify-center mb-3">
                   <div className="relative">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
-                      <CryptoIcon symbol={selectedTx.symbol} size="xl" />
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
+                      <CryptoIcon symbol={selectedTx.symbol} size="lg" />
                     </div>
                     <div className={cn(
-                      "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-card",
+                      "absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center border-2 border-card",
                       selectedTx.status === 'confirmed' && "bg-success",
                       selectedTx.status === 'pending' && "bg-warning",
                       selectedTx.status === 'failed' && "bg-destructive"
                     )}>
-                      {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                      {selectedTx.status === 'pending' && <Clock className="w-3.5 h-3.5 text-white" />}
-                      {selectedTx.status === 'failed' && <XCircle className="w-3.5 h-3.5 text-white" />}
+                      {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                      {selectedTx.status === 'pending' && <Clock className="w-3 h-3 text-white" />}
+                      {selectedTx.status === 'failed' && <XCircle className="w-3 h-3 text-white" />}
                     </div>
                   </div>
                 </div>
 
                 <div className="text-center">
                   <p className={cn(
-                    'text-3xl font-bold tracking-tight',
+                    'text-2xl font-bold tracking-tight',
                     selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
                   )}>
                     {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
                   </p>
-                  <p className="text-muted-foreground text-sm mt-1">
+                  <p className="text-muted-foreground text-xs mt-0.5">
                     ≈ ${selectedTx.usdValue.toLocaleString()}
                   </p>
                 </div>
 
                 {/* Status Tags */}
-                <div className="flex justify-center gap-2 mt-3 flex-wrap">
+                <div className="flex justify-center gap-2 mt-2 flex-wrap">
                   <span className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                    "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
                     selectedTx.status === 'confirmed' && "bg-success/10 text-success",
                     selectedTx.status === 'pending' && "bg-warning/10 text-warning",
                     selectedTx.status === 'failed' && "bg-destructive/10 text-destructive"
@@ -464,7 +464,7 @@ export default function HistoryPage() {
                   
                   {isRiskTx(selectedTx) && selectedTx.riskScore && (
                     <span className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
                       selectedTx.riskScore === 'red' && "bg-destructive/10 text-destructive",
                       selectedTx.riskScore === 'yellow' && "bg-warning/10 text-warning"
                     )}>
@@ -479,13 +479,13 @@ export default function HistoryPage() {
               {/* Risk Info Section */}
               {isRiskTx(selectedTx) && selectedTx.riskReasons && (
                 <div className={cn(
-                  "p-3 rounded-xl border mb-4",
+                  "p-2.5 rounded-xl border mb-3",
                   selectedTx.riskScore === 'red' 
                     ? "bg-destructive/10 border-destructive/30" 
                     : "bg-warning/10 border-warning/30"
                 )}>
-                  <p className="text-xs font-medium text-foreground mb-2">风险原因</p>
-                  <ul className="text-xs text-muted-foreground space-y-1">
+                  <p className="text-xs font-medium text-foreground mb-1.5">风险原因</p>
+                  <ul className="text-xs text-muted-foreground space-y-0.5">
                     {selectedTx.riskReasons.map((reason, i) => (
                       <li key={i} className="flex items-start gap-1">
                         <span className="text-muted-foreground/50">•</span>
@@ -497,50 +497,50 @@ export default function HistoryPage() {
               )}
 
               {/* Details */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-start py-2 border-b border-border">
-                  <span className="text-muted-foreground">
+              <div className="space-y-0">
+                <div className="flex justify-between items-center py-2 border-b border-border">
+                  <span className="text-xs text-muted-foreground">
                     {selectedTx.type === 'receive' ? '付款方' : '收款方'}
                   </span>
                   <div className="text-right">
                     {selectedTx.counterpartyLabel && (
-                      <p className="font-medium text-foreground">{selectedTx.counterpartyLabel}</p>
+                      <p className="text-xs font-medium text-foreground">{selectedTx.counterpartyLabel}</p>
                     )}
-                    <p className="text-sm text-muted-foreground font-mono">
+                    <p className="text-xs text-muted-foreground font-mono">
                       {`${selectedTx.counterparty.slice(0, 10)}...${selectedTx.counterparty.slice(-8)}`}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center py-2 border-b border-border">
-                  <span className="text-muted-foreground">网络</span>
-                  <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">网络</span>
+                  <div className="flex items-center gap-1.5">
                     <ChainIcon chainId={selectedTx.network} size="sm" />
-                    <span className="font-medium text-foreground">
+                    <span className="text-xs font-medium text-foreground">
                       {SUPPORTED_CHAINS.find(c => c.id === selectedTx.network)?.name}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex justify-between py-2 border-b border-border">
-                  <span className="text-muted-foreground">时间</span>
-                  <span className="font-medium text-foreground">
+                <div className="flex justify-between items-center py-2 border-b border-border">
+                  <span className="text-xs text-muted-foreground">时间</span>
+                  <span className="text-xs font-medium text-foreground">
                     {new Date(selectedTx.timestamp).toLocaleString('zh-CN')}
                   </span>
                 </div>
 
                 {selectedTx.fee && (
-                  <div className="flex justify-between py-2 border-b border-border">
-                    <span className="text-muted-foreground">网络费用</span>
-                    <span className="font-medium text-foreground">${selectedTx.fee}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-border">
+                    <span className="text-xs text-muted-foreground">网络费用</span>
+                    <span className="text-xs font-medium text-foreground">${selectedTx.fee}</span>
                   </div>
                 )}
 
                 {selectedTx.txHash && (
                   <div className="flex justify-between items-center py-2 border-b border-border">
-                    <span className="text-muted-foreground">交易哈希</span>
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-foreground text-sm">
+                    <span className="text-xs text-muted-foreground">交易哈希</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-medium text-foreground font-mono">
                         {selectedTx.txHash.slice(0, 8)}...{selectedTx.txHash.slice(-6)}
                       </span>
                       <button 
@@ -550,10 +550,10 @@ export default function HistoryPage() {
                         }}
                         className="p-1 hover:bg-muted rounded"
                       >
-                        <Copy className="w-4 h-4 text-muted-foreground" />
+                        <Copy className="w-3.5 h-3.5 text-muted-foreground" />
                       </button>
                       <button className="p-1 hover:bg-muted rounded">
-                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                        <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
                       </button>
                     </div>
                   </div>
@@ -562,10 +562,10 @@ export default function HistoryPage() {
 
               {/* Actions */}
               {isRiskTx(selectedTx) ? (
-                <div className="space-y-2 mt-6">
+                <div className="space-y-2 mt-4">
                   <Button
                     variant="destructive"
-                    className="w-full gap-2"
+                    className="w-full gap-2 h-10"
                     onClick={() => handleReturn(selectedTx.id)}
                   >
                     <RotateCcw className="w-4 h-4" />
@@ -573,7 +573,7 @@ export default function HistoryPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full h-10"
                     onClick={() => handleAcknowledge(selectedTx.id)}
                   >
                     我已知晓风险，保留资金
@@ -582,7 +582,7 @@ export default function HistoryPage() {
               ) : (
                 <Button
                   variant="outline"
-                  className="w-full mt-6"
+                  className="w-full mt-4 h-10"
                   onClick={() => setSelectedTx(null)}
                 >
                   关闭
