@@ -19,7 +19,7 @@ import { WalletSwitcher } from '@/components/WalletSwitcher';
 
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
-import { toast } from '@/lib/toast';
+import { toast } from 'sonner';
 
 // Empty state component when no wallet exists - guides user to create first wallet
 function EmptyWalletState() {
@@ -177,6 +177,11 @@ export default function HomePage() {
     toast.success('余额已刷新');
   }, []);
 
+  // Show empty state when no wallet exists
+  if (walletStatus === 'not_created') {
+    return <EmptyWalletState />;
+  }
+
   // Filter and aggregate assets based on selected chain
   const displayAssets = useMemo(() => {
     if (selectedChain === 'all') {
@@ -208,11 +213,6 @@ export default function HomePage() {
   };
 
   const balanceParts = formatBalanceParts(totalBalance);
-
-  // Show empty state when no wallet exists
-  if (walletStatus === 'not_created') {
-    return <EmptyWalletState />;
-  }
 
   return (
     <AppLayout>

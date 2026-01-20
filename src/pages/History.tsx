@@ -14,7 +14,7 @@ import { Transaction, SUPPORTED_CHAINS } from '@/types/wallet';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
-import { toast } from '@/lib/toast';
+import { toast } from 'sonner';
 
 export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
