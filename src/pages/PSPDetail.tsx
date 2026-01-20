@@ -4,7 +4,7 @@ import {
   Shield, Building2, ChevronRight, Send, QrCode, 
   ArrowDownToLine, ArrowUpFromLine, FileText,
   Phone, Mail, Globe, Star, Clock, AlertCircle,
-  Settings, Unlink, CheckCircle2, Pause
+  Settings, Unlink, CheckCircle2, Pause, XCircle, RefreshCw
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -13,6 +13,7 @@ import { useWallet } from '@/contexts/WalletContext';
 import { PSPServiceType } from '@/types/wallet';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { PSPLogo } from '@/components/PSPLogo';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,7 +58,11 @@ export default function PSPDetailPage() {
     );
   }
 
-  const { psp, status, connectedAt, stats, permissions } = connection;
+  const { psp, status, connectedAt, stats, permissions, rejectionInfo } = connection;
+
+  const handleReapply = () => {
+    navigate('/psp/connect', { state: { reapplyPspId: connection.pspId } });
+  };
 
   const handleServiceClick = (service: PSPServiceType) => {
     switch (service) {
@@ -121,13 +126,7 @@ export default function PSPDetailPage() {
           <div className="relative z-10">
             <div className="flex items-start gap-4 mb-4">
               {/* Logo */}
-              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 flex items-center justify-center">
-                {psp.logo ? (
-                  <img src={psp.logo} alt={psp.name} className="w-12 h-12 object-contain" />
-                ) : (
-                  <Building2 className="w-8 h-8 text-accent" />
-                )}
-              </div>
+              <PSPLogo pspId={psp.id} pspName={psp.name} size="lg" />
 
               {/* Info */}
               <div className="flex-1">
@@ -145,12 +144,19 @@ export default function PSPDetailPage() {
                     'flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
                     status === 'active' ? 'bg-success/10 text-success' : 
                     status === 'suspended' ? 'bg-muted text-muted-foreground' :
-                    'bg-warning/10 text-warning'
+                    status === 'rejected' ? 'bg-destructive/10 text-destructive' :
+                    status === 'pending' ? 'bg-warning/10 text-warning' :
+                    'bg-muted text-muted-foreground'
                   )}>
                     {status === 'active' ? <CheckCircle2 className="w-3 h-3" /> : 
                      status === 'suspended' ? <Pause className="w-3 h-3" /> :
-                     <Clock className="w-3 h-3" />}
-                    {status === 'active' ? '已连接' : status === 'suspended' ? '已暂停' : '待验证'}
+                     status === 'rejected' ? <XCircle className="w-3 h-3" /> :
+                     status === 'pending' ? <Clock className="w-3 h-3" /> :
+                     <AlertCircle className="w-3 h-3" />}
+                    {status === 'active' ? '已连接' : 
+                     status === 'suspended' ? '已暂停' : 
+                     status === 'rejected' ? '已拒绝' :
+                     status === 'pending' ? '审核中' : '已过期'}
                   </div>
                   {psp.rating && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -161,6 +167,32 @@ export default function PSPDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Rejection Info - Show when rejected */}
+            {status === 'rejected' && rejectionInfo && (
+              <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/20 mb-4">
+                <div className="flex items-start gap-2 mb-2">
+                  <XCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-destructive mb-1">申请已被拒绝</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{rejectionInfo.reason}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      拒绝时间: {new Date(rejectionInfo.rejectedAt).toLocaleDateString('zh-CN')}
+                    </p>
+                  </div>
+                </div>
+                {rejectionInfo.canReapply && (
+                  <Button 
+                    size="sm" 
+                    className="w-full mt-2 gap-2"
+                    onClick={handleReapply}
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    重新申请
+                  </Button>
+                )}
+              </div>
+            )}
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3 p-3 rounded-xl bg-muted/30">

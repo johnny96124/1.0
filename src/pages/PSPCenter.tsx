@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { 
   Plus, ChevronRight, Shield, 
   CheckCircle2, Clock, AlertCircle, Building2,
-  Sparkles, FileCheck, UserCheck, Send
+  Sparkles, FileCheck, UserCheck, Send, XCircle, RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -33,6 +33,11 @@ function StatusBadge({ status }: { status: PSPConnectionStatus }) {
     expired: { 
       label: '已过期', 
       icon: AlertCircle, 
+      className: 'bg-destructive/10 text-destructive' 
+    },
+    rejected: { 
+      label: '已拒绝', 
+      icon: XCircle, 
       className: 'bg-destructive/10 text-destructive' 
     },
   };
@@ -232,13 +237,93 @@ function EmptyState({ onConnect }: { onConnect: () => void }) {
   );
 }
 
+// Rejected PSP Card with reason and reapply option
+function RejectedPSPCard({ connection, onClick, onReapply }: { 
+  connection: PSPConnection; 
+  onClick: () => void;
+  onReapply: () => void;
+}) {
+  const { psp, rejectionInfo } = connection;
+  const canReapply = rejectionInfo?.canReapply && 
+    (!rejectionInfo.reapplyAfter || new Date() >= new Date(rejectionInfo.reapplyAfter));
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="card-elevated p-4"
+    >
+      <button
+        onClick={onClick}
+        className="w-full flex items-center gap-3 text-left"
+      >
+        {/* PSP Logo */}
+        <PSPLogo pspId={psp.id} pspName={psp.name} />
+
+        {/* PSP Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-0.5">
+            <h3 className="font-semibold text-foreground text-sm truncate">{psp.name}</h3>
+            {psp.isVerified && (
+              <Shield className="w-3.5 h-3.5 text-accent shrink-0" />
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            申请时间: {new Date(connection.connectedAt).toLocaleDateString('zh-CN')}
+          </p>
+        </div>
+
+        {/* Status */}
+        <StatusBadge status={connection.status} />
+      </button>
+
+      {/* Rejection reason */}
+      {rejectionInfo && (
+        <div className="mt-3 pt-3 border-t border-border/50">
+          <div className="flex items-start gap-2 mb-3">
+            <XCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-destructive mb-1">拒绝原因</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{rejectionInfo.reason}</p>
+            </div>
+          </div>
+          
+          {canReapply && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="w-full gap-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                onReapply();
+              }}
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              重新申请
+            </Button>
+          )}
+          
+          {!canReapply && rejectionInfo.reapplyAfter && (
+            <p className="text-xs text-muted-foreground text-center">
+              可在 {new Date(rejectionInfo.reapplyAfter).toLocaleDateString('zh-CN')} 后重新申请
+            </p>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 export default function PSPCenterPage() {
   const navigate = useNavigate();
   const { pspConnections } = useWallet();
   
   const activeConnections = pspConnections?.filter(c => c.status === 'active') || [];
   const pendingConnections = pspConnections?.filter(c => c.status === 'pending') || [];
-  const otherConnections = pspConnections?.filter(c => c.status !== 'active' && c.status !== 'pending') || [];
+  const rejectedConnections = pspConnections?.filter(c => c.status === 'rejected') || [];
+  const otherConnections = pspConnections?.filter(c => 
+    c.status !== 'active' && c.status !== 'pending' && c.status !== 'rejected'
+  ) || [];
 
   const handleConnect = () => {
     navigate('/psp/connect');
@@ -246,6 +331,11 @@ export default function PSPCenterPage() {
 
   const handleViewDetail = (connection: PSPConnection) => {
     navigate(`/psp/${connection.id}`);
+  };
+
+  const handleReapply = (connection: PSPConnection) => {
+    // Navigate to connect page with PSP pre-selected for reapply
+    navigate('/psp/connect', { state: { reapplyPspId: connection.pspId } });
   };
 
   return (
@@ -358,6 +448,31 @@ export default function PSPCenterPage() {
                   key={connection.id} 
                   connection={connection}
                   onClick={() => handleViewDetail(connection)}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Rejected Connections */}
+        {rejectedConnections.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mb-4"
+          >
+            <h2 className="text-sm font-medium text-destructive mb-2 px-1 flex items-center gap-1.5">
+              <XCircle className="w-3.5 h-3.5" />
+              已拒绝 ({rejectedConnections.length})
+            </h2>
+            <div className="space-y-3">
+              {rejectedConnections.map((connection) => (
+                <RejectedPSPCard 
+                  key={connection.id} 
+                  connection={connection}
+                  onClick={() => handleViewDetail(connection)}
+                  onReapply={() => handleReapply(connection)}
                 />
               ))}
             </div>
