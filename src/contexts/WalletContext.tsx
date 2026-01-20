@@ -343,6 +343,43 @@ const mockPSPConnections: PSPConnection[] = [
       lastTransactionAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     },
   },
+  {
+    id: 'psp-conn-4',
+    pspId: 'psp-4',
+    psp: {
+      id: 'psp-4',
+      name: 'CrossBorder Pay',
+      logo: '',
+      description: '专业跨境支付服务商，支持多币种结算',
+      officialUrl: 'https://crossborderpay.example.com',
+      isVerified: true,
+      rating: 4.6,
+      contact: {
+        email: 'support@crossborderpay.com',
+        phone: '+86 400-666-8888',
+      },
+      feeConfig: {
+        collection: 0.6,
+        withdrawal: 1.2,
+        transfer: 0.35,
+        minWithdrawal: 200,
+      },
+      availableServices: ['collection', 'transfer', 'withdrawal'],
+    },
+    status: 'pending',
+    connectedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    permissions: {
+      readBalance: true,
+      readTransactions: true,
+      collection: true,
+      transfer: true,
+      withdrawal: true,
+    },
+    stats: {
+      totalTransactions: 0,
+      totalVolume: 0,
+    },
+  },
 ];
 
 // Helper function to aggregate assets across chains
