@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Copy, Download, CheckCircle2, ChevronDown, Info, Search, Star } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -43,6 +44,24 @@ export default function ReceivePage() {
   const qrRef = useRef<HTMLDivElement>(null);
   const { currentWallet } = useWallet();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Handle context-aware back navigation
+  const handleBack = useCallback(() => {
+    // Check if there's a referrer state passed from the previous page
+    const fromPage = location.state?.from;
+    
+    if (fromPage) {
+      navigate(fromPage);
+    } else if (window.history.length > 2) {
+      // If there's browser history, go back
+      navigate(-1);
+    } else {
+      // Default fallback to home
+      navigate('/home');
+    }
+  }, [navigate, location.state]);
 
   // Get the address for the selected network - memoized to prevent QR refresh
   const fullAddress = useMemo(() => {
@@ -195,13 +214,12 @@ export default function ReceivePage() {
   );
 
   return (
-    <AppLayout>
+    <AppLayout showBack title="收款" onBack={handleBack}>
       <div className="px-4 py-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-xl font-bold text-foreground mb-4">收款</h1>
 
           {/* Network Selector */}
           <div className="mb-4">
