@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/drawer';
 import { Transaction, AccountRiskStatus } from '@/types/wallet';
 import { format } from 'date-fns';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 type TabValue = 'all' | 'red' | 'yellow' | 'handled';
 
@@ -105,13 +105,13 @@ export default function RiskManagement() {
   
   const handleCopyAddress = (address: string) => {
     navigator.clipboard.writeText(address);
-    toast.success('地址已复制');
+    toast({ title: '地址已复制', variant: 'default' });
   };
   
   const handleAcknowledge = (txId: string) => {
     acknowledgeRiskTx(txId);
     setSelectedTx(null);
-    toast.success('已标记为已知晓');
+    toast({ title: '已标记为已知晓', description: '该交易已从待处置列表中移除' });
   };
   
   const handleReturn = (txId: string) => {
