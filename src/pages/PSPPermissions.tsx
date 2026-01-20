@@ -2,11 +2,11 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Shield, Eye, FileText, QrCode, Send, 
-  ArrowDownToLine, CheckCircle2, Info
+  ArrowDownToLine, Info
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/button';
+
 import { Switch } from '@/components/ui/switch';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
@@ -70,7 +70,7 @@ export default function PSPPermissionsPage() {
     transfer: true,
     withdrawal: true,
   });
-  const [isSaving, setIsSaving] = useState(false);
+  
 
   if (!connection) {
     return (
@@ -91,24 +91,12 @@ export default function PSPPermissionsPage() {
       toast.error('此权限为必需权限，无法关闭');
       return;
     }
+    const newValue = !permissions[key as keyof typeof permissions];
     setPermissions(prev => ({
       ...prev,
-      [key]: !prev[key as keyof typeof prev],
+      [key]: newValue,
     }));
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('权限设置已保存');
-      navigate(-1);
-    } catch (error) {
-      toast.error('保存失败，请重试');
-    } finally {
-      setIsSaving(false);
-    }
+    toast.success(newValue ? '权限已开启' : '权限已关闭');
   };
 
   return (
@@ -211,34 +199,8 @@ export default function PSPPermissionsPage() {
         >
           <Info className="w-4 h-4 text-accent mt-0.5 shrink-0" />
           <p className="text-xs text-muted-foreground">
-            修改权限后，服务商将在下次交互时应用新的权限设置。某些权限为必需权限，无法关闭。
+            权限修改会立即生效。某些权限为必需权限，无法关闭。
           </p>
-        </motion.div>
-
-        {/* Save Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="mt-4 pb-4"
-        >
-          <Button 
-            className="w-full h-12 gradient-primary"
-            onClick={handleSave}
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                保存中...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                保存设置
-              </div>
-            )}
-          </Button>
         </motion.div>
       </div>
     </AppLayout>
