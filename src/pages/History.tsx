@@ -18,8 +18,9 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 
-type FilterType = 'all' | 'send' | 'receive' | 'risk';
+type FilterType = 'all' | 'send' | 'receive';
 
 // Helper to get status config
 const getStatusConfig = (status: AccountRiskStatus) => {
@@ -77,6 +78,7 @@ export default function HistoryPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
+  const [riskOnly, setRiskOnly] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
 
@@ -99,7 +101,9 @@ export default function HistoryPage() {
       // Filter by type
       if (filter === 'send' && tx.type !== 'send') return false;
       if (filter === 'receive' && tx.type !== 'receive') return false;
-      if (filter === 'risk') {
+      
+      // Risk filter (independent toggle)
+      if (riskOnly) {
         if (tx.type !== 'receive') return false;
         if (tx.riskScore !== 'red' && tx.riskScore !== 'yellow') return false;
         if (tx.disposalStatus !== 'pending') return false;
@@ -117,7 +121,7 @@ export default function HistoryPage() {
       }
       return true;
     });
-  }, [transactions, filter, searchQuery]);
+  }, [transactions, filter, searchQuery, riskOnly]);
 
   // Group by date
   const groupedTransactions = useMemo(() => {
@@ -230,22 +234,41 @@ export default function HistoryPage() {
             />
           </div>
 
-          {/* Filter Tabs */}
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="mb-4">
-            <TabsList className="w-full grid grid-cols-4 h-9">
-              <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
-              <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
-              <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
-              <TabsTrigger value="risk" className="text-xs relative">
-                风险
-                {riskCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
-                    {riskCount}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Filter Controls */}
+          <div className="flex items-center gap-3 mb-4">
+            {/* Direction Tabs */}
+            <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="flex-1">
+              <TabsList className="w-full grid grid-cols-3 h-9">
+                <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
+                <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
+                <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            {/* Risk Toggle */}
+            <button
+              onClick={() => setRiskOnly(!riskOnly)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-colors shrink-0",
+                riskOnly 
+                  ? "bg-destructive/10 border-destructive/30 text-destructive" 
+                  : "bg-muted/50 border-border text-muted-foreground"
+              )}
+            >
+              <ShieldAlert className="w-4 h-4" />
+              <span className="text-xs font-medium">风险</span>
+              {riskCount > 0 && (
+                <span className={cn(
+                  "w-4 h-4 text-[10px] rounded-full flex items-center justify-center",
+                  riskOnly 
+                    ? "bg-destructive text-destructive-foreground" 
+                    : "bg-destructive/80 text-destructive-foreground"
+                )}>
+                  {riskCount}
+                </span>
+              )}
+            </button>
+          </div>
 
           {/* Transactions List */}
           <div className="space-y-6">
@@ -355,16 +378,16 @@ export default function HistoryPage() {
                 className="card-elevated p-8 text-center"
               >
                 <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                  {filter === 'risk' ? (
+                  {riskOnly ? (
                     <Shield className="w-8 h-8 text-success" />
                   ) : (
                     <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
                   )}
                 </div>
                 <p className="text-muted-foreground">
-                  {filter === 'risk' ? '暂无待处置风险交易' : '暂无交易记录'}
+                  {riskOnly ? '暂无待处置风险交易' : '暂无交易记录'}
                 </p>
-                {filter === 'risk' && (
+                {riskOnly && (
                   <p className="text-xs text-muted-foreground/60 mt-1">
                     账户安全状态良好
                   </p>
