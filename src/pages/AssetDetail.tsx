@@ -258,7 +258,7 @@ export default function AssetDetailPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 * index }}
-                    className="card-elevated p-3 flex items-center justify-between w-full text-left"
+                    className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
                     onClick={() => setSelectedTx(tx)}
                   >
                     <div className="flex items-center gap-2">
@@ -272,16 +272,13 @@ export default function AssetDetailPage() {
                           <Send className="w-4 h-4 text-accent" />
                         )}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="font-medium text-foreground text-sm">
-                          {tx.counterpartyLabel || tx.counterparty}
+                          {tx.type === 'receive' ? '转入' : '转出'}
                         </p>
                         <div className="flex items-center gap-1">
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(tx.timestamp).toLocaleDateString('zh-CN', {
-                              month: 'short',
-                              day: 'numeric'
-                            })}
+                          <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                            {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
                           </span>
                           <span className="text-xs text-muted-foreground/60">·</span>
                           <span className="text-xs text-muted-foreground">
@@ -290,7 +287,6 @@ export default function AssetDetailPage() {
                           {tx.status === 'pending' && (
                             <span className="text-xs text-warning flex items-center gap-0.5">
                               <AlertCircle className="w-3 h-3" />
-                              处理中
                             </span>
                           )}
                           {tx.status === 'confirmed' && (
@@ -302,12 +298,17 @@ export default function AssetDetailPage() {
                       </div>
                     </div>
                     <div className="text-right flex items-center gap-2">
-                      <p className={cn(
-                        'font-medium text-sm',
-                        tx.type === 'receive' ? 'text-success' : 'text-foreground'
-                      )}>
-                        {tx.type === 'receive' ? '+' : '-'}{tx.amount}
-                      </p>
+                      <div>
+                        <p className={cn(
+                          'font-medium text-sm',
+                          tx.type === 'receive' ? 'text-success' : 'text-foreground'
+                        )}>
+                          {tx.type === 'receive' ? '+' : '-'}{tx.amount}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          ${(tx.amount * 1).toLocaleString()}
+                        </p>
+                      </div>
                       <ChevronRight className="w-4 h-4 text-muted-foreground" />
                     </div>
                   </motion.button>
