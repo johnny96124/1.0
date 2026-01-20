@@ -2,29 +2,110 @@ import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Send, TrendingDown, 
-  CheckCircle2, AlertCircle, XCircle,
-  ExternalLink, Copy, ChevronRight, Clock
+  CheckCircle2, XCircle,
+  ExternalLink, Copy, ChevronRight, Clock,
+  Shield, ShieldAlert, AlertTriangle, RotateCcw
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
-import { Transaction, SUPPORTED_CHAINS } from '@/types/wallet';
+import { Transaction, SUPPORTED_CHAINS, AccountRiskStatus } from '@/types/wallet';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+type FilterType = 'all' | 'send' | 'receive' | 'risk';
+
+// Helper to get status config
+const getStatusConfig = (status: AccountRiskStatus) => {
+  switch (status) {
+    case 'healthy':
+      return {
+        icon: Shield,
+        label: '账户安全',
+        sublabel: '无待处置风险交易',
+        color: 'text-success',
+        bg: 'bg-success/10',
+        border: 'border-success/20',
+      };
+    case 'warning':
+      return {
+        icon: AlertTriangle,
+        label: '存在可疑收款',
+        sublabel: '建议尽快处置',
+        color: 'text-warning',
+        bg: 'bg-warning/10',
+        border: 'border-warning/20',
+      };
+    case 'restricted':
+      return {
+        icon: ShieldAlert,
+        label: '向服务商转账受限',
+        sublabel: '需处置高风险资金',
+        color: 'text-destructive',
+        bg: 'bg-destructive/10',
+        border: 'border-destructive/20',
+      };
+  }
+};
+
+// Helper to get risk score config
+const getRiskConfig = (score: 'yellow' | 'red' | 'green') => {
+  if (score === 'red') {
+    return {
+      label: '高风险',
+      color: 'text-destructive',
+      bg: 'bg-destructive/10',
+    };
+  }
+  if (score === 'yellow') {
+    return {
+      label: '可疑',
+      color: 'text-warning',
+      bg: 'bg-warning/10',
+    };
+  }
+  return null;
+};
 
 export default function HistoryPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'all' | 'send' | 'receive'>('all');
+  const [filter, setFilter] = useState<FilterType>('all');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
-  const { transactions } = useWallet();
+  const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
+
+  // Get account risk status
+  const riskStatus = getAccountRiskStatus();
+  const statusConfig = getStatusConfig(riskStatus.status);
+  const StatusIcon = statusConfig.icon;
+
+  // Count risk transactions
+  const riskCount = useMemo(() => {
+    return transactions.filter(tx => 
+      tx.type === 'receive' && 
+      (tx.riskScore === 'red' || tx.riskScore === 'yellow') && 
+      tx.disposalStatus === 'pending'
+    ).length;
+  }, [transactions]);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(tx => {
-      if (filter !== 'all' && tx.type !== filter) return false;
+      // Filter by type
+      if (filter === 'send' && tx.type !== 'send') return false;
+      if (filter === 'receive' && tx.type !== 'receive') return false;
+      if (filter === 'risk') {
+        if (tx.type !== 'receive') return false;
+        if (tx.riskScore !== 'red' && tx.riskScore !== 'yellow') return false;
+        if (tx.disposalStatus !== 'pending') return false;
+      }
+      
+      // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         return (
@@ -55,7 +136,7 @@ export default function HistoryPage() {
   // Pull to refresh handler
   const handleRefresh = useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 1500));
-    toast.success('交易记录已刷新');
+    toast({ title: '已刷新', description: '交易记录已更新' });
   }, []);
 
   const getStatusIcon = (status: Transaction['status']) => {
@@ -63,32 +144,83 @@ export default function HistoryPage() {
       case 'confirmed':
         return <CheckCircle2 className="w-4 h-4 text-success" />;
       case 'pending':
-        return <AlertCircle className="w-4 h-4 text-warning" />;
+        return <Clock className="w-4 h-4 text-warning" />;
       case 'failed':
         return <XCircle className="w-4 h-4 text-destructive" />;
     }
   };
 
-  const getStatusText = (status: Transaction['status']) => {
-    switch (status) {
-      case 'confirmed':
-        return '已完成';
-      case 'pending':
-        return '处理中';
-      case 'failed':
-        return '失败';
-    }
+  const handleAcknowledge = (txId: string) => {
+    acknowledgeRiskTx(txId);
+    setSelectedTx(null);
+    toast({ title: '已标记为已知晓', description: '该交易已从待处置列表中移除' });
+  };
+
+  const handleReturn = (txId: string) => {
+    setSelectedTx(null);
+    navigate(`/risk-management/return/${txId}`);
+  };
+
+  // Check if transaction is a pending risk transaction
+  const isRiskTx = (tx: Transaction) => {
+    return tx.type === 'receive' && 
+           (tx.riskScore === 'red' || tx.riskScore === 'yellow') && 
+           tx.disposalStatus === 'pending';
   };
 
   return (
     <AppLayout>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4">
-          <h1 className="text-xl font-bold text-foreground mb-4">交易记录</h1>
+          <h1 className="text-xl font-bold text-foreground mb-4">交易与安全</h1>
 
-        {/* Search & Filter */}
-        <div className="space-y-2 mb-4">
-          <div className="relative">
+          {/* Account Security Status Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={cn(
+              "p-4 rounded-2xl border mb-4",
+              statusConfig.bg,
+              statusConfig.border
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bg)}>
+                <StatusIcon className={cn("w-5 h-5", statusConfig.color)} />
+              </div>
+              <div className="flex-1">
+                <p className={cn("font-semibold", statusConfig.color)}>{statusConfig.label}</p>
+                <p className="text-sm text-muted-foreground">{statusConfig.sublabel}</p>
+              </div>
+              {riskStatus.pendingRiskCount > 0 && (
+                <div className="text-right">
+                  <p className="text-lg font-bold text-foreground">{riskStatus.pendingRiskCount}</p>
+                  <p className="text-xs text-muted-foreground">待处置</p>
+                </div>
+              )}
+            </div>
+            
+            {riskStatus.pendingRiskCount > 0 && (
+              <div className="flex gap-2 mt-3 pt-3 border-t border-border/30">
+                {riskStatus.redCount > 0 && (
+                  <span className="text-xs px-2 py-1 rounded-full bg-destructive/10 text-destructive">
+                    {riskStatus.redCount} 高风险
+                  </span>
+                )}
+                {riskStatus.yellowCount > 0 && (
+                  <span className="text-xs px-2 py-1 rounded-full bg-warning/10 text-warning">
+                    {riskStatus.yellowCount} 可疑
+                  </span>
+                )}
+                <span className="text-xs text-muted-foreground ml-auto">
+                  风险敞口 ${riskStatus.totalRiskExposure.toLocaleString()}
+                </span>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Search */}
+          <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="搜索交易..."
@@ -98,104 +230,152 @@ export default function HistoryPage() {
             />
           </div>
 
-          <div className="flex gap-2">
-            {(['all', 'send', 'receive'] as const).map((f) => (
-              <Button
-                key={f}
-                variant={filter === f ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFilter(f)}
-                className={cn(
-                  'flex-1',
-                  filter === f && 'bg-accent text-accent-foreground'
+          {/* Filter Tabs */}
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="mb-4">
+            <TabsList className="w-full grid grid-cols-4 h-9">
+              <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
+              <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
+              <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
+              <TabsTrigger value="risk" className="text-xs relative">
+                风险
+                {riskCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
+                    {riskCount}
+                  </span>
                 )}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          {/* Transactions List */}
+          <div className="space-y-6">
+            {Object.entries(groupedTransactions).map(([date, txs]) => (
+              <motion.div
+                key={date}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
               >
-                {f === 'all' && '全部'}
-                {f === 'send' && '转出'}
-                {f === 'receive' && '收入'}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Transactions List */}
-        <div className="space-y-6">
-          {Object.entries(groupedTransactions).map(([date, txs]) => (
-            <motion.div
-              key={date}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                {date}
-              </h3>
-              <div className="space-y-2">
-                {txs.map((tx) => (
-                  <motion.button
-                    key={tx.id}
-                    onClick={() => setSelectedTx(tx)}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full card-elevated p-4 flex items-center justify-between text-left"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        'w-10 h-10 rounded-full flex items-center justify-center',
-                        tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
-                      )}>
-                        {tx.type === 'receive' ? (
-                          <TrendingDown className="w-5 h-5 text-success rotate-180" />
-                        ) : (
-                          <Send className="w-5 h-5 text-accent" />
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                  {date}
+                </h3>
+                <div className="space-y-2">
+                  {txs.map((tx) => {
+                    const riskConfig = tx.riskScore && tx.riskScore !== 'green' 
+                      ? getRiskConfig(tx.riskScore) 
+                      : null;
+                    const isPendingRisk = isRiskTx(tx);
+                    
+                    return (
+                      <motion.button
+                        key={tx.id}
+                        onClick={() => setSelectedTx(tx)}
+                        whileTap={{ scale: 0.98 }}
+                        className={cn(
+                          "w-full card-elevated p-4 flex items-center justify-between text-left",
+                          isPendingRisk && "border-l-4",
+                          isPendingRisk && tx.riskScore === 'red' && "border-l-destructive",
+                          isPendingRisk && tx.riskScore === 'yellow' && "border-l-warning"
                         )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-foreground">
-                          {tx.type === 'receive' ? '转入' : '转出'}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(tx.status)}
-                          <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                            {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(tx.timestamp).toLocaleTimeString('zh-CN', {
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </span>
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            'w-10 h-10 rounded-full flex items-center justify-center',
+                            tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
+                          )}>
+                            {tx.type === 'receive' ? (
+                              <TrendingDown className="w-5 h-5 text-success rotate-180" />
+                            ) : (
+                              <Send className="w-5 h-5 text-accent" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-foreground">
+                                {tx.type === 'receive' ? '转入' : '转出'}
+                              </p>
+                              {riskConfig && isPendingRisk && (
+                                <span className={cn(
+                                  "text-xs px-1.5 py-0.5 rounded",
+                                  riskConfig.bg,
+                                  riskConfig.color
+                                )}>
+                                  {riskConfig.label}
+                                </span>
+                              )}
+                              {tx.disposalStatus === 'returned' && (
+                                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                  已退回
+                                </span>
+                              )}
+                              {tx.disposalStatus === 'acknowledged' && (
+                                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                  已知晓
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {getStatusIcon(tx.status)}
+                              <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                                {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(tx.timestamp).toLocaleTimeString('zh-CN', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <div className="text-right flex items-center gap-2">
-                      <div>
-                        <p className={cn(
-                          'font-medium',
-                          tx.type === 'receive' ? 'text-success' : 'text-foreground'
-                        )}>
-                          {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          ${tx.usdValue.toLocaleString()}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-          ))}
+                        <div className="text-right flex items-center gap-2">
+                          <div>
+                            <p className={cn(
+                              'font-medium',
+                              tx.type === 'receive' ? 'text-success' : 'text-foreground'
+                            )}>
+                              {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              ${tx.usdValue.toLocaleString()}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ))}
 
-          {filteredTransactions.length === 0 && (
-            <div className="card-elevated p-8 text-center">
-              <p className="text-muted-foreground">暂无交易记录</p>
-            </div>
-          )}
-        </div>
+            {filteredTransactions.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="card-elevated p-8 text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  {filter === 'risk' ? (
+                    <Shield className="w-8 h-8 text-success" />
+                  ) : (
+                    <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+                <p className="text-muted-foreground">
+                  {filter === 'risk' ? '暂无待处置风险交易' : '暂无交易记录'}
+                </p>
+                {filter === 'risk' && (
+                  <p className="text-xs text-muted-foreground/60 mt-1">
+                    账户安全状态良好
+                  </p>
+                )}
+              </motion.div>
+            )}
+          </div>
         </div>
       </PullToRefresh>
 
-      {/* Transaction Detail Drawer - Matching Home page style */}
+      {/* Transaction Detail Drawer */}
       <AnimatePresence>
         {selectedTx && (
           <motion.div
@@ -211,7 +391,7 @@ export default function HistoryPage() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full bg-card rounded-t-2xl p-6 pb-8 max-h-[80%] overflow-auto"
+              className="w-full bg-card rounded-t-2xl p-6 pb-8 max-h-[85%] overflow-auto"
             >
               {/* Drawer Handle */}
               <div className="flex justify-center mb-4">
@@ -220,13 +400,11 @@ export default function HistoryPage() {
 
               {/* Hero Section: Token Icon + Amount */}
               <div className="relative mb-6">
-                {/* Large Token Icon as Hero */}
                 <div className="flex justify-center mb-4">
                   <div className="relative">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
                       <CryptoIcon symbol={selectedTx.symbol} size="xl" />
                     </div>
-                    {/* Status Badge Overlay */}
                     <div className={cn(
                       "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-card",
                       selectedTx.status === 'confirmed' && "bg-success",
@@ -240,7 +418,6 @@ export default function HistoryPage() {
                   </div>
                 </div>
 
-                {/* Amount Display */}
                 <div className="text-center">
                   <p className={cn(
                     'text-3xl font-bold tracking-tight',
@@ -253,8 +430,8 @@ export default function HistoryPage() {
                   </p>
                 </div>
 
-                {/* Status Tag */}
-                <div className="flex justify-center mt-3">
+                {/* Status Tags */}
+                <div className="flex justify-center gap-2 mt-3 flex-wrap">
                   <span className={cn(
                     "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
                     selectedTx.status === 'confirmed' && "bg-success/10 text-success",
@@ -269,8 +446,40 @@ export default function HistoryPage() {
                     {selectedTx.status === 'pending' && '处理中'}
                     {selectedTx.status === 'failed' && '失败'}
                   </span>
+                  
+                  {isRiskTx(selectedTx) && selectedTx.riskScore && (
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      selectedTx.riskScore === 'red' && "bg-destructive/10 text-destructive",
+                      selectedTx.riskScore === 'yellow' && "bg-warning/10 text-warning"
+                    )}>
+                      {selectedTx.riskScore === 'red' && <ShieldAlert className="w-3 h-3" />}
+                      {selectedTx.riskScore === 'yellow' && <AlertTriangle className="w-3 h-3" />}
+                      {selectedTx.riskScore === 'red' ? '高风险' : '可疑'}
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {/* Risk Info Section */}
+              {isRiskTx(selectedTx) && selectedTx.riskReasons && (
+                <div className={cn(
+                  "p-3 rounded-xl border mb-4",
+                  selectedTx.riskScore === 'red' 
+                    ? "bg-destructive/10 border-destructive/30" 
+                    : "bg-warning/10 border-warning/30"
+                )}>
+                  <p className="text-xs font-medium text-foreground mb-2">风险原因</p>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    {selectedTx.riskReasons.map((reason, i) => (
+                      <li key={i} className="flex items-start gap-1">
+                        <span className="text-muted-foreground/50">•</span>
+                        <span>{reason}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* Details */}
               <div className="space-y-4">
@@ -322,7 +531,7 @@ export default function HistoryPage() {
                       <button 
                         onClick={() => {
                           navigator.clipboard.writeText(selectedTx.txHash!);
-                          toast.success('已复制到剪贴板');
+                          toast({ title: '已复制到剪贴板' });
                         }}
                         className="p-1 hover:bg-muted rounded"
                       >
@@ -336,13 +545,34 @@ export default function HistoryPage() {
                 )}
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full mt-6"
-                onClick={() => setSelectedTx(null)}
-              >
-                关闭
-              </Button>
+              {/* Actions */}
+              {isRiskTx(selectedTx) ? (
+                <div className="space-y-2 mt-6">
+                  <Button
+                    variant="destructive"
+                    className="w-full gap-2"
+                    onClick={() => handleReturn(selectedTx.id)}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    退回资金
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => handleAcknowledge(selectedTx.id)}
+                  >
+                    我已知晓风险，保留资金
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="w-full mt-6"
+                  onClick={() => setSelectedTx(null)}
+                >
+                  关闭
+                </Button>
+              )}
             </motion.div>
           </motion.div>
         )}
