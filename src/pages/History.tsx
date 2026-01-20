@@ -18,6 +18,7 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BiometricVerifyDialog } from '@/components/BiometricVerifyDialog';
 
 type FilterType = 'all' | 'send' | 'receive' | 'risk';
 
@@ -78,6 +79,8 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [showBiometricDialog, setShowBiometricDialog] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{ type: 'acknowledge' | 'return'; txId: string } | null>(null);
   const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
 
   // Get account risk status
@@ -150,15 +153,34 @@ export default function HistoryPage() {
     }
   };
 
-  const handleAcknowledge = (txId: string) => {
-    acknowledgeRiskTx(txId);
-    setSelectedTx(null);
-    toast({ title: '已标记为已知晓', description: '该交易已从待处置列表中移除' });
+  // Request biometric verification before acknowledging
+  const requestAcknowledge = (txId: string) => {
+    setPendingAction({ type: 'acknowledge', txId });
+    setShowBiometricDialog(true);
   };
-
-  const handleReturn = (txId: string) => {
-    setSelectedTx(null);
-    navigate(`/risk-management/return/${txId}`);
+  
+  // Request biometric verification before returning
+  const requestReturn = (txId: string) => {
+    setPendingAction({ type: 'return', txId });
+    setShowBiometricDialog(true);
+  };
+  
+  // Execute after biometric verification
+  const handleBiometricSuccess = () => {
+    setShowBiometricDialog(false);
+    
+    if (!pendingAction) return;
+    
+    if (pendingAction.type === 'acknowledge') {
+      acknowledgeRiskTx(pendingAction.txId);
+      setSelectedTx(null);
+      toast({ title: '已标记为已知晓', description: '该交易已从待处置列表中移除' });
+    } else if (pendingAction.type === 'return') {
+      setSelectedTx(null);
+      navigate(`/risk-management/return/${pendingAction.txId}`);
+    }
+    
+    setPendingAction(null);
   };
 
   // Check if transaction is a pending risk transaction
@@ -566,7 +588,7 @@ export default function HistoryPage() {
                   <Button
                     variant="destructive"
                     className="w-full gap-2 h-10"
-                    onClick={() => handleReturn(selectedTx.id)}
+                    onClick={() => requestReturn(selectedTx.id)}
                   >
                     <RotateCcw className="w-4 h-4" />
                     退回资金
@@ -574,7 +596,7 @@ export default function HistoryPage() {
                   <Button
                     variant="outline"
                     className="w-full h-10"
-                    onClick={() => handleAcknowledge(selectedTx.id)}
+                    onClick={() => requestAcknowledge(selectedTx.id)}
                   >
                     我已知晓风险，保留资金
                   </Button>
@@ -592,6 +614,18 @@ export default function HistoryPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Biometric Verification Dialog */}
+      <BiometricVerifyDialog
+        isOpen={showBiometricDialog}
+        onClose={() => {
+          setShowBiometricDialog(false);
+          setPendingAction(null);
+        }}
+        onSuccess={handleBiometricSuccess}
+        title="安全验证"
+        description="处置风险资金需要验证您的身份"
+      />
     </AppLayout>
   );
 }
