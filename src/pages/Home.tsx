@@ -511,16 +511,13 @@ export default function HomePage() {
                         <Send className="w-4 h-4 text-accent" />
                       )}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-medium text-foreground text-sm">
-                        {tx.counterpartyLabel || tx.counterparty}
+                        {tx.type === 'receive' ? '转入' : '转出'}
                       </p>
                       <div className="flex items-center gap-1">
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(tx.timestamp).toLocaleDateString('zh-CN', {
-                            month: 'short',
-                            day: 'numeric'
-                          })}
+                        <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                          {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
                         </span>
                         <span className="text-xs text-muted-foreground/60">·</span>
                         <span className="text-xs text-muted-foreground">
@@ -528,8 +525,7 @@ export default function HomePage() {
                         </span>
                         {tx.status === 'pending' && (
                           <span className="text-xs text-warning flex items-center gap-0.5">
-                            <AlertCircle className="w-3 h-3" />
-                            处理中
+                            <Clock className="w-3 h-3" />
                           </span>
                         )}
                         {tx.status === 'confirmed' && (
