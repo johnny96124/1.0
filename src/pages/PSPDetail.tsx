@@ -4,7 +4,7 @@ import {
   Shield, Building2, ChevronRight, Send, QrCode, 
   ArrowDownToLine, ArrowUpFromLine, FileText,
   Phone, Mail, Globe, Star, Clock, AlertCircle,
-  Settings, Unlink, CheckCircle2, Pause, XCircle, RefreshCw, Trash2
+  Unlink, CheckCircle2, Pause, XCircle, RefreshCw, Trash2
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -108,11 +108,6 @@ export default function PSPDetailPage() {
       title="服务商详情" 
       showBack 
       onBack={() => navigate(-1)}
-      rightAction={
-        <Button variant="ghost" size="icon" onClick={() => navigate(`/psp/${id}/permissions`)}>
-          <Settings className="w-5 h-5" />
-        </Button>
-      }
     >
       <div className="px-4 py-4">
         {/* PSP Header Card */}
