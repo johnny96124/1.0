@@ -18,7 +18,6 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
 
 type FilterType = 'all' | 'send' | 'receive';
 
@@ -78,8 +77,8 @@ export default function HistoryPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
-  const [riskOnly, setRiskOnly] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [riskSectionCollapsed, setRiskSectionCollapsed] = useState(false);
   const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
 
   // Get account risk status
@@ -87,27 +86,32 @@ export default function HistoryPage() {
   const statusConfig = getStatusConfig(riskStatus.status);
   const StatusIcon = statusConfig.icon;
 
-  // Count risk transactions
-  const riskCount = useMemo(() => {
+  // Separate pending risk transactions from normal transactions
+  const pendingRiskTransactions = useMemo(() => {
     return transactions.filter(tx => 
       tx.type === 'receive' && 
       (tx.riskScore === 'red' || tx.riskScore === 'yellow') && 
       tx.disposalStatus === 'pending'
-    ).length;
+    ).sort((a, b) => {
+      // Sort by risk level (red first) then by time
+      if (a.riskScore === 'red' && b.riskScore !== 'red') return -1;
+      if (a.riskScore !== 'red' && b.riskScore === 'red') return 1;
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+    });
   }, [transactions]);
 
-  const filteredTransactions = useMemo(() => {
+  // Normal transactions (excluding pending risk)
+  const normalTransactions = useMemo(() => {
     return transactions.filter(tx => {
+      // Exclude pending risk transactions (they show in the top section)
+      const isPendingRisk = tx.type === 'receive' && 
+        (tx.riskScore === 'red' || tx.riskScore === 'yellow') && 
+        tx.disposalStatus === 'pending';
+      if (isPendingRisk) return false;
+      
       // Filter by type
       if (filter === 'send' && tx.type !== 'send') return false;
       if (filter === 'receive' && tx.type !== 'receive') return false;
-      
-      // Risk filter (independent toggle)
-      if (riskOnly) {
-        if (tx.type !== 'receive') return false;
-        if (tx.riskScore !== 'red' && tx.riskScore !== 'yellow') return false;
-        if (tx.disposalStatus !== 'pending') return false;
-      }
       
       // Search filter
       if (searchQuery) {
@@ -121,11 +125,11 @@ export default function HistoryPage() {
       }
       return true;
     });
-  }, [transactions, filter, searchQuery, riskOnly]);
+  }, [transactions, filter, searchQuery]);
 
-  // Group by date
+  // Group normal transactions by date
   const groupedTransactions = useMemo(() => {
-    return filteredTransactions.reduce((groups, tx) => {
+    return normalTransactions.reduce((groups, tx) => {
       const date = new Date(tx.timestamp).toLocaleDateString('zh-CN', {
         year: 'numeric',
         month: 'long',
@@ -135,7 +139,7 @@ export default function HistoryPage() {
       groups[date].push(tx);
       return groups;
     }, {} as Record<string, Transaction[]>);
-  }, [filteredTransactions]);
+  }, [normalTransactions]);
 
   // Pull to refresh handler
   const handleRefresh = useCallback(async () => {
@@ -234,62 +238,125 @@ export default function HistoryPage() {
             />
           </div>
 
-          {/* Filter Controls */}
-          <div className="flex items-center gap-3 mb-4">
-            {/* Direction Tabs */}
-            <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="flex-1">
-              <TabsList className="w-full grid grid-cols-3 h-9">
-                <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
-                <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
-                <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            
-            {/* Risk Toggle */}
-            <motion.button
-              onClick={() => setRiskOnly(!riskOnly)}
-              whileTap={{ scale: 0.95 }}
-              animate={{
-                backgroundColor: riskOnly ? 'hsl(var(--destructive) / 0.1)' : 'hsl(var(--muted) / 0.5)',
-                borderColor: riskOnly ? 'hsl(var(--destructive) / 0.3)' : 'hsl(var(--border))',
-              }}
-              transition={{ duration: 0.2 }}
-              className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg border shrink-0",
-                riskOnly ? "text-destructive" : "text-muted-foreground"
-              )}
-            >
+          {/* Pending Risk Transactions Section */}
+          <AnimatePresence>
+            {pendingRiskTransactions.length > 0 && (
               <motion.div
-                animate={{ 
-                  rotate: riskOnly ? [0, -10, 10, -5, 0] : 0,
-                  scale: riskOnly ? [1, 1.2, 1] : 1
-                }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4"
               >
-                <ShieldAlert className="w-4 h-4" />
-              </motion.div>
-              <span className="text-xs font-medium">风险</span>
-              <AnimatePresence mode="wait">
-                {riskCount > 0 && (
-                  <motion.span
-                    key="badge"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
-                    className={cn(
-                      "w-4 h-4 text-[10px] rounded-full flex items-center justify-center",
-                      riskOnly 
-                        ? "bg-destructive text-destructive-foreground" 
-                        : "bg-destructive/80 text-destructive-foreground"
-                    )}
+                <button
+                  onClick={() => setRiskSectionCollapsed(!riskSectionCollapsed)}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-destructive/10 border border-destructive/20 mb-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert className="w-4 h-4 text-destructive" />
+                    <span className="text-sm font-medium text-destructive">
+                      待处置风险交易
+                    </span>
+                    <span className="px-1.5 py-0.5 text-xs rounded-full bg-destructive text-destructive-foreground">
+                      {pendingRiskTransactions.length}
+                    </span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: riskSectionCollapsed ? -90 : 0 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    {riskCount}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
-          </div>
+                    <ChevronRight className="w-4 h-4 text-destructive" />
+                  </motion.div>
+                </button>
+                
+                <AnimatePresence>
+                  {!riskSectionCollapsed && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2 overflow-hidden"
+                    >
+                      {pendingRiskTransactions.map((tx) => {
+                        const riskConfig = getRiskConfig(tx.riskScore!);
+                        
+                        return (
+                          <motion.button
+                            key={tx.id}
+                            onClick={() => setSelectedTx(tx)}
+                            whileTap={{ scale: 0.98 }}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className={cn(
+                              "w-full card-elevated p-4 flex items-center justify-between text-left border-l-4",
+                              tx.riskScore === 'red' ? "border-l-destructive" : "border-l-warning"
+                            )}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                'w-10 h-10 rounded-full flex items-center justify-center',
+                                tx.riskScore === 'red' ? 'bg-destructive/10' : 'bg-warning/10'
+                              )}>
+                                {tx.riskScore === 'red' ? (
+                                  <ShieldAlert className="w-5 h-5 text-destructive" />
+                                ) : (
+                                  <AlertTriangle className="w-5 h-5 text-warning" />
+                                )}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-foreground">转入</p>
+                                  {riskConfig && (
+                                    <span className={cn(
+                                      "text-xs px-1.5 py-0.5 rounded",
+                                      riskConfig.bg,
+                                      riskConfig.color
+                                    )}>
+                                      {riskConfig.label}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                                    {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(tx.timestamp).toLocaleTimeString('zh-CN', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right flex items-center gap-2">
+                              <div>
+                                <p className="font-medium text-success">
+                                  +{tx.amount} {tx.symbol}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  ${tx.usdValue.toLocaleString()}
+                                </p>
+                              </div>
+                              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Filter Tabs for Normal Transactions */}
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="mb-4">
+            <TabsList className="w-full grid grid-cols-3 h-9">
+              <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
+              <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
+              <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
           {/* Transactions List */}
           <div className="space-y-6">
@@ -392,27 +459,18 @@ export default function HistoryPage() {
               </motion.div>
             ))}
 
-            {filteredTransactions.length === 0 && (
+            {normalTransactions.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="card-elevated p-8 text-center"
               >
                 <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                  {riskOnly ? (
-                    <Shield className="w-8 h-8 text-success" />
-                  ) : (
-                    <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
-                  )}
+                  <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground">
-                  {riskOnly ? '暂无待处置风险交易' : '暂无交易记录'}
+                  {filter === 'all' ? '暂无交易记录' : filter === 'send' ? '暂无转出记录' : '暂无收入记录'}
                 </p>
-                {riskOnly && (
-                  <p className="text-xs text-muted-foreground/60 mt-1">
-                    账户安全状态良好
-                  </p>
-                )}
               </motion.div>
             )}
           </div>
