@@ -154,7 +154,7 @@ export type PSPServiceType =
   | 'settlement'; // 结算
 
 // PSP connection status
-export type PSPConnectionStatus = 'active' | 'suspended' | 'pending' | 'expired';
+export type PSPConnectionStatus = 'active' | 'suspended' | 'pending' | 'expired' | 'rejected';
 
 // PSP Provider information
 export interface PSPProvider {
@@ -195,6 +195,14 @@ export interface PSPConnection {
   status: PSPConnectionStatus;
   connectedAt: Date;
   expiresAt?: Date;
+  
+  // Rejection info (when status is 'rejected')
+  rejectionInfo?: {
+    reason: string;
+    rejectedAt: Date;
+    canReapply: boolean;
+    reapplyAfter?: Date;
+  };
   
   // Authorized permissions
   permissions: {

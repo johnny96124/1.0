@@ -380,6 +380,49 @@ const mockPSPConnections: PSPConnection[] = [
       totalVolume: 0,
     },
   },
+  {
+    id: 'psp-conn-3',
+    pspId: 'psp-3',
+    psp: {
+      id: 'psp-3',
+      name: 'UniPay',
+      logo: '',
+      description: '一站式支付解决方案，支持多种支付方式',
+      officialUrl: 'https://unipay.example.com',
+      isVerified: true,
+      rating: 4.3,
+      contact: {
+        email: 'support@unipay.com',
+        phone: '+86 400-777-8888',
+      },
+      feeConfig: {
+        collection: 0.55,
+        withdrawal: 1.1,
+        transfer: 0.3,
+        minWithdrawal: 150,
+      },
+      availableServices: ['collection', 'transfer', 'withdrawal', 'deposit'],
+    },
+    status: 'rejected',
+    connectedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+    rejectionInfo: {
+      reason: '提交的企业资质证明文件不清晰，请重新上传高清扫描件或照片',
+      rejectedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      canReapply: true,
+      reapplyAfter: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    },
+    permissions: {
+      readBalance: true,
+      readTransactions: true,
+      collection: true,
+      transfer: true,
+      withdrawal: true,
+    },
+    stats: {
+      totalTransactions: 0,
+      totalVolume: 0,
+    },
+  },
 ];
 
 // Helper function to aggregate assets across chains
