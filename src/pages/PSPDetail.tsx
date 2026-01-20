@@ -4,7 +4,7 @@ import {
   Shield, Building2, ChevronRight, Send, QrCode, 
   ArrowDownToLine, ArrowUpFromLine, FileText,
   Phone, Mail, Globe, Star, Clock, AlertCircle,
-  Unlink, CheckCircle2, Pause, XCircle, RefreshCw, Trash2
+  Unlink, CheckCircle2, Pause, XCircle, RefreshCw, Trash2, Settings
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -119,6 +119,16 @@ export default function PSPDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-success/5 pointer-events-none" />
           
           <div className="relative z-10">
+            {/* Settings Button - Top Right */}
+            {status === 'active' && (
+              <button
+                onClick={() => navigate(`/psp/${id}/permissions`)}
+                className="absolute top-0 right-0 p-2 rounded-full hover:bg-muted/50 transition-colors"
+              >
+                <Settings className="w-5 h-5 text-muted-foreground" />
+              </button>
+            )}
+            
             <div className="flex items-start gap-4 mb-4">
               {/* Logo */}
               <PSPLogo pspId={psp.id} pspName={psp.name} size="lg" />
