@@ -74,6 +74,12 @@ export interface Transaction {
   fee?: number;
   riskScore?: RiskColor;
   memo?: string;
+  // Risk scanning fields
+  riskReasons?: string[];           // KYT risk reasons
+  riskScanTime?: Date;              // When the risk scan was performed
+  disposalStatus?: 'pending' | 'returned' | 'acknowledged'; // Disposal status for risky inflows
+  disposalTxHash?: string;          // TX hash if funds were returned
+  disposalTime?: Date;              // When the disposal action was taken
 }
 
 export interface Contact {
@@ -226,6 +232,12 @@ export interface PSPConnection {
     totalVolume: number;
     lastTransactionAt?: Date;
   };
+  
+  // PSP wallet addresses (for transfer interception)
+  addresses?: {
+    network: string;
+    address: string;
+  }[];
 }
 
 // PSP announcement
@@ -245,6 +257,18 @@ export interface PSPAuthRequest {
   pspInfo: PSPProvider;
   requestedPermissions: string[];
   expiresAt: Date;
+}
+
+// ============= Account Risk Management Types =============
+
+export type AccountRiskStatus = 'healthy' | 'warning' | 'restricted';
+
+export interface AccountRiskSummary {
+  status: AccountRiskStatus;
+  pendingRiskCount: number;       // Total pending risky transactions
+  yellowCount: number;            // Suspicious (pending only)
+  redCount: number;               // High risk (pending only)
+  totalRiskExposure: number;      // Total USD value of risky funds
 }
 
 // App-level state

@@ -1,0 +1,437 @@
+import { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ArrowLeft, Shield, ShieldAlert, AlertTriangle, CheckCircle2,
+  ChevronRight, RotateCcw, Eye, Copy, ExternalLink, X
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/button';
+import { useWallet } from '@/contexts/WalletContext';
+import { cn } from '@/lib/utils';
+import { CryptoIcon } from '@/components/CryptoIcon';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import { Transaction, AccountRiskStatus } from '@/types/wallet';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+
+type TabValue = 'all' | 'red' | 'yellow' | 'handled';
+
+// Helper to get status config
+const getStatusConfig = (status: AccountRiskStatus) => {
+  switch (status) {
+    case 'healthy':
+      return {
+        icon: Shield,
+        label: '账户安全',
+        color: 'text-success',
+        bg: 'bg-success/10',
+        border: 'border-success/20',
+      };
+    case 'warning':
+      return {
+        icon: AlertTriangle,
+        label: '存在可疑收款',
+        color: 'text-warning',
+        bg: 'bg-warning/10',
+        border: 'border-warning/20',
+      };
+    case 'restricted':
+      return {
+        icon: ShieldAlert,
+        label: '向服务商转账受限',
+        color: 'text-destructive',
+        bg: 'bg-destructive/10',
+        border: 'border-destructive/20',
+      };
+  }
+};
+
+// Helper to get risk score config
+const getRiskConfig = (score: 'yellow' | 'red') => {
+  if (score === 'red') {
+    return {
+      label: '高风险',
+      color: 'text-destructive',
+      bg: 'bg-destructive/10',
+      border: 'border-destructive/30',
+    };
+  }
+  return {
+    label: '可疑',
+    color: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/30',
+  };
+};
+
+// Helper to format address
+const formatAddress = (address: string, showFull = false) => {
+  if (showFull || address.length <= 16) return address;
+  return `${address.slice(0, 8)}...${address.slice(-6)}`;
+};
+
+export default function RiskManagement() {
+  const navigate = useNavigate();
+  const { getAccountRiskStatus, getRiskTransactions, acknowledgeRiskTx } = useWallet();
+  const [activeTab, setActiveTab] = useState<TabValue>('all');
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  
+  const riskStatus = getAccountRiskStatus();
+  const statusConfig = getStatusConfig(riskStatus.status);
+  const StatusIcon = statusConfig.icon;
+  
+  const riskTransactions = getRiskTransactions();
+  
+  // Filter transactions based on tab
+  const filteredTransactions = useMemo(() => {
+    switch (activeTab) {
+      case 'red':
+        return riskTransactions.filter(tx => tx.riskScore === 'red' && tx.disposalStatus === 'pending');
+      case 'yellow':
+        return riskTransactions.filter(tx => tx.riskScore === 'yellow' && tx.disposalStatus === 'pending');
+      case 'handled':
+        return riskTransactions.filter(tx => tx.disposalStatus !== 'pending');
+      default:
+        return riskTransactions;
+    }
+  }, [riskTransactions, activeTab]);
+  
+  const handleCopyAddress = (address: string) => {
+    navigator.clipboard.writeText(address);
+    toast.success('地址已复制');
+  };
+  
+  const handleAcknowledge = (txId: string) => {
+    acknowledgeRiskTx(txId);
+    setSelectedTx(null);
+    toast.success('已标记为已知晓');
+  };
+  
+  const handleReturn = (txId: string) => {
+    setSelectedTx(null);
+    navigate(`/risk-management/return/${txId}`);
+  };
+  
+  return (
+    <AppLayout showNav={false}>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h1 className="font-semibold text-foreground">风险资金处置</h1>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto">
+          {/* Status Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-4 mt-4"
+          >
+            <div className={cn(
+              "p-4 rounded-2xl border",
+              statusConfig.bg,
+              statusConfig.border
+            )}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bg)}>
+                  <StatusIcon className={cn("w-5 h-5", statusConfig.color)} />
+                </div>
+                <div>
+                  <p className={cn("font-semibold", statusConfig.color)}>{statusConfig.label}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {riskStatus.pendingRiskCount > 0 
+                      ? `${riskStatus.pendingRiskCount} 笔待处置交易`
+                      : '暂无风险收款'
+                    }
+                  </p>
+                </div>
+              </div>
+              
+              {riskStatus.pendingRiskCount > 0 && (
+                <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-border/30">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-foreground">
+                      ${riskStatus.totalRiskExposure.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-muted-foreground">风险敞口</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      {riskStatus.redCount > 0 && (
+                        <span className="text-destructive font-medium">{riskStatus.redCount} 高风险</span>
+                      )}
+                      {riskStatus.yellowCount > 0 && (
+                        <span className="text-warning font-medium">{riskStatus.yellowCount} 可疑</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">待处置</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+          
+          {/* Tabs */}
+          <div className="px-4 mt-4">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
+              <TabsList className="w-full grid grid-cols-4 h-9">
+                <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
+                <TabsTrigger value="red" className="text-xs">高风险</TabsTrigger>
+                <TabsTrigger value="yellow" className="text-xs">可疑</TabsTrigger>
+                <TabsTrigger value="handled" className="text-xs">已处置</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          
+          {/* Transaction List */}
+          <div className="px-4 mt-4 pb-6">
+            {filteredTransactions.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-12 text-center"
+              >
+                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                  <CheckCircle2 className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <p className="text-muted-foreground">
+                  {activeTab === 'handled' ? '暂无已处置交易' : '暂无风险交易'}
+                </p>
+              </motion.div>
+            ) : (
+              <div className="space-y-2">
+                <AnimatePresence mode="popLayout">
+                  {filteredTransactions.map((tx, index) => {
+                    const riskConfig = tx.riskScore === 'red' || tx.riskScore === 'yellow' 
+                      ? getRiskConfig(tx.riskScore) 
+                      : null;
+                    const isHandled = tx.disposalStatus !== 'pending';
+                    
+                    return (
+                      <motion.button
+                        key={tx.id}
+                        layout
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ delay: 0.03 * index }}
+                        onClick={() => setSelectedTx(tx)}
+                        className={cn(
+                          "w-full p-3 rounded-xl border text-left transition-colors",
+                          isHandled 
+                            ? "bg-muted/30 border-border/50" 
+                            : "bg-card border-border hover:bg-muted/30"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <CryptoIcon symbol={tx.symbol} size="md" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className={cn(
+                                "font-medium text-sm",
+                                isHandled ? "text-muted-foreground" : "text-foreground"
+                              )}>
+                                +{tx.amount.toLocaleString()} {tx.symbol}
+                              </p>
+                              {riskConfig && !isHandled && (
+                                <span className={cn(
+                                  "text-xs px-1.5 py-0.5 rounded",
+                                  riskConfig.bg,
+                                  riskConfig.color
+                                )}>
+                                  {riskConfig.label}
+                                </span>
+                              )}
+                              {isHandled && (
+                                <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                  {tx.disposalStatus === 'returned' ? '已退回' : '已知晓'}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">
+                              来自 {formatAddress(tx.counterparty)}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <span className="text-xs">
+                              {format(tx.timestamp, 'MM/dd HH:mm')}
+                            </span>
+                            <ChevronRight className="w-4 h-4" />
+                          </div>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      {/* Transaction Detail Drawer */}
+      <Drawer open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="border-b border-border/50">
+            <DrawerTitle>交易详情</DrawerTitle>
+          </DrawerHeader>
+          
+          {selectedTx && (
+            <div className="px-4 py-4 overflow-y-auto">
+              {/* Amount */}
+              <div className="flex items-center gap-3 mb-4">
+                <CryptoIcon symbol={selectedTx.symbol} size="lg" />
+                <div>
+                  <p className="text-2xl font-bold text-foreground">
+                    +{selectedTx.amount.toLocaleString()} {selectedTx.symbol}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    ≈ ${selectedTx.usdValue.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Risk Badge */}
+              {(selectedTx.riskScore === 'red' || selectedTx.riskScore === 'yellow') && (
+                <div className={cn(
+                  "p-3 rounded-xl border mb-4",
+                  selectedTx.riskScore === 'red' 
+                    ? "bg-destructive/10 border-destructive/30" 
+                    : "bg-warning/10 border-warning/30"
+                )}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {selectedTx.riskScore === 'red' ? (
+                      <ShieldAlert className="w-4 h-4 text-destructive" />
+                    ) : (
+                      <AlertTriangle className="w-4 h-4 text-warning" />
+                    )}
+                    <span className={cn(
+                      "font-medium text-sm",
+                      selectedTx.riskScore === 'red' ? "text-destructive" : "text-warning"
+                    )}>
+                      {selectedTx.riskScore === 'red' ? '高风险来款' : '可疑来款'}
+                    </span>
+                    {selectedTx.disposalStatus !== 'pending' && (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground ml-auto">
+                        {selectedTx.disposalStatus === 'returned' ? '已退回' : '已知晓'}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {selectedTx.riskReasons && selectedTx.riskReasons.length > 0 && (
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      {selectedTx.riskReasons.map((reason, i) => (
+                        <li key={i} className="flex items-start gap-1">
+                          <span className="text-muted-foreground/50">•</span>
+                          <span>{reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  
+                  {selectedTx.riskScanTime && (
+                    <p className="text-xs text-muted-foreground/60 mt-2">
+                      KYT 扫描时间: {format(selectedTx.riskScanTime, 'yyyy-MM-dd HH:mm')}
+                    </p>
+                  )}
+                </div>
+              )}
+              
+              {/* Details */}
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center justify-between py-2 border-b border-border/30">
+                  <span className="text-sm text-muted-foreground">来源地址</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-mono text-foreground">
+                      {formatAddress(selectedTx.counterparty)}
+                    </span>
+                    <button 
+                      onClick={() => handleCopyAddress(selectedTx.counterparty)}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between py-2 border-b border-border/30">
+                  <span className="text-sm text-muted-foreground">网络</span>
+                  <span className="text-sm text-foreground">{selectedTx.network}</span>
+                </div>
+                
+                <div className="flex items-center justify-between py-2 border-b border-border/30">
+                  <span className="text-sm text-muted-foreground">收款时间</span>
+                  <span className="text-sm text-foreground">
+                    {format(selectedTx.timestamp, 'yyyy-MM-dd HH:mm:ss')}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between py-2 border-b border-border/30">
+                  <span className="text-sm text-muted-foreground">交易哈希</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-mono text-foreground">
+                      {formatAddress(selectedTx.txHash)}
+                    </span>
+                    <button className="text-muted-foreground hover:text-foreground">
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                
+                {selectedTx.disposalStatus === 'returned' && selectedTx.disposalTxHash && (
+                  <div className="flex items-center justify-between py-2 border-b border-border/30">
+                    <span className="text-sm text-muted-foreground">退回交易</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-mono text-foreground">
+                        {formatAddress(selectedTx.disposalTxHash)}
+                      </span>
+                      <button className="text-muted-foreground hover:text-foreground">
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Actions */}
+              {selectedTx.disposalStatus === 'pending' && (
+                <div className="space-y-2">
+                  <Button
+                    variant="destructive"
+                    className="w-full gap-2"
+                    onClick={() => handleReturn(selectedTx.id)}
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    退回资金
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2"
+                    onClick={() => handleAcknowledge(selectedTx.id)}
+                  >
+                    <Eye className="w-4 h-4" />
+                    我已知晓风险
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DrawerContent>
+      </Drawer>
+    </AppLayout>
+  );
+}

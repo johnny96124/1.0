@@ -3,7 +3,8 @@ import {
   Wallet, Asset, Transaction, Contact, Device, 
   SecurityConfig, BackupStatus, WalletStatus, WalletState,
   RiskColor, ChainId, AggregatedAsset, UserInfo, LimitStatus,
-  PSPProvider, PSPConnection, PSPConnectionStatus
+  PSPProvider, PSPConnection, PSPConnectionStatus,
+  AccountRiskStatus, AccountRiskSummary
 } from '@/types/wallet';
 
 // Mock data for demonstration - wallet-specific assets
@@ -58,7 +59,7 @@ export const getWalletTotalBalance = (walletId: string): number => {
   return assets.reduce((sum, a) => sum + a.usdValue, 0);
 };
 
-// Mock transactions per wallet
+// Mock transactions per wallet (with risk data for testing)
 const mockTransactionsWallet1: Transaction[] = [
   {
     id: '1',
@@ -67,10 +68,10 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 2500,
     status: 'confirmed',
-    counterparty: '0x1234...5678',
+    counterparty: '0x1234567890abcdef1234567890abcdef12345678',
     counterpartyLabel: 'ABC Trading Co.',
     timestamp: new Date(Date.now() - 3600000),
-    txHash: '0xabc...def',
+    txHash: '0xabc123def456789012345678901234567890abcdef',
     network: 'ethereum',
     riskScore: 'green',
   },
@@ -81,26 +82,47 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 800,
     status: 'confirmed',
-    counterparty: 'T9yD14...xK3m',
+    counterparty: 'T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb',
     counterpartyLabel: 'Supplier XYZ',
     timestamp: new Date(Date.now() - 86400000),
-    txHash: 'abc123...def',
+    txHash: 'abc123def456789012345678901234567890',
     network: 'tron',
     fee: 2.5,
     riskScore: 'green',
   },
+  // High risk incoming transaction
   {
-    id: '3',
+    id: 'risk-1',
+    type: 'receive',
+    amount: 15000,
+    symbol: 'USDT',
+    usdValue: 15000,
+    status: 'confirmed',
+    counterparty: '0xSANCTIONED123456789012345678901234567890',
+    timestamp: new Date(Date.now() - 7200000),
+    txHash: '0xrisktx123456789012345678901234567890abcd',
+    network: 'ethereum',
+    riskScore: 'red',
+    riskReasons: ['与 OFAC 制裁名单地址有关联', '历史交易涉及混币器服务'],
+    riskScanTime: new Date(Date.now() - 7100000),
+    disposalStatus: 'pending',
+  },
+  // Suspicious incoming transaction
+  {
+    id: 'risk-2',
     type: 'receive',
     amount: 5000,
     symbol: 'USDC',
     usdValue: 5000,
-    status: 'pending',
-    counterparty: '0x9999...1111',
+    status: 'confirmed',
+    counterparty: '0x9999888877776666555544443333222211110000',
     timestamp: new Date(Date.now() - 1800000),
-    txHash: '0x111...222',
+    txHash: '0xsuspicious1234567890abcdef1234567890ab',
     network: 'ethereum',
     riskScore: 'yellow',
+    riskReasons: ['新地址，交易历史有限', '资金来源链路较短'],
+    riskScanTime: new Date(Date.now() - 1700000),
+    disposalStatus: 'pending',
   },
   {
     id: '4',
@@ -109,9 +131,9 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'BNB',
     usdValue: 900,
     status: 'confirmed',
-    counterparty: '0xBnb...addr',
+    counterparty: '0xBnb123456789012345678901234567890abcdef',
     timestamp: new Date(Date.now() - 172800000),
-    txHash: '0xbnb...hash',
+    txHash: '0xbnbtx123456789012345678901234567890abcd',
     network: 'bsc',
     fee: 0.001,
     riskScore: 'green',
@@ -264,7 +286,7 @@ const defaultBackupStatus: BackupStatus = {
   fileBackup: false,
 };
 
-// Mock PSP data
+// Mock PSP data with addresses for transfer interception
 const mockPSPConnections: PSPConnection[] = [
   {
     id: 'psp-conn-1',
@@ -304,6 +326,10 @@ const mockPSPConnections: PSPConnection[] = [
       totalVolume: 125000,
       lastTransactionAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
     },
+    addresses: [
+      { network: 'ethereum', address: '0xPAYGLOBAL1234567890abcdef1234567890ab' },
+      { network: 'tron', address: 'TPAYGLOBALxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
+    ],
   },
   {
     id: 'psp-conn-2',
@@ -342,6 +368,10 @@ const mockPSPConnections: PSPConnection[] = [
       totalVolume: 38500,
       lastTransactionAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     },
+    addresses: [
+      { network: 'ethereum', address: '0xFASTPAY1234567890abcdef1234567890abcd' },
+      { network: 'bsc', address: '0xFASTPAYBSC1234567890abcdef12345678ab' },
+    ],
   },
   {
     id: 'psp-conn-4',
@@ -499,6 +529,13 @@ interface WalletContextType extends WalletState {
   connectPSP: (psp: PSPProvider, permissions: Record<string, boolean>) => Promise<void>;
   disconnectPSP: (connectionId: string) => Promise<void>;
   suspendPSP: (connectionId: string) => Promise<void>;
+  
+  // Risk management actions
+  getAccountRiskStatus: () => AccountRiskSummary;
+  getRiskTransactions: () => Transaction[];
+  returnRiskFunds: (txId: string) => Promise<{ txHash: string }>;
+  acknowledgeRiskTx: (txId: string) => void;
+  isPSPAddress: (address: string) => { isPSP: boolean; pspName?: string };
 }
 
 const WalletContext = createContext<WalletContextType | null>(null);
@@ -818,6 +855,67 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setPspConnections(prev => [...prev, newConnection]);
   }, []);
 
+  // Risk management methods
+  const getAccountRiskStatus = useCallback((): AccountRiskSummary => {
+    const riskTxs = transactions.filter(
+      tx => tx.type === 'receive' && 
+      (tx.riskScore === 'red' || tx.riskScore === 'yellow') &&
+      tx.disposalStatus === 'pending'
+    );
+    
+    const redCount = riskTxs.filter(tx => tx.riskScore === 'red').length;
+    const yellowCount = riskTxs.filter(tx => tx.riskScore === 'yellow').length;
+    const totalRiskExposure = riskTxs.reduce((sum, tx) => sum + tx.usdValue, 0);
+    
+    let status: AccountRiskStatus = 'healthy';
+    if (redCount > 0) status = 'restricted';
+    else if (yellowCount > 0) status = 'warning';
+    
+    return {
+      status,
+      pendingRiskCount: riskTxs.length,
+      yellowCount,
+      redCount,
+      totalRiskExposure,
+    };
+  }, [transactions]);
+
+  const getRiskTransactions = useCallback((): Transaction[] => {
+    return transactions.filter(
+      tx => tx.type === 'receive' && (tx.riskScore === 'red' || tx.riskScore === 'yellow')
+    );
+  }, [transactions]);
+
+  const returnRiskFunds = useCallback(async (txId: string): Promise<{ txHash: string }> => {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    const txHash = `0x${Math.random().toString(16).slice(2)}`;
+    
+    setTransactions(prev => prev.map(tx =>
+      tx.id === txId 
+        ? { ...tx, disposalStatus: 'returned' as const, disposalTxHash: txHash, disposalTime: new Date() }
+        : tx
+    ));
+    
+    return { txHash };
+  }, []);
+
+  const acknowledgeRiskTx = useCallback((txId: string) => {
+    setTransactions(prev => prev.map(tx =>
+      tx.id === txId 
+        ? { ...tx, disposalStatus: 'acknowledged' as const, disposalTime: new Date() }
+        : tx
+    ));
+  }, []);
+
+  const isPSPAddress = useCallback((address: string): { isPSP: boolean; pspName?: string } => {
+    for (const conn of pspConnections) {
+      if (conn.addresses?.some(a => a.address.toLowerCase() === address.toLowerCase())) {
+        return { isPSP: true, pspName: conn.psp.name };
+      }
+    }
+    return { isPSP: false };
+  }, [pspConnections]);
+
   const disconnectPSP = useCallback(async (connectionId: string) => {
     await new Promise(resolve => setTimeout(resolve, 500));
     setPspConnections(prev => prev.filter(c => c.id !== connectionId));
@@ -871,6 +969,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     connectPSP,
     disconnectPSP,
     suspendPSP,
+    getAccountRiskStatus,
+    getRiskTransactions,
+    returnRiskFunds,
+    acknowledgeRiskTx,
+    isPSPAddress,
   };
 
   return (

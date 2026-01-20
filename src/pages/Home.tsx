@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
-  TrendingDown, Wallet, Plus, Shield,
+  TrendingDown, Wallet, Plus, Shield, ShieldAlert, AlertTriangle,
   CheckCircle2, AlertCircle, Sparkles, Lock, Settings, ChevronDown, Clock, XCircle, Copy, ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -155,7 +155,10 @@ export default function HomePage() {
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [showAllAssets, setShowAllAssets] = useState(false);
   const navigate = useNavigate();
-  const { assets, transactions, currentWallet, walletStatus, userInfo, addToken } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, userInfo, addToken, getAccountRiskStatus } = useWallet();
+  
+  // Get account risk status
+  const riskStatus = getAccountRiskStatus();
 
   // Number of assets to show initially
   const INITIAL_ASSETS_COUNT = 5;
@@ -314,6 +317,42 @@ export default function HomePage() {
           </div>
         </motion.div>
 
+
+        {/* Account Security Status */}
+        {riskStatus.status !== 'healthy' && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={() => navigate('/risk-management')}
+            className={cn(
+              "w-full p-3 rounded-xl border flex items-center gap-3 mb-4",
+              riskStatus.status === 'restricted' 
+                ? "bg-destructive/10 border-destructive/30" 
+                : "bg-warning/10 border-warning/30"
+            )}
+          >
+            {riskStatus.status === 'restricted' ? (
+              <ShieldAlert className="w-5 h-5 text-destructive shrink-0" />
+            ) : (
+              <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
+            )}
+            <div className="flex-1 text-left">
+              <p className={cn(
+                "text-sm font-medium",
+                riskStatus.status === 'restricted' ? "text-destructive" : "text-warning"
+              )}>
+                {riskStatus.status === 'restricted' 
+                  ? `存在 ${riskStatus.redCount} 笔高风险收款` 
+                  : `存在 ${riskStatus.yellowCount} 笔可疑收款`
+                }
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {riskStatus.status === 'restricted' ? '向服务商转账受限，请处置风险资金' : '点击查看详情'}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+          </motion.button>
+        )}
 
         {/* Assets */}
         <motion.div
