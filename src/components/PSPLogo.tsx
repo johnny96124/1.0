@@ -1,4 +1,4 @@
-import { Globe, Zap, CreditCard, ArrowLeftRight } from 'lucide-react';
+import { Globe, Zap, CreditCard, ArrowLeftRight, Landmark, Send, Wallet, Building } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // PSP brand configurations with unique colors and icons
@@ -27,6 +27,26 @@ const pspBrands: Record<string, {
     icon: ArrowLeftRight,
     bgGradient: 'from-purple-500/20 to-violet-500/10',
     iconColor: 'text-purple-500',
+  },
+  'psp-5': { // GlobalLink
+    icon: Landmark,
+    bgGradient: 'from-slate-500/20 to-gray-500/10',
+    iconColor: 'text-slate-600',
+  },
+  'psp-6': { // QuickRemit
+    icon: Send,
+    bgGradient: 'from-sky-500/20 to-cyan-500/10',
+    iconColor: 'text-sky-500',
+  },
+  'psp-7': { // PayEase
+    icon: Wallet,
+    bgGradient: 'from-pink-500/20 to-rose-500/10',
+    iconColor: 'text-pink-500',
+  },
+  'psp-8': { // EuroTransfer
+    icon: Building,
+    bgGradient: 'from-indigo-500/20 to-blue-500/10',
+    iconColor: 'text-indigo-500',
   },
 };
 

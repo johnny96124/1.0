@@ -4,7 +4,7 @@ import {
   Shield, Building2, ChevronRight, Send, QrCode, 
   ArrowDownToLine, ArrowUpFromLine, FileText,
   Phone, Mail, Globe, Star, Clock, AlertCircle,
-  Settings, Unlink, CheckCircle2, Pause, XCircle, RefreshCw
+  Settings, Unlink, CheckCircle2, Pause, XCircle, RefreshCw, Trash2
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -326,30 +326,59 @@ export default function PSPDetailPage() {
           )}
         </motion.div>
 
-        {/* Actions */}
+        {/* Actions - Different buttons based on status */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           className="space-y-2"
         >
-          <Button 
-            variant="outline" 
-            className="w-full h-11"
-            onClick={handleSuspend}
-          >
-            <Pause className="w-4 h-4 mr-2" />
-            {status === 'suspended' ? '恢复服务' : '暂停服务'}
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            className="w-full h-11 text-destructive hover:text-destructive hover:bg-destructive/5"
-            onClick={() => setShowDisconnectDialog(true)}
-          >
-            <Unlink className="w-4 h-4 mr-2" />
-            解除连接
-          </Button>
+          {/* For rejected status - show delete button only */}
+          {status === 'rejected' && (
+            <Button 
+              variant="outline" 
+              className="w-full h-11 text-destructive hover:text-destructive hover:bg-destructive/5"
+              onClick={() => setShowDisconnectDialog(true)}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              删除申请记录
+            </Button>
+          )}
+
+          {/* For pending status - show cancel button */}
+          {status === 'pending' && (
+            <Button 
+              variant="outline" 
+              className="w-full h-11 text-destructive hover:text-destructive hover:bg-destructive/5"
+              onClick={() => setShowDisconnectDialog(true)}
+            >
+              <XCircle className="w-4 h-4 mr-2" />
+              取消申请
+            </Button>
+          )}
+
+          {/* For active/suspended status - show suspend and disconnect */}
+          {(status === 'active' || status === 'suspended') && (
+            <>
+              <Button 
+                variant="outline" 
+                className="w-full h-11"
+                onClick={handleSuspend}
+              >
+                <Pause className="w-4 h-4 mr-2" />
+                {status === 'suspended' ? '恢复服务' : '暂停服务'}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full h-11 text-destructive hover:text-destructive hover:bg-destructive/5"
+                onClick={() => setShowDisconnectDialog(true)}
+              >
+                <Unlink className="w-4 h-4 mr-2" />
+                解除连接
+              </Button>
+            </>
+          )}
         </motion.div>
       </div>
 
@@ -357,9 +386,16 @@ export default function PSPDetailPage() {
       <AlertDialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>确认解除连接？</AlertDialogTitle>
+            <AlertDialogTitle>
+              {status === 'rejected' ? '确认删除记录？' : 
+               status === 'pending' ? '确认取消申请？' : '确认解除连接？'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              解除与 {psp.name} 的连接后，您将无法使用该服务商的服务。此操作不会影响已完成的交易记录。
+              {status === 'rejected' 
+                ? `删除与 ${psp.name} 的申请记录后，相关信息将被清除。如需再次连接，请重新申请。`
+                : status === 'pending'
+                ? `取消与 ${psp.name} 的连接申请后，审核流程将终止。如需再次连接，请重新申请。`
+                : `解除与 ${psp.name} 的连接后，您将无法使用该服务商的服务。此操作不会影响已完成的交易记录。`}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

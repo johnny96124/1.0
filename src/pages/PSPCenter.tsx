@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, ChevronRight, Shield, 
   CheckCircle2, Clock, AlertCircle, Building2,
@@ -11,6 +12,16 @@ import { useWallet } from '@/contexts/WalletContext';
 import { PSPConnection, PSPConnectionStatus } from '@/types/wallet';
 import { cn } from '@/lib/utils';
 import { PSPLogo } from '@/components/PSPLogo';
+
+// Tab configuration
+const tabs = [
+  { id: 'active', label: '已连接', icon: CheckCircle2 },
+  { id: 'pending', label: '审核中', icon: Clock },
+  { id: 'rejected', label: '已拒绝', icon: XCircle },
+  { id: 'other', label: '其他', icon: AlertCircle },
+] as const;
+
+type TabId = typeof tabs[number]['id'];
 
 // Status badge component
 function StatusBadge({ status }: { status: PSPConnectionStatus }) {
@@ -317,6 +328,7 @@ function RejectedPSPCard({ connection, onClick, onReapply }: {
 export default function PSPCenterPage() {
   const navigate = useNavigate();
   const { pspConnections } = useWallet();
+  const [activeTab, setActiveTab] = useState<TabId>('active');
   
   const activeConnections = pspConnections?.filter(c => c.status === 'active') || [];
   const pendingConnections = pspConnections?.filter(c => c.status === 'pending') || [];
@@ -324,6 +336,24 @@ export default function PSPCenterPage() {
   const otherConnections = pspConnections?.filter(c => 
     c.status !== 'active' && c.status !== 'pending' && c.status !== 'rejected'
   ) || [];
+
+  const getConnectionsByTab = (tab: TabId): PSPConnection[] => {
+    switch (tab) {
+      case 'active': return activeConnections;
+      case 'pending': return pendingConnections;
+      case 'rejected': return rejectedConnections;
+      case 'other': return otherConnections;
+    }
+  };
+
+  const getTabCount = (tab: TabId): number => {
+    return getConnectionsByTab(tab).length;
+  };
+
+  // Filter out tabs with no connections (except current tab)
+  const visibleTabs = tabs.filter(tab => 
+    tab.id === activeTab || getTabCount(tab.id) > 0
+  );
 
   const handleConnect = () => {
     navigate('/psp/connect');
@@ -334,9 +364,10 @@ export default function PSPCenterPage() {
   };
 
   const handleReapply = (connection: PSPConnection) => {
-    // Navigate to connect page with PSP pre-selected for reapply
     navigate('/psp/connect', { state: { reapplyPspId: connection.pspId } });
   };
+
+  const currentConnections = getConnectionsByTab(activeTab);
 
   return (
     <AppLayout 
@@ -344,15 +375,14 @@ export default function PSPCenterPage() {
       showBack 
       onBack={() => navigate(-1)}
     >
-      <div className="px-4 py-4">
+      <div className="flex flex-col h-full">
         {/* Stats Card - only show if has active connections */}
         {activeConnections.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="card-elevated p-4 mb-4 relative overflow-hidden"
+            className="mx-4 mt-4 card-elevated p-4 relative overflow-hidden"
           >
-            {/* Decorative gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-success/5 pointer-events-none" />
             
             <div className="relative z-10">
@@ -388,7 +418,7 @@ export default function PSPCenterPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             onClick={handleConnect}
-            className="w-full card-elevated p-4 flex items-center gap-3 mb-4 hover:bg-muted/30 transition-colors"
+            className="mx-4 mt-4 card-elevated p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
           >
             <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center">
               <Plus className="w-5 h-5 text-accent-foreground" />
@@ -406,99 +436,103 @@ export default function PSPCenterPage() {
           <EmptyState onConnect={handleConnect} />
         )}
 
-        {/* Pending Connections - Show first with review progress */}
-        {pendingConnections.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-4"
-          >
-            <h2 className="text-sm font-medium text-warning mb-2 px-1 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              待审核 ({pendingConnections.length})
-            </h2>
-            <div className="space-y-3">
-              {pendingConnections.map((connection) => (
-                <PendingPSPCard 
-                  key={connection.id} 
-                  connection={connection}
-                  onClick={() => handleViewDetail(connection)}
-                />
-              ))}
+        {/* Tab Navigation */}
+        {pspConnections && pspConnections.length > 0 && (
+          <div className="px-4 mt-4">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {visibleTabs.map((tab) => {
+                const Icon = tab.icon;
+                const count = getTabCount(tab.id);
+                const isActive = activeTab === tab.id;
+                
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
+                      isActive 
+                        ? 'bg-accent text-accent-foreground' 
+                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                    )}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {tab.label}
+                    {count > 0 && (
+                      <span className={cn(
+                        'px-1.5 py-0.5 rounded-full text-xs',
+                        isActive ? 'bg-accent-foreground/20' : 'bg-background'
+                      )}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          </motion.div>
+          </div>
         )}
 
-        {/* Active Connections */}
-        {activeConnections.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mb-4"
-          >
-            <h2 className="text-sm font-medium text-success mb-2 px-1 flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              已连接 ({activeConnections.length})
-            </h2>
-            <div className="space-y-2">
-              {activeConnections.map((connection) => (
-                <PSPCard 
-                  key={connection.id} 
-                  connection={connection}
-                  onClick={() => handleViewDetail(connection)}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Rejected Connections */}
-        {rejectedConnections.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="mb-4"
-          >
-            <h2 className="text-sm font-medium text-destructive mb-2 px-1 flex items-center gap-1.5">
-              <XCircle className="w-3.5 h-3.5" />
-              已拒绝 ({rejectedConnections.length})
-            </h2>
-            <div className="space-y-3">
-              {rejectedConnections.map((connection) => (
-                <RejectedPSPCard 
-                  key={connection.id} 
-                  connection={connection}
-                  onClick={() => handleViewDetail(connection)}
-                  onReapply={() => handleReapply(connection)}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Other Connections (suspended, expired) */}
-        {otherConnections.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <h2 className="text-sm font-medium text-muted-foreground mb-2 px-1">
-              其他 ({otherConnections.length})
-            </h2>
-            <div className="space-y-2">
-              {otherConnections.map((connection) => (
-                <PSPCard 
-                  key={connection.id} 
-                  connection={connection}
-                  onClick={() => handleViewDetail(connection)}
-                />
-              ))}
-            </div>
-          </motion.div>
+        {/* Tab Content */}
+        {pspConnections && pspConnections.length > 0 && (
+          <div className="flex-1 px-4 py-4 overflow-y-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-3"
+              >
+                {currentConnections.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                      {activeTab === 'active' && <CheckCircle2 className="w-8 h-8 text-muted-foreground" />}
+                      {activeTab === 'pending' && <Clock className="w-8 h-8 text-muted-foreground" />}
+                      {activeTab === 'rejected' && <XCircle className="w-8 h-8 text-muted-foreground" />}
+                      {activeTab === 'other' && <AlertCircle className="w-8 h-8 text-muted-foreground" />}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {activeTab === 'active' && '暂无已连接的服务商'}
+                      {activeTab === 'pending' && '暂无待审核的申请'}
+                      {activeTab === 'rejected' && '暂无被拒绝的申请'}
+                      {activeTab === 'other' && '暂无其他状态的服务商'}
+                    </p>
+                  </div>
+                ) : (
+                  currentConnections.map((connection) => {
+                    if (activeTab === 'pending') {
+                      return (
+                        <PendingPSPCard 
+                          key={connection.id} 
+                          connection={connection}
+                          onClick={() => handleViewDetail(connection)}
+                        />
+                      );
+                    }
+                    if (activeTab === 'rejected') {
+                      return (
+                        <RejectedPSPCard 
+                          key={connection.id} 
+                          connection={connection}
+                          onClick={() => handleViewDetail(connection)}
+                          onReapply={() => handleReapply(connection)}
+                        />
+                      );
+                    }
+                    return (
+                      <PSPCard 
+                        key={connection.id} 
+                        connection={connection}
+                        onClick={() => handleViewDetail(connection)}
+                      />
+                    );
+                  })
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         )}
       </div>
     </AppLayout>
