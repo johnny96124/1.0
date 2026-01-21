@@ -7,7 +7,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import {
@@ -43,7 +43,6 @@ export default function ReceivePage() {
   const [saving, setSaving] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const { currentWallet } = useWallet();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -89,19 +88,12 @@ export default function ReceivePage() {
     try {
       await navigator.clipboard.writeText(fullAddress);
       setCopied(true);
-      toast({
-        title: '已复制到剪贴板',
-        description: '收款地址已复制',
-      });
+      toast("已复制到剪贴板", { description: "收款地址已复制" });
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      toast({
-        title: '复制失败',
-        description: '请手动复制地址',
-        variant: 'destructive',
-      });
+      toast.error("复制失败", { description: "请手动复制地址" });
     }
-  }, [fullAddress, toast]);
+  }, [fullAddress]);
 
   const handleSaveQRCode = useCallback(async () => {
     if (!qrRef.current) return;
@@ -160,32 +152,21 @@ export default function ReceivePage() {
         link.click();
         
         setSaving(false);
-        toast({
-          title: '保存成功',
-          description: '二维码已保存到本地',
-        });
+        toast("保存成功", { description: "二维码已保存到本地" });
       };
       
       img.onerror = () => {
         URL.revokeObjectURL(svgUrl);
         setSaving(false);
-        toast({
-          title: '保存失败',
-          description: '请重试或截图保存',
-          variant: 'destructive',
-        });
+        toast.error("保存失败", { description: "请重试或截图保存" });
       };
       
       img.src = svgUrl;
     } catch (error) {
       setSaving(false);
-      toast({
-        title: '保存失败',
-        description: '请重试或截图保存',
-        variant: 'destructive',
-      });
+      toast.error("保存失败", { description: "请重试或截图保存" });
     }
-  }, [selectedNetwork.name, fullAddress, toast]);
+  }, [selectedNetwork.name, fullAddress]);
 
   const handleSelectNetwork = (network: typeof networks[0]) => {
     setSelectedNetwork(network);

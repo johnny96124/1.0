@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { PSPServiceType } from '@/types/wallet';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 import { PSPLogo } from '@/components/PSPLogo';
 import {
   AlertDialog,
