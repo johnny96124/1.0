@@ -11,7 +11,7 @@ import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { NetworkFeeSelector } from '@/components/NetworkFeeSelector';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/lib/toast';
 
 type Step = 'confirm' | 'fee' | 'auth' | 'processing' | 'success';
 
@@ -37,7 +37,7 @@ export default function RiskReturn() {
   // Redirect if transaction not found
   useEffect(() => {
     if (!transaction) {
-      toast({ title: '交易未找到', variant: 'destructive' });
+      toast.error('交易未找到');
       navigate('/risk-management');
     }
   }, [transaction, navigate]);
@@ -65,9 +65,9 @@ export default function RiskReturn() {
     try {
       await returnRiskFunds(transaction.id);
       setStep('success');
-      toast({ title: '资金已成功退回', description: '交易已从待处置列表中移除' });
+      toast.success('资金已成功退回', '交易已从待处置列表中移除');
     } catch (error) {
-      toast({ title: '退回失败，请重试', variant: 'destructive' });
+      toast.error('退回失败，请重试');
       setStep('auth');
     } finally {
       setIsProcessing(false);

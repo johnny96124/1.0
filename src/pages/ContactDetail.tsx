@@ -14,7 +14,7 @@ import {
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/toast';
 import { ChainId } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
@@ -35,7 +35,6 @@ export default function ContactDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { contacts, removeContact, updateContact, transactions } = useWallet();
-  const { toast } = useToast();
 
   const contact = contacts.find(c => c.id === id);
   const [copied, setCopied] = useState(false);
@@ -60,35 +59,26 @@ export default function ContactDetailPage() {
     try {
       await navigator.clipboard.writeText(contact.address);
       setCopied(true);
-      toast({
-        title: '已复制',
-        description: '地址已复制到剪贴板',
-      });
+      toast.success('已复制', '地址已复制到剪贴板');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast({
-        title: '复制失败',
-        variant: 'destructive',
-      });
+      toast.error('复制失败');
     }
   };
 
   const handleToggleWhitelist = () => {
     updateContact(contact.id, { isWhitelisted: !contact.isWhitelisted });
-    toast({
-      title: contact.isWhitelisted ? '已从白名单移除' : '已添加到白名单',
-      description: contact.isWhitelisted 
+    toast.success(
+      contact.isWhitelisted ? '已从白名单移除' : '已添加到白名单',
+      contact.isWhitelisted 
         ? '该地址不再享受白名单特权' 
-        : '向该地址转账将跳过部分验证',
-    });
+        : '向该地址转账将跳过部分验证'
+    );
   };
 
   const handleDelete = () => {
     removeContact(contact.id);
-    toast({
-      title: '联系人已删除',
-      description: `${contact.name} 已从地址簿移除`,
-    });
+    toast.success('联系人已删除', `${contact.name} 已从地址簿移除`);
     navigate('/profile/contacts');
   };
 

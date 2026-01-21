@@ -30,15 +30,20 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme="light"
       className="toaster group"
-      position="bottom-center"
+      position="top-center"
       containerAriaLabel="通知"
+      expand={false}
+      richColors={false}
+      closeButton={false}
       /**
        * Sonner's default CSS sets the toaster to `position: fixed`.
        * We override to `absolute` so it positions INSIDE PhoneFrame.
+       * Top position accounts for notch area (~28px) + safe spacing
        */
       style={{
         position: "absolute",
-        bottom: 100,
+        top: 44,
+        bottom: "auto",
         left: 16,
         right: 16,
         width: "auto",
@@ -47,16 +52,21 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       toastOptions={{
         unstyled: true,
+        duration: 3000,
         classNames: {
           toast:
-            "w-full flex flex-col gap-1 p-4 rounded-2xl shadow-xl pointer-events-auto",
-          title: "font-semibold text-base text-foreground",
-          description: "text-sm text-muted-foreground",
+            "w-full flex flex-col gap-1 p-4 rounded-2xl shadow-xl pointer-events-auto bg-[hsl(var(--toast-surface))] text-[hsl(var(--toast-surface-foreground))] data-[swipe=move]:translate-y-[var(--y)] data-[swipe=cancel]:translate-y-0 data-[swipe=end]:animate-out data-[swipe=end]:fade-out-80",
+          title: "font-semibold text-base",
+          description: "text-sm opacity-80",
+          success: "border-l-4 border-l-success",
+          error: "border-l-4 border-l-destructive",
+          warning: "border-l-4 border-l-warning",
+          info: "border-l-4 border-l-accent",
         },
         style: {
           background: "hsl(var(--toast-surface))",
           color: "hsl(var(--toast-surface-foreground))",
-          boxShadow: "var(--shadow-xl)",
+          boxShadow: "0 10px 40px -10px rgba(0, 0, 0, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.1)",
         },
       }}
       {...props}

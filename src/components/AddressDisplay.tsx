@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/toast';
 
 interface AddressDisplayProps {
   address: string;
@@ -18,7 +18,6 @@ export function AddressDisplay({
   showFull = false 
 }: AddressDisplayProps) {
   const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
 
   const formatAddress = (addr: string) => {
     if (showFull || addr.length <= 16) return addr;
@@ -29,17 +28,10 @@ export function AddressDisplay({
     try {
       await navigator.clipboard.writeText(address);
       setCopied(true);
-      toast({
-        title: "已复制",
-        description: "地址已复制到剪贴板",
-      });
+      toast.success('已复制', '地址已复制到剪贴板');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast({
-        title: "复制失败",
-        description: "请手动复制地址",
-        variant: "destructive",
-      });
+      toast.error('复制失败', '请手动复制地址');
     }
   };
 
