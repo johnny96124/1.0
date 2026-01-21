@@ -77,6 +77,10 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217 91% 60%;
+
+    /* System toast surface (bottom-center) */
+    --toast-surface: 220 20% 96%;
+    --toast-surface-foreground: 222 47% 11%;
   }
 
   .dark {
@@ -135,6 +139,10 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 222 30% 18%;
     --sidebar-ring: 217 91% 60%;
+
+    /* System toast surface (bottom-center) */
+    --toast-surface: 222 30% 14%;
+    --toast-surface-foreground: 210 40% 98%;
   }
 }
 

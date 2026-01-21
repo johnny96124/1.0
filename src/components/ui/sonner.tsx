@@ -27,37 +27,40 @@ const Toaster = ({ ...props }: ToasterProps) => {
   if (!container) return null;
 
   const toasterElement = (
-    <div 
+    <Sonner
+      theme="light"
+      className="toaster group"
+      position="bottom-center"
+      containerAriaLabel="通知"
+      /**
+       * Sonner's default CSS sets the toaster to `position: fixed`.
+       * We override to `absolute` so it positions INSIDE PhoneFrame.
+       */
       style={{
-        position: 'absolute',
-        bottom: '100px',
-        left: '16px',
-        right: '16px',
+        position: "absolute",
+        bottom: 100,
+        left: 16,
+        right: 16,
+        width: "auto",
         zIndex: 9999,
-        pointerEvents: 'none',
+        pointerEvents: "none",
       }}
-    >
-      <Sonner
-        theme="light"
-        className="toaster group"
-        position="bottom-center"
-        containerAriaLabel="通知"
-        toastOptions={{
-          unstyled: true,
-          classNames: {
-            toast:
-              "w-full flex flex-col gap-1 p-4 rounded-2xl shadow-xl pointer-events-auto",
-            title: "font-semibold text-base text-slate-900",
-            description: "text-sm text-slate-500",
-          },
-          style: {
-            background: '#f5f5f7',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-          },
-        }}
-        {...props}
-      />
-    </div>
+      toastOptions={{
+        unstyled: true,
+        classNames: {
+          toast:
+            "w-full flex flex-col gap-1 p-4 rounded-2xl shadow-xl pointer-events-auto",
+          title: "font-semibold text-base text-foreground",
+          description: "text-sm text-muted-foreground",
+        },
+        style: {
+          background: "hsl(var(--toast-surface))",
+          color: "hsl(var(--toast-surface-foreground))",
+          boxShadow: "var(--shadow-xl)",
+        },
+      }}
+      {...props}
+    />
   );
 
   return createPortal(toasterElement, container);
