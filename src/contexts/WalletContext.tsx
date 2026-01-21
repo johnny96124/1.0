@@ -39,6 +39,15 @@ const mockAssetsWallet2: Asset[] = [
   { symbol: 'BNB', name: 'BNB', balance: 8.2, usdValue: 4920.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
 ];
 
+// Mock assets for wallet-3 (escaped/self-custody wallet)
+const mockAssetsWallet3: Asset[] = [
+  { symbol: 'ETH', name: 'Ethereum', balance: 1.85, usdValue: 6475.00, change24h: 2.34, icon: 'ETH', network: 'ethereum' },
+  { symbol: 'USDT', name: 'Tether USD', balance: 4200.00, usdValue: 4200.00, change24h: 0.01, icon: 'USDT', network: 'ethereum' },
+  { symbol: 'USDC', name: 'USD Coin', balance: 1500.00, usdValue: 1500.00, change24h: 0.00, icon: 'USDC', network: 'ethereum' },
+  { symbol: 'BNB', name: 'BNB', balance: 2.3, usdValue: 1380.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
+  { symbol: 'USDT', name: 'Tether USD', balance: 800.00, usdValue: 800.00, change24h: 0.01, icon: 'USDT', network: 'tron' },
+];
+
 // Mock assets for newly created wallets (empty)
 const mockAssetsNewWallet: Asset[] = [];
 
@@ -46,6 +55,7 @@ const mockAssetsNewWallet: Asset[] = [];
 const walletAssetsMap: Record<string, Asset[]> = {
   'wallet-1': mockAssetsWallet1,
   'wallet-2': mockAssetsWallet2,
+  'wallet-3': mockAssetsWallet3,
 };
 
 // Helper to get assets for a wallet
@@ -270,10 +280,71 @@ const mockTransactionsWallet2: Transaction[] = [
   },
 ];
 
+// Mock transactions for wallet-3 (self-custody wallet)
+const mockTransactionsWallet3: Transaction[] = [
+  {
+    id: 'self-1',
+    type: 'receive',
+    amount: 1.85,
+    symbol: 'ETH',
+    usdValue: 6475,
+    status: 'confirmed',
+    counterparty: '0xABC123...DEF456',
+    counterpartyLabel: '从 MPC 钱包转入',
+    timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    txHash: '0xself1...hash',
+    network: 'ethereum',
+    riskScore: 'green',
+  },
+  {
+    id: 'self-2',
+    type: 'receive',
+    amount: 4200,
+    symbol: 'USDT',
+    usdValue: 4200,
+    status: 'confirmed',
+    counterparty: '0xABC123...DEF456',
+    counterpartyLabel: '从 MPC 钱包转入',
+    timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    txHash: '0xself2...hash',
+    network: 'ethereum',
+    riskScore: 'green',
+  },
+  {
+    id: 'self-3',
+    type: 'send',
+    amount: 500,
+    symbol: 'USDT',
+    usdValue: 500,
+    status: 'confirmed',
+    counterparty: '0xExch...ange',
+    counterpartyLabel: 'Exchange Deposit',
+    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    txHash: '0xself3...hash',
+    network: 'ethereum',
+    fee: 8.5,
+    riskScore: 'green',
+  },
+  {
+    id: 'self-4',
+    type: 'receive',
+    amount: 2.3,
+    symbol: 'BNB',
+    usdValue: 1380,
+    status: 'confirmed',
+    counterparty: '0xBSC...Addr',
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    txHash: '0xbsc...hash',
+    network: 'bsc',
+    riskScore: 'green',
+  },
+];
+
 // Wallet ID to transactions mapping
 const walletTransactionsMap: Record<string, Transaction[]> = {
   'wallet-1': mockTransactionsWallet1,
   'wallet-2': mockTransactionsWallet2,
+  'wallet-3': mockTransactionsWallet3,
 };
 
 // Helper to get transactions for a wallet

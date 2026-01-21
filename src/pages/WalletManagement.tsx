@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Wallet, Plus, Check,
   CheckCircle2, AlertTriangle, Shield, MoreHorizontal,
-  Edit3, Eye, Trash2, Cloud, FileArchive, Key, Download
+  Edit3, Eye, Trash2, Cloud, FileArchive, Key, Download, Fingerprint
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -28,6 +28,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Wallet as WalletType } from '@/types/wallet';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
 export default function WalletManagementPage() {
   const navigate = useNavigate();
@@ -41,6 +42,10 @@ export default function WalletManagementPage() {
   const [newWalletName, setNewWalletName] = useState('');
   const [backupStatusDialogOpen, setBackupStatusDialogOpen] = useState(false);
   const [selectedWalletForBackup, setSelectedWalletForBackup] = useState<any>(null);
+  const [privateKeyDialogOpen, setPrivateKeyDialogOpen] = useState(false);
+  const [selectedWalletForKey, setSelectedWalletForKey] = useState<WalletType | null>(null);
+  const [passkeyStep, setPasskeyStep] = useState<'verify' | 'show'>('verify');
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Calculate security score based on how many wallets are backed up
   const backedUpCount = wallets.filter(w => w.isBackedUp).length;
@@ -92,6 +97,25 @@ export default function WalletManagementPage() {
   const handleViewBackupStatus = (wallet: any) => {
     setSelectedWalletForBackup(wallet);
     setBackupStatusDialogOpen(true);
+  };
+
+  const handleViewPrivateKey = (wallet: WalletType) => {
+    setSelectedWalletForKey(wallet);
+    setPasskeyStep('verify');
+    setPrivateKeyDialogOpen(true);
+  };
+
+  const handlePasskeyVerify = async () => {
+    setIsVerifying(true);
+    // Simulate passkey verification
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsVerifying(false);
+    setPasskeyStep('show');
+  };
+
+  const handleCopyPrivateKey = () => {
+    navigator.clipboard.writeText('0x1a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890');
+    toast.success('私钥已复制到剪贴板');
   };
 
   return (
@@ -250,7 +274,18 @@ export default function WalletManagementPage() {
                           <Eye className="w-4 h-4 mr-2" />
                           查看备份状态
                         </DropdownMenuItem>
-                        {!isEscaped && (
+                        {isEscaped ? (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => handleViewPrivateKey(wallet)}
+                              className="text-warning focus:text-warning"
+                            >
+                              <Key className="w-4 h-4 mr-2" />
+                              查看私钥
+                            </DropdownMenuItem>
+                          </>
+                        ) : (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
@@ -381,6 +416,101 @@ export default function WalletManagementPage() {
                   )}
                 </div>
               </>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Private Key Drawer */}
+      <Drawer open={privateKeyDialogOpen} onOpenChange={(open) => {
+        setPrivateKeyDialogOpen(open);
+        if (!open) {
+          setPasskeyStep('verify');
+          setSelectedWalletForKey(null);
+        }
+      }}>
+        <DrawerContent>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>
+              {passkeyStep === 'verify' ? '身份验证' : '查看私钥'}
+            </DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6">
+            {passkeyStep === 'verify' ? (
+              <div className="space-y-6">
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Fingerprint className="w-8 h-8 text-accent" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-medium text-foreground mb-1">需要验证身份</p>
+                    <p className="text-sm text-muted-foreground">
+                      为保护您的资产安全，请使用 Passkey 验证身份
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  className="w-full h-12" 
+                  onClick={handlePasskeyVerify}
+                  disabled={isVerifying}
+                >
+                  {isVerifying ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
+                    />
+                  ) : (
+                    <>
+                      <Fingerprint className="w-5 h-5 mr-2" />
+                      使用 Passkey 验证
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Warning */}
+                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-destructive">安全警告</p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        私钥是访问您资产的唯一凭证，请勿截屏、拍照或分享给他人。
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Wallet Info */}
+                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                  <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
+                    <Key className="w-5 h-5 text-warning" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{selectedWalletForKey?.name}</p>
+                    <p className="text-xs text-muted-foreground">自托管钱包</p>
+                  </div>
+                </div>
+
+                {/* Private Key Display */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">私钥</label>
+                  <div className="p-4 bg-muted/50 rounded-lg border border-border break-all font-mono text-sm text-foreground">
+                    0x1a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890
+                  </div>
+                </div>
+
+                {/* Copy Button */}
+                <Button 
+                  variant="outline" 
+                  className="w-full h-11"
+                  onClick={handleCopyPrivateKey}
+                >
+                  复制私钥
+                </Button>
+              </div>
             )}
           </div>
         </DrawerContent>
