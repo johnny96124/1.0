@@ -193,9 +193,7 @@ export default function SendPage() {
             <ArrowLeft className="w-5 h-5 text-foreground" />
           </button>
           <h1 className="text-lg font-semibold text-foreground">{getStepTitle()}</h1>
-          <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">
-            <MoreHorizontal className="w-5 h-5 text-foreground" />
-          </button>
+          <div className="w-10" />
         </div>
 
         {/* Limit Warning for unbacked wallet */}
