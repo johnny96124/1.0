@@ -174,6 +174,18 @@ export interface UserInfo {
   nickname?: string;
 }
 
+// ============= Auth Types =============
+
+// User type for routing after login
+export type UserType = 'new' | 'returning_with_wallet' | 'returning_without_wallet';
+
+// Auth result returned from login/verify
+export interface AuthResult {
+  userType: UserType;
+  isDeviceAuthorized: boolean;
+  hasExistingWallets: boolean;
+}
+
 // ============= PSP (Payment Service Provider) Types =============
 
 // Service types offered by PSP

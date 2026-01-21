@@ -4,7 +4,8 @@ import {
   SecurityConfig, BackupStatus, WalletStatus, WalletState,
   RiskColor, ChainId, AggregatedAsset, UserInfo, LimitStatus,
   PSPProvider, PSPConnection, PSPConnectionStatus,
-  AccountRiskStatus, AccountRiskSummary, Notification
+  AccountRiskStatus, AccountRiskSummary, Notification,
+  AuthResult, UserType
 } from '@/types/wallet';
 
 // Mock data for demonstration - wallet-specific assets
@@ -733,8 +734,10 @@ export function aggregateAssets(assets: Asset[]): AggregatedAsset[] {
 
 interface WalletContextType extends WalletState {
   // Auth actions
-  login: (provider: 'apple' | 'google' | 'email') => Promise<void>;
+  login: (provider: 'apple' | 'google' | 'email') => Promise<AuthResult>;
   logout: () => void;
+  sendVerificationCode: (email: string) => Promise<void>;
+  verifyCode: (email: string, code: string) => Promise<AuthResult>;
   
   // Wallet actions
   createWallet: (name: string) => Promise<Wallet>;
@@ -828,12 +831,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   }, []);
 
-  const login = useCallback(async (provider: 'apple' | 'google' | 'email') => {
-    // Simulate login delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsAuthenticated(true);
-    
-    // Set user info based on login provider
+  // Mock user data - can be toggled for testing different user types
+  const [mockIsNewUser] = useState(false); // Set to true to test new user flow
+
+  const setupExistingUser = useCallback(() => {
     const mockUserInfo: UserInfo = {
       email: 'sarah.chen@gmail.com',
       avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face',
@@ -841,7 +842,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
     setUserInfo(mockUserInfo);
     
-    // Simulate existing user with multiple wallets - login goes directly to home
     const mockWallets: Wallet[] = [
       {
         id: 'wallet-1',
@@ -916,6 +916,80 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setHasBiometric(true);
     setPspConnections(mockPSPConnections);
   }, []);
+
+  const sendVerificationCode = useCallback(async (email: string): Promise<void> => {
+    // Simulate sending verification code
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log(`Verification code sent to ${email}`);
+    // In production, this would call an API to send the code
+  }, []);
+
+  const verifyCode = useCallback(async (email: string, code: string): Promise<AuthResult> => {
+    // Simulate verification delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Mock: Accept any 6-digit code for testing
+    if (code.length !== 6) {
+      throw new Error('Invalid code');
+    }
+
+    setIsAuthenticated(true);
+
+    // Determine user type based on mockIsNewUser flag
+    if (mockIsNewUser) {
+      // New user - no wallets
+      const mockUserInfo: UserInfo = {
+        email,
+        nickname: email.split('@')[0],
+      };
+      setUserInfo(mockUserInfo);
+      setWalletStatus('not_created');
+      
+      return {
+        userType: 'new',
+        isDeviceAuthorized: true,
+        hasExistingWallets: false,
+      };
+    } else {
+      // Existing user with wallets
+      setupExistingUser();
+      
+      return {
+        userType: 'returning_with_wallet',
+        isDeviceAuthorized: true,
+        hasExistingWallets: true,
+      };
+    }
+  }, [mockIsNewUser, setupExistingUser]);
+
+  const login = useCallback(async (provider: 'apple' | 'google' | 'email'): Promise<AuthResult> => {
+    // Simulate login delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsAuthenticated(true);
+    
+    if (mockIsNewUser) {
+      const mockUserInfo: UserInfo = {
+        email: 'newuser@example.com',
+        nickname: 'New User',
+      };
+      setUserInfo(mockUserInfo);
+      setWalletStatus('not_created');
+      
+      return {
+        userType: 'new',
+        isDeviceAuthorized: true,
+        hasExistingWallets: false,
+      };
+    } else {
+      setupExistingUser();
+      
+      return {
+        userType: 'returning_with_wallet',
+        isDeviceAuthorized: true,
+        hasExistingWallets: true,
+      };
+    }
+  }, [mockIsNewUser, setupExistingUser]);
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);
@@ -1254,6 +1328,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     hasBiometric,
     login,
     logout,
+    sendVerificationCode,
+    verifyCode,
     createWallet,
     switchWallet,
     setPin,

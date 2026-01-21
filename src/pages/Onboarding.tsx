@@ -32,6 +32,7 @@ const recoverySteps = [
 export default function OnboardingPage() {
   const [searchParams] = useSearchParams();
   const isRecoveryMode = searchParams.get('recover') === 'true';
+  const isNewUser = searchParams.get('new') === 'true';
   
   const [currentStep, setCurrentStep] = useState(1);
   const navigate = useNavigate();
@@ -54,6 +55,9 @@ export default function OnboardingPage() {
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    } else if (isNewUser) {
+      // New users can't go back to login, redirect to first step
+      setCurrentStep(1);
     } else {
       navigate('/home');
     }
