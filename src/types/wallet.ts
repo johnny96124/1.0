@@ -32,6 +32,22 @@ export const SUPPORTED_CHAINS: ChainInfo[] = [
   { id: 'bsc', name: 'BNB Chain', shortName: 'BNB', icon: 'bsc', color: 'hsl(38 92% 50%)' },
 ];
 
+// Wallet backup channel info
+export interface WalletBackupInfo {
+  method: 'cloud' | 'file' | 'none';
+  cloudProvider?: 'icloud' | 'google_drive';
+  lastBackupTime?: Date;
+  fileBackupTime?: Date;
+}
+
+// Recovery method types
+export type RecoveryMethod = 
+  | 'scan_device'     // Scan old device (recommended)
+  | 'cloud_icloud'    // iCloud recovery
+  | 'cloud_google'    // Google Drive recovery
+  | 'local_file'      // Local backup file recovery
+  | 'private_key';    // Private key import (advanced)
+
 export interface Wallet {
   id: string;
   name: string;
@@ -39,6 +55,11 @@ export interface Wallet {
   createdAt: Date;
   isBackedUp: boolean;
   isBiometricEnabled: boolean;
+  // MPC escape and backup tracking
+  backupInfo?: WalletBackupInfo;
+  isEscaped: boolean;
+  escapedAt?: Date;
+  custodyType: 'mpc' | 'self';
 }
 
 export interface Asset {

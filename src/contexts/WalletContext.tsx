@@ -784,6 +784,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
         isBiometricEnabled: true,
+        isEscaped: false,
+        custodyType: 'mpc',
+        backupInfo: {
+          method: 'cloud',
+          cloudProvider: 'icloud',
+          lastBackupTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        },
       },
       {
         id: 'wallet-2',
@@ -797,6 +804,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
         isBiometricEnabled: false,
+        isEscaped: false,
+        custodyType: 'mpc',
+        backupInfo: {
+          method: 'cloud',
+          cloudProvider: 'google_drive',
+          lastBackupTime: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        },
       },
     ];
     
@@ -842,6 +856,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       createdAt: new Date(),
       isBackedUp: false,
       isBiometricEnabled: hasBiometric,
+      isEscaped: false,
+      custodyType: 'mpc',
     };
     
     // Register new wallet in the assets map
