@@ -648,8 +648,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     
     // Set user info based on login provider
     const mockUserInfo: UserInfo = {
-      email: provider === 'google' ? 'user@gmail.com' : provider === 'apple' ? 'user@icloud.com' : 'user@example.com',
-      avatar: undefined, // Can add avatar URL here
+      email: 'sarah.chen@gmail.com',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face',
+      nickname: 'Sarah Chen',
     };
     setUserInfo(mockUserInfo);
     
