@@ -66,9 +66,6 @@ export default function PSPDetailPage() {
 
   const handleServiceClick = (service: PSPServiceType) => {
     switch (service) {
-      case 'collection':
-        navigate('/receive');
-        break;
       case 'transfer':
         // Use the first address from PSP connection or PSP wallet address
         const pspAddress = connection.addresses?.[0]?.address || psp.walletAddress || '0x1234567890abcdef1234567890abcdef12345678';
@@ -89,6 +86,9 @@ export default function PSPDetailPage() {
         break;
       case 'settlement':
         toast.info('结算功能即将上线');
+        break;
+      case 'collection':
+        toast.info('收款功能即将上线');
         break;
     }
   };
