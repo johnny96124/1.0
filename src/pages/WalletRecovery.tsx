@@ -287,9 +287,13 @@ export default function WalletRecoveryPage() {
             <span>二维码 5 分钟内有效</span>
           </div>
 
-          <Button className="w-full" onClick={handleStartScanDevice}>
+          <Button 
+            className="w-full" 
+            variant="outline"
+            onClick={handleStartScanDevice}
+          >
             <Smartphone className="w-4 h-4 mr-2" />
-            我已在旧设备上打开 App
+            模拟恢复流程（演示）
           </Button>
         </motion.div>
       );
