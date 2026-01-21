@@ -299,8 +299,8 @@ export default function DeviceManagementPage() {
 
       {/* Login History Drawer */}
       <Drawer open={showHistoryDrawer} onOpenChange={setShowHistoryDrawer}>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="border-b border-border">
+        <DrawerContent className="max-h-[70vh] flex flex-col">
+          <DrawerHeader className="border-b border-border flex-shrink-0">
             <div className="flex items-center justify-between">
               <DrawerTitle>登录历史</DrawerTitle>
               <Button
@@ -313,7 +313,7 @@ export default function DeviceManagementPage() {
               </Button>
             </div>
           </DrawerHeader>
-          <div className="overflow-y-auto px-4 py-2 max-h-[70vh]">
+          <div className="overflow-y-auto flex-1 px-4 py-2">
             {mockLoginHistory.map((record, index) => {
               const Icon = getDeviceIcon(record.deviceModel);
               return (
