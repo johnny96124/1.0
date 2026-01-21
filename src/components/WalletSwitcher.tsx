@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Plus, Wallet } from 'lucide-react';
+import { Check, Plus, Wallet, Download, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
@@ -9,9 +9,10 @@ interface WalletSwitcherProps {
   isOpen: boolean;
   onClose: () => void;
   onCreateNew: () => void;
+  onImport: () => void;
 }
 
-export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherProps) {
+export function WalletSwitcher({ isOpen, onClose, onCreateNew, onImport }: WalletSwitcherProps) {
   const { wallets, currentWallet, switchWallet } = useWallet();
 
   const handleSelect = (walletId: string) => {
@@ -51,6 +52,7 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherP
               {wallets.map((wallet) => {
                 const isActive = wallet.id === currentWallet?.id;
                 const balance = getWalletTotalBalance(wallet.id);
+                const isEscaped = wallet.isEscaped;
                 
                 return (
                   <motion.button
@@ -67,12 +69,19 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherP
                     {/* Wallet Icon */}
                     <div className={cn(
                       "w-10 h-10 rounded-full flex items-center justify-center shrink-0",
-                      isActive ? "gradient-primary" : "bg-muted"
+                      isActive ? "gradient-primary" : isEscaped ? "bg-warning/10" : "bg-muted"
                     )}>
-                      <Wallet className={cn(
-                        "w-5 h-5",
-                        isActive ? "text-primary-foreground" : "text-muted-foreground"
-                      )} />
+                      {isEscaped ? (
+                        <Key className={cn(
+                          "w-5 h-5",
+                          isActive ? "text-primary-foreground" : "text-warning"
+                        )} />
+                      ) : (
+                        <Wallet className={cn(
+                          "w-5 h-5",
+                          isActive ? "text-primary-foreground" : "text-muted-foreground"
+                        )} />
+                      )}
                     </div>
                     
                     {/* Wallet Info */}
@@ -99,15 +108,24 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherP
               })}
             </div>
             
-            {/* Create New Wallet Button */}
-            <Button
-              variant="outline"
-              className="w-full h-11 border-dashed"
-              onClick={onCreateNew}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              创建新钱包
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 h-11 border-dashed"
+                onClick={onImport}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                导入钱包
+              </Button>
+              <Button
+                className="flex-1 h-11"
+                onClick={onCreateNew}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                创建钱包
+              </Button>
+            </div>
           </motion.div>
         </motion.div>
       )}
