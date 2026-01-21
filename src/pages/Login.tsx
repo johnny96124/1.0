@@ -25,7 +25,7 @@ interface SlideData {
   floatingIcons: React.ReactNode[];
 }
 
-type LoginStep = 'email' | 'verification' | 'processing';
+type LoginStep = 'email' | 'password' | 'verification' | 'processing';
 
 // Color themes for each slide
 const colorThemes = [
@@ -99,12 +99,15 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [codeError, setCodeError] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
-  const { login, sendVerificationCode, verifyCode } = useWallet();
+  const [hasPassword, setHasPassword] = useState(false);
+  const { login, sendVerificationCode, verifyCode, checkPasswordExists, loginWithPassword } = useWallet();
   const navigate = useNavigate();
 
   const onSelect = useCallback(() => {
@@ -128,6 +131,32 @@ export default function LoginPage() {
       return () => clearTimeout(timer);
     }
   }, [countdown]);
+
+  // Check if user has password and decide which step to show
+  const handleContinueWithEmail = async () => {
+    if (!email) return;
+    
+    setIsLoading(true);
+    try {
+      const result = await checkPasswordExists(email);
+      setHasPassword(result.hasPassword);
+      
+      if (result.hasPassword) {
+        // User has password, show password input
+        setLoginStep('password');
+      } else {
+        // No password, send verification code
+        await sendVerificationCode(email);
+        setLoginStep('verification');
+        setCountdown(60);
+        setCodeError('');
+      }
+    } catch (error) {
+      console.error('Check password failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSendCode = async () => {
     if (!email) return;
@@ -196,7 +225,7 @@ export default function LoginPage() {
 
   const handleLogin = async (provider: 'apple' | 'google' | 'email') => {
     if (provider === 'email') {
-      handleSendCode();
+      handleContinueWithEmail();
       return;
     }
     
@@ -224,12 +253,149 @@ export default function LoginPage() {
   };
 
   const handleBack = () => {
-    if (loginStep === 'verification') {
+    if (loginStep === 'verification' || loginStep === 'password') {
       setLoginStep('email');
       setVerificationCode('');
       setCodeError('');
+      setPassword('');
+      setPasswordError('');
     }
   };
+
+  // Handle password login
+  const handlePasswordLogin = async () => {
+    if (!password) return;
+    
+    setIsLoading(true);
+    setLoginStep('processing');
+    setPasswordError('');
+    
+    try {
+      const result = await loginWithPassword(email, password);
+      
+      if (result.userType === 'new') {
+        navigate('/onboarding?new=true');
+      } else if (result.hasExistingWallets) {
+        navigate('/home');
+      } else {
+        navigate('/create-wallet');
+      }
+    } catch (error) {
+      console.error('Password login failed:', error);
+      setPasswordError('密码错误，请重试');
+      setLoginStep('password');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Switch to verification code method
+  const handleSwitchToVerification = async () => {
+    setIsLoading(true);
+    try {
+      await sendVerificationCode(email);
+      setLoginStep('verification');
+      setCountdown(60);
+      setCodeError('');
+      setPassword('');
+      setPasswordError('');
+    } catch (error) {
+      console.error('Send code failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Password Input Step
+  const renderPasswordStep = () => (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="flex-1 px-6 flex flex-col"
+    >
+      {/* Back button and title */}
+      <div className="flex items-center mb-6">
+        <button
+          onClick={handleBack}
+          className="p-2 -ml-2 mr-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div className="flex-1">
+          <h2 className="text-lg font-semibold text-foreground">输入密码</h2>
+          <p className="text-sm text-muted-foreground">{email}</p>
+        </div>
+      </div>
+
+      {/* Lock icon */}
+      <div className="flex justify-center mb-6">
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center"
+        >
+          <Lock className="w-8 h-8 text-accent" />
+        </motion.div>
+      </div>
+
+      {/* Password Input */}
+      <div className="relative mb-4">
+        <Input
+          type="password"
+          placeholder="请输入密码"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setPasswordError('');
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && password) {
+              handlePasswordLogin();
+            }
+          }}
+          className="h-14 text-base"
+          disabled={isLoading}
+        />
+      </div>
+
+      {/* Error message */}
+      {passwordError && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-sm text-destructive text-center mb-4"
+        >
+          {passwordError}
+        </motion.p>
+      )}
+
+      {/* Login Button */}
+      <Button
+        variant="default"
+        size="lg"
+        className="w-full h-14 text-base font-medium mb-4"
+        onClick={handlePasswordLogin}
+        disabled={isLoading || !password}
+      >
+        {isLoading ? (
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+        ) : null}
+        登录
+      </Button>
+
+      {/* Switch to verification code */}
+      <div className="text-center">
+        <button
+          onClick={handleSwitchToVerification}
+          disabled={isLoading}
+          className="text-sm text-primary hover:underline disabled:opacity-50"
+        >
+          使用验证码登录
+        </button>
+      </div>
+    </motion.div>
+  );
 
   // Email Input Step
   const renderEmailStep = () => (
@@ -583,6 +749,7 @@ export default function LoginPage() {
       {/* Login Form Area */}
       <AnimatePresence mode="wait">
         {loginStep === 'email' && renderEmailStep()}
+        {loginStep === 'password' && renderPasswordStep()}
         {loginStep === 'verification' && renderVerificationStep()}
         {loginStep === 'processing' && renderProcessingStep()}
       </AnimatePresence>
