@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Lock, Wallet, CreditCard, TrendingUp, Sparkles, X, Loader2, ArrowLeft, Mail } from 'lucide-react';
+import { Shield, Lock, Wallet, CreditCard, TrendingUp, Sparkles, X, Loader2, ArrowLeft, Mail, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
@@ -25,7 +25,7 @@ interface SlideData {
   floatingIcons: React.ReactNode[];
 }
 
-type LoginStep = 'email' | 'password' | 'verification' | 'processing';
+type LoginStep = 'email' | 'password' | 'verification' | 'processing' | 'success';
 
 // Color themes for each slide
 const colorThemes = [
@@ -107,6 +107,7 @@ export default function LoginPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
   const [hasPassword, setHasPassword] = useState(false);
+  const [loginResult, setLoginResult] = useState<{ userType?: string; hasExistingWallets?: boolean } | null>(null);
   const { login, sendVerificationCode, verifyCode, checkPasswordExists, loginWithPassword } = useWallet();
   const navigate = useNavigate();
 
@@ -194,17 +195,19 @@ export default function LoginPage() {
     
     try {
       const result = await verifyCode(email, code);
+      setLoginResult(result);
+      setLoginStep('success');
       
-      if (result.userType === 'new') {
-        // New user - go to onboarding
-        navigate('/onboarding?new=true');
-      } else if (result.hasExistingWallets) {
-        // Returning user with wallets - go to home
-        navigate('/home');
-      } else {
-        // Returning user without wallets - go to create wallet
-        navigate('/create-wallet');
-      }
+      // Delay navigation to show success animation
+      setTimeout(() => {
+        if (result.userType === 'new') {
+          navigate('/onboarding?new=true');
+        } else if (result.hasExistingWallets) {
+          navigate('/home');
+        } else {
+          navigate('/create-wallet');
+        }
+      }, 1500);
     } catch (error) {
       console.error('Verify code failed:', error);
       setCodeError('验证码错误，请重试');
@@ -233,13 +236,18 @@ export default function LoginPage() {
     setLoadingProvider(provider);
     try {
       const result = await login(provider);
-      if (result.userType === 'new') {
-        navigate('/onboarding?new=true');
-      } else if (result.hasExistingWallets) {
-        navigate('/home');
-      } else {
-        navigate('/create-wallet');
-      }
+      setLoginResult(result);
+      setLoginStep('success');
+      
+      setTimeout(() => {
+        if (result.userType === 'new') {
+          navigate('/onboarding?new=true');
+        } else if (result.hasExistingWallets) {
+          navigate('/home');
+        } else {
+          navigate('/create-wallet');
+        }
+      }, 1500);
     } catch (error) {
       console.error('Login failed:', error);
     } finally {
@@ -272,14 +280,18 @@ export default function LoginPage() {
     
     try {
       const result = await loginWithPassword(email, password);
+      setLoginResult(result);
+      setLoginStep('success');
       
-      if (result.userType === 'new') {
-        navigate('/onboarding?new=true');
-      } else if (result.hasExistingWallets) {
-        navigate('/home');
-      } else {
-        navigate('/create-wallet');
-      }
+      setTimeout(() => {
+        if (result.userType === 'new') {
+          navigate('/onboarding?new=true');
+        } else if (result.hasExistingWallets) {
+          navigate('/home');
+        } else {
+          navigate('/create-wallet');
+        }
+      }, 1500);
     } catch (error) {
       console.error('Password login failed:', error);
       setPasswordError('密码错误，请重试');
@@ -591,6 +603,93 @@ export default function LoginPage() {
     </motion.div>
   );
 
+  // Success Step
+  const renderSuccessStep = () => (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex-1 px-6 flex flex-col items-center justify-center"
+    >
+      {/* Success checkmark with animation */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
+        className="relative mb-6"
+      >
+        {/* Outer ring pulse */}
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1.5, opacity: 0 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'easeOut' }}
+          className="absolute inset-0 w-24 h-24 rounded-full bg-success/30"
+        />
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1.3, opacity: 0 }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'easeOut', delay: 0.3 }}
+          className="absolute inset-0 w-24 h-24 rounded-full bg-success/20"
+        />
+        
+        {/* Main circle */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.2 }}
+          className="w-24 h-24 rounded-full bg-gradient-to-br from-success to-trust flex items-center justify-center shadow-lg"
+        >
+          <motion.div
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.4 }}
+          >
+            <CheckCircle2 className="w-12 h-12 text-white" strokeWidth={2.5} />
+          </motion.div>
+        </motion.div>
+      </motion.div>
+
+      {/* Success text */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="text-center"
+      >
+        <h2 className="text-xl font-bold text-foreground mb-2">登录成功</h2>
+        <p className="text-sm text-muted-foreground">正在进入您的钱包...</p>
+      </motion.div>
+
+      {/* Confetti-like dots */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ 
+              opacity: 0, 
+              scale: 0,
+              x: '50%',
+              y: '40%'
+            }}
+            animate={{ 
+              opacity: [0, 1, 0],
+              scale: [0, 1, 0.5],
+              x: `${30 + Math.random() * 40}%`,
+              y: `${20 + Math.random() * 40}%`
+            }}
+            transition={{ 
+              duration: 1.5, 
+              delay: 0.3 + i * 0.1,
+              ease: 'easeOut'
+            }}
+            className={`absolute w-2 h-2 rounded-full ${
+              i % 3 === 0 ? 'bg-success' : i % 3 === 1 ? 'bg-accent' : 'bg-warning'
+            }`}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
       {/* Top Gradient Background - covers top spacing and illustration area */}
@@ -752,6 +851,7 @@ export default function LoginPage() {
         {loginStep === 'password' && renderPasswordStep()}
         {loginStep === 'verification' && renderVerificationStep()}
         {loginStep === 'processing' && renderProcessingStep()}
+        {loginStep === 'success' && renderSuccessStep()}
       </AnimatePresence>
 
       {/* Terms - only show on email step */}
