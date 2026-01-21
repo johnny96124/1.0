@@ -14,7 +14,7 @@ import { AddressDisplay } from '@/components/AddressDisplay';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 
 export default function AssetDetailPage() {
   const { symbol } = useParams<{ symbol: string }>();
@@ -88,10 +88,7 @@ export default function AssetDetailPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({
-      title: "已复制",
-      description: "内容已复制到剪贴板",
-    });
+    toast("已复制", { description: "内容已复制到剪贴板" });
   };
 
   if (!assetData) {
