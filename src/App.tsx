@@ -31,6 +31,9 @@ import PSPPermissions from "./pages/PSPPermissions";
 import RiskManagement from "./pages/RiskManagement";
 import RiskReturn from "./pages/RiskReturn";
 import MessageCenter from "./pages/MessageCenter";
+import WalletRecovery from "./pages/WalletRecovery";
+import WalletEscape from "./pages/WalletEscape";
+import AuthorizeDevice from "./pages/AuthorizeDevice";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -79,6 +82,9 @@ function AppRoutes() {
       <Route path="/risk-management" element={<ProtectedRoute><RiskManagement /></ProtectedRoute>} />
       <Route path="/risk-management/return/:txId" element={<ProtectedRoute><RiskReturn /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><MessageCenter /></ProtectedRoute>} />
+      <Route path="/wallet/recovery" element={<WalletRecovery />} />
+      <Route path="/wallet/escape/:id" element={<ProtectedRoute><WalletEscape /></ProtectedRoute>} />
+      <Route path="/profile/devices/authorize" element={<ProtectedRoute><AuthorizeDevice /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
