@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
   TrendingDown, Wallet, Plus, Shield, ShieldAlert, AlertTriangle,
-  CheckCircle2, AlertCircle, Sparkles, Lock, Settings, ChevronDown, Clock, XCircle, Copy, ExternalLink
+  CheckCircle2, AlertCircle, Sparkles, Lock, ChevronDown, Clock, XCircle, Copy, ExternalLink
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -240,13 +240,6 @@ export default function HomePage() {
               </div>
             </div>
           </button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={() => navigate('/profile')}
-          >
-            <Settings className="w-5 h-5 text-muted-foreground" />
-          </Button>
         </div>
 
         {/* Balance Card with Light Gradient Overlay */}
