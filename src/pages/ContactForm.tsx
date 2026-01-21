@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useWallet } from '@/contexts/WalletContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/toast';
 import { ChainId, SUPPORTED_CHAINS, RiskColor } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import { QRScanner } from '@/components/QRScanner';
@@ -30,7 +30,6 @@ export default function ContactFormPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { contacts, addContact, updateContact, scanAddressRisk } = useWallet();
-  const { toast } = useToast();
 
   const isEditing = !!id;
   const existingContact = isEditing ? contacts.find(c => c.id === id) : null;
@@ -93,27 +92,17 @@ export default function ContactFormPage() {
   const handleSave = async () => {
     // Validation
     if (!name.trim()) {
-      toast({
-        title: '请输入联系人名称',
-        variant: 'destructive',
-      });
+      toast.error('请输入联系人名称');
       return;
     }
 
     if (!address.trim()) {
-      toast({
-        title: '请输入地址',
-        variant: 'destructive',
-      });
+      toast.error('请输入地址');
       return;
     }
 
     if (!isValidAddress) {
-      toast({
-        title: '地址格式不正确',
-        description: `请输入有效的 ${network === 'tron' ? 'Tron' : 'EVM'} 地址`,
-        variant: 'destructive',
-      });
+      toast.error('地址格式不正确', `请输入有效的 ${network === 'tron' ? 'Tron' : 'EVM'} 地址`);
       return;
     }
 
@@ -122,11 +111,7 @@ export default function ContactFormPage() {
       c => c.address.toLowerCase() === address.toLowerCase() && c.id !== id
     );
     if (duplicate) {
-      toast({
-        title: '地址已存在',
-        description: `该地址已保存为 "${duplicate.name}"`,
-        variant: 'destructive',
-      });
+      toast.error('地址已存在', `该地址已保存为 "${duplicate.name}"`);
       return;
     }
 
@@ -145,25 +130,15 @@ export default function ContactFormPage() {
 
       if (isEditing && id) {
         updateContact(id, contactData);
-        toast({
-          title: '联系人已更新',
-          description: `${name} 的信息已保存`,
-        });
+        toast.success('联系人已更新', `${name} 的信息已保存`);
       } else {
         addContact(contactData);
-        toast({
-          title: '联系人已添加',
-          description: `${name} 已添加到地址簿`,
-        });
+        toast.success('联系人已添加', `${name} 已添加到地址簿`);
       }
 
       navigate('/profile/contacts');
     } catch (error) {
-      toast({
-        title: '保存失败',
-        description: '请稍后重试',
-        variant: 'destructive',
-      });
+      toast.error('保存失败', '请稍后重试');
     } finally {
       setIsSaving(false);
     }
