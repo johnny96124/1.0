@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 import { Badge } from '@/components/ui/badge';
 
 // Password strength calculation
