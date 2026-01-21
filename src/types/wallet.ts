@@ -1,4 +1,7 @@
 // Wallet Types - No Web3 terminology exposed to users
+import { Notification } from './notification';
+
+export type { Notification, NotificationType, NotificationCategory, NotificationPriority } from './notification';
 
 export type WalletStatus = 
   | 'not_created'      // S0: No wallet exists

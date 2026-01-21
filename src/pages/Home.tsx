@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
   TrendingDown, Wallet, Plus, Shield, ShieldAlert, AlertTriangle,
-  CheckCircle2, AlertCircle, Sparkles, Lock, ChevronDown, Clock, XCircle, Copy, ExternalLink
+  CheckCircle2, AlertCircle, Sparkles, Lock, ChevronDown, Clock, XCircle, Copy, ExternalLink, Bell
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -155,7 +155,7 @@ export default function HomePage() {
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [showAllAssets, setShowAllAssets] = useState(false);
   const navigate = useNavigate();
-  const { assets, transactions, currentWallet, walletStatus, userInfo, addToken, getAccountRiskStatus } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, userInfo, addToken, getAccountRiskStatus, unreadNotificationCount } = useWallet();
   
   // Get account risk status
   const riskStatus = getAccountRiskStatus();
@@ -239,6 +239,19 @@ export default function HomePage() {
                 <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </div>
             </div>
+          </button>
+          
+          {/* Message Center Entry */}
+          <button 
+            className="relative p-2"
+            onClick={() => navigate('/messages')}
+          >
+            <Bell className="w-5 h-5 text-muted-foreground" />
+            {unreadNotificationCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center">
+                {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
+              </span>
+            )}
           </button>
         </div>
 
