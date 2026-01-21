@@ -19,7 +19,7 @@ import { WalletSwitcher } from '@/components/WalletSwitcher';
 
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 // Empty state component when no wallet exists - guides user to create first wallet
 function EmptyWalletState() {

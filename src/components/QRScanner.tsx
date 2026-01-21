@@ -4,7 +4,7 @@ import { ArrowLeft, Flashlight, FlashlightOff, Camera, X } from 'lucide-react';
 import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode';
 import { Button } from '@/components/ui/button';
 import { parseQRCode, ParsedQRData } from '@/lib/qr-parser';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 interface QRScannerProps {
   isOpen: boolean;
