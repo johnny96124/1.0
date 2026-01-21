@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
   TrendingDown, Wallet, Plus, Shield, ShieldAlert, AlertTriangle,
-  CheckCircle2, AlertCircle, Sparkles, Lock, ChevronDown, Clock, XCircle, Copy, ExternalLink, Bell
+  CheckCircle2, AlertCircle, Sparkles, Lock, ChevronDown, Clock, XCircle, Copy, ExternalLink, Bell, Key
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -221,14 +221,38 @@ export default function HomePage() {
     <AppLayout>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4">
+        {/* Self-Custody Warning Banner */}
+        {currentWallet?.isEscaped && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-3 rounded-xl bg-warning/10 border border-warning/30 flex items-center gap-3"
+          >
+            <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-warning">自托管钱包</p>
+              <p className="text-xs text-muted-foreground">此钱包已脱离 MPC 保护，请妥善保管私钥</p>
+            </div>
+          </motion.div>
+        )}
+
         {/* Header - Wallet Selector */}
         <div className="flex items-center justify-between mb-4">
           <button 
             onClick={() => setShowWalletSwitcher(true)}
             className="flex items-center gap-3"
           >
-            <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-primary-foreground" />
+            <div className={cn(
+              "w-10 h-10 rounded-full flex items-center justify-center",
+              currentWallet?.isEscaped 
+                ? "bg-warning/20" 
+                : "gradient-primary"
+            )}>
+              {currentWallet?.isEscaped ? (
+                <Key className="w-5 h-5 text-warning" />
+              ) : (
+                <Wallet className="w-5 h-5 text-primary-foreground" />
+              )}
             </div>
             <div className="text-left">
               <p className="text-xs text-muted-foreground">当前钱包</p>
@@ -236,6 +260,11 @@ export default function HomePage() {
                 <p className="font-semibold text-foreground text-sm">
                   {currentWallet?.name || '我的钱包'}
                 </p>
+                {currentWallet?.isEscaped && (
+                  <span className="text-[10px] px-1.5 py-0.5 bg-warning/10 text-warning rounded ml-1">
+                    自托管
+                  </span>
+                )}
                 <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </div>
             </div>

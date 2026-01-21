@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Wallet, Plus, Check,
   CheckCircle2, AlertTriangle, Shield, MoreHorizontal,
-  Edit3, Eye, Trash2
+  Edit3, Eye, Trash2, Cloud, FileArchive, Key, Download
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -16,6 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
   Drawer,
@@ -26,6 +27,7 @@ import {
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Wallet as WalletType } from '@/types/wallet';
 
 export default function WalletManagementPage() {
   const navigate = useNavigate();
@@ -53,6 +55,22 @@ export default function WalletManagementPage() {
       return totalAssets;
     }
     return totalAssets * 0.3;
+  };
+
+  // Get backup channel icon
+  const getBackupIcon = (wallet: WalletType) => {
+    if (!wallet.backupInfo) return null;
+    
+    if (wallet.backupInfo.cloudProvider === 'icloud') {
+      return { icon: Cloud, color: 'text-blue-500', label: 'iCloud' };
+    }
+    if (wallet.backupInfo.cloudProvider === 'google_drive') {
+      return { icon: Cloud, color: 'text-green-500', label: 'Google Drive' };
+    }
+    if (wallet.backupInfo.method === 'file') {
+      return { icon: FileArchive, color: 'text-muted-foreground', label: '本地文件' };
+    }
+    return null;
   };
 
   const handleRenameWallet = (walletId: string, currentName: string) => {
@@ -160,6 +178,8 @@ export default function WalletManagementPage() {
               {wallets.map((wallet, index) => {
                 const balance = getWalletBalance(wallet.id);
                 const isBackedUp = wallet.isBackedUp;
+                const isEscaped = wallet.isEscaped;
+                const backupChannel = getBackupIcon(wallet);
                 
                 return (
                   <motion.div
@@ -167,28 +187,51 @@ export default function WalletManagementPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
-                    className="w-full card-elevated p-4 flex items-center gap-3"
+                    className={cn(
+                      "w-full card-elevated p-4 flex items-center gap-3",
+                      isEscaped && "border-warning/50"
+                    )}
                   >
                     {/* Wallet Icon */}
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-muted">
-                      <Wallet className="w-6 h-6 text-muted-foreground" />
+                    <div className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center shrink-0",
+                      isEscaped ? "bg-warning/10" : "bg-muted"
+                    )}>
+                      {isEscaped ? (
+                        <Key className="w-6 h-6 text-warning" />
+                      ) : (
+                        <Wallet className="w-6 h-6 text-muted-foreground" />
+                      )}
                     </div>
                     
                     {/* Wallet Info */}
                     <div className="flex-1 text-left min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-semibold text-foreground">
                           {wallet.name}
                         </p>
-                        {!isBackedUp && (
+                        {isEscaped ? (
+                          <Badge variant="outline" className="text-xs border-warning/50 text-warning bg-warning/10">
+                            自托管
+                          </Badge>
+                        ) : !isBackedUp ? (
                           <Badge variant="outline" className="text-xs border-warning/50 text-warning bg-warning/10">
                             未备份
                           </Badge>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-sm text-muted-foreground">
+                          ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                        {/* Backup channel indicator */}
+                        {backupChannel && !isEscaped && (
+                          <div className="flex items-center gap-1">
+                            <backupChannel.icon className={cn("w-3 h-3", backupChannel.color)} />
+                            <span className="text-xs text-muted-foreground">{backupChannel.label}</span>
+                          </div>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </p>
                     </div>
                     
                     {/* Menu */}
@@ -207,6 +250,18 @@ export default function WalletManagementPage() {
                           <Eye className="w-4 h-4 mr-2" />
                           查看备份状态
                         </DropdownMenuItem>
+                        {!isEscaped && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => navigate(`/wallet/escape/${wallet.id}`)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Key className="w-4 h-4 mr-2" />
+                              MPC 逃逸
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </motion.div>
@@ -233,6 +288,22 @@ export default function WalletManagementPage() {
                 </p>
               </div>
             </div>
+          </motion.div>
+
+          {/* Import/Recover Wallet Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Button
+              variant="outline"
+              className="w-full h-12 gap-2"
+              onClick={() => navigate('/wallet/recovery')}
+            >
+              <Download className="w-4 h-4" />
+              导入/恢复钱包
+            </Button>
           </motion.div>
         </div>
       </div>

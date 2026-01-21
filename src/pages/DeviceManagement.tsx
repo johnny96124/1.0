@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Smartphone, Monitor, Tablet, MapPin, Clock, 
-  Trash2, X
+  Trash2, X, Plus, QrCode
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
@@ -104,6 +105,7 @@ const mockLoginHistory: LoginRecord[] = [
 ];
 
 export default function DeviceManagementPage() {
+  const navigate = useNavigate();
   const { devices, removeDevice } = useWallet();
   const [showRemoveDialog, setShowRemoveDialog] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
@@ -163,10 +165,31 @@ export default function DeviceManagementPage() {
   return (
     <AppLayout title="设备管理" showBack>
       <div className="px-4 py-4 space-y-4">
+        {/* Authorize New Device Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <button
+            onClick={() => navigate('/profile/devices/authorize')}
+            className="w-full card-elevated p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+              <QrCode className="w-5 h-5 text-accent" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="font-medium text-foreground">授权新设备</p>
+              <p className="text-xs text-muted-foreground">扫码授权其他设备登录</p>
+            </div>
+            <Plus className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </motion.div>
+
         {/* All Devices */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
         >
           <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">已登录设备</h3>
           <div className="card-elevated overflow-hidden">
