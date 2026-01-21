@@ -812,6 +812,26 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           lastBackupTime: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         },
       },
+      {
+        id: 'wallet-3',
+        name: '自托管钱包',
+        addresses: {
+          all: '',
+          ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+          tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
+          bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+        },
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+        isBackedUp: true,
+        isBiometricEnabled: true,
+        isEscaped: true,
+        escapedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        custodyType: 'self',
+        backupInfo: {
+          method: 'file',
+          fileBackupTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        },
+      },
     ];
     
     setWallets(mockWallets);
