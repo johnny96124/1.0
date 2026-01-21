@@ -16,7 +16,7 @@ import { Transaction, SUPPORTED_CHAINS, AccountRiskStatus } from '@/types/wallet
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type FilterType = 'all' | 'send' | 'receive' | 'risk';
@@ -136,7 +136,7 @@ export default function HistoryPage() {
   // Pull to refresh handler
   const handleRefresh = useCallback(async () => {
     await new Promise(resolve => setTimeout(resolve, 1500));
-    toast({ title: '已刷新', description: '交易记录已更新' });
+    toast("已刷新", { description: "交易记录已更新" });
   }, []);
 
   const getStatusIcon = (status: Transaction['status']) => {
@@ -153,7 +153,7 @@ export default function HistoryPage() {
   const handleAcknowledge = (txId: string) => {
     acknowledgeRiskTx(txId);
     setSelectedTx(null);
-    toast({ title: '已标记为已知晓', description: '该交易已从待处置列表中移除' });
+    toast("已标记为已知晓", { description: "该交易已从待处置列表中移除" });
   };
 
   const handleReturn = (txId: string) => {
@@ -546,7 +546,7 @@ export default function HistoryPage() {
                       <button 
                         onClick={() => {
                           navigator.clipboard.writeText(selectedTx.txHash!);
-                          toast({ title: '已复制到剪贴板' });
+                          toast("已复制到剪贴板");
                         }}
                         className="p-1 hover:bg-muted rounded"
                       >

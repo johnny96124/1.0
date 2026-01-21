@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useWallet } from '@/contexts/WalletContext';
 import { PSPProvider } from '@/types/wallet';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/sonner';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PSPLogo } from '@/components/PSPLogo';
 

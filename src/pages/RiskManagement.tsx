@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/drawer';
 import { Transaction, AccountRiskStatus } from '@/types/wallet';
 import { format } from 'date-fns';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/sonner';
 import { PullToRefresh } from '@/components/PullToRefresh';
 
 type TabValue = 'all' | 'red' | 'yellow' | 'handled';
@@ -106,13 +106,13 @@ export default function RiskManagement() {
   
   const handleCopyAddress = (address: string) => {
     navigator.clipboard.writeText(address);
-    toast({ title: '地址已复制', variant: 'default' });
+    toast("地址已复制");
   };
   
   const handleAcknowledge = (txId: string) => {
     acknowledgeRiskTx(txId);
     setSelectedTx(null);
-    toast({ title: '已标记为已知晓', description: '该交易已从待处置列表中移除' });
+    toast("已标记为已知晓", { description: "该交易已从待处置列表中移除" });
   };
   
   const handleReturn = (txId: string) => {
@@ -124,7 +124,7 @@ export default function RiskManagement() {
   const handleRefresh = useCallback(async () => {
     // Simulate API call to refresh risk transactions
     await new Promise(resolve => setTimeout(resolve, 1500));
-    toast({ title: '已刷新', description: '风险交易列表已更新' });
+    toast("已刷新", { description: "风险交易列表已更新" });
   }, []);
   
   return (
