@@ -441,7 +441,10 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
 
 // Step 4: Backup
 function BackupStep({ onComplete }: { onComplete: () => void }) {
+  const [backupType, setBackupType] = useState<'cloud' | 'local' | null>(null);
+  const [completedBackups, setCompletedBackups] = useState<Set<'cloud' | 'local'>>(new Set());
   const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -477,14 +480,116 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
 
     setIsLoading(true);
     try {
-      await completeCloudBackup('icloud', password);
-      onComplete();
+      if (backupType === 'cloud') {
+        await completeCloudBackup('icloud', password);
+      }
+      // Mark this backup type as completed
+      setCompletedBackups(prev => new Set([...prev, backupType!]));
+      setShowSuccess(true);
     } catch (error) {
       setError('备份失败，请重试');
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleBackToSelection = () => {
+    setShowSuccess(false);
+    setShowPasswordForm(false);
+    setBackupType(null);
+    setPassword('');
+    setConfirmPassword('');
+    setConfirmed(false);
+    setError('');
+  };
+
+  const getOtherBackupType = () => {
+    if (completedBackups.has('cloud') && !completedBackups.has('local')) return 'local';
+    if (completedBackups.has('local') && !completedBackups.has('cloud')) return 'cloud';
+    return null;
+  };
+
+  // Success screen after backup
+  if (showSuccess) {
+    const otherType = getOtherBackupType();
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="flex flex-col h-full"
+      >
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
+          >
+            <CheckCircle2 className="w-10 h-10 text-success" />
+          </motion.div>
+          
+          <h2 className="text-xl font-bold text-foreground mb-2">
+            {backupType === 'cloud' ? '云备份完成' : '本地备份完成'}
+          </h2>
+          <p className="text-muted-foreground text-sm max-w-[280px] mb-6">
+            {backupType === 'cloud' 
+              ? '您的钱包已安全备份到云端'
+              : '备份文件已保存到本地'
+            }
+          </p>
+
+          {/* Show completed backups */}
+          <div className="w-full max-w-[300px] space-y-2 mb-4">
+            {completedBackups.has('cloud') && (
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
+                <Cloud className="w-5 h-5 text-success" />
+                <span className="text-sm text-success font-medium">云备份已完成</span>
+                <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
+              </div>
+            )}
+            {completedBackups.has('local') && (
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
+                <HardDrive className="w-5 h-5 text-success" />
+                <span className="text-sm text-success font-medium">本地备份已完成</span>
+                <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="pb-8 space-y-3">
+          {otherType && (
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-14 text-base font-medium"
+              onClick={handleBackToSelection}
+            >
+              {otherType === 'cloud' ? (
+                <>
+                  <Cloud className="w-5 h-5 mr-2" />
+                  继续完成云备份
+                </>
+              ) : (
+                <>
+                  <HardDrive className="w-5 h-5 mr-2" />
+                  继续完成本地备份
+                </>
+              )}
+            </Button>
+          )}
+          <Button
+            size="lg"
+            className="w-full h-14 text-base font-medium"
+            onClick={onComplete}
+          >
+            {completedBackups.size === 2 ? '完成' : '跳过其他备份'}
+          </Button>
+        </div>
+      </motion.div>
+    );
+  }
 
   if (!showPasswordForm) {
     return (
@@ -516,36 +621,69 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
               ⚠️ 我们无法替您找回保险箱密码，请务必牢记
             </p>
           </div>
+
+          {/* Show completed backups if any */}
+          {completedBackups.size > 0 && (
+            <div className="w-full max-w-[300px] space-y-2 mt-4">
+              {completedBackups.has('cloud') && (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
+                  <Cloud className="w-5 h-5 text-success" />
+                  <span className="text-sm text-success font-medium">云备份已完成</span>
+                  <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
+                </div>
+              )}
+              {completedBackups.has('local') && (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
+                  <HardDrive className="w-5 h-5 text-success" />
+                  <span className="text-sm text-success font-medium">本地备份已完成</span>
+                  <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="pb-8 space-y-3">
-          <Button
-            size="lg"
-            className="w-full h-14 text-base font-medium bg-success hover:bg-success/90 text-success-foreground"
-            onClick={() => setShowPasswordForm(true)}
-          >
-            <CloudUpload className="w-5 h-5 mr-2" />
-            云备份（推荐）
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="w-full h-14 text-base font-medium"
-            onClick={() => setShowPasswordForm(true)}
-          >
-            导出备份文件（高级）
-          </Button>
+          {!completedBackups.has('cloud') && (
+            <Button
+              size="lg"
+              className="w-full h-14 text-base font-medium bg-success hover:bg-success/90 text-success-foreground"
+              onClick={() => {
+                setBackupType('cloud');
+                setShowPasswordForm(true);
+              }}
+            >
+              <CloudUpload className="w-5 h-5 mr-2" />
+              云备份（推荐）
+            </Button>
+          )}
+          {!completedBackups.has('local') && (
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-14 text-base font-medium"
+              onClick={() => {
+                setBackupType('local');
+                setShowPasswordForm(true);
+              }}
+            >
+              <HardDrive className="w-5 h-5 mr-2" />
+              导出备份文件（高级）
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="lg"
             className="w-full h-14 text-base text-muted-foreground"
             onClick={onComplete}
           >
-            稍后备份
+            {completedBackups.size > 0 ? '完成' : '稍后备份'}
           </Button>
-          <p className="text-xs text-center text-destructive">
-            未完成备份将严格限制转账额度
-          </p>
+          {completedBackups.size === 0 && (
+            <p className="text-xs text-center text-destructive">
+              未完成备份将严格限制转账额度
+            </p>
+          )}
         </div>
       </motion.div>
     );
@@ -559,10 +697,10 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
       className="flex flex-col h-full pt-8"
     >
       <h2 className="text-xl font-bold text-foreground mb-2">
-        设置保险箱密码
+        {backupType === 'cloud' ? '设置云备份密码' : '设置备份文件密码'}
       </h2>
       <p className="text-muted-foreground text-sm mb-6">
-        此密码将用于加密您的备份，请牢记
+        此密码将用于加密您的{backupType === 'cloud' ? '云端' : '本地'}备份，请牢记
       </p>
 
       <div className="space-y-4 flex-1">
