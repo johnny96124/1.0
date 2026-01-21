@@ -196,6 +196,7 @@ export interface PSPProvider {
   officialUrl?: string;
   isVerified: boolean; // 官方认证
   rating?: number; // 评分 1-5
+  walletAddress?: string; // PSP's primary receiving address
   
   // Contact info
   contact: {

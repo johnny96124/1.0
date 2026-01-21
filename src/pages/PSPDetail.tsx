@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Shield, Building2, ChevronRight, Send, QrCode, 
+  Shield, ChevronRight, Send, QrCode, 
   ArrowDownToLine, ArrowUpFromLine, FileText,
   Phone, Mail, Globe, Star, Clock, AlertCircle,
   Unlink, CheckCircle2, Pause, XCircle, RefreshCw, Trash2, Settings
@@ -70,7 +70,16 @@ export default function PSPDetailPage() {
         navigate('/receive');
         break;
       case 'transfer':
-        navigate('/send');
+        // Use the first address from PSP connection or PSP wallet address
+        const pspAddress = connection.addresses?.[0]?.address || psp.walletAddress || '0x1234567890abcdef1234567890abcdef12345678';
+        // Navigate to send page with PSP address and name pre-filled
+        navigate('/send', { 
+          state: { 
+            prefilledAddress: pspAddress,
+            pspName: psp.name,
+            fromPSP: true
+          } 
+        });
         break;
       case 'withdrawal':
         toast.info('出金功能即将上线');

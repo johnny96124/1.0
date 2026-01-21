@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Scan, Users, AlertTriangle, 
-  CheckCircle2, Loader2, Shield, MoreHorizontal,
+  CheckCircle2, Loader2, Shield,
   Info, ChevronRight, ShieldAlert
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -22,6 +22,12 @@ import { ChainIcon } from '@/components/ChainIcon';
 import { NetworkFeeSelector, FeeTier } from '@/components/NetworkFeeSelector';
 import { ContactDrawer } from '@/components/ContactDrawer';
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -40,8 +46,13 @@ export default function SendPage() {
     getLimitStatus, checkTransferLimit, isPSPAddress, getAccountRiskStatus
   } = useWallet();
 
-  // Handle prefilled data from contact detail page
-  const prefilledData = location.state as { prefilledAddress?: string; prefilledNetwork?: ChainId } | null;
+  // Handle prefilled data from contact detail page or PSP detail page
+  const prefilledData = location.state as { 
+    prefilledAddress?: string; 
+    prefilledNetwork?: ChainId;
+    pspName?: string;
+    fromPSP?: boolean;
+  } | null;
   
   // Parse asset from URL query params (e.g., /send?asset=USDC)
   const searchParams = new URLSearchParams(location.search);
@@ -52,8 +63,12 @@ export default function SendPage() {
     ? assets.find(a => a.symbol.toUpperCase() === assetFromUrl.toUpperCase()) || assets[0]
     : assets[0];
   
-  const [step, setStep] = useState<'address' | 'amount' | 'confirm' | 'auth' | 'success'>('address');
+  // If coming from PSP, skip address step and go directly to amount
+  const initialStep = prefilledData?.fromPSP && prefilledData?.prefilledAddress ? 'amount' : 'address';
+  
+  const [step, setStep] = useState<'address' | 'amount' | 'confirm' | 'auth' | 'success'>(initialStep);
   const [address, setAddress] = useState(prefilledData?.prefilledAddress || '');
+  const [pspRecipientName, setPspRecipientName] = useState(prefilledData?.pspName || '');
   const [selectedContact, setSelectedContact] = useState<typeof contacts[0] | null>(null);
   const [amount, setAmount] = useState('');
   const [selectedAsset, setSelectedAsset] = useState(initialAsset);
@@ -187,7 +202,22 @@ export default function SendPage() {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 shrink-0">
           <button
-            onClick={() => step === 'address' ? navigate(-1) : setStep(step === 'amount' ? 'address' : step === 'confirm' ? 'amount' : 'address')}
+            onClick={() => {
+              if (step === 'address') {
+                navigate(-1);
+              } else if (step === 'amount') {
+                // If from PSP, go back to previous page; otherwise go to address step
+                if (prefilledData?.fromPSP) {
+                  navigate(-1);
+                } else {
+                  setStep('address');
+                }
+              } else if (step === 'confirm') {
+                setStep('amount');
+              } else {
+                setStep('address');
+              }
+            }}
             className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -370,8 +400,8 @@ export default function SendPage() {
                 <div className="px-4 pt-2">
                   <AddressBar
                     address={address}
-                    label={selectedContact?.name}
-                    onClear={() => setStep('address')}
+                    label={pspRecipientName || selectedContact?.name}
+                    onClear={prefilledData?.fromPSP ? undefined : () => setStep('address')}
                   />
                 </div>
 
@@ -450,7 +480,7 @@ export default function SendPage() {
                   <div>
                     <p className="text-sm text-muted-foreground">收款方</p>
                     <p className="font-medium text-foreground mt-1">
-                      {selectedContact?.name || '未知地址'}
+                      {pspRecipientName || selectedContact?.name || '未知地址'}
                     </p>
                     <p className="text-sm font-mono text-muted-foreground mt-0.5">
                       {address.slice(0, 12)}...{address.slice(-10)}
@@ -632,6 +662,54 @@ export default function SendPage() {
         contacts={contacts}
         onSelect={handleSelectContact}
       />
+
+      {/* Asset Picker Drawer */}
+      <Drawer open={showAssetPicker} onOpenChange={setShowAssetPicker}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>选择币种</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pb-6 space-y-2 max-h-[60vh] overflow-y-auto">
+            {assets.map((asset) => (
+              <button
+                key={`${asset.symbol}-${asset.network}`}
+                onClick={() => {
+                  setSelectedAsset(asset);
+                  setAmount(''); // Reset amount when changing asset
+                  setShowAssetPicker(false);
+                }}
+                className={cn(
+                  'w-full p-4 rounded-xl border text-left transition-colors flex items-center gap-3',
+                  selectedAsset.symbol === asset.symbol && selectedAsset.network === asset.network
+                    ? 'border-accent bg-accent/5' 
+                    : 'border-border hover:border-accent/50'
+                )}
+              >
+                <CryptoIcon symbol={asset.symbol} size="md" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-foreground">{asset.symbol}</span>
+                    <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
+                      {SUPPORTED_CHAINS.find(c => c.id === asset.network)?.shortName}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    {asset.balance.toLocaleString()} {asset.symbol}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-foreground">
+                    ${asset.usdValue.toLocaleString()}
+                  </p>
+                </div>
+                {selectedAsset.symbol === asset.symbol && selectedAsset.network === asset.network && (
+                  <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       {/* PSP Warning Dialog - Account has warning status */}
       <AlertDialog open={showPSPWarningDialog} onOpenChange={setShowPSPWarningDialog}>
