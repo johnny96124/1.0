@@ -184,6 +184,7 @@ export interface AuthResult {
   userType: UserType;
   isDeviceAuthorized: boolean;
   hasExistingWallets: boolean;
+  hasPassword?: boolean; // Whether user has set a password
 }
 
 // ============= PSP (Payment Service Provider) Types =============

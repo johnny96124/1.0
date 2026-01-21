@@ -738,6 +738,8 @@ interface WalletContextType extends WalletState {
   logout: () => void;
   sendVerificationCode: (email: string) => Promise<void>;
   verifyCode: (email: string, code: string) => Promise<AuthResult>;
+  checkPasswordExists: (email: string) => Promise<{ hasPassword: boolean }>;
+  loginWithPassword: (email: string, password: string) => Promise<AuthResult>;
   
   // Wallet actions
   createWallet: (name: string) => Promise<Wallet>;
@@ -923,6 +925,54 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     console.log(`Verification code sent to ${email}`);
     // In production, this would call an API to send the code
   }, []);
+
+  // Check if user has set a password for the email
+  const checkPasswordExists = useCallback(async (email: string): Promise<{ hasPassword: boolean }> => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Mock: Users with specific email patterns have password set
+    // In production, this would call an API to check
+    const hasPassword = email.includes('test') || email.includes('demo') || !mockIsNewUser;
+    
+    return { hasPassword };
+  }, [mockIsNewUser]);
+
+  // Login with password
+  const loginWithPassword = useCallback(async (email: string, password: string): Promise<AuthResult> => {
+    // Simulate login delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Mock: Accept any password with length >= 6 for testing
+    if (password.length < 6) {
+      throw new Error('密码错误');
+    }
+
+    setIsAuthenticated(true);
+
+    if (mockIsNewUser) {
+      const mockUserInfo: UserInfo = {
+        email,
+        nickname: email.split('@')[0],
+      };
+      setUserInfo(mockUserInfo);
+      setWalletStatus('not_created');
+      
+      return {
+        userType: 'new',
+        isDeviceAuthorized: true,
+        hasExistingWallets: false,
+      };
+    } else {
+      setupExistingUser();
+      
+      return {
+        userType: 'returning_with_wallet',
+        isDeviceAuthorized: true,
+        hasExistingWallets: true,
+      };
+    }
+  }, [mockIsNewUser, setupExistingUser]);
 
   const verifyCode = useCallback(async (email: string, code: string): Promise<AuthResult> => {
     // Simulate verification delay
@@ -1330,6 +1380,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     logout,
     sendVerificationCode,
     verifyCode,
+    checkPasswordExists,
+    loginWithPassword,
     createWallet,
     switchWallet,
     setPin,
