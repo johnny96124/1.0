@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useMemo } from 'react';
 import { 
   Wallet, Asset, Transaction, Contact, Device, 
   SecurityConfig, BackupStatus, WalletStatus, WalletState,
   RiskColor, ChainId, AggregatedAsset, UserInfo, LimitStatus,
   PSPProvider, PSPConnection, PSPConnectionStatus,
-  AccountRiskStatus, AccountRiskSummary
+  AccountRiskStatus, AccountRiskSummary, Notification
 } from '@/types/wallet';
 
 // Mock data for demonstration - wallet-specific assets
@@ -539,7 +539,101 @@ const mockPSPConnections: PSPConnection[] = [
   },
 ];
 
-// Helper function to aggregate assets across chains
+// Mock notifications data
+const mockNotifications: Notification[] = [
+  {
+    id: 'notif-1',
+    type: 'risk_inflow',
+    category: 'security',
+    priority: 'urgent',
+    title: '检测到风险资金转入',
+    content: '您的钱包收到一笔 2,500 USDT 的转账，经系统检测可能涉及高风险来源，请及时处理。',
+    timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+    isRead: false,
+    action: { label: '查看详情', route: '/risk-management' },
+    metadata: { amount: 2500, symbol: 'USDT' },
+  },
+  {
+    id: 'notif-2',
+    type: 'new_device',
+    category: 'security',
+    priority: 'urgent',
+    title: '新设备登录提醒',
+    content: '您的账号在新设备 iPhone 15 Pro 上登录，位置：上海。如非本人操作，请立即处理。',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    isRead: false,
+    action: { label: '管理设备', route: '/profile/devices' },
+    metadata: { deviceId: 'device-4' },
+  },
+  {
+    id: 'notif-3',
+    type: 'transaction_in',
+    category: 'transaction',
+    priority: 'normal',
+    title: '收到 500 USDT',
+    content: '来自 0x1234...5678 的转账已确认到账。',
+    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
+    isRead: false,
+    action: { label: '查看交易', route: '/history' },
+    metadata: { amount: 500, symbol: 'USDT' },
+  },
+  {
+    id: 'notif-4',
+    type: 'psp_expiring',
+    category: 'psp',
+    priority: 'normal',
+    title: 'PSP 授权即将到期',
+    content: '您与 支付宝商户服务 的连接将在 7 天后到期，请及时续期以确保服务不中断。',
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+    isRead: false,
+    action: { label: '立即续期', route: '/psp' },
+    metadata: { pspId: 'psp-1' },
+  },
+  {
+    id: 'notif-5',
+    type: 'large_amount',
+    category: 'transaction',
+    priority: 'normal',
+    title: '大额转账通知',
+    content: '您发起的 10,000 USDT 转账已成功发送至 0xabcd...efgh。',
+    timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+    isRead: true,
+    action: { label: '查看交易', route: '/history' },
+    metadata: { amount: 10000, symbol: 'USDT' },
+  },
+  {
+    id: 'notif-6',
+    type: 'system_update',
+    category: 'system',
+    priority: 'low',
+    title: 'v2.1.0 版本更新',
+    content: '新版本已发布，新增多链资产聚合显示、优化转账流程等功能。',
+    timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+    isRead: true,
+  },
+  {
+    id: 'notif-7',
+    type: 'maintenance',
+    category: 'system',
+    priority: 'normal',
+    title: '系统维护通知',
+    content: '系统将于 2026年1月25日 02:00-06:00 进行维护升级，届时部分功能可能暂时无法使用。',
+    timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 days ago
+    isRead: true,
+  },
+  {
+    id: 'notif-8',
+    type: 'transaction_out',
+    category: 'transaction',
+    priority: 'normal',
+    title: '转账成功',
+    content: '向 0x9876...4321 转账 200 USDT 已成功。',
+    timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+    isRead: true,
+    action: { label: '查看交易', route: '/history' },
+    metadata: { amount: 200, symbol: 'USDT' },
+  },
+];
 export function aggregateAssets(assets: Asset[]): AggregatedAsset[] {
   const grouped = assets.reduce((acc, asset) => {
     if (!acc[asset.symbol]) {
@@ -620,6 +714,12 @@ interface WalletContextType extends WalletState {
   returnRiskFunds: (txId: string) => Promise<{ txHash: string }>;
   acknowledgeRiskTx: (txId: string) => void;
   isPSPAddress: (address: string) => { isPSP: boolean; pspName?: string };
+  
+  // Notification actions
+  notifications: Notification[];
+  unreadNotificationCount: number;
+  markNotificationAsRead: (id: string) => void;
+  markAllNotificationsAsRead: () => void;
 }
 
 const WalletContext = createContext<WalletContextType | null>(null);
@@ -640,6 +740,22 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [hasBiometric, setHasBiometric] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [pspConnections, setPspConnections] = useState<PSPConnection[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+
+  // Computed notification count
+  const unreadNotificationCount = useMemo(() => {
+    return notifications.filter(n => !n.isRead).length;
+  }, [notifications]);
+
+  const markNotificationAsRead = useCallback((id: string) => {
+    setNotifications(prev => prev.map(n => 
+      n.id === id ? { ...n, isRead: true } : n
+    ));
+  }, []);
+
+  const markAllNotificationsAsRead = useCallback(() => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+  }, []);
 
   const login = useCallback(async (provider: 'apple' | 'google' | 'email') => {
     // Simulate login delay
@@ -1059,6 +1175,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     returnRiskFunds,
     acknowledgeRiskTx,
     isPSPAddress,
+    notifications,
+    unreadNotificationCount,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
   };
 
   return (
