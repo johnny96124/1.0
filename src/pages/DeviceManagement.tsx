@@ -299,7 +299,7 @@ export default function DeviceManagementPage() {
 
       {/* Login History Drawer */}
       <Drawer open={showHistoryDrawer} onOpenChange={setShowHistoryDrawer}>
-        <DrawerContent className="max-h-[70vh] flex flex-col">
+        <DrawerContent className="max-h-[50%] flex flex-col">
           <DrawerHeader className="border-b border-border flex-shrink-0">
             <div className="flex items-center justify-between">
               <DrawerTitle>登录历史</DrawerTitle>
