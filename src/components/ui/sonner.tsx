@@ -35,18 +35,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
         unstyled: false,
         classNames: {
           toast:
-            "group toast !bg-background !text-foreground !border-border !shadow-lg !rounded-xl",
-          title: "!text-foreground !font-medium",
-          description: "!text-muted-foreground",
+            "group toast !bg-[#f5f5f7] !text-foreground !border-0 !shadow-xl !rounded-2xl !py-4 !px-5 !min-w-[280px]",
+          title: "!text-foreground !font-semibold !text-base",
+          description: "!text-muted-foreground !text-sm",
           actionButton: "!bg-primary !text-primary-foreground",
           cancelButton: "!bg-muted !text-muted-foreground",
-          success: "!bg-background !text-foreground !border-success/30",
-          error: "!bg-background !text-foreground !border-destructive/30",
+          success: "!bg-[#f5f5f7] !text-foreground !border-0",
+          error: "!bg-[#f5f5f7] !text-foreground !border-0",
         },
         style: {
-          background: 'hsl(var(--background))',
+          background: '#f5f5f7',
           color: 'hsl(var(--foreground))',
-          border: '1px solid hsl(var(--border))',
+          border: 'none',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
         },
       }}
       style={{

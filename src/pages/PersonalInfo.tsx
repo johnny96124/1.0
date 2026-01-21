@@ -98,7 +98,9 @@ export default function PersonalInfo() {
   
   const handleCopyUserId = () => {
     navigator.clipboard.writeText(userId);
-    toast.success('用户ID已复制');
+    toast.success('已复制到剪贴板', {
+      description: '用户ID已复制',
+    });
   };
 
   const handleSave = async () => {
