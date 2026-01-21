@@ -24,8 +24,8 @@ export default function ProfilePage() {
   const navigate = useNavigate();
   const { userInfo, logout } = useWallet();
 
-  // Get user display name from email
-  const displayName = userInfo?.email?.split('@')[0] || '用户';
+  // Get user display name from nickname or email
+  const displayName = userInfo?.nickname || userInfo?.email?.split('@')[0] || '用户';
 
   return (
     <AppLayout>

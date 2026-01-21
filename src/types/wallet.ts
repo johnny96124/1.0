@@ -147,6 +147,7 @@ export interface BackupStatus {
 export interface UserInfo {
   email: string;
   avatar?: string;
+  nickname?: string;
 }
 
 // ============= PSP (Payment Service Provider) Types =============
