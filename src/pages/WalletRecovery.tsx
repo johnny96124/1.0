@@ -632,31 +632,44 @@ export default function WalletRecoveryPage() {
     return null;
   };
 
+  // Mock recovered wallet data
+  const recoveredWallet = {
+    name: '我的钱包',
+    address: '0x7a8b...3e2f',
+    recoveredAt: new Date(),
+    assets: [
+      { symbol: 'USDT', name: 'Tether USD', balance: 12580.50, network: 'Ethereum' },
+      { symbol: 'ETH', name: 'Ethereum', balance: 2.35, usdValue: 8225.00, network: 'Ethereum' },
+      { symbol: 'USDC', name: 'USD Coin', balance: 5000.00, network: 'Tron' },
+    ],
+    totalBalance: 25805.50,
+  };
+
   // Render completion step
   const renderComplete = () => (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center min-h-[400px]"
+      className="flex flex-col"
     >
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', delay: 0.2 }}
-        className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
+        className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-4 mx-auto"
       >
         <Check className="w-10 h-10 text-success" />
       </motion.div>
 
-      <h2 className="text-xl font-bold text-foreground mb-2">恢复成功</h2>
-      <p className="text-sm text-muted-foreground text-center mb-8">
+      <h2 className="text-xl font-bold text-foreground mb-1 text-center">恢复成功</h2>
+      <p className="text-sm text-muted-foreground text-center mb-6">
         {selectedMethod === 'private_key' 
           ? '钱包已导入，运行于自托管模式'
           : '您的钱包已成功恢复'}
       </p>
 
       {selectedMethod === 'private_key' && (
-        <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl mb-6 w-full">
+        <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl mb-4 w-full">
           <div className="flex items-center gap-2 text-warning text-sm">
             <AlertTriangle className="w-4 h-4" />
             <span>此钱包为自托管模式，无 MPC 保护</span>
@@ -664,17 +677,72 @@ export default function WalletRecoveryPage() {
         </div>
       )}
 
-      <div className="card-elevated p-4 w-full mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-accent" />
+      {/* Wallet Info Card */}
+      <div className="card-elevated p-4 w-full mb-4">
+        <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border">
+          <div className={cn(
+            "w-12 h-12 rounded-full flex items-center justify-center",
+            selectedMethod === 'private_key' ? "bg-warning/10" : "bg-accent/10"
+          )}>
+            {selectedMethod === 'private_key' ? (
+              <Key className="w-6 h-6 text-warning" />
+            ) : (
+              <Shield className="w-6 h-6 text-accent" />
+            )}
           </div>
-          <div>
-            <p className="font-medium text-foreground">我的钱包</p>
-            <p className="text-xs text-muted-foreground">恢复时间: {new Date().toLocaleString('zh-CN')}</p>
+          <div className="flex-1">
+            <p className="font-semibold text-foreground">{recoveredWallet.name}</p>
+            <p className="text-xs text-muted-foreground">{recoveredWallet.address}</p>
           </div>
         </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">总资产</span>
+          <span className="text-lg font-bold text-foreground">
+            ${recoveredWallet.totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </span>
+        </div>
       </div>
+
+      {/* Asset Preview */}
+      <div className="mb-6">
+        <p className="text-xs font-medium text-muted-foreground mb-2 px-1">资产预览</p>
+        <div className="card-elevated overflow-hidden">
+          {recoveredWallet.assets.map((asset, index) => (
+            <motion.div
+              key={asset.symbol}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              className={cn(
+                "p-3 flex items-center justify-between",
+                index !== recoveredWallet.assets.length - 1 && "border-b border-border"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                  <span className="text-xs font-bold text-muted-foreground">
+                    {asset.symbol.slice(0, 2)}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{asset.symbol}</p>
+                  <p className="text-xs text-muted-foreground">{asset.network}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-foreground">
+                  {asset.balance.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recovery time */}
+      <p className="text-xs text-muted-foreground text-center mb-4">
+        恢复时间: {recoveredWallet.recoveredAt.toLocaleString('zh-CN')}
+      </p>
 
       <Button className="w-full" onClick={handleComplete}>
         进入钱包
