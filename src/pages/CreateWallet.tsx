@@ -10,11 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { useWallet } from '@/contexts/WalletContext';
+import { getTSSNodeInfo } from '@/lib/tss-node';
 import { cn } from '@/lib/utils';
 
-// Dynamic steps based on whether it's the first wallet
-const getSteps = (isFirstWallet: boolean) => {
-  if (isFirstWallet) {
+// Dynamic steps based on whether TSS Node exists
+const getSteps = (isFirstWallet: boolean, hasTSSNode: boolean) => {
+  // First wallet creation without existing TSS Node: full flow with backup
+  if (isFirstWallet && !hasTSSNode) {
     return [
       { id: 1, title: '命名钱包', icon: Wallet, component: 'name' },
       { id: 2, title: '安全验证', icon: Fingerprint, component: 'biometric' },
@@ -23,10 +25,11 @@ const getSteps = (isFirstWallet: boolean) => {
       { id: 5, title: '备份保险箱', icon: CloudUpload, component: 'backup' },
     ];
   }
+  
+  // Subsequent wallet creation (TSS Node already exists): simplified flow, no backup needed
   return [
     { id: 1, title: '命名钱包', icon: Wallet, component: 'name' },
     { id: 2, title: '创建钱包', icon: Shield, component: 'create' },
-    { id: 3, title: '备份保险箱', icon: CloudUpload, component: 'backup' },
   ];
 };
 
@@ -37,7 +40,9 @@ export default function CreateWalletPage() {
   const { wallets } = useWallet();
 
   const isFirstWallet = wallets.length === 0;
-  const steps = getSteps(isFirstWallet);
+  const tssNodeInfo = getTSSNodeInfo();
+  const hasTSSNode = tssNodeInfo.status !== 'not_created';
+  const steps = getSteps(isFirstWallet, hasTSSNode);
   const progress = (currentStep / steps.length) * 100;
   const currentComponent = steps[currentStep - 1]?.component;
 
