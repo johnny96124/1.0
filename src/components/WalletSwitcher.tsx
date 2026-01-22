@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Plus, Wallet, Download, Key } from 'lucide-react';
+import { Check, Plus, Wallet, Key } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
@@ -9,10 +9,9 @@ interface WalletSwitcherProps {
   isOpen: boolean;
   onClose: () => void;
   onCreateNew: () => void;
-  onImport: () => void;
 }
 
-export function WalletSwitcher({ isOpen, onClose, onCreateNew, onImport }: WalletSwitcherProps) {
+export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherProps) {
   const { wallets, currentWallet, switchWallet } = useWallet();
 
   const handleSelect = (walletId: string) => {
@@ -108,24 +107,14 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew, onImport }: Walle
               })}
             </div>
             
-            {/* Action Buttons */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1 h-11 border-dashed"
-                onClick={onImport}
-              >
-                <Download className="w-4 h-4 mr-2" />
-                导入钱包
-              </Button>
-              <Button
-                className="flex-1 h-11"
-                onClick={onCreateNew}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                创建钱包
-              </Button>
-            </div>
+            {/* Action Button */}
+            <Button
+              className="w-full h-11"
+              onClick={onCreateNew}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              创建钱包
+            </Button>
           </motion.div>
         </motion.div>
       )}

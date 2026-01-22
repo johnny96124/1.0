@@ -619,10 +619,6 @@ export default function HomePage() {
           setShowWalletSwitcher(false);
           navigate('/create-wallet');
         }}
-        onImport={() => {
-          setShowWalletSwitcher(false);
-          navigate('/wallet/recovery');
-        }}
       />
 
       {/* Transaction Detail Drawer */}

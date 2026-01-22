@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Wallet, Plus, Check,
+  ArrowLeft, Wallet, Plus,
   CheckCircle2, AlertTriangle, Shield, MoreHorizontal,
-  Edit3, Eye, Trash2, Cloud, FileArchive, Key, Download, Fingerprint
+  Edit3, Key, Cloud, HardDrive, Fingerprint
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -29,29 +29,26 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Wallet as WalletType } from '@/types/wallet';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { getTSSNodeInfo, formatTimeAgo } from '@/lib/tss-node';
 
 export default function WalletManagementPage() {
   const navigate = useNavigate();
-  const { 
-    wallets, currentWallet, switchWallet, 
-    walletStatus, backupStatus, assets 
-  } = useWallet();
+  const { wallets, assets } = useWallet();
   
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedWalletForRename, setSelectedWalletForRename] = useState<string | null>(null);
   const [newWalletName, setNewWalletName] = useState('');
-  const [backupStatusDialogOpen, setBackupStatusDialogOpen] = useState(false);
-  const [selectedWalletForBackup, setSelectedWalletForBackup] = useState<any>(null);
   const [privateKeyDialogOpen, setPrivateKeyDialogOpen] = useState(false);
   const [selectedWalletForKey, setSelectedWalletForKey] = useState<WalletType | null>(null);
   const [passkeyStep, setPasskeyStep] = useState<'verify' | 'show'>('verify');
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Calculate security score based on how many wallets are backed up
-  const backedUpCount = wallets.filter(w => w.isBackedUp).length;
-  const securityScore = wallets.length > 0 
-    ? Math.round((backedUpCount / wallets.length) * 100) 
-    : 0;
+  // Get TSS Node backup info
+  const tssNodeInfo = getTSSNodeInfo();
+  const backup = tssNodeInfo.backup;
+  const hasCloudBackup = backup.hasCloudBackup;
+  const hasLocalBackup = backup.hasLocalBackup;
+  const backupComplete = hasCloudBackup && hasLocalBackup;
 
   // Calculate total balance for a wallet
   const getWalletBalance = (walletId: string) => {
@@ -62,21 +59,6 @@ export default function WalletManagementPage() {
     return totalAssets * 0.3;
   };
 
-  // Get backup channel icon
-  const getBackupIcon = (wallet: WalletType) => {
-    if (!wallet.backupInfo) return null;
-    
-    if (wallet.backupInfo.cloudProvider === 'icloud') {
-      return { icon: Cloud, color: 'text-blue-500', label: 'iCloud' };
-    }
-    if (wallet.backupInfo.cloudProvider === 'google_drive') {
-      return { icon: Cloud, color: 'text-green-500', label: 'Google Drive' };
-    }
-    if (wallet.backupInfo.method === 'file') {
-      return { icon: FileArchive, color: 'text-muted-foreground', label: '本地文件' };
-    }
-    return null;
-  };
 
   const handleRenameWallet = (walletId: string, currentName: string) => {
     setSelectedWalletForRename(walletId);
@@ -92,11 +74,6 @@ export default function WalletManagementPage() {
       setSelectedWalletForRename(null);
       setNewWalletName('');
     }
-  };
-
-  const handleViewBackupStatus = (wallet: any) => {
-    setSelectedWalletForBackup(wallet);
-    setBackupStatusDialogOpen(true);
   };
 
   const handleViewPrivateKey = (wallet: WalletType) => {
@@ -130,53 +107,85 @@ export default function WalletManagementPage() {
         </div>
 
         <div className="flex-1 overflow-auto px-4 py-4">
-          {/* Security Score Card */}
+          {/* TSS Node Backup Status Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className={cn(
               'card-elevated p-4 mb-4',
-              securityScore < 60 ? 'border-warning/30 bg-warning/5' : 'border-success/30 bg-success/5'
+              !backupComplete ? 'border-warning/30 bg-warning/5' : 'border-success/30 bg-success/5'
             )}
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                {securityScore >= 80 ? (
-                  <CheckCircle2 className="w-5 h-5 text-success" />
-                ) : (
-                  <AlertTriangle className="w-5 h-5 text-warning" />
-                )}
-                <span className="font-semibold text-foreground">安全等级</span>
-              </div>
-              <span className={cn(
-                'text-2xl font-bold',
-                securityScore >= 80 ? 'text-success' : 'text-warning'
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-4">
+              <Shield className={cn(
+                "w-5 h-5",
+                backupComplete ? "text-success" : "text-warning"
+              )} />
+              <span className="font-semibold text-foreground">安全账户备份状态</span>
+            </div>
+            
+            {/* Backup Channels Grid */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* Cloud Backup */}
+              <div className={cn(
+                "p-3 rounded-xl",
+                hasCloudBackup ? "bg-success/10" : "bg-muted/30"
               )}>
-                {securityScore}%
-              </span>
-            </div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden mb-3">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${securityScore}%` }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className={cn(
-                  'h-full rounded-full',
-                  securityScore >= 80 ? 'bg-success' : 'bg-warning'
-                )}
-              />
-            </div>
-            <div className="space-y-1 text-sm">
-              {backedUpCount < wallets.length && (
-                <p className="text-muted-foreground">• {wallets.length - backedUpCount} 个钱包未完成备份</p>
-              )}
-              {securityScore === 100 && (
-                <p className="text-success flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" />
-                  所有钱包已完成备份
+                <Cloud className={cn(
+                  "w-5 h-5 mb-2",
+                  hasCloudBackup ? "text-success" : "text-muted-foreground"
+                )} />
+                <p className="text-sm font-medium">
+                  {hasCloudBackup 
+                    ? (backup.cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive')
+                    : '云端备份'
+                  }
                 </p>
-              )}
+                <p className="text-xs text-muted-foreground">
+                  {hasCloudBackup && backup.cloudBackupTime
+                    ? formatTimeAgo(backup.cloudBackupTime)
+                    : '未完成'
+                  }
+                </p>
+              </div>
+              
+              {/* Local Backup */}
+              <div className={cn(
+                "p-3 rounded-xl",
+                hasLocalBackup ? "bg-success/10" : "bg-muted/30"
+              )}>
+                <HardDrive className={cn(
+                  "w-5 h-5 mb-2",
+                  hasLocalBackup ? "text-success" : "text-muted-foreground"
+                )} />
+                <p className="text-sm font-medium">本地备份</p>
+                <p className="text-xs text-muted-foreground">
+                  {hasLocalBackup && backup.localBackupTime
+                    ? formatTimeAgo(backup.localBackupTime)
+                    : '未完成'
+                  }
+                </p>
+              </div>
             </div>
+            
+            {/* Warning if incomplete */}
+            {!backupComplete && (
+              <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg mb-4">
+                <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                <p className="text-xs text-warning">
+                  建议同时完成云端和本地备份，确保账户安全
+                </p>
+              </div>
+            )}
+            
+            {/* Complete status */}
+            {backupComplete && (
+              <div className="flex items-center gap-2 text-success">
+                <CheckCircle2 className="w-4 h-4" />
+                <span className="text-sm font-medium">备份已完成</span>
+              </div>
+            )}
           </motion.div>
 
           {/* Wallet List */}
@@ -201,9 +210,7 @@ export default function WalletManagementPage() {
             <div className="space-y-2">
               {wallets.map((wallet, index) => {
                 const balance = getWalletBalance(wallet.id);
-                const isBackedUp = wallet.isBackedUp;
                 const isEscaped = wallet.isEscaped;
-                const backupChannel = getBackupIcon(wallet);
                 
                 return (
                   <motion.div
@@ -234,28 +241,15 @@ export default function WalletManagementPage() {
                         <p className="font-semibold text-foreground">
                           {wallet.name}
                         </p>
-                        {isEscaped ? (
+                        {isEscaped && (
                           <Badge variant="outline" className="text-xs border-warning/50 text-warning bg-warning/10">
                             自托管
                           </Badge>
-                        ) : !isBackedUp ? (
-                          <Badge variant="outline" className="text-xs border-warning/50 text-warning bg-warning/10">
-                            未备份
-                          </Badge>
-                        ) : null}
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-sm text-muted-foreground">
-                          ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                        {/* Backup channel indicator */}
-                        {backupChannel && !isEscaped && (
-                          <div className="flex items-center gap-1">
-                            <backupChannel.icon className={cn("w-3 h-3", backupChannel.color)} />
-                            <span className="text-xs text-muted-foreground">{backupChannel.label}</span>
-                          </div>
                         )}
                       </div>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
                     </div>
                     
                     {/* Menu */}
@@ -269,10 +263,6 @@ export default function WalletManagementPage() {
                         <DropdownMenuItem onClick={() => handleRenameWallet(wallet.id, wallet.name)}>
                           <Edit3 className="w-4 h-4 mr-2" />
                           修改名称
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleViewBackupStatus(wallet)}>
-                          <Eye className="w-4 h-4 mr-2" />
-                          查看备份状态
                         </DropdownMenuItem>
                         {isEscaped ? (
                           <>
@@ -325,21 +315,6 @@ export default function WalletManagementPage() {
             </div>
           </motion.div>
 
-          {/* Import/Recover Wallet Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Button
-              variant="outline"
-              className="w-full h-12 gap-2"
-              onClick={() => navigate('/wallet/recovery')}
-            >
-              <Download className="w-4 h-4" />
-              导入/恢复钱包
-            </Button>
-          </motion.div>
         </div>
       </div>
 
@@ -364,60 +339,6 @@ export default function WalletManagementPage() {
               确认
             </Button>
           </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-
-      {/* Backup Status Drawer */}
-      <Drawer open={backupStatusDialogOpen} onOpenChange={setBackupStatusDialogOpen}>
-        <DrawerContent>
-          <DrawerHeader className="text-left">
-            <DrawerTitle>备份状态</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-4">
-            {selectedWalletForBackup && (
-              <>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                    <Wallet className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{selectedWalletForBackup.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedWalletForBackup.isBackedUp ? '已备份' : '未备份'}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className={cn(
-                  'p-3 rounded-lg',
-                  selectedWalletForBackup.isBackedUp ? 'bg-success/10' : 'bg-warning/10'
-                )}>
-                  {selectedWalletForBackup.isBackedUp ? (
-                    <div className="flex items-center gap-2 text-success">
-                      <CheckCircle2 className="w-5 h-5" />
-                      <span className="text-sm font-medium">该钱包已完成安全备份</span>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-warning">
-                        <AlertTriangle className="w-5 h-5" />
-                        <span className="text-sm font-medium">该钱包尚未备份</span>
-                      </div>
-                      <Button 
-                        className="w-full"
-                        onClick={() => {
-                          setBackupStatusDialogOpen(false);
-                          navigate('/backup');
-                        }}
-                      >
-                        立即备份
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
         </DrawerContent>
       </Drawer>
 
