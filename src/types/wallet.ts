@@ -3,6 +3,34 @@ import { Notification } from './notification';
 
 export type { Notification, NotificationType, NotificationCategory, NotificationPriority } from './notification';
 
+// ============= TSS Node Types =============
+
+export type TSSNodeStatus = 'not_created' | 'created' | 'recovered';
+
+export interface TSSNodeBackupInfo {
+  hasCloudBackup: boolean;
+  cloudProvider?: 'icloud' | 'google_drive';
+  cloudBackupTime?: Date;
+  hasLocalBackup: boolean;
+  localBackupTime?: Date;
+}
+
+export interface TSSNodeInfo {
+  status: TSSNodeStatus;
+  createdAt?: Date;
+  backup: TSSNodeBackupInfo;
+}
+
+// Device session status for kick detection
+export type DeviceSessionStatus = 'active' | 'kicked' | 'expired';
+
+export interface DeviceKickInfo {
+  kickedAt: Date;
+  newDeviceName: string;
+  newDeviceLocation?: string;
+  reason: 'new_device_login' | 'security_revoke';
+}
+
 export type WalletStatus = 
   | 'not_created'      // S0: No wallet exists
   | 'created_no_backup' // S1: Created but backup incomplete
