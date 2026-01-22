@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Wallet, Plus,
   CheckCircle2, AlertTriangle, Shield, MoreHorizontal,
-  Edit3, Key, Cloud, HardDrive, Fingerprint
+  Edit3, Cloud, HardDrive
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -16,7 +16,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
   Drawer,
@@ -26,9 +25,6 @@ import {
   DrawerFooter,
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Wallet as WalletType } from '@/types/wallet';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { getTSSNodeInfo, formatTimeAgo } from '@/lib/tss-node';
 
 export default function WalletManagementPage() {
@@ -38,10 +34,6 @@ export default function WalletManagementPage() {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedWalletForRename, setSelectedWalletForRename] = useState<string | null>(null);
   const [newWalletName, setNewWalletName] = useState('');
-  const [privateKeyDialogOpen, setPrivateKeyDialogOpen] = useState(false);
-  const [selectedWalletForKey, setSelectedWalletForKey] = useState<WalletType | null>(null);
-  const [passkeyStep, setPasskeyStep] = useState<'verify' | 'show'>('verify');
-  const [isVerifying, setIsVerifying] = useState(false);
 
   // Get TSS Node backup info
   const tssNodeInfo = getTSSNodeInfo();
@@ -76,24 +68,6 @@ export default function WalletManagementPage() {
     }
   };
 
-  const handleViewPrivateKey = (wallet: WalletType) => {
-    setSelectedWalletForKey(wallet);
-    setPasskeyStep('verify');
-    setPrivateKeyDialogOpen(true);
-  };
-
-  const handlePasskeyVerify = async () => {
-    setIsVerifying(true);
-    // Simulate passkey verification
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setIsVerifying(false);
-    setPasskeyStep('show');
-  };
-
-  const handleCopyPrivateKey = () => {
-    navigator.clipboard.writeText('0x1a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890');
-    toast.success('私钥已复制到剪贴板');
-  };
 
   return (
     <AppLayout showNav={false}>
@@ -181,11 +155,21 @@ export default function WalletManagementPage() {
             
             {/* Complete status */}
             {backupComplete && (
-              <div className="flex items-center gap-2 text-success">
+              <div className="flex items-center gap-2 text-success mb-4">
                 <CheckCircle2 className="w-4 h-4" />
                 <span className="text-sm font-medium">备份已完成</span>
               </div>
             )}
+            
+            {/* Manage Backup Button */}
+            <Button
+              variant="outline"
+              className="w-full h-10"
+              onClick={() => navigate('/profile/security/tss-backup')}
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              管理备份
+            </Button>
           </motion.div>
 
           {/* Wallet List */}
@@ -208,9 +192,8 @@ export default function WalletManagementPage() {
             </div>
 
             <div className="space-y-2">
-              {wallets.map((wallet, index) => {
+              {wallets.filter(w => !w.isEscaped).map((wallet, index) => {
                 const balance = getWalletBalance(wallet.id);
-                const isEscaped = wallet.isEscaped;
                 
                 return (
                   <motion.div
@@ -218,41 +201,24 @@ export default function WalletManagementPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
-                    className={cn(
-                      "w-full card-elevated p-4 flex items-center gap-3",
-                      isEscaped && "border-warning/50"
-                    )}
+                    className="w-full card-elevated p-4 flex items-center gap-3"
                   >
                     {/* Wallet Icon */}
-                    <div className={cn(
-                      "w-12 h-12 rounded-full flex items-center justify-center shrink-0",
-                      isEscaped ? "bg-warning/10" : "bg-muted"
-                    )}>
-                      {isEscaped ? (
-                        <Key className="w-6 h-6 text-warning" />
-                      ) : (
-                        <Wallet className="w-6 h-6 text-muted-foreground" />
-                      )}
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-muted">
+                      <Wallet className="w-6 h-6 text-muted-foreground" />
                     </div>
                     
                     {/* Wallet Info */}
                     <div className="flex-1 text-left min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-foreground">
-                          {wallet.name}
-                        </p>
-                        {isEscaped && (
-                          <Badge variant="outline" className="text-xs border-warning/50 text-warning bg-warning/10">
-                            自托管
-                          </Badge>
-                        )}
-                      </div>
+                      <p className="font-semibold text-foreground">
+                        {wallet.name}
+                      </p>
                       <p className="text-sm text-muted-foreground mt-0.5">
                         ${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                     
-                    {/* Menu */}
+                    {/* Menu - Only rename option now */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="shrink-0">
@@ -264,29 +230,6 @@ export default function WalletManagementPage() {
                           <Edit3 className="w-4 h-4 mr-2" />
                           修改名称
                         </DropdownMenuItem>
-                        {isEscaped ? (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              onClick={() => handleViewPrivateKey(wallet)}
-                              className="text-warning focus:text-warning"
-                            >
-                              <Key className="w-4 h-4 mr-2" />
-                              查看私钥
-                            </DropdownMenuItem>
-                          </>
-                        ) : (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              onClick={() => navigate(`/wallet/escape/${wallet.id}`)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Key className="w-4 h-4 mr-2" />
-                              MPC 逃逸
-                            </DropdownMenuItem>
-                          </>
-                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </motion.div>
@@ -342,100 +285,6 @@ export default function WalletManagementPage() {
         </DrawerContent>
       </Drawer>
 
-      {/* Private Key Drawer */}
-      <Drawer open={privateKeyDialogOpen} onOpenChange={(open) => {
-        setPrivateKeyDialogOpen(open);
-        if (!open) {
-          setPasskeyStep('verify');
-          setSelectedWalletForKey(null);
-        }
-      }}>
-        <DrawerContent>
-          <DrawerHeader className="text-left">
-            <DrawerTitle>
-              {passkeyStep === 'verify' ? '身份验证' : '查看私钥'}
-            </DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6">
-            {passkeyStep === 'verify' ? (
-              <div className="space-y-6">
-                <div className="flex flex-col items-center gap-4 py-4">
-                  <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center">
-                    <Fingerprint className="w-8 h-8 text-accent" />
-                  </div>
-                  <div className="text-center">
-                    <p className="font-medium text-foreground mb-1">需要验证身份</p>
-                    <p className="text-sm text-muted-foreground">
-                      为保护您的资产安全，请使用 Passkey 验证身份
-                    </p>
-                  </div>
-                </div>
-                <Button 
-                  className="w-full h-12" 
-                  onClick={handlePasskeyVerify}
-                  disabled={isVerifying}
-                >
-                  {isVerifying ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full"
-                    />
-                  ) : (
-                    <>
-                      <Fingerprint className="w-5 h-5 mr-2" />
-                      使用 Passkey 验证
-                    </>
-                  )}
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {/* Warning */}
-                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-destructive">安全警告</p>
-                      <p className="text-xs text-destructive/80 mt-1">
-                        私钥是访问您资产的唯一凭证，请勿截屏、拍照或分享给他人。
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Wallet Info */}
-                <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                  <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center">
-                    <Key className="w-5 h-5 text-warning" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{selectedWalletForKey?.name}</p>
-                    <p className="text-xs text-muted-foreground">自托管钱包</p>
-                  </div>
-                </div>
-
-                {/* Private Key Display */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">私钥</label>
-                  <div className="p-4 bg-muted/50 rounded-lg border border-border break-all font-mono text-sm text-foreground">
-                    0x1a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890
-                  </div>
-                </div>
-
-                {/* Copy Button */}
-                <Button 
-                  variant="outline" 
-                  className="w-full h-11"
-                  onClick={handleCopyPrivateKey}
-                >
-                  复制私钥
-                </Button>
-              </div>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
     </AppLayout>
   );
 }
