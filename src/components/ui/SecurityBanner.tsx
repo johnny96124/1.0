@@ -2,18 +2,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, ShieldAlert, WifiOff, ChevronRight } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
+import { getTSSNodeInfo } from '@/lib/tss-node';
+import { useNavigate } from 'react-router-dom';
 
 export function SecurityBanner() {
-  const { walletStatus, backupStatus, currentWallet } = useWallet();
+  const { walletStatus } = useWallet();
+  const navigate = useNavigate();
 
   const getBannerConfig = () => {
-    // Only show backup warning if current wallet is not backed up
-    const isCurrentWalletBackedUp = currentWallet?.isBackedUp ?? false;
+    // Check TSS Node backup status (account-level, not wallet-level)
+    const tssNodeInfo = getTSSNodeInfo();
+    const hasTSSNodeBackup = tssNodeInfo.backup.hasCloudBackup || tssNodeInfo.backup.hasLocalBackup;
 
     switch (walletStatus) {
       case 'created_no_backup':
-        // Only show if current wallet specifically is not backed up
-        if (isCurrentWalletBackedUp) {
+        // Only show if TSS Node is not backed up
+        if (hasTSSNodeBackup) {
           return { show: false };
         }
         return {
@@ -22,7 +26,7 @@ export function SecurityBanner() {
           title: '请完成资产保险箱备份',
           description: '备份未完成将限制转账功能',
           action: '立即备份',
-          actionPath: '/backup',
+          actionPath: '/profile/security/tss-backup',
           show: true,
         };
       case 'device_risk':
@@ -43,16 +47,15 @@ export function SecurityBanner() {
           show: true,
         };
       default:
-        // Also check if current wallet needs backup even when walletStatus is fully_secure
-        // (happens when switching to an unbacked wallet)
-        if (!isCurrentWalletBackedUp && currentWallet) {
+        // Check if TSS Node needs backup
+        if (!hasTSSNodeBackup && tssNodeInfo.status !== 'not_created') {
           return {
             type: 'error' as const,
             icon: ShieldAlert,
             title: '请完成资产保险箱备份',
             description: '备份未完成将限制转账功能',
             action: '立即备份',
-            actionPath: '/backup',
+            actionPath: '/profile/security/tss-backup',
             show: true,
           };
         }
@@ -103,11 +106,14 @@ export function SecurityBanner() {
             </p>
           </div>
           {config.action && (
-            <button className={cn(
-              'flex items-center gap-1 text-sm font-medium shrink-0',
-              config.type === 'error' && 'text-destructive',
-              config.type === 'warning' && 'text-warning'
-            )}>
+            <button 
+              onClick={() => config.actionPath && navigate(config.actionPath)}
+              className={cn(
+                'flex items-center gap-1 text-sm font-medium shrink-0',
+                config.type === 'error' && 'text-destructive',
+                config.type === 'warning' && 'text-warning'
+              )}
+            >
               {config.action}
               <ChevronRight className="w-4 h-4" />
             </button>
