@@ -34,6 +34,7 @@ import WalletRecovery from "./pages/WalletRecovery";
 import WalletEscape from "./pages/WalletEscape";
 import AuthorizeDevice from "./pages/AuthorizeDevice";
 import TSSRecovery from "./pages/TSSRecovery";
+import TSSBackupManagement from "./pages/TSSBackupManagement";
 import DeviceKicked from "./pages/DeviceKicked";
 import NotFound from "./pages/NotFound";
 
@@ -68,6 +69,7 @@ function AppRoutes() {
       <Route path="/profile/info" element={<ProtectedRoute><PersonalInfo /></ProtectedRoute>} />
       <Route path="/profile/wallets" element={<ProtectedRoute><WalletManagement /></ProtectedRoute>} />
       <Route path="/profile/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
+      <Route path="/profile/security/tss-backup" element={<ProtectedRoute><TSSBackupManagement /></ProtectedRoute>} />
       <Route path="/profile/devices" element={<ProtectedRoute><DeviceManagement /></ProtectedRoute>} />
       <Route path="/profile/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="/profile/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
