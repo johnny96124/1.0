@@ -796,6 +796,13 @@ interface WalletContextType extends WalletState {
   unreadNotificationCount: number;
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsAsRead: () => void;
+  
+  // TSS Node actions
+  hasTSSNode: boolean;
+  tssNodeInfo: { hasCloudBackup: boolean; cloudProvider?: string; hasLocalBackup: boolean } | null;
+  checkTSSNodeExists: () => Promise<{ exists: boolean; hasCloudBackup: boolean; cloudProvider?: string; hasLocalBackup: boolean }>;
+  recoverTSSNode: (method: 'cloud' | 'local_file' | 'old_device', password?: string) => Promise<void>;
+  createTSSNode: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | null>(null);
@@ -1362,6 +1369,43 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     ));
   }, []);
 
+  // TSS Node state and methods
+  const [hasTSSNode, setHasTSSNode] = useState(true); // Mock: existing user has TSS Node
+  const [tssNodeInfo, setTssNodeInfo] = useState<{ hasCloudBackup: boolean; cloudProvider?: string; hasLocalBackup: boolean } | null>({
+    hasCloudBackup: true,
+    cloudProvider: 'icloud',
+    hasLocalBackup: false,
+  });
+
+  const checkTSSNodeExists = useCallback(async () => {
+    // Mock: simulate checking server for existing TSS Node
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return {
+      exists: hasTSSNode,
+      hasCloudBackup: tssNodeInfo?.hasCloudBackup ?? false,
+      cloudProvider: tssNodeInfo?.cloudProvider,
+      hasLocalBackup: tssNodeInfo?.hasLocalBackup ?? false,
+    };
+  }, [hasTSSNode, tssNodeInfo]);
+
+  const recoverTSSNode = useCallback(async (method: 'cloud' | 'local_file' | 'old_device', password?: string) => {
+    // Mock: simulate TSS Node recovery
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Simulate recovery success
+    setHasTSSNode(true);
+  }, []);
+
+  const createTSSNodeFn = useCallback(async () => {
+    // Mock: simulate TSS Node creation
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setHasTSSNode(true);
+    setTssNodeInfo({
+      hasCloudBackup: false,
+      hasLocalBackup: false,
+    });
+  }, []);
+
   const value = {
     isAuthenticated,
     userInfo,
@@ -1414,6 +1458,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     unreadNotificationCount,
     markNotificationAsRead,
     markAllNotificationsAsRead,
+    // TSS Node
+    hasTSSNode,
+    tssNodeInfo,
+    checkTSSNodeExists,
+    recoverTSSNode,
+    createTSSNode: createTSSNodeFn,
   };
 
   return (

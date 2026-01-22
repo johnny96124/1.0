@@ -33,6 +33,8 @@ import MessageCenter from "./pages/MessageCenter";
 import WalletRecovery from "./pages/WalletRecovery";
 import WalletEscape from "./pages/WalletEscape";
 import AuthorizeDevice from "./pages/AuthorizeDevice";
+import TSSRecovery from "./pages/TSSRecovery";
+import DeviceKicked from "./pages/DeviceKicked";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +86,8 @@ function AppRoutes() {
       <Route path="/wallet/recovery" element={<WalletRecovery />} />
       <Route path="/wallet/escape/:id" element={<ProtectedRoute><WalletEscape /></ProtectedRoute>} />
       <Route path="/profile/devices/authorize" element={<ProtectedRoute><AuthorizeDevice /></ProtectedRoute>} />
+      <Route path="/tss-recovery" element={<TSSRecovery />} />
+      <Route path="/device-kicked" element={<DeviceKicked />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
