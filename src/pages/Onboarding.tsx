@@ -230,35 +230,15 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
           <Shield className="w-10 h-10 text-accent" />
         </motion.div>
         
-        <h2 className="text-xl font-bold text-foreground mb-3">
+        <h2 className="text-xl font-bold text-foreground mb-2">
           授权使用系统安全认证
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[280px] leading-relaxed">
-          我们将使用您设备的安全认证方式
-          <br />
-          <span className="text-foreground/80">（面容ID / 指纹 / 设备密码）</span>
-          <br />
-          保护您的资产安全
+        <p className="text-muted-foreground text-sm max-w-[260px] leading-relaxed">
+          使用面容ID / 指纹 / 设备密码保护您的资产安全
         </p>
-
-        {/* Security features */}
-        <div className="mt-8 space-y-3 w-full max-w-[280px]">
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-              <Lock className="w-4 h-4 text-accent" />
-            </div>
-            <span className="text-sm text-foreground">设备级别安全保护</span>
-          </div>
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
-              <Fingerprint className="w-4 h-4 text-accent" />
-            </div>
-            <span className="text-sm text-foreground">生物识别快速验证</span>
-          </div>
-        </div>
       </div>
 
-      <div className="pb-6 space-y-3">
+      <div className="pb-6">
         <Button
           size="lg"
           className="w-full h-14 text-base font-medium"
@@ -272,12 +252,6 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
           )}
           授权安全认证
         </Button>
-        
-        <button 
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto block"
-        >
-          了解更多
-        </button>
       </div>
     </motion.div>
   );
@@ -435,30 +409,11 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
           </motion.div>
           
           <h2 className="text-xl font-bold text-foreground mb-2">
-            云端备份完成
+            备份完成
           </h2>
-          <p className="text-muted-foreground text-sm max-w-[280px] mb-6">
+          <p className="text-muted-foreground text-sm max-w-[260px]">
             您的钱包已安全备份到 iCloud
           </p>
-
-          {/* Completed backup indicator */}
-          <div className="w-full max-w-[300px] mb-4">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
-              <Cloud className="w-5 h-5 text-success" />
-              <span className="text-sm text-success font-medium">云备份已完成</span>
-              <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
-            </div>
-          </div>
-
-          {/* Local backup hint */}
-          <div className="w-full max-w-[300px] p-4 rounded-xl bg-muted/50 border border-border">
-            <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-              <p className="text-sm text-muted-foreground text-left">
-                您还可以在「设置 &gt; 安全 &gt; 备份管理」中导出本地备份文件，实现双重保障
-              </p>
-            </div>
-          </div>
         </div>
 
         <div className="pb-8">
@@ -482,29 +437,23 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
       exit={{ opacity: 0, x: -20 }}
       className="flex flex-col h-full"
     >
-      <div className="flex-1 flex flex-col items-center pt-8">
+      <div className="flex-1 flex flex-col items-center pt-10">
         {/* iCloud indicator */}
         <motion.div
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-4"
+          className="w-16 h-16 rounded-full bg-accent flex items-center justify-center mb-4"
         >
-          <Cloud className="w-8 h-8 text-white" />
+          <Cloud className="w-8 h-8 text-accent-foreground" />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
           备份到 iCloud
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[280px] text-center mb-4">
-          设置密码加密您的云端备份，用于换机或找回资金
+        <p className="text-muted-foreground text-sm max-w-[260px] text-center mb-6">
+          设置密码加密您的备份，用于换机恢复
         </p>
-
-        <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 max-w-[300px] mb-6">
-          <p className="text-xs text-warning font-medium text-center">
-            ⚠️ 密码无法找回，请务必牢记
-          </p>
-        </div>
 
         {/* Password form */}
         <div className="w-full max-w-[300px] space-y-4">
