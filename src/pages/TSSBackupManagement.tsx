@@ -37,22 +37,6 @@ import { toast } from 'sonner';
 
 type BackupType = 'cloud' | 'local';
 
-// Password strength calculation (reused from PersonalInfo)
-function getPasswordStrength(password: string): { level: 'weak' | 'medium' | 'strong'; label: string; color: string } {
-  if (!password) return { level: 'weak', label: '', color: '' };
-  
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-  if (/\d/.test(password)) score++;
-  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
-  
-  if (score <= 2) return { level: 'weak', label: '弱', color: 'bg-destructive' };
-  if (score <= 3) return { level: 'medium', label: '中', color: 'bg-warning' };
-  return { level: 'strong', label: '强', color: 'bg-success' };
-}
-
 export default function TSSBackupManagement() {
   const navigate = useNavigate();
   const [tssNodeInfo, setTssNodeInfo] = useState(getTSSNodeInfo);
@@ -443,8 +427,6 @@ function PasswordForm({
     password === confirmPassword && 
     confirmed;
 
-  const passwordStrength = getPasswordStrength(password);
-
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -465,37 +447,6 @@ function PasswordForm({
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
-        
-        {/* Password Strength Indicator */}
-        {password && (
-          <div className="space-y-1.5 pt-1">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden flex gap-1">
-                <div 
-                  className={`h-full rounded-full transition-all ${passwordStrength.color}`}
-                  style={{ width: '33%' }}
-                />
-                <div 
-                  className={`h-full rounded-full transition-all ${passwordStrength.level === 'medium' || passwordStrength.level === 'strong' ? passwordStrength.color : 'bg-muted-foreground/20'}`}
-                  style={{ width: '33%' }}
-                />
-                <div 
-                  className={`h-full rounded-full transition-all ${passwordStrength.level === 'strong' ? passwordStrength.color : 'bg-muted-foreground/20'}`}
-                  style={{ width: '33%' }}
-                />
-              </div>
-              <span className={`text-xs font-medium ${
-                passwordStrength.level === 'weak' ? 'text-destructive' : 
-                passwordStrength.level === 'medium' ? 'text-warning' : 'text-success'
-              }`}>
-                {passwordStrength.label}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              建议使用大小写字母、数字和特殊字符组合
-            </p>
-          </div>
-        )}
       </div>
       
       <div className="space-y-2">

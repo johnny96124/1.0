@@ -94,26 +94,16 @@ const slides: SlideData[] = [
   },
 ];
 
-// Email validation helper
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
 export default function LoginPage() {
   const [loginStep, setLoginStep] = useState<LoginStep>('email');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [email, setEmail] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [emailTouched, setEmailTouched] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [passwordShake, setPasswordShake] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [codeError, setCodeError] = useState('');
-  const [codeShake, setCodeShake] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
   const [hasPassword, setHasPassword] = useState(false);
@@ -143,33 +133,9 @@ export default function LoginPage() {
     }
   }, [countdown]);
 
-  // Handle email input change with validation
-  const handleEmailChange = (value: string) => {
-    setEmail(value);
-    if (emailTouched && value && !isValidEmail(value)) {
-      setEmailError('请输入有效的邮箱地址');
-    } else {
-      setEmailError('');
-    }
-  };
-
-  const handleEmailBlur = () => {
-    setEmailTouched(true);
-    if (email && !isValidEmail(email)) {
-      setEmailError('请输入有效的邮箱地址');
-    }
-  };
-
   // Check if user has password and decide which step to show
   const handleContinueWithEmail = async () => {
     if (!email) return;
-    
-    // Validate email format
-    if (!isValidEmail(email)) {
-      setEmailError('请输入有效的邮箱地址');
-      setEmailTouched(true);
-      return;
-    }
     
     setIsLoading(true);
     try {
@@ -245,8 +211,6 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Verify code failed:', error);
       setCodeError('验证码错误，请重试');
-      setCodeShake(true);
-      setTimeout(() => setCodeShake(false), 400);
       setLoginStep('verification');
       setVerificationCode('');
     } finally {
@@ -331,8 +295,6 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Password login failed:', error);
       setPasswordError('密码错误，请重试');
-      setPasswordShake(true);
-      setTimeout(() => setPasswordShake(false), 400);
       setLoginStep('password');
     } finally {
       setIsLoading(false);
@@ -390,7 +352,7 @@ export default function LoginPage() {
       </div>
 
       {/* Password Input */}
-      <div className={`relative mb-4 ${passwordShake ? 'animate-shake' : ''}`}>
+      <div className="relative mb-4">
         <Input
           type="password"
           placeholder="请输入密码"
@@ -404,7 +366,7 @@ export default function LoginPage() {
               handlePasswordLogin();
             }
           }}
-          className={`h-14 text-base ${passwordError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+          className="h-14 text-base"
           disabled={isLoading}
         />
       </div>
@@ -456,14 +418,13 @@ export default function LoginPage() {
       className="flex-1 px-6 flex flex-col"
     >
       {/* Email Input */}
-      <div className="relative mb-1">
+      <div className="relative mb-4">
         <Input
           type="email"
           placeholder="请输入邮箱地址"
           value={email}
-          onChange={(e) => handleEmailChange(e.target.value)}
-          onBlur={handleEmailBlur}
-          className={`h-14 text-base pr-10 ${emailError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+          onChange={(e) => setEmail(e.target.value)}
+          className="h-14 text-base pr-10"
         />
         {email && (
           <button
@@ -474,10 +435,6 @@ export default function LoginPage() {
           </button>
         )}
       </div>
-      {emailError && (
-        <p className="text-xs text-destructive mb-3">{emailError}</p>
-      )}
-      {!emailError && <div className="mb-4" />}
 
       {/* Continue Button */}
       <Button
@@ -485,7 +442,7 @@ export default function LoginPage() {
         size="lg"
         className="w-full h-14 text-base font-medium mb-6"
         onClick={() => handleLogin('email')}
-        disabled={isLoading || !email || !!emailError}
+        disabled={isLoading || !email}
       >
         {isLoading && loadingProvider === null ? (
           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -573,21 +530,20 @@ export default function LoginPage() {
       </div>
 
       {/* OTP Input */}
-      <div className={`flex justify-center mb-4 ${codeShake ? 'animate-shake' : ''}`}>
+      <div className="flex justify-center mb-4">
         <InputOTP
           maxLength={6}
           value={verificationCode}
           onChange={handleCodeChange}
           disabled={isLoading}
-          className={codeError ? '[&_input]:border-destructive' : ''}
         >
           <InputOTPGroup>
-            <InputOTPSlot index={0} className={codeError ? 'border-destructive' : ''} />
-            <InputOTPSlot index={1} className={codeError ? 'border-destructive' : ''} />
-            <InputOTPSlot index={2} className={codeError ? 'border-destructive' : ''} />
-            <InputOTPSlot index={3} className={codeError ? 'border-destructive' : ''} />
-            <InputOTPSlot index={4} className={codeError ? 'border-destructive' : ''} />
-            <InputOTPSlot index={5} className={codeError ? 'border-destructive' : ''} />
+            <InputOTPSlot index={0} />
+            <InputOTPSlot index={1} />
+            <InputOTPSlot index={2} />
+            <InputOTPSlot index={3} />
+            <InputOTPSlot index={4} />
+            <InputOTPSlot index={5} />
           </InputOTPGroup>
         </InputOTP>
       </div>
