@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Wallet, Plus,
   CheckCircle2, AlertTriangle, Shield, MoreHorizontal,
-  Edit3, Cloud, HardDrive
+  Edit3, Cloud, HardDrive, Headphones
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -257,6 +257,18 @@ export default function WalletManagementPage() {
               </div>
             </div>
           </motion.div>
+
+          {/* Contact Support */}
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            onClick={() => toast.info('客服功能即将上线')}
+            className="w-full mt-6 p-4 card-elevated flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Headphones className="w-5 h-5" />
+            <span className="text-sm font-medium">联系客服</span>
+          </motion.button>
 
         </div>
       </div>
