@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, QrCode, Cloud, FileArchive, Key,
   Smartphone, Check, Shield, AlertTriangle, Loader2,
-  ChevronRight, Lock, RefreshCw, Eye, EyeOff
+  ChevronRight, Lock, RefreshCw, Eye, EyeOff, MessageCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -801,6 +801,19 @@ export default function WalletRecoveryPage() {
             {renderContent()}
           </AnimatePresence>
         </div>
+
+        {/* Contact Support */}
+        {step !== 3 && (
+          <div className="px-4 pb-6 pt-2">
+            <button
+              onClick={() => navigate('/help')}
+              className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-3"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>遇到问题？联系客服</span>
+            </button>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
