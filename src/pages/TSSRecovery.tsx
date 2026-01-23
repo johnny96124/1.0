@@ -120,19 +120,40 @@ export default function TSSRecoveryPage() {
     }
   };
 
-  // Get current step index for progress
+  // Get current step index for progress (only used after method selection)
   const steps = getStepsForMethod(selectedMethod);
   const getCurrentStepIndex = () => {
     if (step === 'success') return steps.length;
-    const index = steps.findIndex(s => s.step === step);
-    return index !== -1 ? index + 1 : 1;
+    if (step === 'method') return 0;
+    // For file_select and password steps, calculate index within the remaining steps
+    if (selectedMethod === 'local_file') {
+      if (step === 'file_select') return 1;
+      if (step === 'password') return 2;
+    } else {
+      // cloud method
+      if (step === 'password') return 1;
+    }
+    return 1;
   };
   const currentStepIndex = getCurrentStepIndex();
-  const progress = step === 'success' ? 100 : (currentStepIndex / steps.length) * 100;
+  const totalSteps = selectedMethod === 'local_file' ? 2 : 1; // Steps after method selection
+  const progress = step === 'success' ? 100 : (currentStepIndex / totalSteps) * 100;
+
+  // Steps to show in progress indicator (excluding method selection step)
+  const displaySteps = selectedMethod === 'local_file' 
+    ? [
+        { id: 1, title: '选择文件', icon: HardDrive, step: 'file_select' },
+        { id: 2, title: '验证密码', icon: Lock, step: 'password' },
+      ]
+    : [
+        { id: 1, title: '验证密码', icon: Lock, step: 'password' },
+      ];
+
+  const showProgressIndicator = step !== 'method' && step !== 'success';
 
   return (
     <div className="h-full bg-background flex flex-col">
-      {/* Progress Header */}
+      {/* Header */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -142,9 +163,9 @@ export default function TSSRecoveryPage() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            {step !== 'success' && (
+            {showProgressIndicator && (
               <span className="text-sm text-muted-foreground">
-                步骤 {currentStepIndex} / {steps.length}
+                步骤 {currentStepIndex} / {totalSteps}
               </span>
             )}
           </div>
@@ -153,13 +174,13 @@ export default function TSSRecoveryPage() {
           </span>
         </div>
         
-        {step !== 'success' && (
+        {showProgressIndicator && (
           <>
             <Progress value={progress} className="h-1" />
             
             {/* Step indicators */}
             <div className="flex items-center mt-6">
-              {steps.map((stepItem, index) => {
+              {displaySteps.map((stepItem, index) => {
                 const Icon = stepItem.icon;
                 const isComplete = currentStepIndex > stepItem.id;
                 const isCurrent = currentStepIndex === stepItem.id;
@@ -180,7 +201,7 @@ export default function TSSRecoveryPage() {
                         <Icon className="w-4 h-4" />
                       )}
                     </div>
-                    {index < steps.length - 1 && (
+                    {index < displaySteps.length - 1 && (
                       <div
                         className={cn(
                           'flex-1 h-0.5',
