@@ -14,7 +14,7 @@ const menuItems = [
   { icon: Wallet, label: '钱包管理', path: '/profile/wallets', badge: null },
   { icon: Building2, label: '服务商管理', path: '/psp', badge: null },
   { icon: Shield, label: '安全与风控', path: '/profile/security', badge: null },
-  { icon: Smartphone, label: '设备管理', path: '/profile/devices', badge: null },
+  { icon: Smartphone, label: '登录历史', path: '/profile/devices', badge: null },
   { icon: BookUser, label: '地址簿', path: '/profile/contacts', badge: null },
   { icon: Bell, label: '通知设置', path: '/profile/notifications', badge: null },
   { icon: HelpCircle, label: '帮助与支持', path: '/profile/help', badge: null },
