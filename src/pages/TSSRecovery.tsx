@@ -261,14 +261,19 @@ export default function TSSRecoveryPage() {
 
       {/* Contact Support */}
       {step !== 'success' && (
-        <div className="px-4 pb-6 pt-2">
-          <button
+        <div className="px-6 pb-6 pt-2 space-y-3">
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full h-12 text-base"
             onClick={() => navigate('/help')}
-            className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-3"
           >
-            <MessageCircle className="w-4 h-4" />
-            <span>遇到问题？联系客服</span>
-          </button>
+            <MessageCircle className="w-5 h-5 mr-2" />
+            联系客服
+          </Button>
+          <p className="text-xs text-center text-muted-foreground">
+            遇到问题？联系客服获取帮助
+          </p>
         </div>
       )}
     </div>
