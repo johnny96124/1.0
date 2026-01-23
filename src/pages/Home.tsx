@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Eye, EyeOff, ChevronRight, Send, QrCode, 
@@ -16,6 +16,8 @@ import { ChainIcon } from '@/components/ChainIcon';
 import { TokenSearch } from '@/components/TokenSearch';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { WalletSwitcher } from '@/components/WalletSwitcher';
+import { BalanceCardSkeleton, AssetListSkeleton, TransactionListSkeleton } from '@/components/skeletons';
+import { EmptyState } from '@/components/EmptyState';
 
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
@@ -154,8 +156,15 @@ export default function HomePage() {
   const [showWalletSwitcher, setShowWalletSwitcher] = useState(false);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [showAllAssets, setShowAllAssets] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { assets, transactions, currentWallet, walletStatus, userInfo, addToken, getAccountRiskStatus, unreadNotificationCount } = useWallet();
+  
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Get account risk status
   const riskStatus = getAccountRiskStatus();
@@ -179,11 +188,6 @@ export default function HomePage() {
     await new Promise(resolve => setTimeout(resolve, 1500));
     toast.success('余额已刷新');
   }, []);
-
-  // Show empty state when no wallet exists
-  if (walletStatus === 'not_created') {
-    return <EmptyWalletState />;
-  }
 
   // Filter and aggregate assets based on selected chain
   const displayAssets = useMemo(() => {
@@ -216,6 +220,11 @@ export default function HomePage() {
   };
 
   const balanceParts = formatBalanceParts(totalBalance);
+
+  // Show empty state when no wallet exists
+  if (walletStatus === 'not_created') {
+    return <EmptyWalletState />;
+  }
 
   return (
     <AppLayout>
@@ -285,72 +294,76 @@ export default function HomePage() {
         </div>
 
         {/* Balance Card with Light Gradient Overlay */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden card-elevated p-4 mb-4"
-        >
-          {/* Light gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-success/8 pointer-events-none" />
-          <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-radial from-success/10 to-transparent rounded-full blur-2xl pointer-events-none" />
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {selectedChain === 'all' ? '总资产' : `${getChainName(selectedChain)} 资产`}
-                </span>
-                <button onClick={() => setHideBalance(!hideBalance)}>
-                  {hideBalance ? (
-                    <EyeOff className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <Eye className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </button>
-              </div>
-              <ChainDropdown
-                selectedChain={selectedChain}
-                onSelectChain={setSelectedChain}
-                addresses={currentWallet?.addresses}
-              />
-            </div>
+        {isLoading ? (
+          <BalanceCardSkeleton />
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative overflow-hidden card-elevated p-4 mb-4"
+          >
+            {/* Light gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-success/8 pointer-events-none" />
+            <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-gradient-radial from-success/10 to-transparent rounded-full blur-2xl pointer-events-none" />
             
-            <motion.div
-              key={`${hideBalance}-${selectedChain}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-baseline gap-0.5 mb-4"
-            >
-              {hideBalance ? (
-                <span className="text-3xl font-bold text-foreground">****.**</span>
-              ) : (
-                <>
-                  <span className="text-3xl font-bold text-foreground">${balanceParts.integer}</span>
-                  <span className="text-lg font-medium text-muted-foreground">.{balanceParts.decimal}</span>
-                </>
-              )}
-            </motion.div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {selectedChain === 'all' ? '总资产' : `${getChainName(selectedChain)} 资产`}
+                  </span>
+                  <button onClick={() => setHideBalance(!hideBalance)}>
+                    {hideBalance ? (
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+                <ChainDropdown
+                  selectedChain={selectedChain}
+                  onSelectChain={setSelectedChain}
+                  addresses={currentWallet?.addresses}
+                />
+              </div>
+              
+              <motion.div
+                key={`${hideBalance}-${selectedChain}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-baseline gap-0.5 mb-4"
+              >
+                {hideBalance ? (
+                  <span className="text-3xl font-bold text-foreground">****.**</span>
+                ) : (
+                  <>
+                    <span className="text-3xl font-bold text-foreground">${balanceParts.integer}</span>
+                    <span className="text-lg font-medium text-muted-foreground">.{balanceParts.decimal}</span>
+                  </>
+                )}
+              </motion.div>
 
-            {/* Quick Actions */}
-            <div className="flex gap-3">
-              <Button
-                className="flex-1 h-10 gradient-accent text-accent-foreground"
-                onClick={() => navigate('/send')}
-              >
-                <Send className="w-4 h-4 mr-2" />
-                转账
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1 h-10"
-                onClick={() => navigate('/receive')}
-              >
-                <QrCode className="w-4 h-4 mr-2" />
-                收款
-              </Button>
+              {/* Quick Actions */}
+              <div className="flex gap-3">
+                <Button
+                  className="flex-1 h-10 gradient-accent text-accent-foreground"
+                  onClick={() => navigate('/send')}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  转账
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 h-10"
+                  onClick={() => navigate('/receive')}
+                >
+                  <QrCode className="w-4 h-4 mr-2" />
+                  收款
+                </Button>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
 
         {/* Account Security Status */}
@@ -409,27 +422,19 @@ export default function HomePage() {
             </Button>
           </div>
 
-          {displayAssets.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="card-elevated p-8 flex flex-col items-center justify-center text-center"
-            >
-              <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                <Wallet className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">暂无资产</p>
-              <p className="text-xs text-muted-foreground/70 mb-3">添加代币开始管理您的资产</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1"
-                onClick={() => setShowTokenSearch(true)}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                添加代币
-              </Button>
-            </motion.div>
+          {isLoading ? (
+            <AssetListSkeleton count={5} />
+          ) : displayAssets.length === 0 ? (
+            <EmptyState
+              icon={Wallet}
+              title="暂无资产"
+              description="添加代币开始管理您的资产"
+              action={{
+                label: '添加代币',
+                icon: Plus,
+                onClick: () => setShowTokenSearch(true),
+              }}
+            />
           ) : (
             <div className="space-y-1.5">
               <AnimatePresence mode="popLayout">
@@ -512,18 +517,14 @@ export default function HomePage() {
             </Button>
           </div>
 
-          {filteredTransactions.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="card-elevated p-8 flex flex-col items-center justify-center text-center"
-            >
-              <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                <Send className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <p className="text-sm text-muted-foreground mb-1">暂无交易记录</p>
-              <p className="text-xs text-muted-foreground/70">您的交易记录将在此显示</p>
-            </motion.div>
+          {isLoading ? (
+            <TransactionListSkeleton count={3} showDateHeader={false} />
+          ) : filteredTransactions.length === 0 ? (
+            <EmptyState
+              icon={Send}
+              title="暂无交易记录"
+              description="您的交易记录将在此显示"
+            />
           ) : (
             <div className="space-y-1.5">
               {filteredTransactions.slice(0, 3).map((tx, index) => (
