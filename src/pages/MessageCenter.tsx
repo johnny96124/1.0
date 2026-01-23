@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowDownLeft, ArrowUpRight, Shield, ShieldAlert, AlertTriangle,
@@ -11,6 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { useWallet } from '@/contexts/WalletContext';
 import { useNavigate } from 'react-router-dom';
 import { Notification, NotificationCategory, NotificationType } from '@/types/wallet';
+import { MessageListSkeleton } from '@/components/skeletons/MessageListSkeleton';
+import { EmptyState } from '@/components/EmptyState';
 
 type FilterTab = 'all' | NotificationCategory;
 
@@ -97,6 +99,12 @@ export default function MessageCenter() {
   const navigate = useNavigate();
   const { notifications, markNotificationAsRead, markAllNotificationsAsRead, unreadNotificationCount } = useWallet();
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredNotifications = useMemo(() => {
     if (activeTab === 'all') return notifications;
@@ -169,12 +177,15 @@ export default function MessageCenter() {
 
         {/* Notifications List */}
         <div className="flex-1 overflow-y-auto">
-          {groupedNotifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                <Inbox className="w-8 h-8" />
-              </div>
-              <p className="text-sm">暂无消息</p>
+          {isLoading ? (
+            <MessageListSkeleton count={5} />
+          ) : groupedNotifications.length === 0 ? (
+            <div className="pt-12">
+              <EmptyState
+                icon={Inbox}
+                title="暂无消息"
+                description="所有通知消息都会显示在这里"
+              />
             </div>
           ) : (
             <div className="px-4 py-2">
