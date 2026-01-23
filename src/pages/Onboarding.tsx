@@ -5,20 +5,29 @@ import {
   Shield, Fingerprint, Lock, CloudUpload, CloudDownload,
   CheckCircle2, Loader2, ChevronRight, Eye, EyeOff,
   AlertTriangle, Smartphone, QrCode, FileDown, ArrowLeft,
-  Cloud, HardDrive, Upload
+  Cloud, HardDrive, Upload, Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
-// Create wallet steps
+// Create wallet steps - optimized to 3 steps
 const createSteps = [
-  { id: 1, title: '安全验证', icon: Fingerprint },
-  { id: 2, title: '设置 PIN', icon: Lock },
-  { id: 3, title: '创建钱包', icon: Shield },
-  { id: 4, title: '备份保险箱', icon: CloudUpload },
+  { id: 1, title: '安全授权', icon: Shield },
+  { id: 2, title: '创建钱包', icon: Fingerprint },
+  { id: 3, title: '云端备份', icon: CloudUpload },
 ];
 
 // Recovery steps
@@ -142,19 +151,16 @@ export default function OnboardingPage() {
               )}
             </>
           ) : (
-            // Create Wallet Flow
+            // Create Wallet Flow - Optimized to 3 steps
             <>
               {currentStep === 1 && (
-                <BiometricStep key="biometric" onComplete={handleStepComplete} />
+                <SystemAuthStep key="auth" onComplete={handleStepComplete} />
               )}
               {currentStep === 2 && (
-                <PinStep key="pin" onComplete={handleStepComplete} />
-              )}
-              {currentStep === 3 && (
                 <CreateWalletStep key="create" onComplete={handleStepComplete} />
               )}
-              {currentStep === 4 && (
-                <BackupStep key="backup" onComplete={handleStepComplete} />
+              {currentStep === 3 && (
+                <CloudBackupStep key="backup" onComplete={handleStepComplete} />
               )}
             </>
           )}
@@ -166,18 +172,20 @@ export default function OnboardingPage() {
 
 // ==================== CREATE WALLET FLOW ====================
 
-// Step 1: Biometric
-function BiometricStep({ onComplete }: { onComplete: () => void }) {
+// Step 1: System Authentication Authorization (merged Biometric + PIN)
+function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const { enableBiometric } = useWallet();
 
-  const handleEnable = async () => {
+  const handleAuthorize = async () => {
     setIsLoading(true);
     try {
+      // Call system authentication API (simulated)
+      // In real scenario, this triggers Face ID / Fingerprint / Device Passcode
       await enableBiometric();
       onComplete();
     } catch (error) {
-      console.error('Biometric failed:', error);
+      console.error('Authorization failed:', error);
     } finally {
       setIsLoading(false);
     }
@@ -195,176 +203,65 @@ function BiometricStep({ onComplete }: { onComplete: () => void }) {
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-4"
+          className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6"
         >
-          <Fingerprint className="w-10 h-10 text-accent" />
+          <Shield className="w-10 h-10 text-accent" />
         </motion.div>
         
-        <h2 className="text-lg font-bold text-foreground mb-2">
-          开启生物识别验证
+        <h2 className="text-xl font-bold text-foreground mb-3">
+          授权使用系统安全认证
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[260px]">
-          为了保护资金安全，请开启面容 ID 或指纹验证
+        <p className="text-muted-foreground text-sm max-w-[280px] leading-relaxed">
+          我们将使用您设备的安全认证方式
+          <br />
+          <span className="text-foreground/80">（面容ID / 指纹 / 设备密码）</span>
+          <br />
+          保护您的资产安全
         </p>
+
+        {/* Security features */}
+        <div className="mt-8 space-y-3 w-full max-w-[280px]">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+              <Lock className="w-4 h-4 text-accent" />
+            </div>
+            <span className="text-sm text-foreground">设备级别安全保护</span>
+          </div>
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+              <Fingerprint className="w-4 h-4 text-accent" />
+            </div>
+            <span className="text-sm text-foreground">生物识别快速验证</span>
+          </div>
+        </div>
       </div>
 
-      <div className="pb-6 space-y-2">
+      <div className="pb-6 space-y-3">
         <Button
           size="lg"
-          className="w-full h-12 text-base font-medium"
-          onClick={handleEnable}
+          className="w-full h-14 text-base font-medium"
+          onClick={handleAuthorize}
           disabled={isLoading}
         >
           {isLoading ? (
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
           ) : (
-            <Fingerprint className="w-5 h-5 mr-2" />
+            <Lock className="w-5 h-5 mr-2" />
           )}
-          开启生物识别
+          授权安全认证
         </Button>
-        <Button
-          variant="ghost"
-          size="lg"
-          className="w-full h-12 text-base text-muted-foreground"
-          onClick={onComplete}
-        >
-          暂时跳过
-        </Button>
-        <p className="text-xs text-center text-muted-foreground">
-          不开启将无法使用转账功能
-        </p>
-      </div>
-    </motion.div>
-  );
-}
-
-// Step 2: PIN
-function PinStep({ onComplete }: { onComplete: () => void }) {
-  const [pin, setPinValue] = useState('');
-  const [confirmPin, setConfirmPin] = useState('');
-  const [step, setStep] = useState<'enter' | 'confirm'>('enter');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { setPin } = useWallet();
-
-  const handlePinInput = (value: string) => {
-    if (value.length <= 6) {
-      if (step === 'enter') {
-        setPinValue(value);
-        setError('');
-        if (value.length === 6) {
-          setTimeout(() => setStep('confirm'), 300);
-        }
-      } else {
-        setConfirmPin(value);
-        setError('');
-        if (value.length === 6) {
-          if (value === pin) {
-            handleComplete(value);
-          } else {
-            setError('PIN 不匹配，请重试');
-            setConfirmPin('');
-          }
-        }
-      }
-    }
-  };
-
-  const handleComplete = async (finalPin: string) => {
-    setIsLoading(true);
-    try {
-      await setPin(finalPin);
-      onComplete();
-    } catch (error) {
-      setError('设置失败，请重试');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const currentPin = step === 'enter' ? pin : confirmPin;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col h-full"
-    >
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4"
-        >
-          <Lock className="w-8 h-8 text-accent" />
-        </motion.div>
         
-        <h2 className="text-lg font-bold text-foreground mb-1">
-          {step === 'enter' ? '设置 6 位 PIN 码' : '再次确认 PIN 码'}
-        </h2>
-        <p className="text-muted-foreground text-sm max-w-[260px]">
-          PIN 用于关键操作确认，如转账和恢复
-        </p>
-
-        {/* PIN Display */}
-        <div className="flex gap-3 mt-6 mb-3">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <motion.div
-              key={i}
-              initial={{ scale: 0.8 }}
-              animate={{ 
-                scale: currentPin.length > i ? 1.1 : 1,
-                backgroundColor: currentPin.length > i ? 'hsl(var(--accent))' : 'hsl(var(--muted))'
-              }}
-              className="w-3 h-3 rounded-full"
-            />
-          ))}
-        </div>
-
-        {error && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-sm text-destructive flex items-center gap-1"
-          >
-            <AlertTriangle className="w-4 h-4" />
-            {error}
-          </motion.p>
-        )}
-      </div>
-
-      {/* Number Pad */}
-      <div className="pb-4">
-        <div className="grid grid-cols-3 gap-2 max-w-[240px] mx-auto">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, '', 0, '⌫'].map((num, i) => (
-            <Button
-              key={i}
-              variant="ghost"
-              className={cn(
-                'h-12 text-xl font-medium rounded-xl',
-                num === '' && 'invisible'
-              )}
-              onClick={() => {
-                if (num === '⌫') {
-                  handlePinInput(currentPin.slice(0, -1));
-                } else if (num !== '') {
-                  handlePinInput(currentPin + num);
-                }
-              }}
-              disabled={isLoading}
-            >
-              {num}
-            </Button>
-          ))}
-        </div>
+        <button 
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors mx-auto block"
+        >
+          了解更多
+        </button>
       </div>
     </motion.div>
   );
 }
 
-// Step 3: Create Wallet
+// Step 2: Create Wallet
 function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState(0);
   const { createWallet } = useWallet();
@@ -439,12 +336,12 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// Step 4: Backup
-function BackupStep({ onComplete }: { onComplete: () => void }) {
-  const [backupType, setBackupType] = useState<'cloud' | 'local' | null>(null);
-  const [completedBackups, setCompletedBackups] = useState<Set<'cloud' | 'local'>>(new Set());
+// Step 3: Cloud Backup Only (simplified from BackupStep)
+function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
+  const [cloudProvider, setCloudProvider] = useState<'icloud' | 'google_drive' | null>(null);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -452,6 +349,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
   const [error, setError] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const { completeCloudBackup } = useWallet();
+  const navigate = useNavigate();
 
   const validatePassword = () => {
     if (password.length < 8 || password.length > 32) {
@@ -480,11 +378,7 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
 
     setIsLoading(true);
     try {
-      if (backupType === 'cloud') {
-        await completeCloudBackup('icloud', password);
-      }
-      // Mark this backup type as completed
-      setCompletedBackups(prev => new Set([...prev, backupType!]));
+      await completeCloudBackup(cloudProvider!, password);
       setShowSuccess(true);
     } catch (error) {
       setError('备份失败，请重试');
@@ -493,25 +387,17 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
     }
   };
 
-  const handleBackToSelection = () => {
-    setShowSuccess(false);
-    setShowPasswordForm(false);
-    setBackupType(null);
-    setPassword('');
-    setConfirmPassword('');
-    setConfirmed(false);
-    setError('');
+  const handleSkipClick = () => {
+    setShowSkipWarning(true);
   };
 
-  const getOtherBackupType = () => {
-    if (completedBackups.has('cloud') && !completedBackups.has('local')) return 'local';
-    if (completedBackups.has('local') && !completedBackups.has('cloud')) return 'cloud';
-    return null;
+  const handleConfirmSkip = () => {
+    setShowSkipWarning(false);
+    onComplete();
   };
 
   // Success screen after backup
   if (showSuccess) {
-    const otherType = getOtherBackupType();
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -530,252 +416,260 @@ function BackupStep({ onComplete }: { onComplete: () => void }) {
           </motion.div>
           
           <h2 className="text-xl font-bold text-foreground mb-2">
-            {backupType === 'cloud' ? '云备份完成' : '本地备份完成'}
+            云端备份完成
           </h2>
           <p className="text-muted-foreground text-sm max-w-[280px] mb-6">
-            {backupType === 'cloud' 
-              ? '您的钱包已安全备份到云端'
-              : '备份文件已保存到本地'
-            }
+            您的钱包已安全备份到 {cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive'}
           </p>
 
-          {/* Show completed backups */}
-          <div className="w-full max-w-[300px] space-y-2 mb-4">
-            {completedBackups.has('cloud') && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
-                <Cloud className="w-5 h-5 text-success" />
-                <span className="text-sm text-success font-medium">云备份已完成</span>
-                <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
-              </div>
-            )}
-            {completedBackups.has('local') && (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
-                <HardDrive className="w-5 h-5 text-success" />
-                <span className="text-sm text-success font-medium">本地备份已完成</span>
-                <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
-              </div>
-            )}
+          {/* Completed backup indicator */}
+          <div className="w-full max-w-[300px] mb-4">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
+              <Cloud className="w-5 h-5 text-success" />
+              <span className="text-sm text-success font-medium">云备份已完成</span>
+              <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
+            </div>
+          </div>
+
+          {/* Local backup hint */}
+          <div className="w-full max-w-[300px] p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="flex items-start gap-3">
+              <Info className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+              <p className="text-sm text-muted-foreground text-left">
+                您还可以在「设置 &gt; 安全 &gt; 备份管理」中导出本地备份文件，实现双重保障
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="pb-8 space-y-3">
-          {otherType && (
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full h-14 text-base font-medium"
-              onClick={handleBackToSelection}
-            >
-              {otherType === 'cloud' ? (
-                <>
-                  <Cloud className="w-5 h-5 mr-2" />
-                  继续完成云备份
-                </>
-              ) : (
-                <>
-                  <HardDrive className="w-5 h-5 mr-2" />
-                  继续完成本地备份
-                </>
-              )}
-            </Button>
-          )}
+        <div className="pb-8">
           <Button
             size="lg"
             className="w-full h-14 text-base font-medium"
             onClick={onComplete}
           >
-            {completedBackups.size === 2 ? '完成' : '跳过其他备份'}
+            开始使用钱包
           </Button>
         </div>
       </motion.div>
     );
   }
 
-  if (!showPasswordForm) {
+  // Password form
+  if (showPasswordForm) {
     return (
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className="flex flex-col h-full"
+        className="flex flex-col h-full pt-8"
       >
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-6"
-          >
-            <CloudUpload className="w-12 h-12 text-success" />
-          </motion.div>
-          
-          <h2 className="text-xl font-bold text-foreground mb-2">
-            请完成"资产保险箱"备份
-          </h2>
-          <p className="text-muted-foreground text-sm max-w-[280px] mb-4">
-            用于换机或手机丢失时找回资金
-          </p>
+        <h2 className="text-xl font-bold text-foreground mb-2">
+          设置云备份密码
+        </h2>
+        <p className="text-muted-foreground text-sm mb-6">
+          此密码将用于加密您的云端备份，请牢记
+        </p>
 
-          <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 max-w-[300px]">
-            <p className="text-sm text-warning font-medium">
-              ⚠️ 我们无法替您找回保险箱密码，请务必牢记
-            </p>
+        <div className="space-y-4 flex-1">
+          <div className="relative">
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="设置密码（8-32位，含字母和数字）"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError('');
+              }}
+              className="h-14 pr-12"
+            />
+            <button
+              type="button"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
           </div>
 
-          {/* Show completed backups if any */}
-          {completedBackups.size > 0 && (
-            <div className="w-full max-w-[300px] space-y-2 mt-4">
-              {completedBackups.has('cloud') && (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
-                  <Cloud className="w-5 h-5 text-success" />
-                  <span className="text-sm text-success font-medium">云备份已完成</span>
-                  <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
-                </div>
-              )}
-              {completedBackups.has('local') && (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10 border border-success/20">
-                  <HardDrive className="w-5 h-5 text-success" />
-                  <span className="text-sm text-success font-medium">本地备份已完成</span>
-                  <CheckCircle2 className="w-4 h-4 text-success ml-auto" />
-                </div>
-              )}
-            </div>
+          <Input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="再次确认密码"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setError('');
+            }}
+            className="h-14"
+          />
+
+          <label className="flex items-start gap-3 p-4 bg-muted/50 rounded-xl cursor-pointer">
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              className="mt-0.5 w-5 h-5 accent-accent"
+            />
+            <span className="text-sm text-foreground">
+              我已保存密码，理解密码无法找回
+            </span>
+          </label>
+
+          {error && (
+            <p className="text-sm text-destructive flex items-center gap-1">
+              <AlertTriangle className="w-4 h-4" />
+              {error}
+            </p>
           )}
         </div>
 
         <div className="pb-8 space-y-3">
-          {!completedBackups.has('cloud') && (
-            <Button
-              size="lg"
-              className="w-full h-14 text-base font-medium bg-success hover:bg-success/90 text-success-foreground"
-              onClick={() => {
-                setBackupType('cloud');
-                setShowPasswordForm(true);
-              }}
-            >
-              <CloudUpload className="w-5 h-5 mr-2" />
-              云备份（推荐）
-            </Button>
-          )}
-          {!completedBackups.has('local') && (
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full h-14 text-base font-medium"
-              onClick={() => {
-                setBackupType('local');
-                setShowPasswordForm(true);
-              }}
-            >
-              <HardDrive className="w-5 h-5 mr-2" />
-              导出备份文件（高级）
-            </Button>
-          )}
+          <Button
+            size="lg"
+            className="w-full h-14 text-base font-medium"
+            onClick={handleBackup}
+            disabled={isLoading || !password || !confirmPassword}
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : null}
+            完成备份
+          </Button>
           <Button
             variant="ghost"
             size="lg"
             className="w-full h-14 text-base text-muted-foreground"
-            onClick={onComplete}
+            onClick={() => {
+              setShowPasswordForm(false);
+              setCloudProvider(null);
+              setPassword('');
+              setConfirmPassword('');
+              setConfirmed(false);
+              setError('');
+            }}
           >
-            {completedBackups.size > 0 ? '完成' : '稍后备份'}
+            返回
           </Button>
-          {completedBackups.size === 0 && (
-            <p className="text-xs text-center text-destructive">
-              未完成备份将严格限制转账额度
-            </p>
-          )}
         </div>
       </motion.div>
     );
   }
 
+  // Cloud provider selection
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col h-full pt-8"
+      className="flex flex-col h-full"
     >
-      <h2 className="text-xl font-bold text-foreground mb-2">
-        {backupType === 'cloud' ? '设置云备份密码' : '设置备份文件密码'}
-      </h2>
-      <p className="text-muted-foreground text-sm mb-6">
-        此密码将用于加密您的{backupType === 'cloud' ? '云端' : '本地'}备份，请牢记
-      </p>
+      <div className="flex-1 flex flex-col items-center justify-center text-center">
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-6"
+        >
+          <CloudUpload className="w-12 h-12 text-success" />
+        </motion.div>
+        
+        <h2 className="text-xl font-bold text-foreground mb-2">
+          完成云端备份
+        </h2>
+        <p className="text-muted-foreground text-sm max-w-[280px] mb-4">
+          用于换机或手机丢失时找回资金
+        </p>
 
-      <div className="space-y-4 flex-1">
-        <div className="relative">
-          <Input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="设置密码（8-32位，含字母和数字）"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              setError('');
-            }}
-            className="h-14 pr-12"
-          />
-          <button
-            type="button"
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-          </button>
+        <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 max-w-[300px]">
+          <p className="text-sm text-warning font-medium">
+            ⚠️ 我们无法替您找回保险箱密码，请务必牢记
+          </p>
         </div>
 
-        <Input
-          type={showPassword ? 'text' : 'password'}
-          placeholder="再次确认密码"
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-            setError('');
-          }}
-          className="h-14"
-        />
+        {/* Cloud provider options */}
+        <div className="w-full max-w-[300px] space-y-3 mt-6">
+          <button
+            onClick={() => {
+              setCloudProvider('icloud');
+              setShowPasswordForm(true);
+            }}
+            className="w-full flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-accent transition-colors text-left"
+          >
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <Cloud className="w-6 h-6 text-foreground" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-foreground">iCloud</p>
+              <p className="text-sm text-muted-foreground">Apple 用户推荐</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          </button>
 
-        <label className="flex items-start gap-3 p-4 bg-muted/50 rounded-xl cursor-pointer">
-          <input
-            type="checkbox"
-            checked={confirmed}
-            onChange={(e) => setConfirmed(e.target.checked)}
-            className="mt-0.5 w-5 h-5 accent-accent"
-          />
-          <span className="text-sm text-foreground">
-            我已保存密码，理解密码无法找回
-          </span>
-        </label>
-
-        {error && (
-          <p className="text-sm text-destructive flex items-center gap-1">
-            <AlertTriangle className="w-4 h-4" />
-            {error}
-          </p>
-        )}
+          <button
+            onClick={() => {
+              setCloudProvider('google_drive');
+              setShowPasswordForm(true);
+            }}
+            className="w-full flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-accent transition-colors text-left"
+          >
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <Cloud className="w-6 h-6 text-foreground" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-foreground">Google Drive</p>
+              <p className="text-sm text-muted-foreground">Android 用户推荐</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          </button>
+        </div>
       </div>
 
-      <div className="pb-8 space-y-3">
-        <Button
-          size="lg"
-          className="w-full h-14 text-base font-medium"
-          onClick={handleBackup}
-          disabled={isLoading || !password || !confirmPassword}
-        >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-          ) : null}
-          完成备份
-        </Button>
+      <div className="pb-8">
         <Button
           variant="ghost"
           size="lg"
           className="w-full h-14 text-base text-muted-foreground"
-          onClick={() => setShowPasswordForm(false)}
+          onClick={handleSkipClick}
         >
-          返回
+          稍后备份
         </Button>
+        <p className="text-xs text-center text-destructive mt-2">
+          未完成备份将严格限制转账额度
+        </p>
       </div>
+
+      {/* Skip Warning Dialog */}
+      <AlertDialog open={showSkipWarning} onOpenChange={setShowSkipWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2 text-warning mb-2">
+              <AlertTriangle className="w-5 h-5" />
+              <AlertDialogTitle>确定要跳过备份吗？</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p className="text-foreground font-medium">不完成备份将导致：</p>
+                <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                  <li>转账功能被严格限制</li>
+                  <li>手机丢失或损坏时无法找回资产</li>
+                  <li>无法在新设备上恢复钱包</li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
+            <AlertDialogCancel className="w-full h-12 mt-0">
+              我再想想
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              className="w-full h-12 bg-muted text-muted-foreground hover:bg-muted/80"
+              onClick={handleConfirmSkip}
+            >
+              我已了解风险，稍后备份
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 }
@@ -798,78 +692,54 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
+          className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6"
         >
-          <CloudDownload className="w-12 h-12 text-accent" />
+          <CloudDownload className="w-10 h-10 text-accent" />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
-          在新设备上继续使用
+          恢复资产保险箱
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[280px] mb-8">
-          选择恢复方式，两种方式都不会泄露密钥
+        <p className="text-muted-foreground text-sm max-w-[260px] mb-6">
+          选择一种方式恢复您的钱包
         </p>
 
-        {/* Recovery Options */}
-        <div className="w-full space-y-3 max-w-sm">
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+        <div className="w-full max-w-[300px] space-y-3">
+          <button
             onClick={() => setSelectedMethod('scan')}
             className={cn(
-              'w-full p-4 rounded-2xl border-2 text-left transition-all',
+              'w-full flex items-center gap-4 p-4 rounded-xl border transition-colors',
               selectedMethod === 'scan' 
                 ? 'border-accent bg-accent/5' 
-                : 'border-border hover:border-accent/50'
+                : 'border-border bg-card hover:border-accent/50'
             )}
           >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
-                <QrCode className="w-6 h-6 text-success" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-foreground">旧设备在身边</p>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success">推荐</span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  使用旧设备扫码授权，最快最安全
-                </p>
-              </div>
-              {selectedMethod === 'scan' && (
-                <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
-              )}
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <QrCode className="w-6 h-6 text-foreground" />
             </div>
-          </motion.button>
+            <div className="flex-1 text-left">
+              <p className="font-medium text-foreground">扫码恢复</p>
+              <p className="text-sm text-muted-foreground">使用旧手机扫码授权</p>
+            </div>
+          </button>
 
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+          <button
             onClick={() => setSelectedMethod('cloud')}
             className={cn(
-              'w-full p-4 rounded-2xl border-2 text-left transition-all',
+              'w-full flex items-center gap-4 p-4 rounded-xl border transition-colors',
               selectedMethod === 'cloud' 
                 ? 'border-accent bg-accent/5' 
-                : 'border-border hover:border-accent/50'
+                : 'border-border bg-card hover:border-accent/50'
             )}
           >
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                <Cloud className="w-6 h-6 text-accent" />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-foreground">旧设备不可用</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  通过云备份或备份文件恢复
-                </p>
-              </div>
-              {selectedMethod === 'cloud' && (
-                <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
-              )}
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+              <Cloud className="w-6 h-6 text-foreground" />
             </div>
-          </motion.button>
+            <div className="flex-1 text-left">
+              <p className="font-medium text-foreground">从云端恢复</p>
+              <p className="text-sm text-muted-foreground">iCloud / Google Drive</p>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -877,8 +747,8 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
         <Button
           size="lg"
           className="w-full h-14 text-base font-medium"
-          onClick={onComplete}
           disabled={!selectedMethod}
+          onClick={onComplete}
         >
           继续
           <ChevronRight className="w-5 h-5 ml-1" />
@@ -888,68 +758,30 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// Recovery Step 2: Restore Data (Cloud/File)
+// Recovery Step 2: Restore Data
 function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
-  const [source, setSource] = useState<'icloud' | 'google' | 'file' | null>(null);
+  const [source, setSource] = useState<'icloud' | 'google_drive' | 'file' | null>(null);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [retryCount, setRetryCount] = useState(0);
-
-  const backupSources = [
-    { 
-      id: 'icloud' as const, 
-      name: 'iCloud', 
-      icon: Cloud,
-      lastBackup: '2024-01-10 14:30',
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10'
-    },
-    { 
-      id: 'google' as const, 
-      name: 'Google Drive', 
-      icon: Cloud,
-      lastBackup: '2024-01-08 09:15',
-      color: 'text-green-500',
-      bgColor: 'bg-green-500/10'
-    },
-    { 
-      id: 'file' as const, 
-      name: '导入备份文件', 
-      icon: Upload,
-      lastBackup: null,
-      color: 'text-muted-foreground',
-      bgColor: 'bg-muted'
-    },
-  ];
 
   const handleRestore = async () => {
     if (!password) {
-      setError('请输入保险箱密码');
+      setError('请输入备份密码');
       return;
     }
 
     setIsLoading(true);
-    setError('');
-
-    // Simulate restore process
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Mock: password validation
-    if (password !== 'test1234') {
-      setRetryCount(prev => prev + 1);
-      if (retryCount >= 4) {
-        setError('尝试次数过多，请 1 小时后再试或联系客服');
-      } else {
-        setError(`保险箱密码错误（剩余 ${4 - retryCount} 次尝试）`);
-      }
+    try {
+      // Simulate restoration
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      onComplete();
+    } catch (error) {
+      setError('密码错误或备份文件损坏');
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    setIsLoading(false);
-    onComplete();
   };
 
   if (!source) {
@@ -958,49 +790,59 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
-        className="flex flex-col h-full pt-8"
+        className="flex flex-col h-full"
       >
-        <h2 className="text-xl font-bold text-foreground mb-2">
-          选择备份来源
-        </h2>
-        <p className="text-muted-foreground text-sm mb-6">
-          我们找到了您的云端备份
-        </p>
-
-        <div className="space-y-3 flex-1">
-          {backupSources.map((item) => {
-            const Icon = item.icon;
-            return (
-              <motion.button
-                key={item.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => setSource(item.id)}
-                className="w-full p-4 rounded-2xl border border-border hover:border-accent/50 text-left transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center', item.bgColor)}>
-                    <Icon className={cn('w-6 h-6', item.color)} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-foreground">{item.name}</p>
-                    {item.lastBackup && (
-                      <p className="text-sm text-muted-foreground">
-                        上次备份：{item.lastBackup}
-                      </p>
-                    )}
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
-
-        <div className="pb-8">
-          <p className="text-xs text-center text-muted-foreground">
-            找不到备份？请检查是否登录了正确的账号
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <h2 className="text-xl font-bold text-foreground mb-2">
+            选择备份来源
+          </h2>
+          <p className="text-muted-foreground text-sm max-w-[260px] mb-6">
+            选择您的备份存储位置
           </p>
+
+          <div className="w-full max-w-[300px] space-y-3">
+            <button
+              onClick={() => setSource('icloud')}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors"
+            >
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                <Cloud className="w-6 h-6 text-foreground" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium text-foreground">iCloud</p>
+                <p className="text-sm text-muted-foreground">从 iCloud 恢复</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </button>
+
+            <button
+              onClick={() => setSource('google_drive')}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors"
+            >
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                <Cloud className="w-6 h-6 text-foreground" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium text-foreground">Google Drive</p>
+                <p className="text-sm text-muted-foreground">从 Google Drive 恢复</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </button>
+
+            <button
+              onClick={() => setSource('file')}
+              className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors"
+            >
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                <FileDown className="w-6 h-6 text-foreground" />
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium text-foreground">本地文件</p>
+                <p className="text-sm text-muted-foreground">选择备份文件</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </button>
+          </div>
         </div>
       </motion.div>
     );
@@ -1014,24 +856,23 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
       className="flex flex-col h-full pt-8"
     >
       <h2 className="text-xl font-bold text-foreground mb-2">
-        输入保险箱密码
+        输入备份密码
       </h2>
       <p className="text-muted-foreground text-sm mb-6">
-        请输入您创建钱包时设置的保险箱密码
+        请输入您创建备份时设置的密码
       </p>
 
       <div className="space-y-4 flex-1">
         <div className="relative">
           <Input
             type={showPassword ? 'text' : 'password'}
-            placeholder="请输入保险箱密码"
+            placeholder="备份密码"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
               setError('');
             }}
             className="h-14 pr-12"
-            autoFocus
           />
           <button
             type="button"
@@ -1043,23 +884,11 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
         </div>
 
         {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-xl bg-destructive/10 border border-destructive/20"
-          >
-            <p className="text-sm text-destructive flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              {error}
-            </p>
-          </motion.div>
-        )}
-
-        <div className="bg-muted/50 rounded-xl p-4">
-          <p className="text-xs text-muted-foreground">
-            💡 密码是您在首次创建钱包时设置的"资产保险箱密码"，用于加密保护您的备份数据。
+          <p className="text-sm text-destructive flex items-center gap-1">
+            <AlertTriangle className="w-4 h-4" />
+            {error}
           </p>
-        </div>
+        )}
       </div>
 
       <div className="pb-8 space-y-3">
@@ -1067,32 +896,31 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
           size="lg"
           className="w-full h-14 text-base font-medium"
           onClick={handleRestore}
-          disabled={isLoading || !password || retryCount >= 5}
+          disabled={isLoading || !password}
         >
           {isLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              正在验证...
-            </>
-          ) : (
-            '确认恢复'
-          )}
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : null}
+          恢复数据
         </Button>
         <Button
           variant="ghost"
           size="lg"
           className="w-full h-14 text-base text-muted-foreground"
-          onClick={() => setSource(null)}
-          disabled={isLoading}
+          onClick={() => {
+            setSource(null);
+            setPassword('');
+            setError('');
+          }}
         >
-          返回选择备份
+          返回
         </Button>
       </div>
     </motion.div>
   );
 }
 
-// Recovery Step 3: Verify Identity (Passkey/Biometric)
+// Recovery Step 3: Verify Identity
 function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const { enableBiometric } = useWallet();
@@ -1101,8 +929,6 @@ function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
     setIsLoading(true);
     try {
       await enableBiometric();
-      // Simulate key regeneration
-      await new Promise(resolve => setTimeout(resolve, 1500));
       onComplete();
     } catch (error) {
       console.error('Verification failed:', error);
@@ -1123,23 +949,20 @@ function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
+          className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6"
         >
-          <Fingerprint className="w-12 h-12 text-accent" />
+          <Fingerprint className="w-10 h-10 text-accent" />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
-          验证身份
+          验证您的身份
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[280px] mb-4">
-          请使用面容 ID 或指纹完成身份验证
-        </p>
-        <p className="text-xs text-muted-foreground max-w-[280px]">
-          验证通过后，系统将为此设备生成新的安全凭证
+        <p className="text-muted-foreground text-sm max-w-[260px]">
+          使用生物识别完成身份验证
         </p>
       </div>
 
-      <div className="pb-8 space-y-3">
+      <div className="pb-8">
         <Button
           size="lg"
           className="w-full h-14 text-base font-medium"
@@ -1147,16 +970,11 @@ function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
           disabled={isLoading}
         >
           {isLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              正在验证...
-            </>
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
           ) : (
-            <>
-              <Fingerprint className="w-5 h-5 mr-2" />
-              开始验证
-            </>
+            <Fingerprint className="w-5 h-5 mr-2" />
           )}
+          开始验证
         </Button>
       </div>
     </motion.div>
@@ -1165,79 +983,47 @@ function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
 
 // Recovery Step 4: Complete
 function RecoveryCompleteStep({ onComplete }: { onComplete: () => void }) {
-  const [disableOldDevice, setDisableOldDevice] = useState(true);
-  const navigate = useNavigate();
-
-  const handleComplete = async () => {
-    // TODO: If disableOldDevice is true, mark old device as lost
-    onComplete();
-  };
-
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
       className="flex flex-col h-full"
     >
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ type: 'spring', damping: 15 }}
+          transition={{ type: "spring", duration: 0.5 }}
           className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-6"
         >
           <CheckCircle2 className="w-12 h-12 text-success" />
         </motion.div>
         
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-xl font-bold text-foreground mb-2"
-        >
-          钱包恢复成功！
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-muted-foreground text-sm max-w-[280px] mb-8"
-        >
-          您的钱包已在此设备上成功恢复
-        </motion.p>
+        <h2 className="text-2xl font-bold text-foreground mb-2">
+          恢复完成
+        </h2>
+        <p className="text-muted-foreground text-sm max-w-[280px] mb-8">
+          您的钱包已成功恢复，所有资产均可正常使用
+        </p>
 
-        {/* Security Recommendation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="w-full max-w-sm"
-        >
-          <label className="flex items-start gap-3 p-4 bg-warning/5 border border-warning/20 rounded-xl cursor-pointer">
-            <input
-              type="checkbox"
-              checked={disableOldDevice}
-              onChange={(e) => setDisableOldDevice(e.target.checked)}
-              className="mt-0.5 w-5 h-5 accent-warning"
-            />
-            <div className="text-left">
-              <p className="text-sm font-medium text-foreground">
-                禁用旧设备
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                建议将旧设备标记为丢失并禁用其访问权限
-              </p>
-            </div>
-          </label>
-        </motion.div>
+        <div className="w-full max-w-[300px] space-y-2">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10">
+            <CheckCircle2 className="w-5 h-5 text-success" />
+            <span className="text-sm text-foreground">资产保险箱已恢复</span>
+          </div>
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10">
+            <CheckCircle2 className="w-5 h-5 text-success" />
+            <span className="text-sm text-foreground">安全设置已同步</span>
+          </div>
+        </div>
       </div>
 
       <div className="pb-8">
         <Button
           size="lg"
-          className="w-full h-14 text-base font-medium bg-success hover:bg-success/90 text-success-foreground"
-          onClick={handleComplete}
+          className="w-full h-14 text-base font-medium"
+          onClick={onComplete}
         >
           进入钱包
         </Button>
