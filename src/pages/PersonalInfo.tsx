@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Camera, Check, Mail, Lock, ShieldCheck, Copy } from 'lucide-react';
+import { ArrowLeft, Camera, Check, Mail, Lock, Copy, Eye, EyeOff, Edit3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,9 +21,9 @@ function getPasswordStrength(password: string): { level: 'weak' | 'medium' | 'st
   if (/\d/.test(password)) score++;
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
   
-  if (score <= 2) return { level: 'weak', label: '弱', color: 'bg-red-500' };
-  if (score <= 3) return { level: 'medium', label: '中', color: 'bg-yellow-500' };
-  return { level: 'strong', label: '强', color: 'bg-green-500' };
+  if (score <= 2) return { level: 'weak', label: '弱', color: 'bg-destructive' };
+  if (score <= 3) return { level: 'medium', label: '中', color: 'bg-warning' };
+  return { level: 'strong', label: '强', color: 'bg-success' };
 }
 
 export default function PersonalInfo() {
@@ -33,21 +33,38 @@ export default function PersonalInfo() {
   const initialNickname = userInfo?.email?.split('@')[0] || '';
   const [nickname, setNickname] = useState(initialNickname);
   
-  // Password states
-  const [password, setPassword] = useState('');
+  // Password states - check localStorage for existing password
+  const [hasExistingPassword, setHasExistingPassword] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   
+  // Password visibility toggles
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const userId = 'UID-2024-XXXX-XXXX';
   
+  // Check if password exists on mount
+  useEffect(() => {
+    const savedPassword = localStorage.getItem('user_password');
+    if (savedPassword) {
+      setHasExistingPassword(true);
+    }
+  }, []);
+  
   // Calculate password strength
-  const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
+  const passwordStrength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
   
   // Check if user has made any changes
   const hasChanges = useMemo(() => {
-    return nickname !== initialNickname || password.length > 0;
-  }, [nickname, initialNickname, password]);
+    const nicknameChanged = nickname !== initialNickname;
+    const passwordChanged = isEditingPassword && newPassword.length > 0;
+    return nicknameChanged || passwordChanged;
+  }, [nickname, initialNickname, isEditingPassword, newPassword]);
 
   const handleCopyUserId = () => {
     navigator.clipboard.writeText(userId);
@@ -56,19 +73,52 @@ export default function PersonalInfo() {
     });
   };
 
+  const handleStartEditPassword = () => {
+    setIsEditingPassword(true);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
+  const handleCancelEditPassword = () => {
+    setIsEditingPassword(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
   const handleSave = async () => {
-    if (password && password !== confirmPassword) {
-      toast.error('两次输入的密码不一致');
-      return;
+    // Validate password if editing
+    if (isEditingPassword && newPassword) {
+      // Check current password if user has existing password
+      if (hasExistingPassword) {
+        const savedPassword = localStorage.getItem('user_password');
+        if (currentPassword !== savedPassword) {
+          toast.error('当前密码不正确');
+          return;
+        }
+      }
+      
+      if (newPassword !== confirmPassword) {
+        toast.error('两次输入的密码不一致');
+        return;
+      }
     }
     
     setIsSaving(true);
     await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Save new password if provided
+    if (isEditingPassword && newPassword) {
+      localStorage.setItem('user_password', newPassword);
+      setHasExistingPassword(true);
+      setIsEditingPassword(false);
+    }
+    
     setIsSaving(false);
     toast.success('个人信息已更新');
     navigate(-1);
   };
-
 
   return (
     <AppLayout showNav={false}>
@@ -174,68 +224,182 @@ export default function PersonalInfo() {
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Lock className="w-4 h-4" />
-                  设置密码
+                  {hasExistingPassword ? '登录密码' : '设置密码'}
                 </label>
+                {hasExistingPassword && !isEditingPassword && (
+                  <Badge variant="secondary" className="text-xs bg-success/10 text-success">
+                    已设置
+                  </Badge>
+                )}
               </div>
               
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="请输入新密码"
-                className="bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-accent"
-              />
-              
-              {/* Password Strength Indicator */}
-              {password && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden flex gap-1">
-                      <div 
-                        className={`h-full rounded-full transition-all ${passwordStrength.level === 'weak' ? passwordStrength.color : 'bg-muted-foreground/20'} ${passwordStrength.level !== 'weak' ? passwordStrength.color : ''}`}
-                        style={{ width: '33%' }}
-                      />
-                      <div 
-                        className={`h-full rounded-full transition-all ${passwordStrength.level === 'medium' || passwordStrength.level === 'strong' ? passwordStrength.color : 'bg-muted-foreground/20'}`}
-                        style={{ width: '33%' }}
-                      />
-                      <div 
-                        className={`h-full rounded-full transition-all ${passwordStrength.level === 'strong' ? passwordStrength.color : 'bg-muted-foreground/20'}`}
-                        style={{ width: '33%' }}
-                      />
+              <AnimatePresence mode="wait">
+                {!isEditingPassword ? (
+                  <motion.div
+                    key="password-display"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-3"
+                  >
+                    {hasExistingPassword ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="password"
+                            value="••••••••"
+                            readOnly
+                            className="bg-muted/30 border-0 text-muted-foreground cursor-not-allowed"
+                          />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleStartEditPassword}
+                            className="shrink-0 gap-1"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            修改
+                          </Button>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          密码可用于登录和安全验证
+                        </p>
+                      </>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleStartEditPassword}
+                      >
+                        <Lock className="w-4 h-4 mr-2" />
+                        设置登录密码
+                      </Button>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="password-edit"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-3"
+                  >
+                    {/* Current password (only if has existing) */}
+                    {hasExistingPassword && (
+                      <div className="space-y-1">
+                        <label className="text-xs text-muted-foreground">当前密码</label>
+                        <div className="relative">
+                          <Input
+                            type={showCurrentPassword ? 'text' : 'password'}
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            placeholder="请输入当前密码"
+                            className="bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-accent pr-10"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* New password */}
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">新密码</label>
+                      <div className="relative">
+                        <Input
+                          type={showNewPassword ? 'text' : 'password'}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="请输入新密码"
+                          className="bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-accent pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
-                    <span className={`text-xs font-medium ${
-                      passwordStrength.level === 'weak' ? 'text-red-500' : 
-                      passwordStrength.level === 'medium' ? 'text-yellow-500' : 'text-green-500'
-                    }`}>
-                      {passwordStrength.label}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    建议使用8位以上，包含大小写字母、数字和特殊字符
-                  </p>
-                </motion.div>
-              )}
-              
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="请确认新密码"
-                className="bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-accent"
-              />
-              
-              {confirmPassword && password !== confirmPassword && (
-                <p className="text-xs text-red-500">两次输入的密码不一致</p>
-              )}
-              
-              <p className="text-xs text-muted-foreground">
-                设置密码后可用于登录和安全验证
-              </p>
+                    
+                    {/* Password Strength Indicator */}
+                    {newPassword && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden flex gap-1">
+                            <div 
+                              className={`h-full rounded-full transition-all ${passwordStrength.color}`}
+                              style={{ width: '33%' }}
+                            />
+                            <div 
+                              className={`h-full rounded-full transition-all ${passwordStrength.level === 'medium' || passwordStrength.level === 'strong' ? passwordStrength.color : 'bg-muted-foreground/20'}`}
+                              style={{ width: '33%' }}
+                            />
+                            <div 
+                              className={`h-full rounded-full transition-all ${passwordStrength.level === 'strong' ? passwordStrength.color : 'bg-muted-foreground/20'}`}
+                              style={{ width: '33%' }}
+                            />
+                          </div>
+                          <span className={`text-xs font-medium ${
+                            passwordStrength.level === 'weak' ? 'text-destructive' : 
+                            passwordStrength.level === 'medium' ? 'text-warning' : 'text-success'
+                          }`}>
+                            {passwordStrength.label}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          建议使用8位以上，包含大小写字母、数字和特殊字符
+                        </p>
+                      </motion.div>
+                    )}
+                    
+                    {/* Confirm password */}
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-foreground">确认新密码</label>
+                      <div className="relative">
+                        <Input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="请再次输入新密码"
+                          className="bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-accent pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {confirmPassword && newPassword !== confirmPassword && (
+                      <p className="text-xs text-destructive">两次输入的密码不一致</p>
+                    )}
+                    
+                    {/* Cancel button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleCancelEditPassword}
+                      className="text-muted-foreground"
+                    >
+                      取消修改
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         </div>
