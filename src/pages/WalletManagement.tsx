@@ -29,7 +29,7 @@ import { getTSSNodeInfo, formatTimeAgo } from '@/lib/tss-node';
 
 export default function WalletManagementPage() {
   const navigate = useNavigate();
-  const { wallets, assets } = useWallet();
+  const { wallets, assets, renameWallet } = useWallet();
   
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [selectedWalletForRename, setSelectedWalletForRename] = useState<string | null>(null);
@@ -59,9 +59,9 @@ export default function WalletManagementPage() {
   };
 
   const confirmRename = () => {
-    if (newWalletName.trim()) {
-      // In real app, this would call a context method to update the wallet name
-      toast.success(`钱包已重命名为 "${newWalletName}"`);
+    if (newWalletName.trim() && selectedWalletForRename) {
+      renameWallet(selectedWalletForRename, newWalletName.trim());
+      toast.success(`钱包已重命名为 "${newWalletName.trim()}"`);
       setRenameDialogOpen(false);
       setSelectedWalletForRename(null);
       setNewWalletName('');

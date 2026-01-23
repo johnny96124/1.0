@@ -744,6 +744,7 @@ interface WalletContextType extends WalletState {
   // Wallet actions
   createWallet: (name: string) => Promise<Wallet>;
   switchWallet: (walletId: string) => void;
+  renameWallet: (walletId: string, newName: string) => void;
   
   // Backup actions
   setPin: (pin: string) => Promise<boolean>;
@@ -1107,6 +1108,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [wallets]);
 
+  const renameWallet = useCallback((walletId: string, newName: string) => {
+    setWallets(prev => prev.map(w => 
+      w.id === walletId ? { ...w, name: newName } : w
+    ));
+    // If renaming current wallet, also update currentWallet
+    if (currentWallet?.id === walletId) {
+      setCurrentWallet(prev => prev ? { ...prev, name: newName } : null);
+    }
+  }, [currentWallet?.id]);
+
   const setPin = useCallback(async (pin: string): Promise<boolean> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     setHasPin(true);
@@ -1428,6 +1439,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     loginWithPassword,
     createWallet,
     switchWallet,
+    renameWallet,
     setPin,
     enableBiometric,
     completeCloudBackup,
