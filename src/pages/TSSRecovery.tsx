@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Shield, Cloud, HardDrive, 
   AlertTriangle, CheckCircle2, Loader2, ArrowLeft,
-  Lock, Eye, EyeOff, Upload, FileText
+  Lock, Eye, EyeOff, Upload, FileText, MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -161,6 +161,19 @@ export default function TSSRecoveryPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Contact Support */}
+      {step !== 'success' && (
+        <div className="px-4 pb-6 pt-2">
+          <button
+            onClick={() => navigate('/help')}
+            className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-3"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span>遇到问题？联系客服</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
