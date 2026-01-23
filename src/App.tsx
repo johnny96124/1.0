@@ -37,6 +37,7 @@ import AuthorizeDevice from "./pages/AuthorizeDevice";
 import TSSRecovery from "./pages/TSSRecovery";
 import TSSBackupManagement from "./pages/TSSBackupManagement";
 import DeviceKicked from "./pages/DeviceKicked";
+import SecurityRequired from "./pages/SecurityRequired";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -89,6 +90,7 @@ function AppRoutes() {
       <Route path="/profile/devices/authorize" element={<ProtectedRoute><AuthorizeDevice /></ProtectedRoute>} />
       <Route path="/tss-recovery" element={<TSSRecovery />} />
       <Route path="/device-kicked" element={<DeviceKicked />} />
+      <Route path="/security-required" element={<SecurityRequired />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

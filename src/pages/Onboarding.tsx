@@ -176,16 +176,38 @@ export default function OnboardingPage() {
 function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const { enableBiometric } = useWallet();
+  const navigate = useNavigate();
+
+  // Simulate checking if device has security enabled
+  const checkDeviceSecurity = async (): Promise<boolean> => {
+    // In real implementation, this would check:
+    // iOS: LAContext.canEvaluatePolicy(.deviceOwnerAuthentication)
+    // Android: KeyguardManager.isDeviceSecure()
+    // For demo, we'll simulate success (return true)
+    // Change to false to test the security-required page
+    return true;
+  };
 
   const handleAuthorize = async () => {
     setIsLoading(true);
     try {
+      // First check if device has security enabled
+      const hasDeviceSecurity = await checkDeviceSecurity();
+      
+      if (!hasDeviceSecurity) {
+        // Navigate to security required page
+        navigate('/security-required');
+        return;
+      }
+
       // Call system authentication API (simulated)
       // In real scenario, this triggers Face ID / Fingerprint / Device Passcode
       await enableBiometric();
       onComplete();
     } catch (error) {
       console.error('Authorization failed:', error);
+      // If auth fails due to no security setup, redirect
+      navigate('/security-required');
     } finally {
       setIsLoading(false);
     }
