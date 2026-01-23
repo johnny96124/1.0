@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -7,12 +7,15 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useWallet, aggregateAssets } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { ChainSelector } from '@/components/ChainSelector';
 import { AddressDisplay } from '@/components/AddressDisplay';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
+import { TransactionListSkeleton } from '@/components/skeletons';
+import { EmptyState } from '@/components/EmptyState';
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { toast } from '@/lib/toast';
 
@@ -21,7 +24,14 @@ export default function AssetDetailPage() {
   const navigate = useNavigate();
   const [selectedChain, setSelectedChain] = useState<ChainId>('all');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { assets, transactions, currentWallet } = useWallet();
+
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Get aggregated asset data
   const aggregatedAssets = useMemo(() => aggregateAssets(assets), [assets]);
@@ -133,18 +143,25 @@ export default function AssetDetailPage() {
 
         <div className="flex-1 overflow-auto px-4 py-4">
           {/* Balance Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="card-elevated p-4 mb-4 text-center"
-          >
-            <p className="text-3xl font-bold text-foreground mb-1">
-              {displayBalance.balance.toLocaleString()} {assetData.symbol}
-            </p>
-            <p className="text-lg text-muted-foreground">
-              {formatCurrency(displayBalance.usdValue)}
-            </p>
-          </motion.div>
+          {isLoading ? (
+            <div className="card-elevated p-4 mb-4 text-center">
+              <Skeleton className="h-8 w-40 mx-auto mb-2" />
+              <Skeleton className="h-5 w-24 mx-auto" />
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="card-elevated p-4 mb-4 text-center"
+            >
+              <p className="text-3xl font-bold text-foreground mb-1">
+                {displayBalance.balance.toLocaleString()} {assetData.symbol}
+              </p>
+              <p className="text-lg text-muted-foreground">
+                {formatCurrency(displayBalance.usdValue)}
+              </p>
+            </motion.div>
+          )}
 
           {/* Quick Actions */}
           <motion.div
@@ -247,7 +264,9 @@ export default function AssetDetailPage() {
               </Button>
             </div>
 
-            {assetTransactions.length > 0 ? (
+            {isLoading ? (
+              <TransactionListSkeleton count={4} showDateHeader={false} />
+            ) : assetTransactions.length > 0 ? (
               <div className="space-y-1.5">
                 {assetTransactions.map((tx, index) => (
                   <motion.button
@@ -312,15 +331,14 @@ export default function AssetDetailPage() {
                 ))}
               </div>
             ) : (
-              <div className="card-elevated p-6 text-center">
-                <p className="text-muted-foreground text-sm">暂无交易记录</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {selectedChain === 'all' 
-                    ? `暂无 ${assetData.symbol} 的交易`
-                    : `暂无 ${SUPPORTED_CHAINS.find(c => c.id === selectedChain)?.name} 链上的交易`
-                  }
-                </p>
-              </div>
+              <EmptyState
+                icon={Send}
+                title="暂无交易记录"
+                description={selectedChain === 'all' 
+                  ? `暂无 ${assetData.symbol} 的交易`
+                  : `暂无 ${SUPPORTED_CHAINS.find(c => c.id === selectedChain)?.name} 链上的交易`
+                }
+              />
             )}
           </motion.div>
         </div>

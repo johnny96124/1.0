@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Send, TrendingDown, 
@@ -18,6 +18,8 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from '@/lib/toast';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SecurityCardSkeleton, TransactionListSkeleton } from '@/components/skeletons';
+import { EmptyState } from '@/components/EmptyState';
 
 type FilterType = 'all' | 'send' | 'receive' | 'risk';
 
@@ -78,7 +80,14 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
+
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Get account risk status
   const riskStatus = getAccountRiskStatus();
@@ -175,55 +184,59 @@ export default function HistoryPage() {
           <h1 className="text-xl font-bold text-foreground mb-4">交易与安全</h1>
 
           {/* Account Security Status Card - Clickable when there are pending risks */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileTap={riskStatus.pendingRiskCount > 0 ? { scale: 0.98 } : undefined}
-            onClick={() => riskStatus.pendingRiskCount > 0 && navigate('/risk-management')}
-            className={cn(
-              "p-4 rounded-2xl border mb-4 transition-colors",
-              statusConfig.bg,
-              statusConfig.border,
-              riskStatus.pendingRiskCount > 0 && "cursor-pointer active:opacity-90"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bg)}>
-                <StatusIcon className={cn("w-5 h-5", statusConfig.color)} />
-              </div>
-              <div className="flex-1">
-                <p className={cn("font-semibold", statusConfig.color)}>{statusConfig.label}</p>
-                <p className="text-sm text-muted-foreground">{statusConfig.sublabel}</p>
-              </div>
-              {riskStatus.pendingRiskCount > 0 && (
-                <div className="text-right flex items-center gap-2">
-                  <div>
-                    <p className="text-lg font-bold text-foreground">{riskStatus.pendingRiskCount}</p>
-                    <p className="text-xs text-muted-foreground">待处置</p>
+          {isLoading ? (
+            <SecurityCardSkeleton />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileTap={riskStatus.pendingRiskCount > 0 ? { scale: 0.98 } : undefined}
+              onClick={() => riskStatus.pendingRiskCount > 0 && navigate('/risk-management')}
+              className={cn(
+                "p-4 rounded-2xl border mb-4 transition-colors",
+                statusConfig.bg,
+                statusConfig.border,
+                riskStatus.pendingRiskCount > 0 && "cursor-pointer active:opacity-90"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bg)}>
+                  <StatusIcon className={cn("w-5 h-5", statusConfig.color)} />
+                </div>
+                <div className="flex-1">
+                  <p className={cn("font-semibold", statusConfig.color)}>{statusConfig.label}</p>
+                  <p className="text-sm text-muted-foreground">{statusConfig.sublabel}</p>
+                </div>
+                {riskStatus.pendingRiskCount > 0 && (
+                  <div className="text-right flex items-center gap-2">
+                    <div>
+                      <p className="text-lg font-bold text-foreground">{riskStatus.pendingRiskCount}</p>
+                      <p className="text-xs text-muted-foreground">待处置</p>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                )}
+              </div>
+              
+              {riskStatus.pendingRiskCount > 0 && (
+                <div className="flex gap-2 mt-3 pt-3 border-t border-border/30">
+                  {riskStatus.redCount > 0 && (
+                    <span className="text-xs px-2 py-1 rounded-full bg-destructive/10 text-destructive">
+                      {riskStatus.redCount} 高风险
+                    </span>
+                  )}
+                  {riskStatus.yellowCount > 0 && (
+                    <span className="text-xs px-2 py-1 rounded-full bg-warning/10 text-warning">
+                      {riskStatus.yellowCount} 可疑
+                    </span>
+                  )}
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    风险敞口 ${riskStatus.totalRiskExposure.toLocaleString()}
+                  </span>
                 </div>
               )}
-            </div>
-            
-            {riskStatus.pendingRiskCount > 0 && (
-              <div className="flex gap-2 mt-3 pt-3 border-t border-border/30">
-                {riskStatus.redCount > 0 && (
-                  <span className="text-xs px-2 py-1 rounded-full bg-destructive/10 text-destructive">
-                    {riskStatus.redCount} 高风险
-                  </span>
-                )}
-                {riskStatus.yellowCount > 0 && (
-                  <span className="text-xs px-2 py-1 rounded-full bg-warning/10 text-warning">
-                    {riskStatus.yellowCount} 可疑
-                  </span>
-                )}
-                <span className="text-xs text-muted-foreground ml-auto">
-                  风险敞口 ${riskStatus.totalRiskExposure.toLocaleString()}
-                </span>
-              </div>
-            )}
-          </motion.div>
+            </motion.div>
+          )}
 
           {/* Search */}
           <div className="relative mb-3">
@@ -254,139 +267,128 @@ export default function HistoryPage() {
           </Tabs>
 
           {/* Transactions List */}
-          <div className="space-y-6">
-            {Object.entries(groupedTransactions).map(([date, txs]) => (
-              <motion.div
-                key={date}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">
-                  {date}
-                </h3>
-                <div className="space-y-1.5">
-                  {txs.map((tx, index) => {
-                    const riskConfig = tx.riskScore && tx.riskScore !== 'green' 
-                      ? getRiskConfig(tx.riskScore) 
-                      : null;
-                    const isPendingRisk = isRiskTx(tx);
-                    
-                    return (
-                      <motion.button
-                        key={tx.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.05 * index }}
-                        onClick={() => setSelectedTx(tx)}
-                        className={cn(
-                          "w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors",
-                          isPendingRisk && "border-l-4",
-                          isPendingRisk && tx.riskScore === 'red' && "border-l-destructive",
-                          isPendingRisk && tx.riskScore === 'yellow' && "border-l-warning"
-                        )}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className={cn(
-                            'w-8 h-8 rounded-full flex items-center justify-center',
-                            tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
-                          )}>
-                            {tx.type === 'receive' ? (
-                              <TrendingDown className="w-4 h-4 text-success rotate-180" />
-                            ) : (
-                              <Send className="w-4 h-4 text-accent" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <p className="font-medium text-foreground text-sm">
-                                {tx.type === 'receive' ? '转入' : '转出'}
-                              </p>
-                              {riskConfig && isPendingRisk && (
-                                <span className={cn(
-                                  "text-[10px] px-1.5 py-0.5 rounded",
-                                  riskConfig.bg,
-                                  riskConfig.color
-                                )}>
-                                  {riskConfig.label}
-                                </span>
-                              )}
-                              {tx.disposalStatus === 'returned' && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                                  已退回
-                                </span>
-                              )}
-                              {tx.disposalStatus === 'acknowledged' && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                                  已知晓
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                                {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
-                              </span>
-                              <span className="text-xs text-muted-foreground/60">·</span>
-                              <span className="text-xs text-muted-foreground">
-                                {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
-                              </span>
-                              {tx.status === 'pending' && (
-                                <span className="text-xs text-warning flex items-center gap-0.5">
-                                  <Clock className="w-3 h-3" />
-                                </span>
-                              )}
-                              {tx.status === 'confirmed' && (
-                                <span className="text-xs text-success flex items-center gap-0.5">
-                                  <CheckCircle2 className="w-3 h-3" />
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right flex items-center gap-2">
-                          <div>
-                            <p className={cn(
-                              'font-medium text-sm',
-                              tx.type === 'receive' ? 'text-success' : 'text-foreground'
+          {isLoading ? (
+            <TransactionListSkeleton count={5} />
+          ) : (
+            <div className="space-y-6">
+              {Object.entries(groupedTransactions).map(([date, txs]) => (
+                <motion.div
+                  key={date}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">
+                    {date}
+                  </h3>
+                  <div className="space-y-1.5">
+                    {txs.map((tx, index) => {
+                      const riskConfig = tx.riskScore && tx.riskScore !== 'green' 
+                        ? getRiskConfig(tx.riskScore) 
+                        : null;
+                      const isPendingRisk = isRiskTx(tx);
+                      
+                      return (
+                        <motion.button
+                          key={tx.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.05 * index }}
+                          onClick={() => setSelectedTx(tx)}
+                          className={cn(
+                            "w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors",
+                            isPendingRisk && "border-l-4",
+                            isPendingRisk && tx.riskScore === 'red' && "border-l-destructive",
+                            isPendingRisk && tx.riskScore === 'yellow' && "border-l-warning"
+                          )}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={cn(
+                              'w-8 h-8 rounded-full flex items-center justify-center',
+                              tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
                             )}>
-                              {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              ${tx.usdValue.toLocaleString()}
-                            </p>
+                              {tx.type === 'receive' ? (
+                                <TrendingDown className="w-4 h-4 text-success rotate-180" />
+                              ) : (
+                                <Send className="w-4 h-4 text-accent" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <p className="font-medium text-foreground text-sm">
+                                  {tx.type === 'receive' ? '转入' : '转出'}
+                                </p>
+                                {riskConfig && isPendingRisk && (
+                                  <span className={cn(
+                                    "text-[10px] px-1.5 py-0.5 rounded",
+                                    riskConfig.bg,
+                                    riskConfig.color
+                                  )}>
+                                    {riskConfig.label}
+                                  </span>
+                                )}
+                                {tx.disposalStatus === 'returned' && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                    已退回
+                                  </span>
+                                )}
+                                {tx.disposalStatus === 'acknowledged' && (
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                    已知晓
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                                  {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
+                                </span>
+                                <span className="text-xs text-muted-foreground/60">·</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
+                                </span>
+                                {tx.status === 'pending' && (
+                                  <span className="text-xs text-warning flex items-center gap-0.5">
+                                    <Clock className="w-3 h-3" />
+                                  </span>
+                                )}
+                                {tx.status === 'confirmed' && (
+                                  <span className="text-xs text-success flex items-center gap-0.5">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            ))}
+                          <div className="text-right flex items-center gap-2">
+                            <div>
+                              <p className={cn(
+                                'font-medium text-sm',
+                                tx.type === 'receive' ? 'text-success' : 'text-foreground'
+                              )}>
+                                {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                ${tx.usdValue.toLocaleString()}
+                              </p>
+                            </div>
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              ))}
 
-            {filteredTransactions.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="card-elevated p-8 flex flex-col items-center justify-center text-center"
-              >
-                <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                  {filter === 'risk' ? (
-                    <Shield className="w-6 h-6 text-success" />
-                  ) : (
-                    <Send className="w-6 h-6 text-muted-foreground" />
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  {filter === 'risk' ? '暂无待处置风险交易' : '暂无交易记录'}
-                </p>
-                {filter === 'risk' && (
-                  <p className="text-xs text-muted-foreground/70">
-                    账户安全状态良好
-                  </p>
-                )}
-              </motion.div>
-            )}
-          </div>
+              {filteredTransactions.length === 0 && (
+                <EmptyState
+                  icon={filter === 'risk' ? Shield : Send}
+                  title={filter === 'risk' ? '暂无待处置风险交易' : '暂无交易记录'}
+                  description={filter === 'risk' ? '账户安全状态良好' : undefined}
+                  variant={filter === 'risk' ? 'success' : 'default'}
+                />
+              )}
+            </div>
+          )}
         </div>
       </PullToRefresh>
 
