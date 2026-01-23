@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-  Shield, Cloud, HardDrive, Smartphone, QrCode, 
+  Shield, Cloud, HardDrive, 
   AlertTriangle, CheckCircle2, Loader2, ArrowLeft,
-  Lock, Eye, EyeOff, Upload, FileDown
+  Lock, Eye, EyeOff, Upload, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useWallet } from '@/contexts/WalletContext';
 
-type RecoveryMethod = 'cloud' | 'local_file' | 'old_device';
-type RecoveryStep = 'method' | 'password' | 'scanning' | 'success';
+type RecoveryMethod = 'cloud' | 'local_file';
+type RecoveryStep = 'method' | 'file_select' | 'password' | 'success';
 
 export default function TSSRecoveryPage() {
   const [searchParams] = useSearchParams();
@@ -22,6 +22,7 @@ export default function TSSRecoveryPage() {
   
   const [step, setStep] = useState<RecoveryStep>('method');
   const [selectedMethod, setSelectedMethod] = useState<RecoveryMethod | null>(null);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -32,12 +33,17 @@ export default function TSSRecoveryPage() {
 
   const handleSelectMethod = (method: RecoveryMethod) => {
     setSelectedMethod(method);
-    if (method === 'old_device') {
-      // Go to scanning step for QR code
-      setStep('scanning');
+    if (method === 'local_file') {
+      // Go to file selection step first
+      setStep('file_select');
     } else {
       setStep('password');
     }
+  };
+
+  const handleFileSelected = (fileName: string) => {
+    setSelectedFile(fileName);
+    setStep('password');
   };
 
   const handleRecover = async () => {
@@ -63,30 +69,37 @@ export default function TSSRecoveryPage() {
     }
   };
 
-  const handleScanComplete = async () => {
-    setIsLoading(true);
-    try {
-      await recoverTSSNode('old_device');
-      setStep('success');
-    } catch (e) {
-      setError('扫码授权失败，请重试');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleEnterWallet = () => {
     navigate('/home');
   };
 
   const handleBack = () => {
-    if (step === 'password' || step === 'scanning') {
+    if (step === 'password') {
+      if (selectedMethod === 'local_file') {
+        setStep('file_select');
+        setPassword('');
+        setError('');
+      } else {
+        setStep('method');
+        setSelectedMethod(null);
+        setPassword('');
+        setError('');
+      }
+    } else if (step === 'file_select') {
       setStep('method');
       setSelectedMethod(null);
-      setPassword('');
-      setError('');
+      setSelectedFile(null);
     } else {
       navigate('/login');
+    }
+  };
+
+  const getStepTitle = () => {
+    switch (step) {
+      case 'method': return '恢复安全账户';
+      case 'file_select': return '选择备份文件';
+      case 'password': return '验证密码';
+      case 'success': return '恢复成功';
     }
   };
 
@@ -102,10 +115,7 @@ export default function TSSRecoveryPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <span className="text-sm font-medium text-foreground">
-            {step === 'method' && '恢复安全账户'}
-            {step === 'password' && '验证密码'}
-            {step === 'scanning' && '扫码恢复'}
-            {step === 'success' && '恢复成功'}
+            {getStepTitle()}
           </span>
         </div>
       </div>
@@ -122,11 +132,18 @@ export default function TSSRecoveryPage() {
               onSelect={handleSelectMethod}
             />
           )}
+          {step === 'file_select' && (
+            <FileSelectStep
+              key="file_select"
+              onFileSelected={handleFileSelected}
+            />
+          )}
           {step === 'password' && (
             <PasswordStep
               key="password"
               method={selectedMethod!}
               cloudProvider={cloudProvider}
+              selectedFile={selectedFile}
               password={password}
               setPassword={setPassword}
               showPassword={showPassword}
@@ -134,14 +151,6 @@ export default function TSSRecoveryPage() {
               error={error}
               isLoading={isLoading}
               onSubmit={handleRecover}
-            />
-          )}
-          {step === 'scanning' && (
-            <ScanningStep
-              key="scanning"
-              isLoading={isLoading}
-              error={error}
-              onComplete={handleScanComplete}
             />
           )}
           {step === 'success' && (
@@ -248,7 +257,7 @@ function MethodSelectionStep({
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: hasCloudBackup ? 0.2 : 0.1 }}
           onClick={() => onSelect('local_file')}
           className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-accent/50 transition-colors"
         >
@@ -264,27 +273,109 @@ function MethodSelectionStep({
             </div>
           </div>
         </motion.button>
+      </div>
+    </motion.div>
+  );
+}
 
-        {/* Old Device QR Scan */}
-        <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          onClick={() => onSelect('old_device')}
-          className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-accent/50 transition-colors"
+// File Selection Step
+function FileSelectStep({
+  onFileSelected,
+}: {
+  onFileSelected: (fileName: string) => void;
+}) {
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+
+  const handleFileSelect = () => {
+    // Mock file selection
+    const mockFileName = 'wallet_backup_20250120.backup';
+    setSelectedFile(mockFileName);
+  };
+
+  const handleContinue = () => {
+    if (selectedFile) {
+      onFileSelected(selectedFile);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="flex flex-col h-full"
+    >
+      <div className="flex-1 flex flex-col items-center pt-8">
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          className="w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center mb-4"
         >
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
-              <QrCode className="w-5 h-5 text-success" />
-            </div>
-            <div className="flex-1">
-              <span className="font-medium text-foreground">旧设备扫码授权</span>
-              <p className="text-sm text-muted-foreground mt-1">
-                使用旧设备扫描二维码完成授权
-              </p>
-            </div>
-          </div>
-        </motion.button>
+          <HardDrive className="w-8 h-8 text-warning" />
+        </motion.div>
+        
+        <h2 className="text-lg font-bold text-foreground mb-2 text-center">
+          选择备份文件
+        </h2>
+        <p className="text-sm text-muted-foreground text-center max-w-[280px] mb-8">
+          请选择之前导出的 .backup 备份文件
+        </p>
+
+        {/* File Selection Area */}
+        <div className="w-full max-w-[300px]">
+          {!selectedFile ? (
+            <button
+              onClick={handleFileSelect}
+              className="w-full border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center gap-3 hover:border-accent/50 hover:bg-accent/5 transition-colors"
+            >
+              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                <Upload className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium text-foreground">点击选择文件</p>
+                <p className="text-xs text-muted-foreground mt-1">支持 .backup 格式</p>
+              </div>
+            </button>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full bg-success/5 border border-success/30 rounded-xl p-4"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center shrink-0">
+                  <FileText className="w-5 h-5 text-success" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {selectedFile}
+                  </p>
+                  <p className="text-xs text-success flex items-center gap-1 mt-0.5">
+                    <CheckCircle2 className="w-3 h-3" />
+                    文件已选择
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleFileSelect}
+                className="w-full mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                重新选择
+              </button>
+            </motion.div>
+          )}
+        </div>
+      </div>
+
+      <div className="pb-6">
+        <Button
+          size="lg"
+          className="w-full h-12 text-base font-medium"
+          onClick={handleContinue}
+          disabled={!selectedFile}
+        >
+          下一步
+        </Button>
       </div>
     </motion.div>
   );
@@ -294,6 +385,7 @@ function MethodSelectionStep({
 function PasswordStep({
   method,
   cloudProvider,
+  selectedFile,
   password,
   setPassword,
   showPassword,
@@ -304,6 +396,7 @@ function PasswordStep({
 }: {
   method: RecoveryMethod;
   cloudProvider: string;
+  selectedFile: string | null;
   password: string;
   setPassword: (v: string) => void;
   showPassword: boolean;
@@ -312,13 +405,6 @@ function PasswordStep({
   isLoading: boolean;
   onSubmit: () => void;
 }) {
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-
-  const handleFileSelect = () => {
-    // Mock file selection
-    setSelectedFile('wallet_backup_20250120.backup');
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -345,23 +431,11 @@ function PasswordStep({
           }
         </p>
 
-        {/* File Selection for local_file method */}
-        {method === 'local_file' && (
-          <div className="w-full max-w-[300px] mb-4">
-            <Button
-              variant="outline"
-              className="w-full h-12 justify-start"
-              onClick={handleFileSelect}
-            >
-              <Upload className="w-5 h-5 mr-2" />
-              {selectedFile || '选择备份文件'}
-            </Button>
-            {selectedFile && (
-              <p className="text-xs text-success mt-2 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" />
-                已选择文件
-              </p>
-            )}
+        {/* Show selected file info for local_file method */}
+        {method === 'local_file' && selectedFile && (
+          <div className="w-full max-w-[300px] mb-4 bg-muted/30 rounded-lg p-3 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="text-sm text-muted-foreground truncate">{selectedFile}</span>
           </div>
         )}
 
@@ -401,7 +475,7 @@ function PasswordStep({
           size="lg"
           className="w-full h-12 text-base font-medium"
           onClick={onSubmit}
-          disabled={isLoading || !password || (method === 'local_file' && !selectedFile)}
+          disabled={isLoading || !password}
         >
           {isLoading ? (
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -413,84 +487,6 @@ function PasswordStep({
   );
 }
 
-// Scanning Step (QR Code)
-function ScanningStep({
-  isLoading,
-  error,
-  onComplete,
-}: {
-  isLoading: boolean;
-  error: string;
-  onComplete: () => void;
-}) {
-  const [scanProgress, setScanProgress] = useState(0);
-
-  useEffect(() => {
-    // Simulate scanning progress
-    const interval = setInterval(() => {
-      setScanProgress(p => {
-        if (p >= 100) {
-          clearInterval(interval);
-          setTimeout(onComplete, 500);
-          return 100;
-        }
-        return p + 10;
-      });
-    }, 300);
-
-    return () => clearInterval(interval);
-  }, [onComplete]);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col h-full items-center justify-center text-center"
-    >
-      {/* QR Code Display */}
-      <motion.div
-        initial={{ scale: 0.9 }}
-        animate={{ scale: 1 }}
-        className="w-48 h-48 bg-white rounded-2xl p-4 mb-6 shadow-lg"
-      >
-        <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
-          <QrCode className="w-24 h-24 text-foreground" />
-        </div>
-      </motion.div>
-
-      <h2 className="text-lg font-bold text-foreground mb-2">
-        请用旧设备扫描二维码
-      </h2>
-      <p className="text-sm text-muted-foreground max-w-[280px] mb-4">
-        在旧设备上打开钱包应用，扫描此二维码完成授权
-      </p>
-
-      {/* Progress indicator */}
-      {scanProgress > 0 && scanProgress < 100 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center gap-2 text-accent"
-        >
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm">正在等待授权...</span>
-        </motion.div>
-      )}
-
-      {error && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-sm text-destructive mt-3 flex items-center gap-1"
-        >
-          <AlertTriangle className="w-4 h-4" />
-          {error}
-        </motion.p>
-      )}
-    </motion.div>
-  );
-}
 
 // Success Step
 function SuccessStep({ onEnter }: { onEnter: () => void }) {
