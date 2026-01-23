@@ -15,11 +15,7 @@ const Splash = () => {
       
       // Wait for exit animation before navigating
       setTimeout(() => {
-        const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
-        
-        if (!hasSeenWelcome) {
-          navigate('/welcome', { replace: true });
-        } else if (isAuthenticated) {
+        if (isAuthenticated) {
           navigate('/home', { replace: true });
         } else {
           navigate('/login', { replace: true });
