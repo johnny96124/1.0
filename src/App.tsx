@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { WalletProvider, useWallet } from "@/contexts/WalletContext";
 import { PhoneFrame } from "@/components/layout/PhoneFrame";
+import Splash from "./pages/Splash";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
@@ -44,20 +45,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useWallet();
   
   if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
   
   return <>{children}</>;
 }
 
 function AppRoutes() {
-  const { isAuthenticated } = useWallet();
-
   return (
     <Routes>
-      <Route path="/" element={isAuthenticated ? <Navigate to="/home" replace /> : <Login />} />
-      <Route path="/welcome" element={isAuthenticated ? <Navigate to="/home" replace /> : <Welcome />} />
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/home" replace /> : <Login />} />
+      <Route path="/" element={<Splash />} />
+      <Route path="/welcome" element={<Welcome />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/create-wallet" element={<ProtectedRoute><CreateWallet /></ProtectedRoute>} />
       <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
