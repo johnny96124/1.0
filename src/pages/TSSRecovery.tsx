@@ -8,11 +8,28 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useWallet } from '@/contexts/WalletContext';
 
 type RecoveryMethod = 'cloud' | 'local_file';
 type RecoveryStep = 'method' | 'file_select' | 'password' | 'success';
+
+// Define steps for progress indicator
+const getStepsForMethod = (method: RecoveryMethod | null) => {
+  if (method === 'local_file') {
+    return [
+      { id: 1, title: '选择方式', icon: Shield, step: 'method' },
+      { id: 2, title: '选择文件', icon: HardDrive, step: 'file_select' },
+      { id: 3, title: '验证密码', icon: Lock, step: 'password' },
+    ];
+  }
+  // Cloud recovery has fewer steps
+  return [
+    { id: 1, title: '选择方式', icon: Shield, step: 'method' },
+    { id: 2, title: '验证密码', icon: Lock, step: 'password' },
+  ];
+};
 
 export default function TSSRecoveryPage() {
   const [searchParams] = useSearchParams();
@@ -103,21 +120,80 @@ export default function TSSRecoveryPage() {
     }
   };
 
+  // Get current step index for progress
+  const steps = getStepsForMethod(selectedMethod);
+  const getCurrentStepIndex = () => {
+    if (step === 'success') return steps.length;
+    const index = steps.findIndex(s => s.step === step);
+    return index !== -1 ? index + 1 : 1;
+  };
+  const currentStepIndex = getCurrentStepIndex();
+  const progress = step === 'success' ? 100 : (currentStepIndex / steps.length) * 100;
+
   return (
     <div className="h-full bg-background flex flex-col">
-      {/* Header */}
+      {/* Progress Header */}
       <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={handleBack}
-            className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleBack}
+              className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            {step !== 'success' && (
+              <span className="text-sm text-muted-foreground">
+                步骤 {currentStepIndex} / {steps.length}
+              </span>
+            )}
+          </div>
           <span className="text-sm font-medium text-foreground">
             {getStepTitle()}
           </span>
         </div>
+        
+        {step !== 'success' && (
+          <>
+            <Progress value={progress} className="h-1" />
+            
+            {/* Step indicators */}
+            <div className="flex items-center mt-6">
+              {steps.map((stepItem, index) => {
+                const Icon = stepItem.icon;
+                const isComplete = currentStepIndex > stepItem.id;
+                const isCurrent = currentStepIndex === stepItem.id;
+                
+                return (
+                  <div key={stepItem.id} className="flex items-center flex-1 last:flex-none">
+                    <div
+                      className={cn(
+                        'w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0',
+                        isComplete && 'bg-success text-success-foreground',
+                        isCurrent && 'bg-accent text-accent-foreground',
+                        !isComplete && !isCurrent && 'bg-muted text-muted-foreground'
+                      )}
+                    >
+                      {isComplete ? (
+                        <CheckCircle2 className="w-4 h-4" />
+                      ) : (
+                        <Icon className="w-4 h-4" />
+                      )}
+                    </div>
+                    {index < steps.length - 1 && (
+                      <div
+                        className={cn(
+                          'flex-1 h-0.5',
+                          currentStepIndex > stepItem.id ? 'bg-success' : 'bg-muted'
+                        )}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Content */}
