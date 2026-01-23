@@ -336,10 +336,8 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// Step 3: Cloud Backup Only (simplified from BackupStep)
+// Step 3: Cloud Backup Only (simplified - iCloud only for Apple ecosystem)
 function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
-  const [cloudProvider, setCloudProvider] = useState<'icloud' | 'google_drive' | null>(null);
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [password, setPassword] = useState('');
@@ -349,7 +347,6 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
   const [error, setError] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const { completeCloudBackup } = useWallet();
-  const navigate = useNavigate();
 
   const validatePassword = () => {
     if (password.length < 8 || password.length > 32) {
@@ -378,7 +375,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
 
     setIsLoading(true);
     try {
-      await completeCloudBackup(cloudProvider!, password);
+      await completeCloudBackup('icloud', password);
       setShowSuccess(true);
     } catch (error) {
       setError('备份失败，请重试');
@@ -419,7 +416,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
             云端备份完成
           </h2>
           <p className="text-muted-foreground text-sm max-w-[280px] mb-6">
-            您的钱包已安全备份到 {cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive'}
+            您的钱包已安全备份到 iCloud
           </p>
 
           {/* Completed backup indicator */}
@@ -455,21 +452,40 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
     );
   }
 
-  // Password form
-  if (showPasswordForm) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        className="flex flex-col h-full pt-8"
-      >
+  // Main backup screen - directly show password form (no provider selection needed)
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="flex flex-col h-full"
+    >
+      <div className="flex-1 flex flex-col items-center pt-8">
+        {/* iCloud indicator */}
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-4"
+        >
+          <Cloud className="w-8 h-8 text-white" />
+        </motion.div>
+        
         <h2 className="text-xl font-bold text-foreground mb-2">
-          设置云备份密码
+          备份到 iCloud
         </h2>
-        <p className="text-muted-foreground text-sm mb-6">
-          此密码将用于加密您的云端备份，请牢记
+        <p className="text-muted-foreground text-sm max-w-[280px] text-center mb-4">
+          设置密码加密您的云端备份，用于换机或找回资金
         </p>
+
+        <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 max-w-[300px] mb-6">
+          <p className="text-xs text-warning font-medium text-center">
+            ⚠️ 密码无法找回，请务必牢记
+          </p>
+        </div>
+
+        {/* Password form */}
+        <div className="w-full max-w-[300px] space-y-4">
 
         <div className="space-y-4 flex-1">
           <div className="relative">
@@ -523,108 +539,23 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
           )}
         </div>
 
-        <div className="pb-8 space-y-3">
-          <Button
-            size="lg"
-            className="w-full h-14 text-base font-medium"
-            onClick={handleBackup}
-            disabled={isLoading || !password || !confirmPassword}
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            ) : null}
-            完成备份
-          </Button>
-          <Button
-            variant="ghost"
-            size="lg"
-            className="w-full h-14 text-base text-muted-foreground"
-            onClick={() => {
-              setShowPasswordForm(false);
-              setCloudProvider(null);
-              setPassword('');
-              setConfirmPassword('');
-              setConfirmed(false);
-              setError('');
-            }}
-          >
-            返回
-          </Button>
-        </div>
-      </motion.div>
-    );
-  }
-
-  // Cloud provider selection
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="flex flex-col h-full"
-    >
-      <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-6"
-        >
-          <CloudUpload className="w-12 h-12 text-success" />
-        </motion.div>
-        
-        <h2 className="text-xl font-bold text-foreground mb-2">
-          完成云端备份
-        </h2>
-        <p className="text-muted-foreground text-sm max-w-[280px] mb-4">
-          用于换机或手机丢失时找回资金
-        </p>
-
-        <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 max-w-[300px]">
-          <p className="text-sm text-warning font-medium">
-            ⚠️ 我们无法替您找回保险箱密码，请务必牢记
-          </p>
-        </div>
-
-        {/* Cloud provider options */}
-        <div className="w-full max-w-[300px] space-y-3 mt-6">
-          <button
-            onClick={() => {
-              setCloudProvider('icloud');
-              setShowPasswordForm(true);
-            }}
-            className="w-full flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-accent transition-colors text-left"
-          >
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <Cloud className="w-6 h-6 text-foreground" />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-foreground">iCloud</p>
-              <p className="text-sm text-muted-foreground">Apple 用户推荐</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </button>
-
-          <button
-            onClick={() => {
-              setCloudProvider('google_drive');
-              setShowPasswordForm(true);
-            }}
-            className="w-full flex items-center gap-4 p-4 rounded-xl bg-card border border-border hover:border-accent transition-colors text-left"
-          >
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <Cloud className="w-6 h-6 text-foreground" />
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-foreground">Google Drive</p>
-              <p className="text-sm text-muted-foreground">Android 用户推荐</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </button>
         </div>
       </div>
 
-      <div className="pb-8">
+      <div className="pb-8 space-y-3">
+        <Button
+          size="lg"
+          className="w-full h-14 text-base font-medium"
+          onClick={handleBackup}
+          disabled={isLoading || !password || !confirmPassword}
+        >
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            <Cloud className="w-5 h-5 mr-2" />
+          )}
+          备份到 iCloud
+        </Button>
         <Button
           variant="ghost"
           size="lg"
@@ -633,7 +564,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
         >
           稍后备份
         </Button>
-        <p className="text-xs text-center text-destructive mt-2">
+        <p className="text-xs text-center text-destructive">
           未完成备份将严格限制转账额度
         </p>
       </div>
