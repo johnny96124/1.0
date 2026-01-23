@@ -36,8 +36,6 @@ import { getTSSNodeInfo, updateTSSNodeBackup, formatTimeAgo } from '@/lib/tss-no
 import { toast } from 'sonner';
 
 type BackupType = 'cloud' | 'local';
-type CloudProvider = 'icloud' | 'google_drive';
-type DrawerStep = 'provider' | 'password';
 
 export default function TSSBackupManagement() {
   const navigate = useNavigate();
@@ -45,8 +43,6 @@ export default function TSSBackupManagement() {
   
   // Drawer states
   const [activeBackupType, setActiveBackupType] = useState<BackupType | null>(null);
-  const [drawerStep, setDrawerStep] = useState<DrawerStep>('provider');
-  const [selectedProvider, setSelectedProvider] = useState<CloudProvider | null>(null);
   
   // Confirmation dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -66,8 +62,6 @@ export default function TSSBackupManagement() {
     setShowPassword(false);
     setConfirmed(false);
     setError('');
-    setDrawerStep('provider');
-    setSelectedProvider(null);
   };
 
   const handleStartBackup = (type: BackupType) => {
@@ -79,23 +73,14 @@ export default function TSSBackupManagement() {
       setPendingBackupType(type);
       setShowConfirmDialog(true);
     } else {
-      openBackupDrawer(type);
-    }
-  };
-
-  const openBackupDrawer = (type: BackupType) => {
-    setActiveBackupType(type);
-    if (type === 'cloud') {
-      setDrawerStep('provider');
-    } else {
-      setDrawerStep('password');
+      setActiveBackupType(type);
     }
   };
 
   const handleConfirmRebackup = () => {
     setShowConfirmDialog(false);
     if (pendingBackupType) {
-      openBackupDrawer(pendingBackupType);
+      setActiveBackupType(pendingBackupType);
       setPendingBackupType(null);
     }
   };
@@ -117,7 +102,7 @@ export default function TSSBackupManagement() {
   };
 
   const handleCloudBackup = async () => {
-    if (!validatePassword() || !selectedProvider) return;
+    if (!validatePassword()) return;
     
     setIsLoading(true);
     try {
@@ -126,13 +111,13 @@ export default function TSSBackupManagement() {
       
       const updated = updateTSSNodeBackup({
         hasCloudBackup: true,
-        cloudProvider: selectedProvider,
+        cloudProvider: 'icloud',
         cloudBackupTime: new Date(),
       });
       setTssNodeInfo(updated);
       
       toast.success('云备份完成', {
-        description: `已备份到 ${selectedProvider === 'icloud' ? 'iCloud' : 'Google Drive'}`,
+        description: '已备份到 iCloud',
       });
       setActiveBackupType(null);
       resetForm();
@@ -245,10 +230,7 @@ export default function TSSBackupManagement() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">
-                    {tssNodeInfo.backup.hasCloudBackup 
-                      ? (tssNodeInfo.backup.cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive')
-                      : '未备份'
-                    }
+                    {tssNodeInfo.backup.hasCloudBackup ? 'iCloud' : '未备份'}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {tssNodeInfo.backup.hasCloudBackup && tssNodeInfo.backup.cloudBackupTime
@@ -338,120 +320,40 @@ export default function TSSBackupManagement() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Cloud Backup Drawer */}
+      {/* Cloud Backup Drawer - iCloud only */}
       <Drawer open={activeBackupType === 'cloud'} onOpenChange={handleDrawerClose}>
         <DrawerContent className="max-h-[90vh]">
           <DrawerHeader>
-            <DrawerTitle>
-              {drawerStep === 'provider' ? '选择云备份方式' : '设置备份密码'}
-            </DrawerTitle>
+            <DrawerTitle>备份到 iCloud</DrawerTitle>
           </DrawerHeader>
           
           <div className="px-4 pb-8">
-            <AnimatePresence mode="wait">
-              {drawerStep === 'provider' ? (
-                <motion.div
-                  key="provider"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  className="space-y-4"
-                >
-                  <Card 
-                    className={`p-4 cursor-pointer transition-all ${
-                      selectedProvider === 'icloud' 
-                        ? 'border-primary bg-primary/5' 
-                        : 'hover:bg-accent/50'
-                    }`}
-                    onClick={() => setSelectedProvider('icloud')}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                          <Cloud className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">iCloud</p>
-                          <p className="text-xs text-muted-foreground">使用 Apple ID 安全存储</p>
-                        </div>
-                      </div>
-                      <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedProvider === 'icloud' 
-                          ? 'border-primary bg-primary' 
-                          : 'border-muted-foreground/30'
-                      }`}>
-                        {selectedProvider === 'icloud' && (
-                          <Check className="h-3 w-3 text-primary-foreground" />
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                  
-                  <Card 
-                    className={`p-4 cursor-pointer transition-all ${
-                      selectedProvider === 'google_drive' 
-                        ? 'border-primary bg-primary/5' 
-                        : 'hover:bg-accent/50'
-                    }`}
-                    onClick={() => setSelectedProvider('google_drive')}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-400 via-blue-500 to-yellow-400 flex items-center justify-center">
-                          <HardDrive className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">Google Drive</p>
-                          <p className="text-xs text-muted-foreground">使用 Google 账号安全存储</p>
-                        </div>
-                      </div>
-                      <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedProvider === 'google_drive' 
-                          ? 'border-primary bg-primary' 
-                          : 'border-muted-foreground/30'
-                      }`}>
-                        {selectedProvider === 'google_drive' && (
-                          <Check className="h-3 w-3 text-primary-foreground" />
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                  
-                  <Button 
-                    className="w-full mt-6"
-                    disabled={!selectedProvider}
-                    onClick={() => setDrawerStep('password')}
-                  >
-                    下一步
-                  </Button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="password"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-4"
-                >
-                  <PasswordForm
-                    password={password}
-                    confirmPassword={confirmPassword}
-                    showPassword={showPassword}
-                    confirmed={confirmed}
-                    error={error}
-                    isLoading={isLoading}
-                    onPasswordChange={(v) => { setPassword(v); setError(''); }}
-                    onConfirmPasswordChange={(v) => { setConfirmPassword(v); setError(''); }}
-                    onShowPasswordToggle={() => setShowPassword(!showPassword)}
-                    onConfirmedChange={setConfirmed}
-                    onSubmit={handleCloudBackup}
-                    onBack={() => setDrawerStep('provider')}
-                    submitLabel={`备份到 ${selectedProvider === 'icloud' ? 'iCloud' : 'Google Drive'}`}
-                    showBackButton
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* iCloud indicator */}
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20 mb-6">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                <Cloud className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">iCloud</p>
+                <p className="text-xs text-muted-foreground">使用 Apple ID 安全存储</p>
+              </div>
+            </div>
+            
+            <PasswordForm
+              password={password}
+              confirmPassword={confirmPassword}
+              showPassword={showPassword}
+              confirmed={confirmed}
+              error={error}
+              isLoading={isLoading}
+              onPasswordChange={(v) => { setPassword(v); setError(''); }}
+              onConfirmPasswordChange={(v) => { setConfirmPassword(v); setError(''); }}
+              onShowPasswordToggle={() => setShowPassword(!showPassword)}
+              onConfirmedChange={setConfirmed}
+              onSubmit={handleCloudBackup}
+              submitLabel="备份到 iCloud"
+              showBackButton={false}
+            />
           </div>
         </DrawerContent>
       </Drawer>
