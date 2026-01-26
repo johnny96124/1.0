@@ -62,9 +62,6 @@ export const countries: Country[] = [
   { code: 'EG', name: '埃及', dialCode: '+20', flag: '🇪🇬' },
 ];
 
-// Hot/popular countries shown at top
-const hotCountries = ['CN', 'HK', 'US', 'JP', 'SG', 'GB'];
-
 interface CountryCodeSelectorProps {
   selectedCountry: Country;
   onSelect: (country: Country) => void;
@@ -89,11 +86,6 @@ export function CountryCodeSelector({
     );
   }, [searchQuery]);
 
-  const hotCountryList = useMemo(() => 
-    countries.filter(c => hotCountries.includes(c.code)),
-    []
-  );
-
   const handleSelect = (country: Country) => {
     onSelect(country);
     setOpen(false);
@@ -116,7 +108,7 @@ export function CountryCodeSelector({
       </button>
 
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="max-h-[85vh]">
+        <DrawerContent className="max-h-[50vh]">
           <DrawerHeader className="border-b border-border pb-3">
             <DrawerTitle>选择国家/地区</DrawerTitle>
           </DrawerHeader>
@@ -135,28 +127,8 @@ export function CountryCodeSelector({
           </div>
 
           <ScrollArea className="flex-1 px-4">
-            {/* Hot countries */}
-            {!searchQuery && (
-              <div className="mb-4">
-                <p className="text-xs text-muted-foreground mb-2 px-1">常用</p>
-                <div className="space-y-1">
-                  {hotCountryList.map((country) => (
-                    <CountryItem
-                      key={country.code}
-                      country={country}
-                      isSelected={selectedCountry.code === country.code}
-                      onSelect={handleSelect}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* All countries */}
             <div className="pb-6">
-              {!searchQuery && (
-                <p className="text-xs text-muted-foreground mb-2 px-1">全部国家/地区</p>
-              )}
               <div className="space-y-1">
                 {filteredCountries.map((country) => (
                   <CountryItem
