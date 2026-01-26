@@ -165,6 +165,11 @@
   .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
+
+  /* Global icon stroke width */
+  .lucide {
+    stroke-width: 1px;
+  }
 }
 
 @layer components {
