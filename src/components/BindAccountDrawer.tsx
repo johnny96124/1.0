@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Phone, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Mail, Phone, Loader2, CheckCircle2, ArrowLeft, Shield } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -18,13 +18,16 @@ import { CountryCodeSelector, countries, type Country } from './CountryCodeSelec
 import { cn } from '@/lib/utils';
 
 type BindType = 'email' | 'phone';
+type BindMode = 'bind' | 'rebind';
 type OAuthProvider = 'google' | 'apple';
-type BindStep = 'input' | 'verification' | 'success';
+type BindStep = 'verify-old' | 'input' | 'verification' | 'success';
 
 interface BindAccountDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   type: BindType;
+  mode?: BindMode;
+  currentValue?: string;
   onSuccess?: (value: string) => void;
 }
 
@@ -32,21 +35,39 @@ export function BindAccountDrawer({
   open,
   onOpenChange,
   type,
+  mode = 'bind',
+  currentValue,
   onSuccess
 }: BindAccountDrawerProps) {
-  const [step, setStep] = useState<BindStep>('input');
+  const [step, setStep] = useState<BindStep>(mode === 'rebind' ? 'verify-old' : 'input');
   const [value, setValue] = useState('');
   const [code, setCode] = useState('');
+  const [oldCode, setOldCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
   const [countdown, setCountdown] = useState(0);
+  const [oldCountdown, setOldCountdown] = useState(0);
   const [codeError, setCodeError] = useState('');
+  const [oldCodeError, setOldCodeError] = useState('');
+  const [oldCodeSent, setOldCodeSent] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
 
   const isEmail = type === 'email';
-  const title = isEmail ? '绑定邮箱' : '绑定手机号';
+  const isRebind = mode === 'rebind';
+  
+  const title = isRebind 
+    ? (isEmail ? '换绑邮箱' : '换绑手机号')
+    : (isEmail ? '绑定邮箱' : '绑定手机号');
+  
   const placeholder = isEmail ? '请输入邮箱地址' : '请输入手机号';
   const Icon = isEmail ? Mail : Phone;
+
+  // Reset step when mode changes
+  useEffect(() => {
+    if (open) {
+      setStep(mode === 'rebind' ? 'verify-old' : 'input');
+    }
+  }, [open, mode]);
 
   const handleOAuthBind = async (provider: OAuthProvider) => {
     setOauthLoading(provider);
@@ -66,6 +87,54 @@ export function BindAccountDrawer({
       onSuccess?.(mockEmail);
       handleClose();
     }, 1500);
+  };
+
+  const handleSendOldCode = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsLoading(false);
+    setOldCodeSent(true);
+    setOldCountdown(60);
+    
+    // Start countdown
+    const timer = setInterval(() => {
+      setOldCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleVerifyOldCode = async (inputCode: string) => {
+    if (inputCode.length !== 6) return;
+    
+    setIsLoading(true);
+    setOldCodeError('');
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Mock: accept any 6-digit code
+    if (inputCode.length === 6) {
+      setStep('input');
+    } else {
+      setOldCodeError('验证码错误');
+      setOldCode('');
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleOldCodeChange = (newCode: string) => {
+    setOldCode(newCode);
+    setOldCodeError('');
+    if (newCode.length === 6) {
+      handleVerifyOldCode(newCode);
+    }
   };
 
   const handleSendCode = async () => {
@@ -142,16 +211,39 @@ export function BindAccountDrawer({
     }, 1000);
   };
 
+  const handleResendOldCode = async () => {
+    if (oldCountdown > 0) return;
+    
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setIsLoading(false);
+    setOldCountdown(60);
+    
+    const timer = setInterval(() => {
+      setOldCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handleClose = () => {
     onOpenChange(false);
     // Reset state after animation
     setTimeout(() => {
-      setStep('input');
+      setStep(mode === 'rebind' ? 'verify-old' : 'input');
       setValue('');
       setCode('');
+      setOldCode('');
       setCodeError('');
+      setOldCodeError('');
+      setOldCodeSent(false);
       setOauthLoading(null);
       setCountdown(0);
+      setOldCountdown(0);
     }, 300);
   };
 
@@ -160,7 +252,18 @@ export function BindAccountDrawer({
       setStep('input');
       setCode('');
       setCodeError('');
+    } else if (step === 'input' && isRebind) {
+      setStep('verify-old');
+      setOldCode('');
+      setOldCodeError('');
     }
+  };
+
+  const getStepTitle = () => {
+    if (step === 'verify-old') {
+      return '安全验证';
+    }
+    return title;
   };
 
   return (
@@ -168,17 +271,101 @@ export function BindAccountDrawer({
       <DrawerContent>
         <DrawerHeader className="border-b border-border">
           <div className="flex items-center gap-3">
-            {step === 'verification' && (
+            {(step === 'verification' || (step === 'input' && isRebind)) && (
               <button onClick={handleBack} className="text-muted-foreground">
                 <ArrowLeft className="w-5 h-5" />
               </button>
             )}
-            <DrawerTitle>{title}</DrawerTitle>
+            <DrawerTitle>{getStepTitle()}</DrawerTitle>
           </div>
         </DrawerHeader>
 
         <div className="px-4 py-6">
           <AnimatePresence mode="wait">
+            {/* Step: Verify Old Account (Rebind mode only) */}
+            {step === 'verify-old' && (
+              <motion.div
+                key="verify-old"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                {/* Security Icon */}
+                <div className="flex justify-center mb-6">
+                  <div className="w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center">
+                    <Shield className="w-8 h-8 text-warning" />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    为确保账号安全，请先验证当前绑定的{isEmail ? '邮箱' : '手机号'}
+                  </p>
+                  <p className="font-medium text-foreground">
+                    {currentValue}
+                  </p>
+                </div>
+
+                {!oldCodeSent ? (
+                  <Button
+                    className="w-full h-12"
+                    onClick={handleSendOldCode}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      `发送验证码到${isEmail ? '原邮箱' : '原手机号'}`
+                    )}
+                  </Button>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="flex justify-center">
+                      <InputOTP
+                        maxLength={6}
+                        value={oldCode}
+                        onChange={handleOldCodeChange}
+                        disabled={isLoading}
+                      >
+                        <InputOTPGroup>
+                          {[0, 1, 2, 3, 4, 5].map((index) => (
+                            <InputOTPSlot
+                              key={index}
+                              index={index}
+                              className={cn(
+                                "w-11 h-12 text-lg",
+                                oldCodeError && "border-destructive"
+                              )}
+                            />
+                          ))}
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+
+                    {oldCodeError && (
+                      <p className="text-sm text-destructive text-center">{oldCodeError}</p>
+                    )}
+
+                    <div className="text-center">
+                      <button
+                        onClick={handleResendOldCode}
+                        disabled={oldCountdown > 0 || isLoading}
+                        className={cn(
+                          "text-sm",
+                          oldCountdown > 0 ? "text-muted-foreground" : "text-primary hover:underline"
+                        )}
+                      >
+                        {oldCountdown > 0 ? `${oldCountdown}s 后重新发送` : '重新发送验证码'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Step: Input New Account */}
             {step === 'input' && (
               <motion.div
                 key="input"
@@ -193,6 +380,15 @@ export function BindAccountDrawer({
                     <Icon className="w-8 h-8 text-accent" />
                   </div>
                 </div>
+
+                {/* Rebind hint */}
+                {isRebind && (
+                  <div className="text-center mb-4">
+                    <p className="text-sm text-muted-foreground">
+                      请输入新的{isEmail ? '邮箱地址' : '手机号码'}
+                    </p>
+                  </div>
+                )}
 
                 {/* OAuth Options - Only for Email */}
                 {isEmail && (
@@ -226,7 +422,7 @@ export function BindAccountDrawer({
                           />
                         </svg>
                       )}
-                      <span>使用 Google 账号绑定</span>
+                      <span>使用 Google 账号{isRebind ? '换绑' : '绑定'}</span>
                     </Button>
 
                     {/* Apple OAuth */}
@@ -243,7 +439,7 @@ export function BindAccountDrawer({
                           <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                         </svg>
                       )}
-                      <span>使用 Apple 账号绑定</span>
+                      <span>使用 Apple 账号{isRebind ? '换绑' : '绑定'}</span>
                     </Button>
 
                     {/* Divider */}
@@ -308,6 +504,7 @@ export function BindAccountDrawer({
               </motion.div>
             )}
 
+            {/* Step: Verify New Account */}
             {step === 'verification' && (
               <motion.div
                 key="verification"
@@ -364,6 +561,7 @@ export function BindAccountDrawer({
               </motion.div>
             )}
 
+            {/* Step: Success */}
             {step === 'success' && (
               <motion.div
                 key="success"
@@ -379,7 +577,9 @@ export function BindAccountDrawer({
                 >
                   <CheckCircle2 className="w-10 h-10 text-success" />
                 </motion.div>
-                <p className="text-lg font-semibold text-foreground">绑定成功</p>
+                <p className="text-lg font-semibold text-foreground">
+                  {isRebind ? '换绑成功' : '绑定成功'}
+                </p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isEmail ? value : `${selectedCountry.dialCode} ${value}`}
                 </p>

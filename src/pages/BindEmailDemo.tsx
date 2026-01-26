@@ -1,22 +1,72 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Mail, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, CheckCircle2, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { BindAccountDrawer } from '@/components/BindAccountDrawer';
 
+// Helper function to mask email
+const maskEmail = (email: string) => {
+  const [local, domain] = email.split('@');
+  if (local.length <= 2) {
+    return `${local}****@${domain}`;
+  }
+  return `${local.slice(0, 2)}****@${domain}`;
+};
+
+// Helper function to mask phone
+const maskPhone = (phone: string) => {
+  // Format: +86 138****8888
+  const parts = phone.split(' ');
+  if (parts.length >= 2) {
+    const dialCode = parts[0];
+    const number = parts.slice(1).join('');
+    if (number.length >= 8) {
+      return `${dialCode} ${number.slice(0, 3)}****${number.slice(-4)}`;
+    }
+  }
+  return phone;
+};
+
+type BindType = 'email' | 'phone';
+type BindMode = 'bind' | 'rebind';
+
 export default function BindEmailDemo() {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerType, setDrawerType] = useState<BindType>('email');
+  const [drawerMode, setDrawerMode] = useState<BindMode>('bind');
   const [boundEmail, setBoundEmail] = useState<string | null>(null);
+  const [boundPhone, setBoundPhone] = useState<string | null>(null);
 
-  const handleBindSuccess = (email: string) => {
-    setBoundEmail(email);
+  const handleOpenDrawer = (type: BindType, mode: BindMode) => {
+    setDrawerType(type);
+    setDrawerMode(mode);
+    setDrawerOpen(true);
+  };
+
+  const handleBindSuccess = (value: string) => {
+    if (drawerType === 'email') {
+      setBoundEmail(value);
+    } else {
+      setBoundPhone(value);
+    }
   };
 
   const handleReset = () => {
     setBoundEmail(null);
+    setBoundPhone(null);
+  };
+
+  const getCurrentValue = () => {
+    if (drawerType === 'email' && boundEmail) {
+      return maskEmail(boundEmail);
+    }
+    if (drawerType === 'phone' && boundPhone) {
+      return maskPhone(boundPhone);
+    }
+    return '';
   };
 
   return (
@@ -33,98 +83,156 @@ export default function BindEmailDemo() {
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
-        <h1 className="text-xl font-bold text-foreground">绑定邮箱演示</h1>
+        <h1 className="text-xl font-bold text-foreground">账号绑定演示</h1>
       </motion.div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-12">
+      <div className="flex-1 px-4 pb-12 space-y-4">
+        {/* Email Card */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6"
+          className="rounded-xl border border-border bg-card p-4"
         >
-          <Mail className="w-10 h-10 text-primary" />
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Mail className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-foreground">邮箱</p>
+              {boundEmail ? (
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                  <p className="text-sm text-muted-foreground truncate">
+                    {maskEmail(boundEmail)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">未绑定</p>
+              )}
+            </div>
+            <Button
+              variant={boundEmail ? "outline" : "default"}
+              size="sm"
+              onClick={() => handleOpenDrawer('email', boundEmail ? 'rebind' : 'bind')}
+              className="gap-1"
+            >
+              {boundEmail ? '换绑' : '绑定'}
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         </motion.div>
 
+        {/* Phone Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-center space-y-2 mb-8"
+          className="rounded-xl border border-border bg-card p-4"
         >
-          <h2 className="text-lg font-semibold text-foreground">
-            {boundEmail ? '邮箱已绑定' : '邮箱绑定流程演示'}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {boundEmail 
-              ? '您已成功完成邮箱绑定流程'
-              : '点击下方按钮体验完整的邮箱绑定流程'
-            }
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+              <Phone className="w-6 h-6 text-accent" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-foreground">手机号</p>
+              {boundPhone ? (
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                  <p className="text-sm text-muted-foreground truncate">
+                    {maskPhone(boundPhone)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">未绑定</p>
+              )}
+            </div>
+            <Button
+              variant={boundPhone ? "outline" : "default"}
+              size="sm"
+              onClick={() => handleOpenDrawer('phone', boundPhone ? 'rebind' : 'bind')}
+              className="gap-1"
+            >
+              {boundPhone ? '换绑' : '绑定'}
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         </motion.div>
 
-        {/* Bound Email Display */}
-        {boundEmail && (
+        {/* Reset Button */}
+        {(boundEmail || boundPhone) && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-sm mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
           >
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-success/10 border border-success/20">
-              <CheckCircle2 className="w-5 h-5 text-success" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-muted-foreground">已绑定邮箱</p>
-                <p className="font-medium text-foreground truncate">{boundEmail}</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="w-full max-w-sm space-y-3"
-        >
-          <Button
-            className="w-full h-12"
-            onClick={() => setDrawerOpen(true)}
-          >
-            <Mail className="w-5 h-5 mr-2" />
-            {boundEmail ? '重新绑定邮箱' : '开始绑定邮箱'}
-          </Button>
-          
-          {boundEmail && (
             <Button
               variant="outline"
               className="w-full h-12"
               onClick={handleReset}
             >
-              重置演示
+              重置所有绑定
             </Button>
-          )}
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Tips */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="mt-8 p-4 rounded-xl bg-muted/50 w-full max-w-sm"
+          className="mt-6 p-4 rounded-xl bg-muted/50"
         >
           <p className="text-xs text-muted-foreground text-center">
             提示：演示模式下，任意6位数字验证码均可通过验证
           </p>
         </motion.div>
+
+        {/* Flow Description */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="space-y-3"
+        >
+          <h3 className="text-sm font-medium text-foreground">流程说明</h3>
+          
+          <div className="space-y-2">
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 text-xs font-medium text-primary">
+                1
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">首次绑定</p>
+                <p className="text-xs text-muted-foreground">
+                  输入账号 → 验证码验证 → 绑定成功
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/30">
+              <div className="w-6 h-6 rounded-full bg-warning/20 flex items-center justify-center flex-shrink-0 text-xs font-medium text-warning">
+                2
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">换绑流程</p>
+                <p className="text-xs text-muted-foreground">
+                  验证原账号 → 输入新账号 → 验证新账号 → 换绑成功
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Bind Email Drawer */}
+      {/* Bind Account Drawer */}
       <BindAccountDrawer
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
-        type="email"
+        type={drawerType}
+        mode={drawerMode}
+        currentValue={getCurrentValue()}
         onSuccess={handleBindSuccess}
       />
     </AppLayout>
