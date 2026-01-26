@@ -552,9 +552,6 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
         >
           稍后备份
         </Button>
-        <p className="text-xs text-center text-destructive">
-          未完成备份将严格限制转账额度
-        </p>
       </div>
 
       {/* Skip Warning Dialog */}
