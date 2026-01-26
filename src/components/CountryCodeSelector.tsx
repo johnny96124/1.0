@@ -98,7 +98,7 @@ export function CountryCodeSelector({
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "flex items-center gap-1.5 px-3 h-14 bg-muted/50 rounded-l-md border-r border-border hover:bg-muted transition-colors",
+          "flex items-center gap-1.5 px-3 h-full transition-colors",
           className
         )}
       >
