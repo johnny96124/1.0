@@ -77,17 +77,9 @@ export default function OnboardingPage() {
       {/* Progress Header */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={handleBack}
-              className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <span className="text-sm text-muted-foreground">
-              步骤 {currentStep} / {steps.length}
-            </span>
-          </div>
+          <span className="text-sm text-muted-foreground">
+            步骤 {currentStep} / {steps.length}
+          </span>
           <span className="text-sm font-medium text-foreground">
             {steps[currentStep - 1].title}
           </span>
