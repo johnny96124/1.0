@@ -579,8 +579,8 @@ export default function LoginPage() {
             )}
           </Button>
           {lastLogin === 'apple' && (
-            <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none whitespace-nowrap">
-              上次使用
+            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
+              上次
             </span>
           )}
         </div>
@@ -604,8 +604,8 @@ export default function LoginPage() {
             )}
           </Button>
           {lastLogin === 'google' && (
-            <span className="absolute -top-2 left-1/2 -translate-x-1/2 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none whitespace-nowrap">
-              上次使用
+            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
+              上次
             </span>
           )}
         </div>
