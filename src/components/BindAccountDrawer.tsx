@@ -178,20 +178,22 @@ export function BindAccountDrawer({
                     placeholder={placeholder}
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
-                    className="h-14 text-base"
+                    className="h-12 text-base"
                   />
                 ) : (
-                  <div className="flex">
+                  <div className="relative flex items-center h-12 rounded-md border border-input bg-background">
                     <CountryCodeSelector
                       selectedCountry={selectedCountry}
                       onSelect={setSelectedCountry}
+                      className="border-0 bg-transparent h-full rounded-l-md hover:bg-muted/50"
                     />
-                    <Input
+                    <div className="w-px h-6 bg-border" />
+                    <input
                       type="tel"
                       placeholder={placeholder}
                       value={value}
                       onChange={(e) => setValue(e.target.value.replace(/\D/g, ''))}
-                      className="h-14 text-base rounded-l-none flex-1"
+                      className="flex-1 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
                     />
                   </div>
                 )}
