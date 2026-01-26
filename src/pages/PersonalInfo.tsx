@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Camera, Check, Mail, Lock, Copy, Eye, EyeOff, Edit3, Phone, Plus, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Camera, Check, Mail, Lock, Copy, Eye, EyeOff, Edit3, Phone, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -263,24 +263,24 @@ export default function PersonalInfo() {
                 onClick={() => handleBindAccount('phone')}
                 className="w-full p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors border-b border-border"
               >
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                  <Phone className="w-5 h-5 text-muted-foreground" />
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <Phone className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-medium text-foreground">手机号</p>
                   {boundPhone ? (
-                    <p className="text-sm text-muted-foreground">{maskPhone(boundPhone)}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-success" />
+                      <span className="text-sm text-muted-foreground">{maskPhone(boundPhone)}</span>
+                    </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">未绑定</p>
                   )}
                 </div>
                 {boundPhone ? (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="bg-success/10 text-success text-xs">
-                      <Check className="w-3 h-3 mr-1" />
-                      已绑定
-                    </Badge>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground text-sm">
+                    <span>换绑</span>
+                    <ChevronRight className="w-4 h-4" />
                   </div>
                 ) : (
                   <div className="flex items-center gap-1 text-primary">
@@ -295,24 +295,24 @@ export default function PersonalInfo() {
                 onClick={() => handleBindAccount('email')}
                 className="w-full p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
               >
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-muted-foreground" />
+                <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <Mail className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="font-medium text-foreground">邮箱</p>
                   {boundEmail ? (
-                    <p className="text-sm text-muted-foreground">{maskEmail(boundEmail)}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <CheckCircle2 className="w-4 h-4 text-success" />
+                      <span className="text-sm text-muted-foreground">{maskEmail(boundEmail)}</span>
+                    </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">未绑定</p>
                   )}
                 </div>
                 {boundEmail ? (
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="bg-success/10 text-success text-xs">
-                      <Check className="w-3 h-3 mr-1" />
-                      已绑定
-                    </Badge>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground text-sm">
+                    <span>换绑</span>
+                    <ChevronRight className="w-4 h-4" />
                   </div>
                 ) : (
                   <div className="flex items-center gap-1 text-primary">
