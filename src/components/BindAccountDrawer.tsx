@@ -62,6 +62,32 @@ export function BindAccountDrawer({
   const placeholder = isEmail ? '请输入邮箱地址' : '请输入手机号';
   const Icon = isEmail ? Mail : Phone;
 
+  // Mask functions for security display
+  const maskEmail = (email: string) => {
+    if (!email) return '';
+    const [local, domain] = email.split('@');
+    if (!domain || local.length <= 2) return email;
+    return `${local.slice(0, 2)}****@${domain}`;
+  };
+
+  const maskPhone = (phone: string) => {
+    if (!phone) return '';
+    const parts = phone.split(' ');
+    if (parts.length < 2) {
+      // No country code format
+      if (phone.length <= 4) return phone;
+      return `${phone.slice(0, 3)}****${phone.slice(-4)}`;
+    }
+    const countryCode = parts[0];
+    const number = parts.slice(1).join('');
+    if (number.length <= 4) return phone;
+    return `${countryCode} ${number.slice(0, 3)}****${number.slice(-4)}`;
+  };
+
+  const maskedCurrentValue = currentValue 
+    ? (isEmail ? maskEmail(currentValue) : maskPhone(currentValue))
+    : '';
+
   // Reset step when mode changes
   useEffect(() => {
     if (open) {
@@ -303,8 +329,8 @@ export function BindAccountDrawer({
                   <p className="text-sm text-muted-foreground">
                     为确保账号安全，请先验证当前绑定的{isEmail ? '邮箱' : '手机号'}
                   </p>
-                  <p className="font-medium text-foreground">
-                    {currentValue}
+                  <p className="font-medium text-foreground text-lg">
+                    {maskedCurrentValue}
                   </p>
                 </div>
 
