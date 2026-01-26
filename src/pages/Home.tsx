@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { ChainDropdown } from '@/components/ChainDropdown';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
-import { TokenSearch } from '@/components/TokenSearch';
+import { TokenManager } from '@/components/TokenManager';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { WalletSwitcher } from '@/components/WalletSwitcher';
 import { BalanceCardSkeleton, AssetListSkeleton, TransactionListSkeleton, RiskAlertSkeleton } from '@/components/skeletons';
@@ -158,7 +158,7 @@ export default function HomePage() {
   const [showAllAssets, setShowAllAssets] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
-  const { assets, transactions, currentWallet, walletStatus, userInfo, addToken, getAccountRiskStatus, unreadNotificationCount } = useWallet();
+  const { assets, transactions, currentWallet, walletStatus, userInfo, addToken, removeToken, getAccountRiskStatus, unreadNotificationCount } = useWallet();
   
   // Simulate initial loading
   useEffect(() => {
@@ -177,9 +177,18 @@ export default function HomePage() {
     return assets.map(a => a.symbol);
   }, [assets]);
 
-  const handleAddToken = (token: TokenInfo, network: ChainId) => {
-    addToken(token.symbol, token.name, network, token.price, token.change24h);
-    toast.success(`已添加 ${token.symbol} (${network})`);
+  // Handle adding token to all supported networks
+  const handleAddToken = (token: TokenInfo) => {
+    token.networks.forEach(network => {
+      addToken(token.symbol, token.name, network, token.price, token.change24h);
+    });
+    toast.success(`已添加 ${token.symbol} (${token.networks.length} 个网络)`);
+  };
+
+  // Handle removing token from all networks
+  const handleRemoveToken = (symbol: string) => {
+    removeToken(symbol);
+    toast.success(`已删除 ${symbol}`);
   };
 
   // Pull to refresh handler
@@ -605,9 +614,11 @@ export default function HomePage() {
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-50 bg-background"
           >
-            <TokenSearch
+            <TokenManager
               addedSymbols={addedSymbols}
+              addedAssets={assets}
               onAddToken={handleAddToken}
+              onRemoveToken={handleRemoveToken}
               onClose={() => setShowTokenSearch(false)}
             />
           </motion.div>

@@ -771,6 +771,7 @@ interface WalletContextType extends WalletState {
   
   // Asset actions
   addToken: (symbol: string, name: string, network: ChainId, price: number, change24h: number) => void;
+  removeToken: (symbol: string, network?: ChainId) => void;
   
   // Security config
   updateSecurityConfig: (config: Partial<SecurityConfig>) => void;
@@ -1258,6 +1259,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setAssets(prev => [...prev, newAsset]);
   }, [assets]);
 
+  const removeToken = useCallback((symbol: string, network?: ChainId) => {
+    setAssets(prev => {
+      if (network) {
+        // Remove from specific network
+        return prev.filter(a => !(a.symbol === symbol && a.network === network));
+      }
+      // Remove from all networks
+      return prev.filter(a => a.symbol !== symbol);
+    });
+  }, []);
+
   const getLimitStatus = useCallback((): LimitStatus => {
     return {
       singleLimit: securityConfig.singleTransactionLimit,
@@ -1455,6 +1467,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     addDevice,
     removeDevice,
     addToken,
+    removeToken,
     updateSecurityConfig,
     onboardingStep,
     setOnboardingStep,
