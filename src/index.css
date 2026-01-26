@@ -11,29 +11,29 @@
 
 @layer base {
   :root {
-    /* Core palette - Deep slate/navy for professionalism */
-    --background: 220 20% 97%;
-    --foreground: 222 47% 11%;
+    /* Core palette - Cobo Brand Colors */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 11%;
     
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 11%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 11%;
     
-    /* Primary - Deep navy for trust */
-    --primary: 222 47% 11%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary - Cobo Brand Blue #1F32D6 */
+    --primary: 233 75% 48%;
+    --primary-foreground: 0 0% 100%;
     
     /* Secondary - Soft slate */
     --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary-foreground: 0 0% 11%;
     
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
     
     /* Accent - Professional blue */
-    --accent: 217 91% 60%;
+    --accent: 233 75% 48%;
     --accent-foreground: 0 0% 100%;
     
     /* Status colors */
@@ -44,43 +44,44 @@
     --warning-foreground: 0 0% 100%;
     
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
     
     /* Trust green for positive actions */
     --trust: 158 64% 42%;
     --trust-foreground: 0 0% 100%;
     
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 217 91% 60%;
+    /* Border/Stroke - Cobo Brand #EDEEF3 */
+    --border: 228 18% 94%;
+    --input: 228 18% 94%;
+    --ring: 233 75% 48%;
     
     --radius: 0.75rem;
     
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(222 47% 11%) 0%, hsl(222 47% 20%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(222 80% 50%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(233 75% 48%) 0%, hsl(233 75% 38%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(233 75% 48%) 0%, hsl(233 65% 40%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(158 64% 42%) 0%, hsl(152 69% 40%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 98%) 100%);
     
     /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.07), 0 2px 4px -2px hsl(222 47% 11% / 0.05);
-    --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.08), 0 4px 6px -4px hsl(222 47% 11% / 0.05);
-    --shadow-xl: 0 20px 25px -5px hsl(222 47% 11% / 0.1), 0 8px 10px -6px hsl(222 47% 11% / 0.05);
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 11% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 11% / 0.07), 0 2px 4px -2px hsl(0 0% 11% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 11% / 0.08), 0 4px 6px -4px hsl(0 0% 11% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 11% / 0.1), 0 8px 10px -6px hsl(0 0% 11% / 0.05);
     
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary: 233 75% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-border: 228 18% 94%;
+    --sidebar-ring: 233 75% 48%;
 
     /* System toast surface (bottom-center) */
     --toast-surface: 220 20% 96%;
-    --toast-surface-foreground: 222 47% 11%;
+    --toast-surface-foreground: 0 0% 11%;
   }
 
   .dark {
