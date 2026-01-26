@@ -493,8 +493,14 @@ export default function LoginPage() {
       </div>
 
       {/* Input Field */}
-      <div className="relative mb-4">
-        {loginMethod === 'phone' ? (
+      <div className="relative mb-4 h-14">
+        {/* Phone Input */}
+        <div 
+          className={cn(
+            "absolute inset-0 transition-opacity duration-200",
+            loginMethod === 'phone' ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+          )}
+        >
           <div className="relative flex items-center h-14 rounded-md border border-input bg-background">
             <CountryCodeSelector
               selectedCountry={selectedCountry}
@@ -518,25 +524,31 @@ export default function LoginPage() {
               </button>
             )}
           </div>
-        ) : (
-          <>
-            <Input
-              type="email"
-              placeholder="请输入邮箱地址"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-14 text-base pr-10"
-            />
-            {email && (
-              <button
-                onClick={handleClear}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-muted flex items-center justify-center"
-              >
-                <X className="w-4 h-4 text-muted-foreground" />
-              </button>
-            )}
-          </>
-        )}
+        </div>
+
+        {/* Email Input */}
+        <div 
+          className={cn(
+            "absolute inset-0 transition-opacity duration-200",
+            loginMethod === 'email' ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+          )}
+        >
+          <Input
+            type="email"
+            placeholder="请输入邮箱地址"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-14 text-base pr-10"
+          />
+          {email && (
+            <button
+              onClick={handleClear}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-muted flex items-center justify-center"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Continue Button */}
