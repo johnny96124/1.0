@@ -3,3 +3,4 @@ export { AssetListSkeleton } from './AssetListSkeleton';
 export { TransactionListSkeleton } from './TransactionListSkeleton';
 export { SecurityCardSkeleton } from './SecurityCardSkeleton';
 export { MessageListSkeleton } from './MessageListSkeleton';
+export { RiskAlertSkeleton } from './RiskAlertSkeleton';
