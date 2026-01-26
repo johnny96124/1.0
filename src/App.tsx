@@ -39,6 +39,7 @@ import TSSBackupManagement from "./pages/TSSBackupManagement";
 import DeviceKicked from "./pages/DeviceKicked";
 import SecurityRequired from "./pages/SecurityRequired";
 import SetPassword from "./pages/SetPassword";
+import BindEmailDemo from "./pages/BindEmailDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -93,6 +94,7 @@ function AppRoutes() {
       <Route path="/device-kicked" element={<DeviceKicked />} />
       <Route path="/security-required" element={<SecurityRequired />} />
       <Route path="/set-password" element={<ProtectedRoute><SetPassword /></ProtectedRoute>} />
+      <Route path="/bind-email-demo" element={<BindEmailDemo />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
