@@ -169,7 +169,7 @@
 
 @layer components {
   .card-elevated {
-    @apply bg-card rounded-xl border border-border;
+    @apply bg-card rounded-lg border border-border;
     box-shadow: var(--shadow-md);
   }
   

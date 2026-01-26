@@ -57,7 +57,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         duration: 3000,
         classNames: {
           toast:
-            "w-full flex flex-col gap-1 p-4 rounded-2xl shadow-xl pointer-events-auto bg-[hsl(var(--toast-surface))] text-[hsl(var(--toast-surface-foreground))] data-[swipe=move]:translate-y-[var(--y)] data-[swipe=cancel]:translate-y-0 data-[swipe=end]:animate-out data-[swipe=end]:fade-out-80",
+            "w-full flex flex-col gap-1 p-4 rounded-lg shadow-xl pointer-events-auto bg-[hsl(var(--toast-surface))] text-[hsl(var(--toast-surface-foreground))] data-[swipe=move]:translate-y-[var(--y)] data-[swipe=cancel]:translate-y-0 data-[swipe=end]:animate-out data-[swipe=end]:fade-out-80",
           title: "font-semibold text-base",
           description: "text-sm opacity-80",
           success: "border-l-4 border-l-success",
