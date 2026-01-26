@@ -30,9 +30,20 @@ const DrawerContent = React.forwardRef<
   const [container, setContainer] = React.useState<HTMLElement | null>(null);
 
   React.useEffect(() => {
-    // Try to get the phone frame container, fallback to body
-    const phoneContainer = getDrawerContainer();
-    setContainer(phoneContainer || document.body);
+    // Try to get the phone frame container with a small delay to ensure it's mounted
+    const getContainer = () => {
+      const phoneContainer = getDrawerContainer();
+      if (phoneContainer) {
+        setContainer(phoneContainer);
+      } else {
+        // Retry after a short delay if not found
+        setTimeout(() => {
+          const retryContainer = getDrawerContainer();
+          setContainer(retryContainer || document.body);
+        }, 50);
+      }
+    };
+    getContainer();
   }, []);
 
   return (
