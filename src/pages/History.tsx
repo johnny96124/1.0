@@ -178,10 +178,9 @@ export default function HistoryPage() {
   };
 
   return (
-    <AppLayout>
+    <AppLayout title="交易与安全" titleBadge={riskCount}>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="px-4 py-4">
-          <h1 className="text-xl font-bold text-foreground mb-4">交易与安全</h1>
 
           {/* Account Security Status Card - Clickable when there are pending risks */}
           {isLoading ? (

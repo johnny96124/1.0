@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { BottomNav } from './BottomNav';
 import { SecurityBanner } from '@/components/ui/SecurityBanner';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 export interface AppLayoutProps {
   children: ReactNode;
@@ -12,6 +13,7 @@ export interface AppLayoutProps {
   showSecurityBanner?: boolean;
   // Header props
   title?: string;
+  titleBadge?: number; // Red notification count badge beside title
   showBack?: boolean;
   onBack?: () => void;
   rightAction?: ReactNode;
@@ -22,6 +24,7 @@ export function AppLayout({
   showNav = true, 
   showSecurityBanner = true,
   title,
+  titleBadge,
   showBack = false,
   onBack,
   rightAction,
@@ -42,12 +45,12 @@ export function AppLayout({
     <div className="h-full bg-background flex flex-col relative overflow-hidden">
       {showBanner && <SecurityBanner />}
       
-      {/* Page Header */}
+      {/* Page Header - Grey nav design */}
       {hasHeader && (
         <motion.header 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-4 py-3 bg-background/95 backdrop-blur-sm border-b border-border/30 sticky top-0 z-10"
+          className="flex items-center justify-between px-4 py-3 bg-muted/30 backdrop-blur-sm border-b border-border/50 sticky top-0 z-10"
         >
           <div className="w-10">
             {showBack && (
@@ -55,18 +58,28 @@ export function AppLayout({
                 variant="ghost"
                 size="icon"
                 onClick={handleBack}
-                className="h-10 w-10 -ml-2"
+                className="h-10 w-10 -ml-2 rounded-full hover:bg-muted"
               >
                 <ChevronLeft className="w-6 h-6" />
               </Button>
             )}
           </div>
           
-          {title && (
-            <h1 className="text-lg font-semibold text-foreground">
-              {title}
-            </h1>
-          )}
+          <div className="flex items-center gap-2">
+            {title && (
+              <h1 className="text-lg font-semibold text-foreground">
+                {title}
+              </h1>
+            )}
+            {titleBadge !== undefined && titleBadge > 0 && (
+              <Badge 
+                variant="destructive" 
+                className="h-5 min-w-5 px-1.5 text-xs font-medium"
+              >
+                {titleBadge > 99 ? '99+' : titleBadge}
+              </Badge>
+            )}
+          </div>
           
           <div className="w-10 flex justify-end">
             {rightAction}
