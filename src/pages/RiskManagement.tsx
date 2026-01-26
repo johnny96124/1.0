@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, Shield, ShieldAlert, AlertTriangle, CheckCircle2,
+  Shield, ShieldAlert, AlertTriangle, CheckCircle2,
   ChevronRight, RotateCcw, Eye, Copy, ExternalLink, X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -128,20 +128,7 @@ export default function RiskManagement() {
   }, []);
   
   return (
-    <AppLayout showNav={false}>
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="font-semibold text-foreground">风险资金处置</h1>
-        </div>
-        
+    <AppLayout showNav={false} title="风险资金处置" titleBadge={riskStatus.pendingRiskCount} showBack>
         <PullToRefresh onRefresh={handleRefresh} className="flex-1">
           {/* Status Card */}
           <motion.div
@@ -312,7 +299,6 @@ export default function RiskManagement() {
             </>
           )}
         </PullToRefresh>
-      </div>
       
       {/* Transaction Detail Drawer */}
       <Drawer open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>

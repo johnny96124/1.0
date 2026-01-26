@@ -28,16 +28,8 @@ export default function ProfilePage() {
   const displayName = userInfo?.nickname || userInfo?.email?.split('@')[0] || '用户';
 
   return (
-    <AppLayout>
+    <AppLayout title="账户设置">
       <div className="px-4 py-4">
-        {/* Page Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-xl font-bold text-foreground mb-4"
-        >
-          账户设置
-        </motion.h1>
 
         {/* Profile Header - User Info */}
         <motion.div

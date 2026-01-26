@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Camera, Check, Mail, Lock, Copy, Eye, EyeOff, Edit3, Phone, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Camera, Mail, Lock, Copy, Eye, EyeOff, Edit3, Phone, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
