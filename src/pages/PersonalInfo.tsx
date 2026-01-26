@@ -328,6 +328,8 @@ export default function PersonalInfo() {
         onOpenChange={setPasswordDrawerOpen}
         hasExistingPassword={hasExistingPassword}
         onSuccess={handlePasswordSuccess}
+        boundEmail={boundEmail}
+        boundPhone={boundPhone}
       />
     </AppLayout>
   );

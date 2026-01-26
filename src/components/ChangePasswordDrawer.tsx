@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Lock, Eye, EyeOff, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle2, Loader2, ArrowRight, Mail, Phone, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,14 +9,17 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
-type Step = 'verify' | 'new-password' | 'success';
+type Step = 'verify' | 'new-password' | 'success' | 'forgot-choose' | 'forgot-otp';
 
 interface ChangePasswordDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   hasExistingPassword: boolean;
   onSuccess: () => void;
+  boundEmail?: string | null;
+  boundPhone?: string | null;
 }
 
 // Password strength calculation
@@ -35,11 +38,31 @@ function getPasswordStrength(password: string): { level: 'weak' | 'medium' | 'st
   return { level: 'strong', label: '强', color: 'bg-success' };
 }
 
+// Mask helpers
+function maskEmail(email: string) {
+  if (!email) return '';
+  const [local, domain] = email.split('@');
+  if (!domain || local.length <= 2) return email;
+  return `${local.slice(0, 2)}****@${domain}`;
+}
+
+function maskPhone(phone: string) {
+  if (!phone) return '';
+  const parts = phone.split(' ');
+  if (parts.length < 2) return phone;
+  const countryCode = parts[0];
+  const number = parts.slice(1).join('');
+  if (number.length <= 4) return phone;
+  return `${countryCode} ${number.slice(0, 3)}****${number.slice(-4)}`;
+}
+
 export function ChangePasswordDrawer({
   open,
   onOpenChange,
   hasExistingPassword,
   onSuccess,
+  boundEmail,
+  boundPhone,
 }: ChangePasswordDrawerProps) {
   const [step, setStep] = useState<Step>(hasExistingPassword ? 'verify' : 'new-password');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -50,14 +73,29 @@ export function ChangePasswordDrawer({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Forgot password states
+  const [resetMethod, setResetMethod] = useState<'email' | 'phone'>('email');
+  const [otp, setOtp] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   const passwordStrength = useMemo(() => getPasswordStrength(newPassword), [newPassword]);
+
+  // Countdown timer for resend
+  useEffect(() => {
+    if (countdown > 0) {
+      countdownRef.current = setTimeout(() => setCountdown(countdown - 1), 1000);
+    }
+    return () => {
+      if (countdownRef.current) clearTimeout(countdownRef.current);
+    };
+  }, [countdown]);
 
   const handleVerifyPassword = async () => {
     setError('');
     setIsLoading(true);
     
-    // Simulate verification
     await new Promise(resolve => setTimeout(resolve, 800));
     
     const savedPassword = localStorage.getItem('user_password');
@@ -69,6 +107,59 @@ export function ChangePasswordDrawer({
     
     setIsLoading(false);
     setStep('new-password');
+  };
+
+  const handleForgotPassword = () => {
+    setError('');
+    // Default to email if available, otherwise phone
+    if (boundEmail) {
+      setResetMethod('email');
+    } else if (boundPhone) {
+      setResetMethod('phone');
+    }
+    setStep('forgot-choose');
+  };
+
+  const handleSendResetCode = async () => {
+    setError('');
+    setIsLoading(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    setIsLoading(false);
+    setCountdown(60);
+    setStep('forgot-otp');
+  };
+
+  const handleVerifyOtp = async () => {
+    setError('');
+    
+    if (otp.length !== 6) {
+      setError('请输入完整的验证码');
+      return;
+    }
+    
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Mock verification - accept any 6-digit code
+    if (otp === '000000') {
+      setError('验证码错误，请重试');
+      setIsLoading(false);
+      return;
+    }
+    
+    setIsLoading(false);
+    setStep('new-password');
+  };
+
+  const handleResendCode = async () => {
+    if (countdown > 0) return;
+    
+    setIsLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    setIsLoading(false);
+    setCountdown(60);
   };
 
   const handleSetNewPassword = async () => {
@@ -99,17 +190,27 @@ export function ChangePasswordDrawer({
 
   const handleClose = () => {
     onOpenChange(false);
-    // Reset state after animation
     setTimeout(() => {
       setStep(hasExistingPassword ? 'verify' : 'new-password');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setOtp('');
       setError('');
       setShowCurrentPassword(false);
       setShowNewPassword(false);
       setShowConfirmPassword(false);
+      setCountdown(0);
     }, 300);
+  };
+
+  const handleBack = () => {
+    setError('');
+    if (step === 'forgot-choose') {
+      setStep('verify');
+    } else if (step === 'forgot-otp') {
+      setStep('forgot-choose');
+    }
   };
 
   const getTitle = () => {
@@ -120,14 +221,28 @@ export function ChangePasswordDrawer({
         return hasExistingPassword ? '设置新密码' : '设置登录密码';
       case 'success':
         return '密码设置成功';
+      case 'forgot-choose':
+        return '找回密码';
+      case 'forgot-otp':
+        return '验证身份';
     }
   };
+
+  const hasBoundAccounts = boundEmail || boundPhone;
 
   return (
     <Drawer open={open} onOpenChange={handleClose}>
       <DrawerContent className="max-h-[85vh]">
         <DrawerHeader className="text-center pb-2">
           <DrawerTitle className="flex items-center justify-center gap-2">
+            {(step === 'forgot-choose' || step === 'forgot-otp') && (
+              <button
+                onClick={handleBack}
+                className="absolute left-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
             <Lock className="w-5 h-5 text-primary" />
             {getTitle()}
           </DrawerTitle>
@@ -191,6 +306,163 @@ export function ChangePasswordDrawer({
                       验证密码
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
+                  )}
+                </Button>
+
+                {hasBoundAccounts && (
+                  <button
+                    onClick={handleForgotPassword}
+                    className="w-full text-center text-sm text-primary hover:underline"
+                  >
+                    忘记密码？
+                  </button>
+                )}
+              </motion.div>
+            )}
+
+            {/* Forgot Password - Choose Method */}
+            {step === 'forgot-choose' && (
+              <motion.div
+                key="forgot-choose"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                <p className="text-sm text-muted-foreground text-center mb-4">
+                  选择验证方式找回密码
+                </p>
+                
+                <div className="space-y-3">
+                  {boundEmail && (
+                    <button
+                      onClick={() => setResetMethod('email')}
+                      className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
+                        resetMethod === 'email'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-muted-foreground/50'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        resetMethod === 'email' ? 'bg-primary/10' : 'bg-muted'
+                      }`}>
+                        <Mail className={`w-5 h-5 ${resetMethod === 'email' ? 'text-primary' : 'text-muted-foreground'}`} />
+                      </div>
+                      <div className="text-left flex-1">
+                        <p className="font-medium text-foreground">邮箱验证</p>
+                        <p className="text-sm text-muted-foreground">{maskEmail(boundEmail)}</p>
+                      </div>
+                      {resetMethod === 'email' && (
+                        <CheckCircle2 className="w-5 h-5 text-primary" />
+                      )}
+                    </button>
+                  )}
+                  
+                  {boundPhone && (
+                    <button
+                      onClick={() => setResetMethod('phone')}
+                      className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
+                        resetMethod === 'phone'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-muted-foreground/50'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        resetMethod === 'phone' ? 'bg-primary/10' : 'bg-muted'
+                      }`}>
+                        <Phone className={`w-5 h-5 ${resetMethod === 'phone' ? 'text-primary' : 'text-muted-foreground'}`} />
+                      </div>
+                      <div className="text-left flex-1">
+                        <p className="font-medium text-foreground">手机验证</p>
+                        <p className="text-sm text-muted-foreground">{maskPhone(boundPhone)}</p>
+                      </div>
+                      {resetMethod === 'phone' && (
+                        <CheckCircle2 className="w-5 h-5 text-primary" />
+                      )}
+                    </button>
+                  )}
+                </div>
+                
+                <Button
+                  className="w-full h-12"
+                  onClick={handleSendResetCode}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      发送验证码
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </motion.div>
+            )}
+
+            {/* Forgot Password - OTP Verification */}
+            {step === 'forgot-otp' && (
+              <motion.div
+                key="forgot-otp"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-4"
+              >
+                <p className="text-sm text-muted-foreground text-center mb-4">
+                  验证码已发送至 {resetMethod === 'email' ? maskEmail(boundEmail || '') : maskPhone(boundPhone || '')}
+                </p>
+                
+                <div className="flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={setOtp}
+                    disabled={isLoading}
+                  >
+                    <InputOTPGroup>
+                      {[0, 1, 2, 3, 4, 5].map((index) => (
+                        <InputOTPSlot key={index} index={index} className="w-11 h-12" />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                
+                {error && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-sm text-destructive text-center"
+                  >
+                    {error}
+                  </motion.p>
+                )}
+                
+                <div className="text-center">
+                  {countdown > 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      {countdown}秒后可重新发送
+                    </p>
+                  ) : (
+                    <button
+                      onClick={handleResendCode}
+                      disabled={isLoading}
+                      className="text-sm text-primary hover:underline disabled:opacity-50"
+                    >
+                      重新发送验证码
+                    </button>
+                  )}
+                </div>
+                
+                <Button
+                  className="w-full h-12"
+                  onClick={handleVerifyOtp}
+                  disabled={otp.length !== 6 || isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    '验证'
                   )}
                 </Button>
               </motion.div>
