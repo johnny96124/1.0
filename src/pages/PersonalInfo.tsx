@@ -251,76 +251,86 @@ export default function PersonalInfo() {
               />
             </div>
 
-            {/* Bound Accounts Section */}
-            <div className="card-elevated overflow-hidden">
-              <div className="p-4 border-b border-border">
-                <h3 className="font-medium text-foreground">绑定账号</h3>
-                <p className="text-xs text-muted-foreground mt-1">绑定多个账号可提高安全性</p>
-              </div>
-              
-              {/* Phone Binding */}
-              <button
-                onClick={() => handleBindAccount('phone')}
-                className="w-full p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors border-b border-border"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                  <Phone className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            {/* Phone Binding Card */}
+            <div className="card-elevated p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                    <Phone className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">手机号</p>
+                    {boundPhone ? (
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        <span className="text-sm text-muted-foreground">{maskPhone(boundPhone)}</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">未绑定</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="font-medium text-foreground">手机号</p>
+                <button
+                  onClick={() => handleBindAccount('phone')}
+                  className={boundPhone 
+                    ? "flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-colors"
+                    : "flex items-center gap-1 text-primary text-sm"
+                  }
+                >
                   {boundPhone ? (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                      <span className="text-sm text-muted-foreground">{maskPhone(boundPhone)}</span>
-                    </div>
+                    <>
+                      <span>换绑</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">未绑定</p>
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>绑定</span>
+                    </>
                   )}
-                </div>
-                {boundPhone ? (
-                  <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground text-sm">
-                    <span>换绑</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1 text-primary">
-                    <Plus className="w-4 h-4" />
-                    <span className="text-sm">绑定</span>
-                  </div>
-                )}
-              </button>
+                </button>
+              </div>
+            </div>
 
-              {/* Email Binding */}
-              <button
-                onClick={() => handleBindAccount('email')}
-                className="w-full p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                  <Mail className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            {/* Email Binding Card */}
+            <div className="card-elevated p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                    <Mail className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">邮箱</p>
+                    {boundEmail ? (
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        <span className="text-sm text-muted-foreground">{maskEmail(boundEmail)}</span>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">未绑定</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 text-left">
-                  <p className="font-medium text-foreground">邮箱</p>
+                <button
+                  onClick={() => handleBindAccount('email')}
+                  className={boundEmail 
+                    ? "flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-colors"
+                    : "flex items-center gap-1 text-primary text-sm"
+                  }
+                >
                   {boundEmail ? (
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4 text-success" />
-                      <span className="text-sm text-muted-foreground">{maskEmail(boundEmail)}</span>
-                    </div>
+                    <>
+                      <span>换绑</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">未绑定</p>
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>绑定</span>
+                    </>
                   )}
-                </div>
-                {boundEmail ? (
-                  <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-muted/50 text-muted-foreground text-sm">
-                    <span>换绑</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1 text-primary">
-                    <Plus className="w-4 h-4" />
-                    <span className="text-sm">绑定</span>
-                  </div>
-                )}
-              </button>
+                </button>
+              </div>
             </div>
 
             {/* Password Setting */}
