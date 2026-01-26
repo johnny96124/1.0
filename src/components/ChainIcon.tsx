@@ -19,10 +19,12 @@ const sizeMap = {
 export function ChainIcon({ chainId, size = 'md', className }: ChainIconProps) {
   const [hasError, setHasError] = useState(false);
   
-  // For 'all' chains, show a globe icon
+  // For 'all' chains, show a globe icon with consistent sizing
   if (chainId === 'all') {
     return (
-      <Globe className={cn(sizeMap[size], 'text-accent', className)} />
+      <div className={cn(sizeMap[size], 'flex items-center justify-center', className)}>
+        <Globe className="w-full h-full text-accent" />
+      </div>
     );
   }
   
