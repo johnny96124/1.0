@@ -738,7 +738,7 @@ interface WalletContextType extends WalletState {
   logout: () => void;
   sendVerificationCode: (email: string) => Promise<void>;
   verifyCode: (email: string, code: string) => Promise<AuthResult>;
-  checkPasswordExists: (email: string) => Promise<{ hasPassword: boolean }>;
+  checkPasswordExists: (email: string) => Promise<{ hasPassword: boolean; isNewUser: boolean }>;
   loginWithPassword: (email: string, password: string) => Promise<AuthResult>;
   
   // Wallet actions
@@ -935,15 +935,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Check if user has set a password for the email
-  const checkPasswordExists = useCallback(async (email: string): Promise<{ hasPassword: boolean }> => {
+  const checkPasswordExists = useCallback(async (email: string): Promise<{ hasPassword: boolean; isNewUser: boolean }> => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     
     // Mock: Users with specific email patterns have password set
     // In production, this would call an API to check
     const hasPassword = email.includes('test') || email.includes('demo') || !mockIsNewUser;
+    const isNewUser = mockIsNewUser;
     
-    return { hasPassword };
+    return { hasPassword, isNewUser };
   }, [mockIsNewUser]);
 
   // Login with password

@@ -38,6 +38,7 @@ import TSSRecovery from "./pages/TSSRecovery";
 import TSSBackupManagement from "./pages/TSSBackupManagement";
 import DeviceKicked from "./pages/DeviceKicked";
 import SecurityRequired from "./pages/SecurityRequired";
+import SetPassword from "./pages/SetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -91,6 +92,7 @@ function AppRoutes() {
       <Route path="/tss-recovery" element={<TSSRecovery />} />
       <Route path="/device-kicked" element={<DeviceKicked />} />
       <Route path="/security-required" element={<SecurityRequired />} />
+      <Route path="/set-password" element={<ProtectedRoute><SetPassword /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
