@@ -492,12 +492,12 @@ export default function PersonalInfo() {
           </motion.div>
         </div>
 
-        {/* Save Button */}
+        {/* Save Button - Fixed to bottom of phone frame */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-lg border-t border-border"
+          className="sticky bottom-0 p-4 bg-background/80 backdrop-blur-lg border-t border-border"
         >
           <Button
             className="w-full h-12"
