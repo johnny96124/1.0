@@ -455,20 +455,20 @@ export default function LoginPage() {
       className="flex-1 px-6 flex flex-col"
     >
       {/* Method Tabs */}
-      <div className="flex bg-muted/50 rounded-xl p-1 mb-4">
+      <div className="flex gap-3 mb-4">
         <button
           onClick={() => handleMethodChange('phone')}
           className={cn(
-            "flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 relative",
+            "flex-1 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 relative",
             loginMethod === 'phone'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-muted/50 text-foreground border border-border"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
           )}
         >
           <Phone className="w-4 h-4" />
           手机号
           {lastLogin === 'phone' && (
-            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
+            <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
               上次
             </span>
           )}
@@ -476,16 +476,16 @@ export default function LoginPage() {
         <button
           onClick={() => handleMethodChange('email')}
           className={cn(
-            "flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 relative",
+            "flex-1 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 relative",
             loginMethod === 'email'
-              ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
+              ? "bg-muted/50 text-foreground border border-border"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
           )}
         >
           <Mail className="w-4 h-4" />
           邮箱
           {lastLogin === 'email' && (
-            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
+            <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
               上次
             </span>
           )}
@@ -495,28 +495,28 @@ export default function LoginPage() {
       {/* Input Field */}
       <div className="relative mb-4">
         {loginMethod === 'phone' ? (
-          <div className="flex">
+          <div className="relative flex items-center h-14 rounded-md border border-input bg-background">
             <CountryCodeSelector
               selectedCountry={selectedCountry}
               onSelect={setSelectedCountry}
+              className="border-0 bg-transparent h-full rounded-l-md hover:bg-muted/50"
             />
-            <div className="relative flex-1">
-              <Input
-                type="tel"
-                placeholder="请输入手机号"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                className="h-14 text-base rounded-l-none pr-10"
-              />
-              {phone && (
-                <button
-                  onClick={handleClear}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-muted flex items-center justify-center"
-                >
-                  <X className="w-4 h-4 text-muted-foreground" />
-                </button>
-              )}
-            </div>
+            <div className="w-px h-6 bg-border" />
+            <input
+              type="tel"
+              placeholder="请输入手机号"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+              className="flex-1 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
+            />
+            {phone && (
+              <button
+                onClick={handleClear}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-muted flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
           </div>
         ) : (
           <>
