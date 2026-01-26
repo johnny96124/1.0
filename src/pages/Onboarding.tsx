@@ -344,6 +344,24 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
   const [confirmed, setConfirmed] = useState(false);
   const { completeCloudBackup } = useWallet();
 
+  // Password strength calculation
+  const getPasswordStrength = (pwd: string): { level: 0 | 1 | 2 | 3; label: string; color: string } => {
+    if (!pwd) return { level: 0, label: '', color: '' };
+    
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (pwd.length >= 12) score++;
+    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^a-zA-Z0-9]/.test(pwd)) score++;
+    
+    if (score <= 2) return { level: 1, label: '弱', color: 'bg-destructive' };
+    if (score <= 3) return { level: 2, label: '中', color: 'bg-warning' };
+    return { level: 3, label: '强', color: 'bg-success' };
+  };
+
+  const passwordStrength = getPasswordStrength(password);
+
   const validatePassword = () => {
     if (password.length < 8 || password.length > 32) {
       return '密码需要 8-32 位';
@@ -459,24 +477,51 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
         <div className="w-full max-w-[300px] space-y-4">
 
         <div className="space-y-4 flex-1">
-          <div className="relative">
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              placeholder="设置密码（8-32位，含字母和数字）"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError('');
-              }}
-              className="h-14 pr-12"
-            />
-            <button
-              type="button"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
+          <div className="space-y-2">
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="设置密码（8-32位，含字母和数字）"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError('');
+                }}
+                className="h-14 pr-12"
+              />
+              <button
+                type="button"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            
+            {/* Password strength indicator */}
+            {password && (
+              <div className="flex items-center gap-2">
+                <div className="flex gap-1 flex-1">
+                  {[1, 2, 3].map((level) => (
+                    <div
+                      key={level}
+                      className={cn(
+                        'h-1.5 flex-1 rounded-full transition-all',
+                        passwordStrength.level >= level ? passwordStrength.color : 'bg-muted'
+                      )}
+                    />
+                  ))}
+                </div>
+                <span className={cn(
+                  'text-xs font-medium',
+                  passwordStrength.level === 1 && 'text-destructive',
+                  passwordStrength.level === 2 && 'text-warning',
+                  passwordStrength.level === 3 && 'text-success'
+                )}>
+                  {passwordStrength.label}
+                </span>
+              </div>
+            )}
           </div>
 
           <Input
