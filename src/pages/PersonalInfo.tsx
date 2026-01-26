@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Camera, Mail, Lock, Copy, Edit3, Phone, Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Camera, Mail, Lock, Copy, Check, Edit3, Phone, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -33,6 +33,9 @@ export default function PersonalInfo() {
   const [passwordDrawerOpen, setPasswordDrawerOpen] = useState(false);
   const [hasExistingPassword, setHasExistingPassword] = useState(false);
   
+  // Copy state
+  const [copied, setCopied] = useState(false);
+  
   const userId = 'UID-2024-XXXX-XXXX';
   
   // Check if password exists on mount
@@ -50,9 +53,11 @@ export default function PersonalInfo() {
 
   const handleCopyUserId = () => {
     navigator.clipboard.writeText(userId);
+    setCopied(true);
     toast.success('已复制到剪贴板', {
       description: '用户ID已复制',
     });
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleBindAccount = (type: 'email' | 'phone') => {
@@ -160,7 +165,27 @@ export default function PersonalInfo() {
                   onClick={handleCopyUserId}
                   className="shrink-0"
                 >
-                  <Copy className="w-4 h-4" />
+                  <AnimatePresence mode="wait">
+                    {copied ? (
+                      <motion.div
+                        key="check"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                      >
+                        <Check className="w-4 h-4 text-success" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="copy"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">用于客服查询，不可修改</p>
