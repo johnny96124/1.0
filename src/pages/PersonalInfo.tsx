@@ -267,8 +267,7 @@ export default function PersonalInfo() {
               
               {boundPhone ? (
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 flex items-center gap-2 h-10 px-3 rounded-md bg-muted/30">
-                    <CheckCircle2 className="w-4 h-4 text-success" />
+                  <div className="flex-1 flex items-center h-10 px-3 rounded-md bg-muted/30">
                     <span className="text-muted-foreground">{maskPhone(boundPhone)}</span>
                   </div>
                   <Button
@@ -312,8 +311,7 @@ export default function PersonalInfo() {
               
               {boundEmail ? (
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 flex items-center gap-2 h-10 px-3 rounded-md bg-muted/30">
-                    <CheckCircle2 className="w-4 h-4 text-success" />
+                  <div className="flex-1 flex items-center h-10 px-3 rounded-md bg-muted/30">
                     <span className="text-muted-foreground">{maskEmail(boundEmail)}</span>
                   </div>
                   <Button
