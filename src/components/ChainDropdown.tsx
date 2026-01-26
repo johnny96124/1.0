@@ -73,8 +73,8 @@ export function ChainDropdown({
               key={chain.id}
               onClick={() => onSelectChain(chain.id)}
               className={cn(
-                "flex items-center justify-between gap-3 py-3 px-3 cursor-pointer",
-                isSelected && "bg-accent/10"
+                "flex items-center justify-between gap-3 py-3 px-3 cursor-pointer hover:bg-muted focus:bg-muted",
+                isSelected && "bg-muted"
               )}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
