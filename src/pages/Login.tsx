@@ -126,6 +126,7 @@ export default function LoginPage() {
   const [loginMethod, setLoginMethod] = useState<LoginMethod>(initialMethod);
   const [loginStep, setLoginStep] = useState<LoginStep>('input');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSwitchingToOtp, setIsSwitchingToOtp] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -138,6 +139,7 @@ export default function LoginPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
   const [hasPassword, setHasPassword] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
   const [loginResult, setLoginResult] = useState<{ userType?: string; hasExistingWallets?: boolean } | null>(null);
   const { login, sendVerificationCode, verifyCode, checkPasswordExists, loginWithPassword } = useWallet();
   const navigate = useNavigate();
@@ -176,10 +178,19 @@ export default function LoginPage() {
       const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
       const result = await checkPasswordExists(identifier);
       setHasPassword(result.hasPassword);
+      setIsNewUser(result.isNewUser);
       
-      if (result.hasPassword) {
+      // New user: always use OTP login flow
+      if (result.isNewUser) {
+        await sendVerificationCode(identifier);
+        setLoginStep('verification');
+        setCountdown(60);
+        setCodeError('');
+      } else if (result.hasPassword) {
+        // Existing user with password: show password input
         setLoginStep('password');
       } else {
+        // Existing user without password: use OTP
         await sendVerificationCode(identifier);
         setLoginStep('verification');
         setCountdown(60);
@@ -236,8 +247,9 @@ export default function LoginPage() {
       setLoginStep('success');
       
       setTimeout(() => {
+        // New user: go to set password page first
         if (result.userType === 'new') {
-          navigate('/onboarding?new=true');
+          navigate('/set-password');
         } else if (result.hasExistingWallets) {
           navigate('/home');
         } else {
@@ -339,7 +351,7 @@ export default function LoginPage() {
   };
 
   const handleSwitchToVerification = async () => {
-    setIsLoading(true);
+    setIsSwitchingToOtp(true);
     try {
       const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
       await sendVerificationCode(identifier);
@@ -351,7 +363,7 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Send code failed:', error);
     } finally {
-      setIsLoading(false);
+      setIsSwitchingToOtp(false);
     }
   };
 
@@ -437,9 +449,10 @@ export default function LoginPage() {
       <div className="text-center">
         <button
           onClick={handleSwitchToVerification}
-          disabled={isLoading}
-          className="text-sm text-primary hover:underline disabled:opacity-50"
+          disabled={isLoading || isSwitchingToOtp}
+          className="text-sm text-primary hover:underline disabled:opacity-50 inline-flex items-center gap-1"
         >
+          {isSwitchingToOtp && <Loader2 className="w-4 h-4 animate-spin" />}
           使用验证码登录
         </button>
       </div>
