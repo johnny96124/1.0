@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Camera, Check, Mail, Lock, Copy, Eye, EyeOff, Edit3 } from 'lucide-react';
+import { ArrowLeft, Camera, Check, Mail, Lock, Copy, Eye, EyeOff, Edit3, Phone, Plus, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { toast } from '@/components/ui/sonner';
 import { Badge } from '@/components/ui/badge';
+import { BindAccountDrawer } from '@/components/BindAccountDrawer';
 
 // Password strength calculation
 function getPasswordStrength(password: string): { level: 'weak' | 'medium' | 'strong'; label: string; color: string } {
@@ -33,7 +34,15 @@ export default function PersonalInfo() {
   const initialNickname = userInfo?.email?.split('@')[0] || '';
   const [nickname, setNickname] = useState(initialNickname);
   
-  // Password states - check localStorage for existing password
+  // Bound accounts
+  const [boundEmail, setBoundEmail] = useState<string | null>(userInfo?.email || null);
+  const [boundPhone, setBoundPhone] = useState<string | null>(null);
+  
+  // Bind drawer state
+  const [bindDrawerOpen, setBindDrawerOpen] = useState(false);
+  const [bindType, setBindType] = useState<'email' | 'phone'>('email');
+  
+  // Password states
   const [hasExistingPassword, setHasExistingPassword] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -53,6 +62,11 @@ export default function PersonalInfo() {
     const savedPassword = localStorage.getItem('user_password');
     if (savedPassword) {
       setHasExistingPassword(true);
+    }
+    // Load bound phone from localStorage
+    const savedPhone = localStorage.getItem('bound_phone');
+    if (savedPhone) {
+      setBoundPhone(savedPhone);
     }
   }, []);
   
@@ -87,10 +101,25 @@ export default function PersonalInfo() {
     setConfirmPassword('');
   };
 
+  const handleBindAccount = (type: 'email' | 'phone') => {
+    setBindType(type);
+    setBindDrawerOpen(true);
+  };
+
+  const handleBindSuccess = (value: string) => {
+    if (bindType === 'email') {
+      setBoundEmail(value);
+      toast.success('邮箱绑定成功');
+    } else {
+      setBoundPhone(value);
+      localStorage.setItem('bound_phone', value);
+      toast.success('手机号绑定成功');
+    }
+  };
+
   const handleSave = async () => {
     // Validate password if editing
     if (isEditingPassword && newPassword) {
-      // Check current password if user has existing password
       if (hasExistingPassword) {
         const savedPassword = localStorage.getItem('user_password');
         if (currentPassword !== savedPassword) {
@@ -108,7 +137,6 @@ export default function PersonalInfo() {
     setIsSaving(true);
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Save new password if provided
     if (isEditingPassword && newPassword) {
       localStorage.setItem('user_password', newPassword);
       setHasExistingPassword(true);
@@ -118,6 +146,25 @@ export default function PersonalInfo() {
     setIsSaving(false);
     toast.success('个人信息已更新');
     navigate(-1);
+  };
+
+  // Mask phone number for display
+  const maskPhone = (phone: string) => {
+    if (!phone) return '';
+    const parts = phone.split(' ');
+    if (parts.length < 2) return phone;
+    const countryCode = parts[0];
+    const number = parts.slice(1).join('');
+    if (number.length <= 4) return phone;
+    return `${countryCode} ${number.slice(0, 3)}****${number.slice(-4)}`;
+  };
+
+  // Mask email for display
+  const maskEmail = (email: string) => {
+    if (!email) return '';
+    const [local, domain] = email.split('@');
+    if (!domain || local.length <= 2) return email;
+    return `${local.slice(0, 2)}****@${domain}`;
   };
 
   return (
@@ -167,7 +214,7 @@ export default function PersonalInfo() {
             transition={{ delay: 0.2 }}
             className="space-y-4"
           >
-            {/* User ID - Now at top */}
+            {/* User ID */}
             <div className="card-elevated p-4 space-y-2">
               <label className="text-sm font-medium text-muted-foreground">用户 ID</label>
               <div className="flex items-center gap-2">
@@ -199,24 +246,70 @@ export default function PersonalInfo() {
               />
             </div>
 
-            {/* Email (Read-only for OAuth) */}
-            <div className="card-elevated p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  邮箱
-                </label>
-                <Badge variant="secondary" className="text-xs bg-accent/10 text-accent">
-                  <Lock className="w-3 h-3 mr-1" />
-                  OAuth 绑定
-                </Badge>
+            {/* Bound Accounts Section */}
+            <div className="card-elevated overflow-hidden">
+              <div className="p-4 border-b border-border">
+                <h3 className="font-medium text-foreground">绑定账号</h3>
+                <p className="text-xs text-muted-foreground mt-1">绑定多个账号可提高安全性</p>
               </div>
-              <Input
-                value={userInfo?.email || ''}
-                readOnly
-                className="bg-muted/30 border-0 text-muted-foreground cursor-not-allowed"
-              />
-              <p className="text-xs text-muted-foreground">通过第三方账号登录，邮箱不可修改</p>
+              
+              {/* Phone Binding */}
+              <button
+                onClick={() => !boundPhone && handleBindAccount('phone')}
+                className="w-full p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors border-b border-border"
+              >
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <Phone className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-foreground">手机号</p>
+                  {boundPhone ? (
+                    <p className="text-sm text-muted-foreground">{maskPhone(boundPhone)}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">未绑定</p>
+                  )}
+                </div>
+                {boundPhone ? (
+                  <Badge variant="secondary" className="bg-success/10 text-success text-xs">
+                    <Check className="w-3 h-3 mr-1" />
+                    已绑定
+                  </Badge>
+                ) : (
+                  <div className="flex items-center gap-1 text-primary">
+                    <Plus className="w-4 h-4" />
+                    <span className="text-sm">绑定</span>
+                  </div>
+                )}
+              </button>
+
+              {/* Email Binding */}
+              <button
+                onClick={() => !boundEmail && handleBindAccount('email')}
+                className="w-full p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-foreground">邮箱</p>
+                  {boundEmail ? (
+                    <p className="text-sm text-muted-foreground">{maskEmail(boundEmail)}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">未绑定</p>
+                  )}
+                </div>
+                {boundEmail ? (
+                  <Badge variant="secondary" className="bg-success/10 text-success text-xs">
+                    <Check className="w-3 h-3 mr-1" />
+                    已绑定
+                  </Badge>
+                ) : (
+                  <div className="flex items-center gap-1 text-primary">
+                    <Plus className="w-4 h-4" />
+                    <span className="text-sm">绑定</span>
+                  </div>
+                )}
+              </button>
             </div>
 
             {/* Password Setting */}
@@ -284,7 +377,6 @@ export default function PersonalInfo() {
                     exit={{ opacity: 0, y: -10 }}
                     className="space-y-3"
                   >
-                    {/* Current password (only if has existing) */}
                     {hasExistingPassword && (
                       <div className="space-y-1">
                         <label className="text-xs text-muted-foreground">当前密码</label>
@@ -307,7 +399,6 @@ export default function PersonalInfo() {
                       </div>
                     )}
                     
-                    {/* New password */}
                     <div className="space-y-1">
                       <label className="text-xs text-muted-foreground">新密码</label>
                       <div className="relative">
@@ -328,7 +419,6 @@ export default function PersonalInfo() {
                       </div>
                     </div>
                     
-                    {/* Password Strength Indicator */}
                     {newPassword && (
                       <motion.div
                         initial={{ opacity: 0, y: -5 }}
@@ -363,7 +453,6 @@ export default function PersonalInfo() {
                       </motion.div>
                     )}
                     
-                    {/* Confirm password */}
                     <div className="space-y-1">
                       <label className="text-xs text-muted-foreground">确认新密码</label>
                       <div className="relative">
@@ -388,7 +477,6 @@ export default function PersonalInfo() {
                       <p className="text-xs text-destructive">两次输入的密码不一致</p>
                     )}
                     
-                    {/* Cancel button */}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -404,36 +492,30 @@ export default function PersonalInfo() {
           </motion.div>
         </div>
 
-        {/* Save Button - Fixed at bottom */}
+        {/* Save Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="absolute bottom-0 left-0 right-0 px-4 pb-6 pt-3 bg-gradient-to-t from-background via-background to-transparent"
+          className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-lg border-t border-border"
         >
           <Button
+            className="w-full h-12"
             onClick={handleSave}
-            disabled={isSaving || !hasChanges}
-            className="w-full h-12 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!hasChanges || isSaving}
           >
-            {isSaving ? (
-              <span className="flex items-center gap-2">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                  className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full"
-                />
-                保存中...
-              </span>
-            ) : (
-              <span className="flex items-center gap-2">
-                <Check className="w-4 h-4" />
-                保存修改
-              </span>
-            )}
+            {isSaving ? '保存中...' : '保存修改'}
           </Button>
         </motion.div>
       </div>
+
+      {/* Bind Account Drawer */}
+      <BindAccountDrawer
+        open={bindDrawerOpen}
+        onOpenChange={setBindDrawerOpen}
+        type={bindType}
+        onSuccess={handleBindSuccess}
+      />
     </AppLayout>
   );
 }
