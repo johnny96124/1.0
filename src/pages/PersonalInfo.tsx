@@ -41,6 +41,8 @@ export default function PersonalInfo() {
   // Bind drawer state
   const [bindDrawerOpen, setBindDrawerOpen] = useState(false);
   const [bindType, setBindType] = useState<'email' | 'phone'>('email');
+  const [bindMode, setBindMode] = useState<'bind' | 'rebind'>('bind');
+  const [currentBindValue, setCurrentBindValue] = useState<string>('');
   
   // Password states
   const [hasExistingPassword, setHasExistingPassword] = useState(false);
@@ -102,7 +104,10 @@ export default function PersonalInfo() {
   };
 
   const handleBindAccount = (type: 'email' | 'phone') => {
+    const isBound = type === 'email' ? boundEmail : boundPhone;
     setBindType(type);
+    setBindMode(isBound ? 'rebind' : 'bind');
+    setCurrentBindValue(isBound || '');
     setBindDrawerOpen(true);
   };
 
@@ -255,7 +260,7 @@ export default function PersonalInfo() {
               
               {/* Phone Binding */}
               <button
-                onClick={() => !boundPhone && handleBindAccount('phone')}
+                onClick={() => handleBindAccount('phone')}
                 className="w-full p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors border-b border-border"
               >
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
@@ -270,10 +275,13 @@ export default function PersonalInfo() {
                   )}
                 </div>
                 {boundPhone ? (
-                  <Badge variant="secondary" className="bg-success/10 text-success text-xs">
-                    <Check className="w-3 h-3 mr-1" />
-                    已绑定
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-success/10 text-success text-xs">
+                      <Check className="w-3 h-3 mr-1" />
+                      已绑定
+                    </Badge>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
                 ) : (
                   <div className="flex items-center gap-1 text-primary">
                     <Plus className="w-4 h-4" />
@@ -284,7 +292,7 @@ export default function PersonalInfo() {
 
               {/* Email Binding */}
               <button
-                onClick={() => !boundEmail && handleBindAccount('email')}
+                onClick={() => handleBindAccount('email')}
                 className="w-full p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
               >
                 <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
@@ -299,10 +307,13 @@ export default function PersonalInfo() {
                   )}
                 </div>
                 {boundEmail ? (
-                  <Badge variant="secondary" className="bg-success/10 text-success text-xs">
-                    <Check className="w-3 h-3 mr-1" />
-                    已绑定
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-success/10 text-success text-xs">
+                      <Check className="w-3 h-3 mr-1" />
+                      已绑定
+                    </Badge>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
                 ) : (
                   <div className="flex items-center gap-1 text-primary">
                     <Plus className="w-4 h-4" />
@@ -514,6 +525,8 @@ export default function PersonalInfo() {
         open={bindDrawerOpen}
         onOpenChange={setBindDrawerOpen}
         type={bindType}
+        mode={bindMode}
+        currentValue={currentBindValue}
         onSuccess={handleBindSuccess}
       />
     </AppLayout>
