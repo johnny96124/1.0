@@ -181,7 +181,7 @@ export default function SetPassword() {
                 setPassword(e.target.value);
                 setError('');
               }}
-              className="h-14 text-base pr-12"
+              className="h-12 text-base pr-12"
               disabled={isLoading}
             />
             <button
@@ -237,7 +237,7 @@ export default function SetPassword() {
                 setConfirmPassword(e.target.value);
                 setError('');
               }}
-              className="h-14 text-base pr-12"
+              className="h-12 text-base pr-12"
               disabled={isLoading}
             />
             <button
@@ -274,7 +274,7 @@ export default function SetPassword() {
           <Button
             variant="default"
             size="lg"
-            className="w-full h-14 text-base font-medium"
+            className="w-full h-12 text-base font-medium"
             onClick={handleSetPassword}
             disabled={isLoading || !password || !confirmPassword}
           >

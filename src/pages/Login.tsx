@@ -418,7 +418,7 @@ export default function LoginPage() {
               handlePasswordLogin();
             }
           }}
-          className="h-14 text-base"
+          className="h-12 text-base"
           disabled={isLoading}
         />
       </div>
@@ -436,7 +436,7 @@ export default function LoginPage() {
       <Button
         variant="default"
         size="lg"
-        className="w-full h-14 text-base font-medium mb-4"
+        className="w-full h-12 text-base font-medium mb-4"
         onClick={handlePasswordLogin}
         disabled={isLoading || !password}
       >
@@ -506,7 +506,7 @@ export default function LoginPage() {
       </div>
 
       {/* Input Field */}
-      <div className="relative mb-4 h-14">
+      <div className="relative mb-4 h-12">
         {/* Phone Input */}
         <div 
           className={cn(
@@ -514,7 +514,7 @@ export default function LoginPage() {
             loginMethod === 'phone' ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
           )}
         >
-          <div className="relative flex items-center h-14 rounded-md border border-input bg-background">
+          <div className="relative flex items-center h-12 rounded-md border border-input bg-background">
             <CountryCodeSelector
               selectedCountry={selectedCountry}
               onSelect={setSelectedCountry}
@@ -551,7 +551,7 @@ export default function LoginPage() {
             placeholder="请输入邮箱地址"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-14 text-base pr-10"
+            className="h-12 text-base pr-10"
           />
           {email && (
             <button
@@ -568,7 +568,7 @@ export default function LoginPage() {
       <Button
         variant="default"
         size="lg"
-        className="w-full h-14 text-base font-medium mb-6"
+        className="w-full h-12 text-base font-medium mb-6"
         onClick={handleContinue}
         disabled={isLoading || !currentValue}
       >
@@ -591,7 +591,7 @@ export default function LoginPage() {
           <Button
             variant="outline"
             size="lg"
-            className="w-full h-14"
+            className="w-full h-12"
             onClick={() => handleSocialLogin('apple')}
             disabled={isLoading}
           >
@@ -613,7 +613,7 @@ export default function LoginPage() {
           <Button
             variant="outline"
             size="lg"
-            className="w-full h-14"
+            className="w-full h-12"
             onClick={() => handleSocialLogin('google')}
             disabled={isLoading}
           >
@@ -978,10 +978,13 @@ export default function LoginPage() {
       {loginStep === 'input' && (
         <div className="px-6 pb-8">
           <p className="text-xs text-center text-muted-foreground">
-            继续即表示您同意我们的
-            <button className="text-primary ml-1">服务条款</button>
-            和
-            <button className="text-primary ml-1">隐私政策</button>
+            继续即表示您同意我们的<button 
+              className="text-primary hover:underline"
+              onClick={() => navigate('/terms')}
+            >服务条款</button>和<button 
+              className="text-primary hover:underline"
+              onClick={() => navigate('/privacy')}
+            >隐私政策</button>
           </p>
         </div>
       )}

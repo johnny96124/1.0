@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useWallet } from "@/contexts/WalletContext";
+import coboLogo from "@/assets/cobo-logo.svg";
 
 const Splash = () => {
   const navigate = useNavigate();
@@ -108,9 +109,8 @@ const Splash = () => {
           
           {/* Logo container */}
           <motion.div
-            className="w-[84px] h-[84px] rounded-3xl flex items-center justify-center shadow-2xl relative overflow-hidden"
+            className="w-[84px] h-[84px] rounded-3xl flex items-center justify-center shadow-2xl relative overflow-hidden bg-white"
             style={{
-              background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(210 100% 50%))',
               boxShadow: '0 20px 40px -10px hsl(var(--primary) / 0.4), 0 10px 20px -5px hsl(210 100% 50% / 0.3)'
             }}
             initial={{ opacity: 0, scale: 0.5, rotateY: -30 }}
@@ -119,49 +119,21 @@ const Splash = () => {
           >
             {/* Inner glow effect */}
             <motion.div 
-              className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-transparent"
+              className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-transparent"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             />
             
-            {/* Logo - Stylized Wallet/Shield Icon */}
-            <svg
-              viewBox="0 0 48 48"
-              className="w-11 h-11 text-white relative z-10"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {/* Shield outline */}
-              <motion.path
-                d="M24 4L6 12v12c0 11 8 17 18 20 10-3 18-9 18-20V12L24 4z"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
-                fill="rgba(255,255,255,0.15)"
-              />
-              {/* Inner hexagon pattern */}
-              <motion.path
-                d="M24 14l8 5v10l-8 5-8-5V19l8-5z"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.8, ease: "easeOut" }}
-                fill="rgba(255,255,255,0.25)"
-              />
-              {/* Center dot */}
-              <motion.circle
-                cx="24"
-                cy="24"
-                r="3"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.3, delay: 1.1 }}
-                fill="white"
-              />
-            </svg>
+            {/* COBO Logo */}
+            <motion.img
+              src={coboLogo}
+              alt="COBO"
+              className="w-14 h-14 relative z-10"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            />
           </motion.div>
         </div>
 
@@ -190,15 +162,19 @@ const Splash = () => {
         </motion.div>
       </div>
 
-      {/* Footer */}
+      {/* Footer with COBO logo */}
       <motion.div
-        className="absolute bottom-12 flex flex-col items-center gap-1"
+        className="absolute bottom-12 flex flex-col items-center gap-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.6, ease: "easeOut" }}
       >
         <p className="text-xs text-muted-foreground/60">Powered by</p>
-        <p className="text-sm font-semibold text-primary/80 tracking-wider">COBO</p>
+        <img 
+          src={coboLogo} 
+          alt="COBO" 
+          className="h-5 opacity-70"
+        />
       </motion.div>
     </motion.div>
   );
