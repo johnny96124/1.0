@@ -254,10 +254,10 @@ export default function HistoryPage() {
               <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
               <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
               <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
-              <TabsTrigger value="risk" className="text-xs relative">
+              <TabsTrigger value="risk" className="text-xs">
                 风险
                 {riskCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
+                  <span className="ml-1 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
                     {riskCount}
                   </span>
                 )}

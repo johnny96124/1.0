@@ -154,10 +154,10 @@ export default function MessageCenter() {
                   : notifications.filter(n => n.category === tab.key && !n.isRead).length;
                 
                 return (
-                  <TabsTrigger key={tab.key} value={tab.key} className="text-xs relative">
+                  <TabsTrigger key={tab.key} value={tab.key} className="text-xs">
                     {tab.label}
                     {count > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
+                      <span className="ml-1 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
                         {count > 99 ? '99+' : count}
                       </span>
                     )}
