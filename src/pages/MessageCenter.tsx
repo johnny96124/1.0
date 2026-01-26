@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWallet } from '@/contexts/WalletContext';
 import { useNavigate } from 'react-router-dom';
 import { Notification, NotificationCategory, NotificationType } from '@/types/wallet';
@@ -145,34 +145,27 @@ export default function MessageCenter() {
     >
       <div className="flex flex-col h-full">
         {/* Filter Tabs */}
-        <div className="px-4 py-3 border-b border-border/50">
-          <div className="flex gap-2">
-            {FILTER_TABS.map(tab => {
-              const count = tab.key === 'all' 
-                ? unreadNotificationCount 
-                : notifications.filter(n => n.category === tab.key && !n.isRead).length;
-              
-              return (
-                <Button
-                  key={tab.key}
-                  variant={activeTab === tab.key ? 'default' : 'ghost'}
-                  size="sm"
-                  className={`h-8 px-3 ${activeTab === tab.key ? '' : 'text-muted-foreground'}`}
-                  onClick={() => setActiveTab(tab.key)}
-                >
-                  {tab.label}
-                  {count > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="ml-1.5 h-4 min-w-4 px-1 text-[10px]"
-                    >
-                      {count > 99 ? '99+' : count}
-                    </Badge>
-                  )}
-                </Button>
-              );
-            })}
-          </div>
+        <div className="px-4 py-3">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
+            <TabsList className="w-full grid grid-cols-4 h-9">
+              {FILTER_TABS.map(tab => {
+                const count = tab.key === 'all' 
+                  ? unreadNotificationCount 
+                  : notifications.filter(n => n.category === tab.key && !n.isRead).length;
+                
+                return (
+                  <TabsTrigger key={tab.key} value={tab.key} className="text-xs relative">
+                    {tab.label}
+                    {count > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center">
+                        {count > 99 ? '99+' : count}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </Tabs>
         </div>
 
         {/* Notifications List */}
