@@ -424,6 +424,19 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
           <p className="text-muted-foreground text-sm max-w-[260px]">
             您的钱包已安全备份到 iCloud
           </p>
+
+          {/* Local backup tip */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-6 p-3 bg-muted/50 rounded-xl flex items-start gap-2 max-w-[280px]"
+          >
+            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground text-left">
+              建议在「设置 → 钱包管理」中额外创建本地备份，双重保障更安心
+            </p>
+          </motion.div>
         </div>
 
         <div className="pb-8">
