@@ -1,242 +1,210 @@
 
-# 手机号和邮箱换绑流程设计方案
+# Token Management Optimization Plan
 
-## 需求概述
+## Overview
 
-在现有的绑定流程基础上，增加**换绑功能**，让已绑定账号的用户可以更换绑定的手机号或邮箱。换绑流程需要先验证原账号的所有权，再绑定新账号，确保安全性。
+This plan optimizes the token management experience by transforming it from a simple "add token" feature into a comprehensive "manage tokens" feature that supports both adding and removing tokens, simplifies the add flow, and provides better information about each token.
 
 ---
 
-## 换绑流程设计
+## Current State Analysis
 
-### 流程图
+### Existing Implementation
+- `TokenSearch.tsx`: Displays available tokens with category filters, requires users to select a network after clicking on a token
+- `WalletContext.tsx`: Has `addToken()` function but no `removeToken()` function
+- `Home.tsx`: Tracks `addedSymbols` by token symbol, shows "Add Token" button
+
+### Issues Identified
+1. No delete functionality for tokens
+2. Adding a token requires extra step to select network (even when token supports multiple networks)
+3. No indication of how many networks support each token
+4. UX could be improved with additional features like sorting and batch operations
+
+---
+
+## Implementation Plan
+
+### 1. Rename Component and Update Interface
+
+**File: `src/components/TokenSearch.tsx` -> `src/components/TokenManager.tsx`**
+
+- Rename component to `TokenManager` to reflect expanded functionality
+- Change page title from "Add Token" (添加代币) to "Manage Tokens" (管理代币)
+- Add two tabs: "Add Token" (添加代币) and "My Tokens" (我的代币)
+
+### 2. Simplify Add Token Flow
+
+**File: `src/components/TokenManager.tsx`**
+
+When user clicks to add a token:
+- Automatically add the token across ALL supported networks (no network selection modal)
+- Show network count badge next to token name (e.g., "3 chains" / "3 链")
+- Display small chain icons showing which networks are supported
 
 ```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                           换绑流程                                   │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  Step 1: 验证原账号        Step 2: 输入新账号        Step 3: 验证新账号  │
-│  ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐│
-│  │ 显示当前绑定账号  │     │ 输入新邮箱/手机号 │     │   输入验证码     ││
-│  │ 发送验证码到原账号│ --> │ (或 OAuth 登录)  │ --> │   验证通过      ││
-│  │ 输入验证码验证   │     │  发送验证码      │     │   换绑成功      ││
-│  └─────────────────┘     └─────────────────┘     └─────────────────┘│
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+Before:
+[Click Token] → [Select Network Modal] → [Added to 1 network]
+
+After:
+[Click Token] → [Immediately added to ALL supported networks]
 ```
 
-### 安全设计
+### 3. Add Delete Token Functionality
 
-| 步骤 | 目的 | 验证方式 |
-|------|------|----------|
-| 验证原账号 | 确认是账号所有者 | 发送验证码到原绑定账号 |
-| 绑定新账号 | 确认新账号有效且属于用户 | 发送验证码到新账号 / OAuth授权 |
+**File: `src/contexts/WalletContext.tsx`**
 
----
-
-## Demo 页面扩展
-
-### 页面结构改造
-
-将 `BindEmailDemo` 页面扩展为完整的**账号绑定演示中心**，支持：
-
-1. 绑定邮箱（首次绑定）
-2. 绑定手机号（首次绑定）
-3. 换绑邮箱（已有绑定时）
-4. 换绑手机号（已有绑定时）
-
-```text
-┌─────────────────────────────────┐
-│  ← 账号绑定演示                  │
-├─────────────────────────────────┤
-│                                 │
-│  ┌─────────────────────────┐    │
-│  │ 📧 邮箱                  │    │
-│  │ 已绑定: us****@gmail.com│    │
-│  │              [换绑邮箱]  │    │
-│  └─────────────────────────┘    │
-│                                 │
-│  ┌─────────────────────────┐    │
-│  │ 📱 手机号                │    │
-│  │ 未绑定                   │    │
-│  │           [绑定手机号]   │    │
-│  └─────────────────────────┘    │
-│                                 │
-│  [重置所有绑定]                  │
-│                                 │
-│  提示：演示模式下，任意6位验证码可通过│
-└─────────────────────────────────┘
-```
-
----
-
-## 技术实现
-
-### 1. 修改 BindAccountDrawer 组件
-
-新增 Props 和 Step：
-
+Add new function to WalletContext:
 ```typescript
-interface BindAccountDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  type: 'email' | 'phone';
-  mode: 'bind' | 'rebind';        // 新增：绑定模式
-  currentValue?: string;           // 新增：当前绑定值（换绑时使用）
-  onSuccess?: (value: string) => void;
-}
-
-type BindStep = 
-  | 'verify-old'      // 新增：验证原账号
-  | 'input'           // 输入新账号
-  | 'verification'    // 验证新账号
-  | 'success';        // 成功
+removeToken: (symbol: string, network?: ChainId) => void;
+// If network is undefined, remove token from all networks
+// If network is specified, remove only from that network
 ```
 
-### 2. 新增验证原账号步骤
+**File: `src/components/TokenManager.tsx`**
 
-换绑模式下，首先显示当前绑定的账号，要求用户验证：
+In the "My Tokens" tab:
+- Show list of currently added tokens with their network distribution
+- Swipe left or click delete icon to remove a token (with confirmation dialog)
+- Option to remove from all networks or specific network
 
+### 4. Display Network Support Information
+
+**File: `src/components/TokenManager.tsx`**
+
+For each token in the list:
+- Show number of supported networks as a badge next to token name
+- Display small chain icons (e.g., ETH, TRX, BSC icons) next to the token
+- Format: "USDT · 3 chains" or "USDT · 3 链"
+
+Visual layout for each token row:
 ```text
-┌─────────────────────────────┐
-│         换绑邮箱             │
-├─────────────────────────────┤
-│                             │
-│      [🔒 安全验证图标]       │
-│                             │
-│  为确保账号安全，请先验证     │
-│  当前绑定的邮箱所有权         │
-│                             │
-│  当前邮箱: us****@gmail.com  │
-│                             │
-│  [ 发送验证码到原邮箱 ]       │
-│                             │
-└─────────────────────────────┘
++----------------------------------------------------------+
+| [TokenIcon] USDT                      [$1.00] [+0.01%]   |
+|             Tether USD                [ETH][TRX][BSC]    |
+|             3 链                                [+/-]    |
++----------------------------------------------------------+
 ```
 
-### 3. 完整状态流转
+### 5. Additional Value-Add Features
 
-```text
-换绑模式（mode = 'rebind'）:
-  verify-old -> input -> verification -> success
-     │           │            │
-     │           │            └─> 验证新账号的验证码
-     │           └─> 输入新账号 / OAuth
-     └─> 验证原账号的验证码
+**A. Sorting Options**
+- Sort by: Name (A-Z), Price (High-Low), 24h Change
+- Add sort dropdown in header area
 
-绑定模式（mode = 'bind'）:
-  input -> verification -> success
-    │           │
-    │           └─> 验证新账号的验证码
-    └─> 输入新账号 / OAuth
-```
+**B. Quick Actions**
+- Long-press or swipe gestures for quick add/remove
+- Batch select mode for adding/removing multiple tokens
+
+**C. Token Status Indicators**
+- Green checkmark for fully added tokens (all networks)
+- Partial indicator for tokens added on some networks only
+- Balance preview for already-added tokens
+
+**D. Empty State for "My Tokens" Tab**
+- When no tokens are added, show friendly empty state with CTA to add tokens
 
 ---
 
-## 文件变更清单
+## File Changes Summary
 
-| 文件 | 操作 | 说明 |
-|------|------|------|
-| `src/components/BindAccountDrawer.tsx` | 修改 | 增加换绑模式和验证原账号步骤 |
-| `src/pages/BindEmailDemo.tsx` | 修改 | 扩展为完整账号绑定演示中心 |
+| File | Changes |
+|------|---------|
+| `src/components/TokenSearch.tsx` | Rename to `TokenManager.tsx`, add tabs, remove network selection modal, add delete functionality, display chain count |
+| `src/contexts/WalletContext.tsx` | Add `removeToken()` function, update type definitions |
+| `src/pages/Home.tsx` | Update import and component usage, pass removal handler |
+| `src/types/wallet.ts` | Update WalletContextType interface if needed |
 
 ---
 
-## 详细代码实现
+## UI/UX Specifications
 
-### BindAccountDrawer.tsx 改动
+### Tab Design
+- Two pill-style tabs at the top: "添加代币" | "我的代币"
+- Active tab has accent background color
 
-1. **新增 Props**：
-```tsx
-interface BindAccountDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  type: 'email' | 'phone';
-  mode?: 'bind' | 'rebind';       // 默认 'bind'
-  currentValue?: string;          // 换绑时的当前值
-  onSuccess?: (value: string) => void;
-}
+### Token Card in Add Tab
+```text
++----------------------------------------------------------+
+| [Icon] USDT                              $1.00  [+]      |
+|        Tether USD · 支持 3 链            +0.01%          |
+|        [ETH] [TRX] [BSC]                                 |
++----------------------------------------------------------+
 ```
 
-2. **新增状态**：
-```tsx
-type BindStep = 'verify-old' | 'input' | 'verification' | 'success';
-const [oldCode, setOldCode] = useState('');
-const [oldCodeError, setOldCodeError] = useState('');
+### Token Card in My Tokens Tab
+```text
++----------------------------------------------------------+
+| [Icon] USDT                              余额: 12,580.50 |
+|        Tether USD                        ≈ $12,580.50    |
+|        [ETH✓] [TRX✓] [BSC✓]                       [🗑️]   |
++----------------------------------------------------------+
 ```
 
-3. **新增验证原账号 UI**（Step: verify-old）：
-   - 显示安全验证图标和提示文案
-   - 显示当前绑定的脱敏账号
-   - "发送验证码到原账号" 按钮
-   - 6位验证码输入框
-   - 验证通过后进入 input 步骤
+### Delete Confirmation Dialog
+- Title: "删除代币"
+- Message: "确定要从钱包中删除 {symbol} 吗？此操作不会影响您的链上资产。"
+- Buttons: "取消" | "删除"
 
-4. **修改标题逻辑**：
-```tsx
-const title = mode === 'rebind' 
-  ? (isEmail ? '换绑邮箱' : '换绑手机号')
-  : (isEmail ? '绑定邮箱' : '绑定手机号');
+---
+
+## Technical Details
+
+### New Context Function
+```typescript
+// In WalletContext.tsx
+const removeToken = useCallback((symbol: string, network?: ChainId) => {
+  setAssets(prev => {
+    if (network) {
+      // Remove from specific network
+      return prev.filter(a => !(a.symbol === symbol && a.network === network));
+    }
+    // Remove from all networks
+    return prev.filter(a => a.symbol !== symbol);
+  });
+}, []);
 ```
 
-### BindEmailDemo.tsx 改动
-
-1. **重命名为账号绑定演示中心**
-
-2. **新增状态**：
-```tsx
-const [boundPhone, setBoundPhone] = useState<string | null>(null);
-const [drawerType, setDrawerType] = useState<'email' | 'phone'>('email');
-const [drawerMode, setDrawerMode] = useState<'bind' | 'rebind'>('bind');
-```
-
-3. **新增操作函数**：
-```tsx
-const handleOpenDrawer = (type: 'email' | 'phone', mode: 'bind' | 'rebind') => {
-  setDrawerType(type);
-  setDrawerMode(mode);
-  setDrawerOpen(true);
+### Updated addToken for Multi-Network
+```typescript
+// Modified to add token on all supported networks
+const handleAddToken = (token: TokenInfo) => {
+  token.networks.forEach(network => {
+    addToken(token.symbol, token.name, network, token.price, token.change24h);
+  });
+  toast.success(`已添加 ${token.symbol} (${token.networks.length} 个网络)`);
 };
 ```
 
-4. **UI 改造为账号卡片列表**：
-   - 邮箱卡片：显示绑定状态，按钮为"绑定"或"换绑"
-   - 手机卡片：显示绑定状态，按钮为"绑定"或"换绑"
-   - 重置按钮：清空所有绑定
+### Props Interface Update
+```typescript
+interface TokenManagerProps {
+  addedSymbols: string[];
+  addedAssets: Asset[]; // For showing current balances
+  onAddToken: (token: TokenInfo) => void; // Simplified - no network param
+  onRemoveToken: (symbol: string, network?: ChainId) => void;
+  onClose: () => void;
+}
+```
 
 ---
 
-## 用户体验流程
+## Animation & Transitions
 
-### 场景1：首次绑定邮箱
+- Tab switching: Slide content left/right with fade
+- Token add: Scale up + fade in checkmark
+- Token remove: Slide out to left + fade
+- Delete confirmation: Bottom sheet slide up
 
-1. 点击"绑定邮箱" → 打开 Drawer（mode=bind）
-2. 选择 Google/Apple OAuth 或手动输入邮箱
-3. 输入验证码
-4. 绑定成功
+---
 
-### 场景2：换绑邮箱
+## Implementation Order
 
-1. 点击"换绑邮箱" → 打开 Drawer（mode=rebind）
-2. 显示当前绑定邮箱（脱敏），点击"发送验证码到原邮箱"
-3. 输入原邮箱收到的验证码，验证通过
-4. 选择新邮箱（OAuth 或手动输入）
-5. 输入新邮箱收到的验证码
-6. 换绑成功
+1. Add `removeToken` function to `WalletContext.tsx`
+2. Create new `TokenManager.tsx` component (or refactor `TokenSearch.tsx`)
+3. Implement tabbed interface with "Add" and "My Tokens" tabs
+4. Update add token flow to add all networks automatically
+5. Implement delete functionality with confirmation
+6. Add chain count badges and chain icons to token rows
+7. Update `Home.tsx` to use new component and handlers
+8. Add sorting options and empty states
 
-### 场景3：首次绑定手机号
-
-1. 点击"绑定手机号" → 打开 Drawer（mode=bind）
-2. 选择国家区号，输入手机号
-3. 输入验证码
-4. 绑定成功
-
-### 场景4：换绑手机号
-
-1. 点击"换绑手机号" → 打开 Drawer（mode=rebind）
-2. 显示当前绑定手机号（脱敏），发送验证码
-3. 输入原手机收到的验证码，验证通过
-4. 输入新手机号
-5. 输入新手机收到的验证码
-6. 换绑成功
