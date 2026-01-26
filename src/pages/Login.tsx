@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Lock, Wallet, CreditCard, TrendingUp, Sparkles, X, Loader2, ArrowLeft, Mail, CheckCircle2 } from 'lucide-react';
+import { Shield, Lock, Wallet, CreditCard, TrendingUp, Sparkles, X, Loader2, ArrowLeft, Mail, CheckCircle2, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
@@ -17,6 +17,8 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp';
+import { CountryCodeSelector, countries, type Country } from '@/components/CountryCodeSelector';
+import { cn } from '@/lib/utils';
 
 interface SlideData {
   icon: React.ReactNode;
@@ -25,7 +27,8 @@ interface SlideData {
   floatingIcons: React.ReactNode[];
 }
 
-type LoginStep = 'email' | 'password' | 'verification' | 'processing' | 'success';
+type LoginMethod = 'email' | 'phone';
+type LoginStep = 'input' | 'password' | 'verification' | 'processing' | 'success';
 
 // Color themes for each slide
 const colorThemes = [
@@ -95,10 +98,13 @@ const slides: SlideData[] = [
 ];
 
 export default function LoginPage() {
-  const [loginStep, setLoginStep] = useState<LoginStep>('email');
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>('phone');
+  const [loginStep, setLoginStep] = useState<LoginStep>('input');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -110,6 +116,9 @@ export default function LoginPage() {
   const [loginResult, setLoginResult] = useState<{ userType?: string; hasExistingWallets?: boolean } | null>(null);
   const { login, sendVerificationCode, verifyCode, checkPasswordExists, loginWithPassword } = useWallet();
   const navigate = useNavigate();
+
+  const currentValue = loginMethod === 'email' ? email : phone;
+  const displayValue = loginMethod === 'email' ? email : `${selectedCountry.dialCode} ${phone}`;
 
   const onSelect = useCallback(() => {
     if (!api) return;
@@ -134,20 +143,19 @@ export default function LoginPage() {
   }, [countdown]);
 
   // Check if user has password and decide which step to show
-  const handleContinueWithEmail = async () => {
-    if (!email) return;
+  const handleContinue = async () => {
+    if (!currentValue) return;
     
     setIsLoading(true);
     try {
-      const result = await checkPasswordExists(email);
+      const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
+      const result = await checkPasswordExists(identifier);
       setHasPassword(result.hasPassword);
       
       if (result.hasPassword) {
-        // User has password, show password input
         setLoginStep('password');
       } else {
-        // No password, send verification code
-        await sendVerificationCode(email);
+        await sendVerificationCode(identifier);
         setLoginStep('verification');
         setCountdown(60);
         setCodeError('');
@@ -160,11 +168,12 @@ export default function LoginPage() {
   };
 
   const handleSendCode = async () => {
-    if (!email) return;
+    if (!currentValue) return;
     
     setIsLoading(true);
     try {
-      await sendVerificationCode(email);
+      const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
+      await sendVerificationCode(identifier);
       setLoginStep('verification');
       setCountdown(60);
       setCodeError('');
@@ -179,7 +188,8 @@ export default function LoginPage() {
     if (countdown > 0) return;
     
     try {
-      await sendVerificationCode(email);
+      const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
+      await sendVerificationCode(identifier);
       setCountdown(60);
       setCodeError('');
     } catch (error) {
@@ -194,11 +204,11 @@ export default function LoginPage() {
     setLoginStep('processing');
     
     try {
-      const result = await verifyCode(email, code);
+      const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
+      const result = await verifyCode(identifier, code);
       setLoginResult(result);
       setLoginStep('success');
       
-      // Delay navigation to show success animation
       setTimeout(() => {
         if (result.userType === 'new') {
           navigate('/onboarding?new=true');
@@ -226,12 +236,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleLogin = async (provider: 'apple' | 'google' | 'email') => {
-    if (provider === 'email') {
-      handleContinueWithEmail();
-      return;
-    }
-    
+  const handleSocialLogin = async (provider: 'apple' | 'google') => {
     setIsLoading(true);
     setLoadingProvider(provider);
     try {
@@ -256,13 +261,17 @@ export default function LoginPage() {
     }
   };
 
-  const handleClearEmail = () => {
-    setEmail('');
+  const handleClear = () => {
+    if (loginMethod === 'email') {
+      setEmail('');
+    } else {
+      setPhone('');
+    }
   };
 
   const handleBack = () => {
     if (loginStep === 'verification' || loginStep === 'password') {
-      setLoginStep('email');
+      setLoginStep('input');
       setVerificationCode('');
       setCodeError('');
       setPassword('');
@@ -270,7 +279,6 @@ export default function LoginPage() {
     }
   };
 
-  // Handle password login
   const handlePasswordLogin = async () => {
     if (!password) return;
     
@@ -279,7 +287,8 @@ export default function LoginPage() {
     setPasswordError('');
     
     try {
-      const result = await loginWithPassword(email, password);
+      const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
+      const result = await loginWithPassword(identifier, password);
       setLoginResult(result);
       setLoginStep('success');
       
@@ -301,11 +310,11 @@ export default function LoginPage() {
     }
   };
 
-  // Switch to verification code method
   const handleSwitchToVerification = async () => {
     setIsLoading(true);
     try {
-      await sendVerificationCode(email);
+      const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
+      await sendVerificationCode(identifier);
       setLoginStep('verification');
       setCountdown(60);
       setCodeError('');
@@ -318,6 +327,12 @@ export default function LoginPage() {
     }
   };
 
+  const handleMethodChange = (method: LoginMethod) => {
+    setLoginMethod(method);
+    setEmail('');
+    setPhone('');
+  };
+
   // Password Input Step
   const renderPasswordStep = () => (
     <motion.div
@@ -326,7 +341,6 @@ export default function LoginPage() {
       exit={{ opacity: 0, x: -20 }}
       className="flex-1 px-6 flex flex-col"
     >
-      {/* Back button and title */}
       <div className="flex items-center mb-6">
         <button
           onClick={handleBack}
@@ -336,11 +350,10 @@ export default function LoginPage() {
         </button>
         <div className="flex-1">
           <h2 className="text-lg font-semibold text-foreground">输入密码</h2>
-          <p className="text-sm text-muted-foreground">{email}</p>
+          <p className="text-sm text-muted-foreground">{displayValue}</p>
         </div>
       </div>
 
-      {/* Lock icon */}
       <div className="flex justify-center mb-6">
         <motion.div
           initial={{ scale: 0.8 }}
@@ -351,7 +364,6 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
-      {/* Password Input */}
       <div className="relative mb-4">
         <Input
           type="password"
@@ -371,7 +383,6 @@ export default function LoginPage() {
         />
       </div>
 
-      {/* Error message */}
       {passwordError && (
         <motion.p
           initial={{ opacity: 0 }}
@@ -382,7 +393,6 @@ export default function LoginPage() {
         </motion.p>
       )}
 
-      {/* Login Button */}
       <Button
         variant="default"
         size="lg"
@@ -396,7 +406,6 @@ export default function LoginPage() {
         登录
       </Button>
 
-      {/* Switch to verification code */}
       <div className="text-center">
         <button
           onClick={handleSwitchToVerification}
@@ -409,30 +418,86 @@ export default function LoginPage() {
     </motion.div>
   );
 
-  // Email Input Step
-  const renderEmailStep = () => (
+  // Input Step (Email or Phone)
+  const renderInputStep = () => (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       className="flex-1 px-6 flex flex-col"
     >
-      {/* Email Input */}
+      {/* Method Tabs */}
+      <div className="flex bg-muted/50 rounded-xl p-1 mb-4">
+        <button
+          onClick={() => handleMethodChange('phone')}
+          className={cn(
+            "flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2",
+            loginMethod === 'phone'
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Phone className="w-4 h-4" />
+          手机号
+        </button>
+        <button
+          onClick={() => handleMethodChange('email')}
+          className={cn(
+            "flex-1 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2",
+            loginMethod === 'email'
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          <Mail className="w-4 h-4" />
+          邮箱
+        </button>
+      </div>
+
+      {/* Input Field */}
       <div className="relative mb-4">
-        <Input
-          type="email"
-          placeholder="请输入邮箱地址"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="h-14 text-base pr-10"
-        />
-        {email && (
-          <button
-            onClick={handleClearEmail}
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-muted flex items-center justify-center"
-          >
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
+        {loginMethod === 'phone' ? (
+          <div className="flex">
+            <CountryCodeSelector
+              selectedCountry={selectedCountry}
+              onSelect={setSelectedCountry}
+            />
+            <div className="relative flex-1">
+              <Input
+                type="tel"
+                placeholder="请输入手机号"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                className="h-14 text-base rounded-l-none pr-10"
+              />
+              {phone && (
+                <button
+                  onClick={handleClear}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-muted flex items-center justify-center"
+                >
+                  <X className="w-4 h-4 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <>
+            <Input
+              type="email"
+              placeholder="请输入邮箱地址"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-14 text-base pr-10"
+            />
+            {email && (
+              <button
+                onClick={handleClear}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-muted flex items-center justify-center"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
+          </>
         )}
       </div>
 
@@ -441,8 +506,8 @@ export default function LoginPage() {
         variant="default"
         size="lg"
         className="w-full h-14 text-base font-medium mb-6"
-        onClick={() => handleLogin('email')}
-        disabled={isLoading || !email}
+        onClick={handleContinue}
+        disabled={isLoading || !currentValue}
       >
         {isLoading && loadingProvider === null ? (
           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -463,7 +528,7 @@ export default function LoginPage() {
           variant="outline"
           size="lg"
           className="flex-1 h-14"
-          onClick={() => handleLogin('apple')}
+          onClick={() => handleSocialLogin('apple')}
           disabled={isLoading}
         >
           {loadingProvider === 'apple' ? (
@@ -478,7 +543,7 @@ export default function LoginPage() {
           variant="outline"
           size="lg"
           className="flex-1 h-14"
-          onClick={() => handleLogin('google')}
+          onClick={() => handleSocialLogin('google')}
           disabled={isLoading}
         >
           {loadingProvider === 'google' ? (
@@ -504,7 +569,6 @@ export default function LoginPage() {
       exit={{ opacity: 0, x: -20 }}
       className="flex-1 px-6 flex flex-col"
     >
-      {/* Back button and title */}
       <div className="flex items-center mb-6">
         <button
           onClick={handleBack}
@@ -514,22 +578,24 @@ export default function LoginPage() {
         </button>
         <div className="flex-1">
           <h2 className="text-lg font-semibold text-foreground">输入验证码</h2>
-          <p className="text-sm text-muted-foreground">验证码已发送至 {email}</p>
+          <p className="text-sm text-muted-foreground">验证码已发送至 {displayValue}</p>
         </div>
       </div>
 
-      {/* Email icon */}
       <div className="flex justify-center mb-6">
         <motion.div
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center"
         >
-          <Mail className="w-8 h-8 text-accent" />
+          {loginMethod === 'email' ? (
+            <Mail className="w-8 h-8 text-accent" />
+          ) : (
+            <Phone className="w-8 h-8 text-accent" />
+          )}
         </motion.div>
       </div>
 
-      {/* OTP Input */}
       <div className="flex justify-center mb-4">
         <InputOTP
           maxLength={6}
@@ -548,7 +614,6 @@ export default function LoginPage() {
         </InputOTP>
       </div>
 
-      {/* Error message */}
       {codeError && (
         <motion.p
           initial={{ opacity: 0 }}
@@ -559,7 +624,6 @@ export default function LoginPage() {
         </motion.p>
       )}
 
-      {/* Resend button */}
       <div className="text-center mb-6">
         {countdown > 0 ? (
           <p className="text-sm text-muted-foreground">
@@ -575,7 +639,6 @@ export default function LoginPage() {
         )}
       </div>
 
-      {/* Loading indicator when verifying */}
       {isLoading && (
         <div className="flex justify-center">
           <Loader2 className="w-6 h-6 text-primary animate-spin" />
@@ -610,14 +673,12 @@ export default function LoginPage() {
       animate={{ opacity: 1, scale: 1 }}
       className="flex-1 px-6 flex flex-col items-center justify-center"
     >
-      {/* Success checkmark with animation */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
         className="relative mb-6"
       >
-        {/* Outer ring pulse */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1.5, opacity: 0 }}
@@ -631,7 +692,6 @@ export default function LoginPage() {
           className="absolute inset-0 w-24 h-24 rounded-full bg-success/20"
         />
         
-        {/* Main circle */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -648,7 +708,6 @@ export default function LoginPage() {
         </motion.div>
       </motion.div>
 
-      {/* Success text */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -659,7 +718,6 @@ export default function LoginPage() {
         <p className="text-sm text-muted-foreground">正在进入您的钱包...</p>
       </motion.div>
 
-      {/* Confetti-like dots */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {[...Array(6)].map((_, i) => (
           <motion.div
@@ -692,10 +750,8 @@ export default function LoginPage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-background">
-      {/* Top Gradient Background - covers top spacing and illustration area */}
-      {loginStep === 'email' && (
+      {loginStep === 'input' && (
         <div className="relative">
-          {/* Top spacing to push content down */}
           <div className="pt-10" />
           
           <Carousel
@@ -717,7 +773,6 @@ export default function LoginPage() {
                 <CarouselItem key={index} className="pl-0">
                   <div className="relative h-52 flex items-center justify-center">
                   
-                  {/* Animated Background Orbs */}
                   <motion.div
                     animate={{ 
                       scale: [1, 1.2, 1],
@@ -735,9 +790,7 @@ export default function LoginPage() {
                     className={`absolute bottom-4 right-1/4 w-24 h-24 rounded-full blur-3xl ${colorThemes[index].orbColor2}`}
                   />
                   
-                  {/* Main Icon with Orbiting Elements */}
                   <div className="relative z-10">
-                    {/* Outer Ring */}
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
@@ -748,7 +801,6 @@ export default function LoginPage() {
                       <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full ${colorThemes[index].dotColor2}`} />
                     </motion.div>
 
-                    {/* Floating Icons */}
                     <motion.div
                       animate={{ y: [0, -8, 0], x: [0, 3, 0] }}
                       transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -773,21 +825,18 @@ export default function LoginPage() {
                       {slide.floatingIcons[2]}
                     </motion.div>
 
-                    {/* Main Icon Container with Pulse */}
                     <motion.div
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       transition={{ duration: 0.5, type: 'spring', stiffness: 200 }}
                       className="relative"
                     >
-                      {/* Pulse Ring */}
                       <motion.div
                         animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }}
                         transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
                         className={`absolute inset-0 rounded-2xl ${colorThemes[index].pulseColor}`}
                       />
                       
-                      {/* Icon Box */}
                       <div className={`relative w-24 h-24 rounded-2xl ${slide.iconBg} flex items-center justify-center shadow-2xl`}>
                         <motion.div
                           animate={{ rotate: [0, 4, -4, 0] }}
@@ -798,7 +847,6 @@ export default function LoginPage() {
                       </div>
                     </motion.div>
 
-                    {/* Sparkle Effects */}
                     <motion.div
                       animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0 }}
@@ -818,10 +866,8 @@ export default function LoginPage() {
       </div>
       )}
 
-      {/* Title & Progress Indicators - only show on email step */}
-      {loginStep === 'email' && (
+      {loginStep === 'input' && (
         <div className="px-6 pt-4">
-          {/* Progress Indicators */}
           <div className="flex items-center justify-center gap-2 mb-4">
             {slides.map((_, i) => (
               <motion.div
@@ -838,24 +884,21 @@ export default function LoginPage() {
             ))}
           </div>
 
-          {/* Title */}
           <h1 className="text-xl font-bold text-foreground text-center mb-6">
             {slides[currentIndex].title}
           </h1>
         </div>
       )}
 
-      {/* Login Form Area */}
       <AnimatePresence mode="wait">
-        {loginStep === 'email' && renderEmailStep()}
+        {loginStep === 'input' && renderInputStep()}
         {loginStep === 'password' && renderPasswordStep()}
         {loginStep === 'verification' && renderVerificationStep()}
         {loginStep === 'processing' && renderProcessingStep()}
         {loginStep === 'success' && renderSuccessStep()}
       </AnimatePresence>
 
-      {/* Terms - only show on email step */}
-      {loginStep === 'email' && (
+      {loginStep === 'input' && (
         <div className="px-6 pb-8">
           <p className="text-xs text-center text-muted-foreground">
             继续即表示您同意我们的
