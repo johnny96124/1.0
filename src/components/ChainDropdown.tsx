@@ -50,18 +50,18 @@ export function ChainDropdown({
         <Button
           variant="ghost"
           className={cn(
-            "h-8 px-3 gap-2 bg-secondary/80 hover:bg-secondary hover:text-foreground rounded-full text-sm font-medium",
+            "h-8 px-2 gap-1.5 bg-secondary/80 hover:bg-secondary hover:text-foreground rounded-full",
             className
           )}
         >
           <ChainIcon chainId={selectedChainInfo?.icon || 'all'} size="md" />
-          <span>{selectedChainInfo?.shortName}</span>
           <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="start" 
-        className="w-72 bg-popover border border-border shadow-xl z-50"
+        className="w-64 bg-popover border border-border shadow-xl z-50 max-h-[60vh] overflow-y-auto"
+        container={document.getElementById('phone-frame-container') || undefined}
       >
         {SUPPORTED_CHAINS.map((chain) => {
           const address = addresses?.[chain.id] || '';
