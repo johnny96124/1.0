@@ -94,18 +94,18 @@ export default function OnboardingPage() {
         </div>
         <Progress value={progress} className="h-1" />
         
-        {/* Step indicators */}
-        <div className="flex items-center justify-between mt-6">
+        {/* Step indicators with connected lines */}
+        <div className="flex items-center mt-6">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isComplete = currentStep > step.id;
             const isCurrent = currentStep === step.id;
             
             return (
-              <div key={step.id} className="flex items-center">
+              <div key={step.id} className="flex items-center flex-1 last:flex-none">
                 <div
                   className={cn(
-                    'w-10 h-10 rounded-full flex items-center justify-center transition-all',
+                    'w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0',
                     isComplete && 'bg-success text-success-foreground',
                     isCurrent && 'bg-accent text-accent-foreground',
                     !isComplete && !isCurrent && 'bg-muted text-muted-foreground'
@@ -120,8 +120,8 @@ export default function OnboardingPage() {
                 {index < steps.length - 1 && (
                   <div
                     className={cn(
-                      'w-8 h-0.5 mx-1',
-                      currentStep > step.id ? 'bg-success' : 'bg-muted'
+                      'flex-1 h-0.5 mx-2',
+                      currentStep > step.id ? 'bg-success' : 'bg-border'
                     )}
                   />
                 )}
@@ -490,12 +490,29 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
             className="h-14"
           />
 
-          <label className="flex items-start gap-3 p-4 bg-muted/50 rounded-xl cursor-pointer">
+          {/* Password warning banner */}
+          <div className="p-4 bg-warning/10 border border-warning/30 rounded-xl">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4 text-warning" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">
+                  请务必牢记此密码
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  密码用于加密您的备份文件，一旦遗忘将<span className="text-warning font-medium">无法找回</span>，也无法恢复您的钱包资产
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <label className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl cursor-pointer">
             <input
               type="checkbox"
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
-              className="mt-0.5 w-5 h-5 accent-accent"
+              className="w-5 h-5 accent-accent rounded"
             />
             <span className="text-sm text-foreground">
               我已保存密码，理解密码无法找回
