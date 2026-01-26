@@ -16,7 +16,7 @@ import { ChainIcon } from '@/components/ChainIcon';
 import { TokenSearch } from '@/components/TokenSearch';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { WalletSwitcher } from '@/components/WalletSwitcher';
-import { BalanceCardSkeleton, AssetListSkeleton, TransactionListSkeleton } from '@/components/skeletons';
+import { BalanceCardSkeleton, AssetListSkeleton, TransactionListSkeleton, RiskAlertSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
 
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
@@ -367,7 +367,9 @@ export default function HomePage() {
 
 
         {/* Account Security Status */}
-        {riskStatus.status !== 'healthy' && (
+        {isLoading ? (
+          <RiskAlertSkeleton />
+        ) : riskStatus.status !== 'healthy' && (
           <motion.button
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
