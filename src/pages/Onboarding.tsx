@@ -219,7 +219,7 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
           transition={{ delay: 0.2 }}
           className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6"
         >
-          <Shield className="w-10 h-10 text-accent" />
+          <Shield className="w-10 h-10 text-accent" strokeWidth={1.5} />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
@@ -292,7 +292,7 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
         transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
         className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
       >
-        <Fingerprint className="w-12 h-12 text-accent" />
+        <Fingerprint className="w-12 h-12 text-accent" strokeWidth={1.5} />
       </motion.div>
       
       <AnimatePresence mode="wait">
@@ -468,7 +468,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
           transition={{ delay: 0.2 }}
           className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4"
         >
-          <CloudUpload className="w-8 h-8 text-accent" />
+          <CloudUpload className="w-8 h-8 text-accent" strokeWidth={1.5} />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
