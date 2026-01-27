@@ -136,6 +136,7 @@ export default function LoginPage() {
   const [verificationCode, setVerificationCode] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [codeError, setCodeError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [api, setApi] = useState<CarouselApi>();
   const [hasPassword, setHasPassword] = useState(false);
@@ -146,6 +147,21 @@ export default function LoginPage() {
 
   const currentValue = loginMethod === 'email' ? email : phone;
   const displayValue = loginMethod === 'email' ? email : `${selectedCountry.dialCode} ${phone}`;
+
+  // Email validation helper
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateEmail = () => {
+    if (loginMethod === 'email' && email && !isValidEmail(email)) {
+      setEmailError('请输入正确的邮箱格式');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
 
   const onSelect = useCallback(() => {
     if (!api) return;
@@ -172,6 +188,11 @@ export default function LoginPage() {
   // Check if user has password and decide which step to show
   const handleContinue = async () => {
     if (!currentValue) return;
+    
+    // Validate email format before proceeding
+    if (loginMethod === 'email' && !validateEmail()) {
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -371,6 +392,7 @@ export default function LoginPage() {
     setLoginMethod(method);
     setEmail('');
     setPhone('');
+    setEmailError('');
   };
 
   // Password Input Step
@@ -550,8 +572,15 @@ export default function LoginPage() {
             type="email"
             placeholder="请输入邮箱地址"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="h-12 text-base pr-10"
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (emailError) setEmailError('');
+            }}
+            onBlur={validateEmail}
+            className={cn(
+              "h-12 text-base pr-10",
+              emailError && "border-destructive focus-visible:ring-destructive"
+            )}
           />
           {email && (
             <button
@@ -563,6 +592,17 @@ export default function LoginPage() {
           )}
         </div>
       </div>
+
+      {/* Email Error Message */}
+      {emailError && loginMethod === 'email' && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-sm text-destructive mb-4 -mt-2"
+        >
+          {emailError}
+        </motion.p>
+      )}
 
       {/* Continue Button */}
       <Button
