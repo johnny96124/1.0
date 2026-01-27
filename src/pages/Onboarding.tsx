@@ -292,7 +292,7 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
         transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
         className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
       >
-        <Shield className="w-12 h-12 text-accent" />
+        <Fingerprint className="w-12 h-12 text-accent" />
       </motion.div>
       
       <AnimatePresence mode="wait">
@@ -466,9 +466,9 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="w-16 h-16 rounded-full bg-accent flex items-center justify-center mb-4"
+          className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4"
         >
-          <Cloud className="w-8 h-8 text-accent-foreground" />
+          <CloudUpload className="w-8 h-8 text-accent" />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
