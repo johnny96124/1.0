@@ -29,14 +29,14 @@ export function ChainSelector({
           className={cn(
             "relative flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap shrink-0",
             selectedChain === chain.id
-              ? "text-accent-foreground"
-              : "bg-muted text-muted-foreground hover:bg-muted/80"
+              ? "text-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/50"
           )}
         >
           {selectedChain === chain.id && (
             <motion.div
               layoutId="chainSelector"
-              className="absolute inset-0 gradient-accent rounded-full"
+              className="absolute inset-0 bg-muted rounded-full"
               transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
             />
           )}
