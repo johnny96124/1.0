@@ -27,15 +27,15 @@ const Splash = () => {
 
   return (
     <motion.div 
-      className="fixed inset-0 bg-gradient-to-br from-background via-primary/5 to-primary/10 flex flex-col items-center justify-center overflow-hidden"
+      className="fixed inset-0 bg-background flex flex-col items-center justify-center overflow-hidden"
       initial={{ opacity: 1 }}
       animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -20 : 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
-      {/* Background decorative elements */}
+      {/* Background decorative elements - subtle white/grey gradients */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div 
-          className="absolute top-1/4 -left-20 w-72 h-72 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl"
+          className="absolute top-1/4 -left-20 w-72 h-72 bg-gradient-to-br from-foreground/5 to-muted/30 rounded-full blur-3xl"
           animate={{ 
             scale: [1, 1.1, 1],
             opacity: [0.4, 0.6, 0.4]
@@ -43,7 +43,7 @@ const Splash = () => {
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute bottom-1/3 -right-20 w-80 h-80 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl"
+          className="absolute bottom-1/3 -right-20 w-80 h-80 bg-gradient-to-br from-muted/30 to-foreground/5 rounded-full blur-3xl"
           animate={{ 
             scale: [1.1, 1, 1.1],
             opacity: [0.3, 0.5, 0.3]
@@ -51,7 +51,7 @@ const Splash = () => {
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-radial from-primary/5 to-transparent rounded-full"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-radial from-muted/20 to-transparent rounded-full"
           animate={{ 
             scale: [1, 1.2, 1],
           }}
@@ -65,13 +65,12 @@ const Splash = () => {
         <div className="relative">
           {/* Outer pulse ring */}
           <motion.div
-            className="absolute inset-0 rounded-3xl"
+            className="absolute inset-0 rounded-3xl bg-gradient-to-br from-foreground/10 to-muted/20"
             style={{ 
               width: 120, 
               height: 120, 
               marginLeft: -18, 
               marginTop: -18,
-              background: 'linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(210 100% 60% / 0.2))'
             }}
             initial={{ scale: 1, opacity: 0.4 }}
             animate={{ 
@@ -86,13 +85,12 @@ const Splash = () => {
           />
           {/* Inner pulse ring */}
           <motion.div
-            className="absolute inset-0 rounded-3xl"
+            className="absolute inset-0 rounded-3xl bg-gradient-to-br from-foreground/15 to-muted/25"
             style={{ 
               width: 120, 
               height: 120, 
               marginLeft: -18, 
               marginTop: -18,
-              background: 'linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(210 100% 60% / 0.3))'
             }}
             initial={{ scale: 1, opacity: 0.4 }}
             animate={{ 
@@ -111,7 +109,7 @@ const Splash = () => {
           <motion.div
             className="w-[84px] h-[84px] rounded-3xl flex items-center justify-center shadow-2xl relative overflow-hidden bg-card border border-border"
             style={{
-              boxShadow: '0 20px 40px -10px hsl(var(--primary) / 0.3), 0 10px 20px -5px hsl(217 91% 50% / 0.2)'
+              boxShadow: '0 20px 40px -10px hsl(var(--foreground) / 0.1), 0 10px 20px -5px hsl(var(--foreground) / 0.05)'
             }}
             initial={{ opacity: 0, scale: 0.5, rotateY: -30 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
@@ -119,7 +117,7 @@ const Splash = () => {
           >
             {/* Inner glow effect */}
             <motion.div 
-              className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-transparent"
+              className="absolute inset-0 bg-gradient-to-tr from-muted/30 via-transparent to-transparent"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
@@ -139,7 +137,7 @@ const Splash = () => {
 
         {/* Brand name */}
         <motion.h1
-          className="mt-8 text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent tracking-wide"
+          className="mt-8 text-3xl font-bold text-foreground tracking-wide"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
@@ -155,9 +153,9 @@ const Splash = () => {
           transition={{ duration: 0.4, delay: 0.45, ease: "easeOut" }}
         >
           <span className="text-sm text-muted-foreground font-medium">安全</span>
-          <span className="w-1 h-1 rounded-full bg-primary/50" />
+          <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
           <span className="text-sm text-muted-foreground font-medium">便捷</span>
-          <span className="w-1 h-1 rounded-full bg-primary/50" />
+          <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
           <span className="text-sm text-muted-foreground font-medium">专业</span>
         </motion.div>
       </div>
