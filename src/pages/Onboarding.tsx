@@ -615,7 +615,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
               size="lg"
               className="w-full text-base font-medium"
               onClick={handleBackup}
-              disabled={isLoading || !password || !confirmPassword}
+              disabled={isLoading || !password || !confirmPassword || !confirmed}
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
