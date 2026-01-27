@@ -504,7 +504,7 @@ export function BindAccountDrawer({
                       placeholder={placeholder}
                       value={value}
                       onChange={(e) => setValue(e.target.value.replace(/\D/g, ''))}
-                      className="flex-1 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
+                      className="flex-1 h-full px-3 text-base bg-transparent outline-none placeholder:text-text-placeholder"
                     />
                   </div>
                 )}

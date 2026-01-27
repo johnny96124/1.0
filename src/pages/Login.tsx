@@ -526,7 +526,7 @@ export default function LoginPage() {
               placeholder="请输入手机号"
               value={phone}
               onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-              className="flex-1 h-full px-3 text-base bg-transparent outline-none placeholder:text-muted-foreground"
+              className="flex-1 h-full px-3 text-base bg-transparent outline-none placeholder:text-text-placeholder"
             />
             {phone && (
               <button
