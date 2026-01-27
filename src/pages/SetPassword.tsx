@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 type PasswordStrength = 'weak' | 'medium' | 'strong';
@@ -31,6 +31,9 @@ const strengthConfig = {
 
 export default function SetPassword() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isOnboardingFlow = searchParams.get('onboarding') === 'true';
+  
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -76,12 +79,17 @@ export default function SetPassword() {
   };
 
   const handleSkip = () => {
-    // Allow user to skip and go directly to onboarding
+    // Allow user to skip and go directly to onboarding (only for non-onboarding flow)
     navigate('/onboarding?new=true');
   };
 
   const handleBack = () => {
-    navigate(-1);
+    if (isOnboardingFlow) {
+      // In onboarding flow, go back to login page
+      navigate('/login');
+    } else {
+      navigate(-1);
+    }
   };
 
   // Success state
@@ -284,13 +292,16 @@ export default function SetPassword() {
             设置密码
           </Button>
 
-          <button
-            onClick={handleSkip}
-            disabled={isLoading}
-            className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-          >
-            稍后设置
-          </button>
+          {/* Only show skip button when NOT in onboarding flow */}
+          {!isOnboardingFlow && (
+            <button
+              onClick={handleSkip}
+              disabled={isLoading}
+              className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+            >
+              稍后设置
+            </button>
+          )}
         </motion.div>
       </div>
     </div>

@@ -258,9 +258,9 @@ export default function LoginPage() {
       setLoginStep('success');
       
       setTimeout(() => {
-        // New user: go to set password page first
+        // New user: go to set password page with onboarding flag (mandatory password)
         if (result.userType === 'new') {
-          navigate('/set-password');
+          navigate('/set-password?onboarding=true');
         } else if (result.hasExistingWallets) {
           navigate('/home');
         } else {
@@ -295,8 +295,9 @@ export default function LoginPage() {
       setLoginStep('success');
       
       setTimeout(() => {
+        // New user from social login: also go through mandatory password setup
         if (result.userType === 'new') {
-          navigate('/onboarding?new=true');
+          navigate('/set-password?onboarding=true');
         } else if (result.hasExistingWallets) {
           navigate('/home');
         } else {
@@ -346,8 +347,9 @@ export default function LoginPage() {
       setLoginStep('success');
       
       setTimeout(() => {
+        // Password login for new user: also go through mandatory password setup
         if (result.userType === 'new') {
-          navigate('/onboarding?new=true');
+          navigate('/set-password?onboarding=true');
         } else if (result.hasExistingWallets) {
           navigate('/home');
         } else {

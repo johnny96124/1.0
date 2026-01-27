@@ -65,8 +65,8 @@ export default function OnboardingPage() {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     } else if (isNewUser) {
-      // New users can't go back to login, redirect to first step
-      setCurrentStep(1);
+      // New users at step 1: navigate back to set-password page (part of onboarding flow)
+      navigate('/set-password?onboarding=true');
     } else {
       navigate('/home');
     }
