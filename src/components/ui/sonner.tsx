@@ -2,6 +2,7 @@ import { Toaster as Sonner, toast } from "sonner";
 import { useEffect, useState } from "react";
 import { getDrawerContainer } from "@/components/layout/PhoneFrame";
 import { createPortal } from "react-dom";
+import { CheckCircle2, XCircle, AlertTriangle, Info, X } from "lucide-react";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -32,9 +33,18 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       position="top-center"
       containerAriaLabel="通知"
-      expand={false}
+      expand={true}
+      gap={8}
+      visibleToasts={4}
       richColors={false}
-      closeButton={false}
+      closeButton={true}
+      icons={{
+        success: <CheckCircle2 className="w-6 h-6 text-success" />,
+        error: <XCircle className="w-6 h-6 text-destructive" />,
+        warning: <AlertTriangle className="w-6 h-6 text-warning" />,
+        info: <Info className="w-6 h-6 text-primary" />,
+        close: <X className="w-4 h-4" />,
+      }}
       /**
        * Sonner's default CSS sets the toaster to `position: fixed`.
        * We override to `absolute` so it positions INSIDE PhoneFrame.
@@ -57,18 +67,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
         duration: 3000,
         classNames: {
           toast:
-            "w-full flex flex-col gap-1 p-4 rounded-lg shadow-xl pointer-events-auto bg-[hsl(var(--toast-surface))] text-[hsl(var(--toast-surface-foreground))] data-[swipe=move]:translate-y-[var(--y)] data-[swipe=cancel]:translate-y-0 data-[swipe=end]:animate-out data-[swipe=end]:fade-out-80",
-          title: "font-semibold text-base",
-          description: "text-sm opacity-80",
-          success: "border-l-4 border-l-success",
-          error: "border-l-4 border-l-destructive",
-          warning: "border-l-4 border-l-warning",
-          info: "border-l-4 border-l-accent",
+            "w-full flex items-start gap-3 p-4 rounded-xl shadow-lg pointer-events-auto bg-card border border-border/30",
+          title: "font-semibold text-base text-foreground leading-tight",
+          description: "text-sm text-muted-foreground mt-0.5",
+          icon: "flex-shrink-0 mt-0.5",
+          content: "flex-1 min-w-0",
+          closeButton: "absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted",
+          actionButton: "bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium",
+          cancelButton: "bg-muted text-muted-foreground rounded-lg px-3 py-1.5 text-sm font-medium",
         },
         style: {
-          background: "hsl(var(--toast-surface))",
-          color: "hsl(var(--toast-surface-foreground))",
-          boxShadow: "0 10px 40px -10px rgba(0, 0, 0, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.1)",
+          background: "hsl(var(--card))",
+          color: "hsl(var(--card-foreground))",
+          boxShadow: "0 4px 20px -4px rgba(0, 0, 0, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.08)",
         },
       }}
       {...props}
