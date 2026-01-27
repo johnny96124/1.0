@@ -78,7 +78,8 @@ export function DeviceKickedDialog({
 
         <AlertDialogFooter className="sm:justify-center">
           <Button
-            className="w-full h-11"
+            size="lg"
+            className="w-full"
             onClick={onConfirm}
           >
             <LogIn className="w-4 h-4 mr-2" />

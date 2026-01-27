@@ -116,7 +116,7 @@ export default function SecurityRequiredPage() {
         >
           <Button
             size="lg"
-            className="w-full h-14 text-base font-medium"
+            className="w-full text-base font-medium"
             onClick={handleOpenSettings}
           >
             <Settings className="w-5 h-5 mr-2" />
@@ -127,7 +127,7 @@ export default function SecurityRequiredPage() {
           <Button
             variant="outline"
             size="lg"
-            className="w-full h-14 text-base font-medium"
+            className="w-full text-base font-medium"
             onClick={handleRetry}
           >
             已完成设置，重新授权

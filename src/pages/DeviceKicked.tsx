@@ -137,7 +137,7 @@ export default function DeviceKickedPage() {
       >
         <Button
           size="lg"
-          className="w-full h-12 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleRelogin}
         >
           <LogIn className="w-5 h-5 mr-2" />
@@ -147,7 +147,7 @@ export default function DeviceKickedPage() {
         <Button
           variant="outline"
           size="lg"
-          className="w-full h-12 text-base"
+          className="w-full text-base"
           onClick={handleContactSupport}
         >
           <MessageCircle className="w-5 h-5 mr-2" />

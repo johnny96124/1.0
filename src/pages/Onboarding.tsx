@@ -233,7 +233,7 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-6">
         <Button
           size="lg"
-          className="w-full h-14 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleAuthorize}
           disabled={isLoading}
         >
@@ -442,7 +442,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
         <div className="pb-8">
           <Button
             size="lg"
-            className="w-full h-14 text-base font-medium"
+            className="w-full text-base font-medium"
             onClick={onComplete}
           >
             开始使用钱包
@@ -583,7 +583,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-8 space-y-3">
         <Button
           size="lg"
-          className="w-full h-14 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleBackup}
           disabled={isLoading || !password || !confirmPassword}
         >
@@ -597,7 +597,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
         <Button
           variant="ghost"
           size="lg"
-          className="w-full h-14 text-base text-muted-foreground"
+          className="w-full text-base text-muted-foreground"
           onClick={handleSkipClick}
         >
           稍后备份
@@ -624,11 +624,11 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
-            <AlertDialogCancel className="w-full h-12 mt-0">
+            <AlertDialogCancel className="w-full mt-0">
               我再想想
             </AlertDialogCancel>
             <AlertDialogAction 
-              className="w-full h-12 bg-muted text-muted-foreground hover:bg-muted/80"
+              className="w-full bg-muted text-muted-foreground hover:bg-muted/80"
               onClick={handleConfirmSkip}
             >
               我已了解风险，稍后备份
@@ -712,7 +712,7 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-8">
         <Button
           size="lg"
-          className="w-full h-14 text-base font-medium"
+          className="w-full text-base font-medium"
           disabled={!selectedMethod}
           onClick={onComplete}
         >
@@ -860,7 +860,7 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-8 space-y-3">
         <Button
           size="lg"
-          className="w-full h-14 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleRestore}
           disabled={isLoading || !password}
         >
@@ -872,7 +872,7 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
         <Button
           variant="ghost"
           size="lg"
-          className="w-full h-14 text-base text-muted-foreground"
+          className="w-full text-base text-muted-foreground"
           onClick={() => {
             setSource(null);
             setPassword('');
@@ -931,7 +931,7 @@ function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-8">
         <Button
           size="lg"
-          className="w-full h-14 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleVerify}
           disabled={isLoading}
         >
@@ -988,7 +988,7 @@ function RecoveryCompleteStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-8">
         <Button
           size="lg"
-          className="w-full h-14 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={onComplete}
         >
           进入钱包

@@ -347,8 +347,9 @@ export default function PSPDetailPage() {
           {/* For rejected status - show delete button only */}
           {status === 'rejected' && (
             <Button 
-              variant="outline" 
-              className="w-full h-11 text-destructive hover:text-destructive hover:bg-destructive/5"
+              variant="outline"
+              size="md"
+              className="w-full text-destructive hover:text-destructive hover:bg-destructive/5"
               onClick={() => setShowDisconnectDialog(true)}
             >
               <Trash2 className="w-4 h-4 mr-2" />
@@ -359,8 +360,9 @@ export default function PSPDetailPage() {
           {/* For pending status - show cancel button */}
           {status === 'pending' && (
             <Button 
-              variant="outline" 
-              className="w-full h-11 text-destructive hover:text-destructive hover:bg-destructive/5"
+              variant="outline"
+              size="md"
+              className="w-full text-destructive hover:text-destructive hover:bg-destructive/5"
               onClick={() => setShowDisconnectDialog(true)}
             >
               <XCircle className="w-4 h-4 mr-2" />
@@ -372,8 +374,9 @@ export default function PSPDetailPage() {
           {(status === 'active' || status === 'suspended') && (
             <>
               <Button 
-                variant="outline" 
-                className="w-full h-11"
+                variant="outline"
+                size="md"
+                className="w-full"
                 onClick={handleSuspend}
               >
                 <Pause className="w-4 h-4 mr-2" />
@@ -381,8 +384,9 @@ export default function PSPDetailPage() {
               </Button>
               
               <Button 
-                variant="outline" 
-                className="w-full h-11 text-destructive hover:text-destructive hover:bg-destructive/5"
+                variant="outline"
+                size="md"
+                className="w-full text-destructive hover:text-destructive hover:bg-destructive/5"
                 onClick={() => setShowDisconnectDialog(true)}
               >
                 <Unlink className="w-4 h-4 mr-2" />

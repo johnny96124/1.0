@@ -109,7 +109,8 @@ export function WalletSwitcher({ isOpen, onClose, onCreateNew }: WalletSwitcherP
             
             {/* Action Button */}
             <Button
-              className="w-full h-11"
+              size="lg"
+              className="w-full"
               onClick={onCreateNew}
             >
               <Plus className="w-4 h-4 mr-2" />

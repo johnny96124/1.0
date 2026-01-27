@@ -273,7 +273,7 @@ function NameWalletStep({
       <div className="pb-6">
         <Button
           size="lg"
-          className="w-full h-12 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleContinue}
         >
           继续
@@ -328,7 +328,7 @@ function BiometricStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-6 space-y-2">
         <Button
           size="lg"
-          className="w-full h-12 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleEnable}
           disabled={isLoading}
         >
@@ -342,7 +342,7 @@ function BiometricStep({ onComplete }: { onComplete: () => void }) {
         <Button
           variant="ghost"
           size="lg"
-          className="w-full h-12 text-base text-muted-foreground"
+          className="w-full text-base text-muted-foreground"
           onClick={onComplete}
         >
           暂时跳过
@@ -785,7 +785,7 @@ function BackupStep({
             <Button
               variant="outline"
               size="lg"
-              className="w-full h-12 text-base font-medium"
+              className="w-full text-base font-medium"
               onClick={handleBackToSelection}
             >
               {otherType === 'cloud' ? (
@@ -803,7 +803,7 @@ function BackupStep({
           )}
           <Button
             size="lg"
-            className="w-full h-12 text-base font-medium"
+            className="w-full text-base font-medium"
             onClick={onComplete}
           >
             {completedBackups.size === 2 ? '完成' : '跳过其他备份'}
@@ -909,7 +909,7 @@ function BackupStep({
           <Button
             variant="ghost"
             size="lg"
-            className="w-full h-12 text-base text-muted-foreground"
+            className="w-full text-base text-muted-foreground"
             onClick={onComplete}
           >
             {completedBackups.size > 0 ? '完成' : '稍后备份'}
@@ -1007,7 +1007,7 @@ function BackupStep({
       <div className="pb-6 space-y-2">
         <Button
           size="lg"
-          className="w-full h-12 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleBackup}
           disabled={isLoading}
         >
@@ -1021,7 +1021,7 @@ function BackupStep({
         <Button
           variant="ghost"
           size="lg"
-          className="w-full h-12 text-base text-muted-foreground"
+          className="w-full text-base text-muted-foreground"
           onClick={() => setShowPasswordForm(false)}
         >
           返回

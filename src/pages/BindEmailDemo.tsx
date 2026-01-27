@@ -169,7 +169,8 @@ export default function BindEmailDemo() {
           >
             <Button
               variant="outline"
-              className="w-full h-12"
+              size="lg"
+              className="w-full"
               onClick={handleReset}
             >
               重置所有绑定

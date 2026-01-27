@@ -436,7 +436,7 @@ export default function LoginPage() {
       <Button
         variant="default"
         size="lg"
-        className="w-full h-12 text-base font-medium mb-4"
+        className="w-full text-base font-medium mb-4"
         onClick={handlePasswordLogin}
         disabled={isLoading || !password}
       >
@@ -568,7 +568,7 @@ export default function LoginPage() {
       <Button
         variant="default"
         size="lg"
-        className="w-full h-12 text-base font-medium mb-6"
+        className="w-full text-base font-medium mb-6"
         onClick={handleContinue}
         disabled={isLoading || !currentValue}
       >
@@ -591,7 +591,7 @@ export default function LoginPage() {
           <Button
             variant="outline"
             size="lg"
-            className="w-full h-12"
+            className="w-full"
             onClick={() => handleSocialLogin('apple')}
             disabled={isLoading}
           >
@@ -613,7 +613,7 @@ export default function LoginPage() {
           <Button
             variant="outline"
             size="lg"
-            className="w-full h-12"
+            className="w-full"
             onClick={() => handleSocialLogin('google')}
             disabled={isLoading}
           >

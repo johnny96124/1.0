@@ -148,7 +148,8 @@ export function ContactDrawer({
           <div className="px-4 pb-2">
             <Button
               variant="outline"
-              className="w-full justify-start gap-2 h-11"
+              size="md"
+              className="w-full justify-start gap-2"
               onClick={handleAddNew}
             >
               <Plus className="w-4 h-4" />

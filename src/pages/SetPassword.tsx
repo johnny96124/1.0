@@ -274,7 +274,7 @@ export default function SetPassword() {
           <Button
             variant="default"
             size="lg"
-            className="w-full h-12 text-base font-medium"
+            className="w-full text-base font-medium"
             onClick={handleSetPassword}
             disabled={isLoading || !password || !confirmPassword}
           >
