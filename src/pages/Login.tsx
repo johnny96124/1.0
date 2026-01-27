@@ -481,7 +481,7 @@ export default function LoginPage() {
           <Phone className="w-4 h-4" />
           手机号
           {lastLogin === 'phone' && (
-            <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] rounded-full leading-none" style={{ backgroundColor: '#E9EAFB', color: '#1F32D6' }}>
+            <span className="absolute -top-1.5 -right-1.5 px-2 py-1 text-[10px] rounded-full leading-none" style={{ backgroundColor: '#E9EAFB', color: '#1F32D6' }}>
               上次
             </span>
           )}
@@ -498,7 +498,7 @@ export default function LoginPage() {
           <Mail className="w-4 h-4" />
           邮箱
           {lastLogin === 'email' && (
-            <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] rounded-full leading-none" style={{ backgroundColor: '#E9EAFB', color: '#1F32D6' }}>
+            <span className="absolute -top-1.5 -right-1.5 px-2 py-1 text-[10px] rounded-full leading-none" style={{ backgroundColor: '#E9EAFB', color: '#1F32D6' }}>
               上次
             </span>
           )}
