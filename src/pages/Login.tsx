@@ -406,39 +406,49 @@ export default function LoginPage() {
       exit={{ opacity: 0, x: -20 }}
       className="flex-1 px-4 flex flex-col"
     >
-      <div className="flex items-center mb-6">
+      {/* Header with back button */}
+      <div className="flex items-center py-3 -mx-4 px-4">
         <button
           onClick={handleBack}
-          className="p-2 -ml-2 mr-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-foreground">
-            {authMode === 'otp' ? '输入验证码' : '输入密码'}
-          </h2>
-          <p className="text-sm text-muted-foreground">{displayValue}</p>
-        </div>
       </div>
 
-      <div className="flex justify-center mb-6">
+      {/* Centered Icon */}
+      <div className="flex justify-center mb-6 mt-8">
         <motion.div
           key={authMode}
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", duration: 0.5 }}
+          className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center"
         >
           {authMode === 'otp' ? (
             loginMethod === 'email' ? (
-              <Mail className="w-8 h-8 text-accent" />
+              <Mail className="w-10 h-10 text-primary" />
             ) : (
-              <Phone className="w-8 h-8 text-accent" />
+              <Phone className="w-10 h-10 text-primary" />
             )
           ) : (
-            <Lock className="w-8 h-8 text-accent" />
+            <Lock className="w-10 h-10 text-primary" />
           )}
         </motion.div>
       </div>
+
+      {/* Title - Left aligned like SetPassword */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mb-8"
+      >
+        <h1 className="text-2xl font-bold text-foreground mb-2">
+          {authMode === 'otp' ? '输入验证码' : '输入密码'}
+        </h1>
+        <p className="text-muted-foreground">{displayValue}</p>
+      </motion.div>
 
       <AnimatePresence mode="wait">
         {authMode === 'otp' ? (
