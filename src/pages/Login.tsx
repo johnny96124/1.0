@@ -254,14 +254,19 @@ export default function LoginPage() {
       const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
       const result = await verifyCode(identifier, code);
       saveLastLogin(loginMethod);
+      
+      // New user: skip success state, go directly to set password
+      if (result.userType === 'new') {
+        navigate('/set-password?onboarding=true');
+        return;
+      }
+      
+      // Existing user: show success state then navigate
       setLoginResult(result);
       setLoginStep('success');
       
       setTimeout(() => {
-        // New user: go to set password page with onboarding flag (mandatory password)
-        if (result.userType === 'new') {
-          navigate('/set-password?onboarding=true');
-        } else if (result.hasExistingWallets) {
+        if (result.hasExistingWallets) {
           navigate('/home');
         } else {
           navigate('/create-wallet');
@@ -366,13 +371,19 @@ export default function LoginPage() {
   };
 
   // Switch between OTP and password modes (preserves countdown state)
-  const handleSwitchAuthMode = () => {
+  const handleSwitchAuthMode = async () => {
     if (authMode === 'password') {
       // Switching to OTP mode - preserve countdown state
       setAuthMode('otp');
       setPassword('');
       setPasswordError('');
     } else {
+      // New user trying to use password login - show toast warning
+      if (!hasPassword) {
+        const { toast } = await import('@/lib/toast');
+        toast.info('请先完成验证码登录，设置密码后可使用密码登录');
+        return;
+      }
       // Switching to password mode
       setAuthMode('password');
       setVerificationCode('');
@@ -554,18 +565,16 @@ export default function LoginPage() {
         )}
       </AnimatePresence>
 
-      {/* Switch Auth Mode Link */}
-      {hasPassword && (
-        <div className="text-center mt-2">
-          <button
-            onClick={handleSwitchAuthMode}
-            disabled={isLoading}
-            className="text-sm text-primary hover:underline disabled:opacity-50"
-          >
-            {authMode === 'otp' ? '使用密码登录' : '使用验证码登录'}
-          </button>
-        </div>
-      )}
+      {/* Switch Auth Mode Link - Always show for UI consistency */}
+      <div className="text-center mt-2">
+        <button
+          onClick={handleSwitchAuthMode}
+          disabled={isLoading}
+          className="text-sm text-primary hover:underline disabled:opacity-50"
+        >
+          {authMode === 'otp' ? '使用密码登录' : '使用验证码登录'}
+        </button>
+      </div>
     </motion.div>
   );
 
