@@ -120,7 +120,6 @@ export default function OnboardingPage() {
             {steps[currentStep - 1].title}
           </span>
         </div>
-        <Progress value={progress} className="h-1" />
         
         {/* Step indicators with connected lines */}
         <div className="flex items-center mt-6">
