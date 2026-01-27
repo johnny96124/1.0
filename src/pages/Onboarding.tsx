@@ -79,6 +79,7 @@ export default function OnboardingPage() {
   const isNewUser = searchParams.get('new') === 'true';
   
   const [currentStep, setCurrentStep] = useState(1);
+  const [backupComplete, setBackupComplete] = useState(false);
   const navigate = useNavigate();
   const { 
     enableBiometric, setPin, createWallet, 
@@ -125,8 +126,9 @@ export default function OnboardingPage() {
         <div className="flex items-center mt-6">
           {steps.map((step, index) => {
             const Icon = step.icon;
-            const isComplete = currentStep > step.id;
-            const isCurrent = currentStep === step.id;
+            // Mark step as complete if we've passed it, or if it's the last step and backup is done
+            const isComplete = currentStep > step.id || (step.id === steps.length && backupComplete);
+            const isCurrent = currentStep === step.id && !backupComplete;
             
             return (
               <div key={step.id} className="flex items-center flex-1 last:flex-none">
@@ -187,7 +189,11 @@ export default function OnboardingPage() {
                 <CreateWalletStep key="create" onComplete={handleStepComplete} />
               )}
               {currentStep === 3 && (
-                <CloudBackupStep key="backup" onComplete={handleStepComplete} />
+                <CloudBackupStep 
+                  key="backup" 
+                  onComplete={handleStepComplete} 
+                  onBackupSuccess={() => setBackupComplete(true)}
+                />
               )}
             </>
           )}
@@ -360,7 +366,7 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
 }
 
 // Step 3: Cloud Backup Only (simplified - iCloud only for Apple ecosystem)
-function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
+function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => void; onBackupSuccess?: () => void }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [password, setPassword] = useState('');
@@ -418,6 +424,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
     try {
       await completeCloudBackup('icloud', password);
       setShowSuccess(true);
+      onBackupSuccess?.();
     } catch (error) {
       setError('备份失败，请重试');
     } finally {
