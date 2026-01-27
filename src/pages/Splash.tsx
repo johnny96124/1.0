@@ -27,7 +27,7 @@ const Splash = () => {
 
   return (
     <motion.div 
-      className="fixed inset-0 bg-gradient-to-br from-white via-blue-50/50 to-primary/10 flex flex-col items-center justify-center overflow-hidden"
+      className="fixed inset-0 bg-gradient-to-br from-background via-primary/5 to-primary/10 flex flex-col items-center justify-center overflow-hidden"
       initial={{ opacity: 1 }}
       animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -20 : 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -35,7 +35,7 @@ const Splash = () => {
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div 
-          className="absolute top-1/4 -left-20 w-72 h-72 bg-gradient-to-br from-primary/20 to-blue-400/20 rounded-full blur-3xl"
+          className="absolute top-1/4 -left-20 w-72 h-72 bg-gradient-to-br from-primary/20 to-accent/20 rounded-full blur-3xl"
           animate={{ 
             scale: [1, 1.1, 1],
             opacity: [0.4, 0.6, 0.4]
@@ -43,7 +43,7 @@ const Splash = () => {
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div 
-          className="absolute bottom-1/3 -right-20 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-primary/20 rounded-full blur-3xl"
+          className="absolute bottom-1/3 -right-20 w-80 h-80 bg-gradient-to-br from-accent/20 to-primary/20 rounded-full blur-3xl"
           animate={{ 
             scale: [1.1, 1, 1.1],
             opacity: [0.3, 0.5, 0.3]
@@ -109,9 +109,9 @@ const Splash = () => {
           
           {/* Logo container */}
           <motion.div
-            className="w-[84px] h-[84px] rounded-3xl flex items-center justify-center shadow-2xl relative overflow-hidden bg-white"
+            className="w-[84px] h-[84px] rounded-3xl flex items-center justify-center shadow-2xl relative overflow-hidden bg-card border border-border"
             style={{
-              boxShadow: '0 20px 40px -10px hsl(var(--primary) / 0.4), 0 10px 20px -5px hsl(210 100% 50% / 0.3)'
+              boxShadow: '0 20px 40px -10px hsl(var(--primary) / 0.3), 0 10px 20px -5px hsl(217 91% 50% / 0.2)'
             }}
             initial={{ opacity: 0, scale: 0.5, rotateY: -30 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
@@ -139,7 +139,7 @@ const Splash = () => {
 
         {/* Brand name */}
         <motion.h1
-          className="mt-8 text-3xl font-bold bg-gradient-to-r from-primary via-blue-600 to-primary bg-clip-text text-transparent tracking-wide"
+          className="mt-8 text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent tracking-wide"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
