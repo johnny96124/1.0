@@ -461,7 +461,7 @@ export default function HomePage() {
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ delay: 0.05 * index }}
                     onClick={() => navigate(`/asset/${asset.symbol}`)}
-                    className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 transition-colors"
+                    className="w-full card-elevated p-3 flex items-center justify-between hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50 transition-all"
                   >
                     <div className="flex items-center gap-2">
                       <CryptoIcon symbol={asset.symbol} size="md" />
@@ -548,7 +548,7 @@ export default function HomePage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 * index }}
                   onClick={() => setSelectedTx(tx)}
-                  className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                  className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50 transition-all"
                 >
                   <div className="flex items-center gap-2">
                     <div className={cn(

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { SwipeBack } from '@/components/SwipeBack';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
@@ -198,6 +199,7 @@ export default function SendPage() {
 
   return (
     <AppLayout showNav={false} showSecurityBanner={false}>
+      <SwipeBack enabled={step === 'address'}>
       <div className="flex flex-col h-full bg-background">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 shrink-0">
@@ -647,6 +649,7 @@ export default function SendPage() {
           </div>
         )}
       </div>
+      </SwipeBack>
 
       {/* QR Scanner Modal */}
       <QRScanner
