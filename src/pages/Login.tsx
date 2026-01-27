@@ -28,7 +28,8 @@ interface SlideData {
 }
 
 type LoginMethod = 'email' | 'phone';
-type LoginStep = 'input' | 'password' | 'verification' | 'processing' | 'success';
+type LoginStep = 'input' | 'otp-input' | 'password' | 'verification' | 'processing' | 'success';
+type AuthMode = 'otp' | 'password';
 type LastLoginType = 'email' | 'phone' | 'apple' | 'google' | null;
 
 const LAST_LOGIN_KEY = 'last_login_method';
@@ -126,7 +127,7 @@ export default function LoginPage() {
   const [loginMethod, setLoginMethod] = useState<LoginMethod>(initialMethod);
   const [loginStep, setLoginStep] = useState<LoginStep>('input');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSwitchingToOtp, setIsSwitchingToOtp] = useState(false);
+  
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -142,6 +143,8 @@ export default function LoginPage() {
   const [hasPassword, setHasPassword] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
   const [loginResult, setLoginResult] = useState<{ userType?: string; hasExistingWallets?: boolean } | null>(null);
+  const [authMode, setAuthMode] = useState<AuthMode>('otp'); // Default to OTP mode
+  const [otpSent, setOtpSent] = useState(false); // Track if OTP has been sent
   const { login, sendVerificationCode, verifyCode, checkPasswordExists, loginWithPassword } = useWallet();
   const navigate = useNavigate();
 
@@ -201,22 +204,9 @@ export default function LoginPage() {
       setHasPassword(result.hasPassword);
       setIsNewUser(result.isNewUser);
       
-      // New user: always use OTP login flow
-      if (result.isNewUser) {
-        await sendVerificationCode(identifier);
-        setLoginStep('verification');
-        setCountdown(60);
-        setCodeError('');
-      } else if (result.hasPassword) {
-        // Existing user with password: show password input
-        setLoginStep('password');
-      } else {
-        // Existing user without password: use OTP
-        await sendVerificationCode(identifier);
-        setLoginStep('verification');
-        setCountdown(60);
-        setCodeError('');
-      }
+      // Go to OTP input step (user needs to manually send code)
+      setLoginStep('otp-input');
+      setAuthMode('otp');
     } catch (error) {
       console.error('Check password failed:', error);
     } finally {
@@ -231,7 +221,7 @@ export default function LoginPage() {
     try {
       const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
       await sendVerificationCode(identifier);
-      setLoginStep('verification');
+      setOtpSent(true);
       setCountdown(60);
       setCodeError('');
     } catch (error) {
@@ -330,12 +320,14 @@ export default function LoginPage() {
   };
 
   const handleBack = () => {
-    if (loginStep === 'verification' || loginStep === 'password') {
+    if (loginStep === 'verification' || loginStep === 'password' || loginStep === 'otp-input') {
       setLoginStep('input');
       setVerificationCode('');
       setCodeError('');
       setPassword('');
       setPasswordError('');
+      setOtpSent(false);
+      setAuthMode('otp');
     }
   };
 
@@ -371,20 +363,18 @@ export default function LoginPage() {
     }
   };
 
-  const handleSwitchToVerification = async () => {
-    setIsSwitchingToOtp(true);
-    try {
-      const identifier = loginMethod === 'email' ? email : `${selectedCountry.dialCode}${phone}`;
-      await sendVerificationCode(identifier);
-      setLoginStep('verification');
-      setCountdown(60);
-      setCodeError('');
+  // Switch between OTP and password modes (preserves countdown state)
+  const handleSwitchAuthMode = () => {
+    if (authMode === 'password') {
+      // Switching to OTP mode - preserve countdown state
+      setAuthMode('otp');
       setPassword('');
       setPasswordError('');
-    } catch (error) {
-      console.error('Send code failed:', error);
-    } finally {
-      setIsSwitchingToOtp(false);
+    } else {
+      // Switching to password mode
+      setAuthMode('password');
+      setVerificationCode('');
+      setCodeError('');
     }
   };
 
@@ -395,8 +385,8 @@ export default function LoginPage() {
     setEmailError('');
   };
 
-  // Password Input Step
-  const renderPasswordStep = () => (
+  // OTP Input Step (with option to switch to password)
+  const renderOtpInputStep = () => (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
@@ -411,73 +401,169 @@ export default function LoginPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex-1">
-          <h2 className="text-lg font-semibold text-foreground">输入密码</h2>
+          <h2 className="text-lg font-semibold text-foreground">
+            {authMode === 'otp' ? '输入验证码' : '输入密码'}
+          </h2>
           <p className="text-sm text-muted-foreground">{displayValue}</p>
         </div>
       </div>
 
       <div className="flex justify-center mb-6">
         <motion.div
+          key={authMode}
           initial={{ scale: 0.8 }}
           animate={{ scale: 1 }}
           className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center"
         >
-          <Lock className="w-8 h-8 text-accent" />
+          {authMode === 'otp' ? (
+            loginMethod === 'email' ? (
+              <Mail className="w-8 h-8 text-accent" />
+            ) : (
+              <Phone className="w-8 h-8 text-accent" />
+            )
+          ) : (
+            <Lock className="w-8 h-8 text-accent" />
+          )}
         </motion.div>
       </div>
 
-      <div className="relative mb-4">
-        <Input
-          type="password"
-          placeholder="请输入密码"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            setPasswordError('');
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && password) {
-              handlePasswordLogin();
-            }
-          }}
-          className="h-12 text-base"
-          disabled={isLoading}
-        />
-      </div>
+      <AnimatePresence mode="wait">
+        {authMode === 'otp' ? (
+          <motion.div
+            key="otp-mode"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            {/* OTP Input */}
+            <div className="flex justify-center mb-4">
+              <InputOTP
+                maxLength={6}
+                value={verificationCode}
+                onChange={handleCodeChange}
+                disabled={isLoading || !otpSent}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
 
-      {passwordError && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-sm text-destructive text-center mb-4"
-        >
-          {passwordError}
-        </motion.p>
+            {codeError && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-sm text-destructive text-center mb-4"
+              >
+                {codeError}
+              </motion.p>
+            )}
+
+            {/* Send/Resend Code Button */}
+            <div className="text-center mb-4">
+              {!otpSent ? (
+                <Button
+                  variant="default"
+                  size="lg"
+                  className="w-full text-base font-medium"
+                  onClick={handleSendCode}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : null}
+                  发送验证码
+                </Button>
+              ) : countdown > 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {countdown} 秒后可重新发送
+                </p>
+              ) : (
+                <button
+                  onClick={handleResendCode}
+                  className="text-sm text-primary hover:underline"
+                >
+                  重新发送验证码
+                </button>
+              )}
+            </div>
+
+            {isLoading && otpSent && (
+              <div className="flex justify-center">
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
+            )}
+          </motion.div>
+        ) : (
+          <motion.div
+            key="password-mode"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            {/* Password Input */}
+            <div className="relative mb-4">
+              <Input
+                type="password"
+                placeholder="请输入密码"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordError('');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && password) {
+                    handlePasswordLogin();
+                  }
+                }}
+                className="h-12 text-base"
+                disabled={isLoading}
+              />
+            </div>
+
+            {passwordError && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-sm text-destructive text-center mb-4"
+              >
+                {passwordError}
+              </motion.p>
+            )}
+
+            <Button
+              variant="default"
+              size="lg"
+              className="w-full text-base font-medium mb-4"
+              onClick={handlePasswordLogin}
+              disabled={isLoading || !password}
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : null}
+              登录
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Switch Auth Mode Link */}
+      {hasPassword && (
+        <div className="text-center mt-2">
+          <button
+            onClick={handleSwitchAuthMode}
+            disabled={isLoading}
+            className="text-sm text-primary hover:underline disabled:opacity-50"
+          >
+            {authMode === 'otp' ? '使用密码登录' : '使用验证码登录'}
+          </button>
+        </div>
       )}
-
-      <Button
-        variant="default"
-        size="lg"
-        className="w-full text-base font-medium mb-4"
-        onClick={handlePasswordLogin}
-        disabled={isLoading || !password}
-      >
-        {isLoading ? (
-          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-        ) : null}
-        登录
-      </Button>
-
-      <div className="text-center">
-        <button
-          onClick={handleSwitchToVerification}
-          disabled={isLoading || isSwitchingToOtp}
-          className="text-sm text-primary hover:underline disabled:opacity-50 inline-flex items-center gap-1"
-        >
-          {isSwitchingToOtp && <Loader2 className="w-4 h-4 animate-spin" />}
-          使用验证码登录
-        </button>
-      </div>
     </motion.div>
   );
 
@@ -675,92 +761,6 @@ export default function LoginPage() {
           )}
         </div>
       </div>
-    </motion.div>
-  );
-
-  // Verification Code Step
-  const renderVerificationStep = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      className="flex-1 px-4 flex flex-col"
-    >
-      <div className="flex items-center mb-6">
-        <button
-          onClick={handleBack}
-          className="p-2 -ml-2 mr-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-foreground">输入验证码</h2>
-          <p className="text-sm text-muted-foreground">验证码已发送至 {displayValue}</p>
-        </div>
-      </div>
-
-      <div className="flex justify-center mb-6">
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center"
-        >
-          {loginMethod === 'email' ? (
-            <Mail className="w-8 h-8 text-accent" />
-          ) : (
-            <Phone className="w-8 h-8 text-accent" />
-          )}
-        </motion.div>
-      </div>
-
-      <div className="flex justify-center mb-4">
-        <InputOTP
-          maxLength={6}
-          value={verificationCode}
-          onChange={handleCodeChange}
-          disabled={isLoading}
-        >
-          <InputOTPGroup>
-            <InputOTPSlot index={0} />
-            <InputOTPSlot index={1} />
-            <InputOTPSlot index={2} />
-            <InputOTPSlot index={3} />
-            <InputOTPSlot index={4} />
-            <InputOTPSlot index={5} />
-          </InputOTPGroup>
-        </InputOTP>
-      </div>
-
-      {codeError && (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-sm text-destructive text-center mb-4"
-        >
-          {codeError}
-        </motion.p>
-      )}
-
-      <div className="text-center mb-6">
-        {countdown > 0 ? (
-          <p className="text-sm text-muted-foreground">
-            {countdown} 秒后可重新发送
-          </p>
-        ) : (
-          <button
-            onClick={handleResendCode}
-            className="text-sm text-primary hover:underline"
-          >
-            重新发送验证码
-          </button>
-        )}
-      </div>
-
-      {isLoading && (
-        <div className="flex justify-center">
-          <Loader2 className="w-6 h-6 text-primary animate-spin" />
-        </div>
-      )}
     </motion.div>
   );
 
@@ -1018,8 +1018,7 @@ export default function LoginPage() {
 
       <AnimatePresence mode="wait">
         {loginStep === 'input' && renderInputStep()}
-        {loginStep === 'password' && renderPasswordStep()}
-        {loginStep === 'verification' && renderVerificationStep()}
+        {loginStep === 'otp-input' && renderOtpInputStep()}
         {loginStep === 'processing' && renderProcessingStep()}
         {loginStep === 'success' && renderSuccessStep()}
       </AnimatePresence>
