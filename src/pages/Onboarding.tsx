@@ -375,7 +375,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
     }
 
     if (!confirmed) {
-      setError('请确认您已牢记密码');
+      setError('请勾选确认已牢记密码');
       return;
     }
 
@@ -480,8 +480,6 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
 
         {/* Password form */}
         <div className="w-full max-w-[300px] space-y-4">
-
-        <div className="space-y-4 flex-1">
           <div className="space-y-2">
             <div className="relative">
               <Input
@@ -562,20 +560,12 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
               type="checkbox"
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
-              className="w-5 h-5 accent-accent rounded"
+              className="w-5 h-5 accent-accent rounded checkbox-thin"
             />
             <span className="text-sm text-foreground">
               我已保存密码，理解密码无法找回
             </span>
           </label>
-
-          {error && (
-            <p className="text-sm text-destructive flex items-center gap-1">
-              <AlertTriangle className="w-4 h-4" />
-              {error}
-            </p>
-          )}
-        </div>
 
           {error && (
             <p className="text-sm text-destructive flex items-center gap-1">
