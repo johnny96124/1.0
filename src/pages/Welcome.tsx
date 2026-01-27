@@ -136,7 +136,7 @@ export default function WelcomePage() {
           <CarouselContent className="ml-0">
             {slides.map((slide, index) => (
               <CarouselItem key={index} className="pl-0">
-                <div className="relative h-56 pt-10 flex items-center justify-center">
+                <div className="relative h-56 flex items-center justify-center">
                   {/* Background Gradient - extends to top edge */}
                   <div className={`absolute inset-0 -top-20 ${colorThemes[index].gradientBg}`} />
                   
