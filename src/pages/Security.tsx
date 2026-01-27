@@ -195,8 +195,8 @@ export default function SecurityPage() {
               onClick={() => handleEditLimit('daily')}
               className="w-full p-3 flex items-center gap-3 border-b border-border hover:bg-muted/50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-blue-500" />
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium">每日限额</p>
@@ -211,8 +211,8 @@ export default function SecurityPage() {
               onClick={() => handleEditLimit('monthly')}
               className="w-full p-3 flex items-center gap-3 border-b border-border hover:bg-muted/50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center">
-                <CalendarDays className="w-4 h-4 text-purple-500" />
+              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                <CalendarDays className="w-4 h-4 text-accent" />
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium">每月限额</p>

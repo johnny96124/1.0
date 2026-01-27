@@ -192,7 +192,7 @@ export default function HistoryPage() {
               whileTap={riskStatus.pendingRiskCount > 0 ? { scale: 0.98 } : undefined}
               onClick={() => riskStatus.pendingRiskCount > 0 && navigate('/risk-management')}
               className={cn(
-                "p-4 rounded-2xl border mb-4 transition-colors",
+                "p-4 rounded-xl border mb-4 transition-colors",
                 statusConfig.bg,
                 statusConfig.border,
                 riskStatus.pendingRiskCount > 0 && "cursor-pointer active:opacity-90"
