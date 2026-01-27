@@ -297,13 +297,16 @@ export default function HistoryPage() {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.05 * index }}
                           onClick={() => setSelectedTx(tx)}
-                          className={cn(
-                            "w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50 transition-all",
-                            isPendingRisk && "border-l-4",
-                            isPendingRisk && tx.riskScore === 'red' && "border-l-destructive",
-                            isPendingRisk && tx.riskScore === 'yellow' && "border-l-warning"
-                          )}
-                        >
+                        className={cn(
+                          "w-full p-3 rounded-xl flex items-center justify-between text-left transition-all",
+                          "hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50",
+                          isPendingRisk && tx.riskScore === 'red' 
+                            ? "bg-destructive/5 border border-destructive/30" 
+                            : isPendingRisk && tx.riskScore === 'yellow'
+                            ? "bg-warning/5 border border-warning/30"
+                            : "bg-card border border-border/50"
+                        )}
+                      >
                           <div className="flex items-center gap-2">
                             <div className={cn(
                               'w-8 h-8 rounded-full flex items-center justify-center',
