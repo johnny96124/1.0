@@ -1,3 +1,38 @@
+/**
+ * ============================================================================
+ * ONBOARDING FLOW - 新用户引导流程
+ * ============================================================================
+ * 
+ * 完整的新用户 Onboarding 流程涉及以下页面：
+ * 
+ * 1. Welcome.tsx        - 欢迎页面（可选入口）
+ * 2. Login.tsx          - 登录页面（手机/邮箱验证码 或 密码登录）
+ * 3. SetPassword.tsx    - 设置密码页面（新用户强制，?onboarding=true 时不可跳过）
+ * 4. Onboarding.tsx     - 本文件，包含以下步骤：
+ *    - Step 1: 安全授权 (SystemAuthStep) - 授权使用系统安全认证
+ *    - Step 2: 创建钱包 (CreateWalletStep) - 创建安全账户
+ *    - Step 3: 云端备份 (CloudBackupStep) - 备份到 iCloud
+ * 5. Home.tsx           - 钱包首页（流程完成后进入）
+ * 
+ * 流程图：
+ * ┌─────────┐    ┌─────────┐    ┌─────────────┐    ┌─────────────┐    ┌──────┐
+ * │ Welcome │ -> │  Login  │ -> │ SetPassword │ -> │ Onboarding  │ -> │ Home │
+ * └─────────┘    └─────────┘    └─────────────┘    └─────────────┘    └──────┘
+ *                 (new=true)    (强制设置密码)     (创建+备份)
+ * 
+ * 关键参数：
+ * - ?new=true       : 标识新用户流程
+ * - ?onboarding=true: 标识 onboarding 强制流程（密码设置页使用）
+ * - ?recover=true   : 恢复模式（非 onboarding）
+ * 
+ * 注意事项：
+ * - 新用户在 Login 成功后会导航到 /set-password?onboarding=true
+ * - SetPassword 完成后导航到 /onboarding?new=true
+ * - Onboarding 完成后导航到 /home
+ * - 新用户在 Onboarding 第一步返回会回到 SetPassword
+ * ============================================================================
+ */
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
