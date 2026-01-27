@@ -278,8 +278,8 @@ export default function RiskManagement() {
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  来自 {formatAddress(tx.counterparty)}
+                                <p className="text-xs text-muted-foreground truncate font-mono">
+                                  {formatAddress(tx.counterparty)}
                                 </p>
                               </div>
                               <div className="flex items-center gap-1 text-muted-foreground">
