@@ -42,6 +42,7 @@ export default function ReceivePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [addressExpanded, setAddressExpanded] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   const { currentWallet } = useWallet();
   const navigate = useNavigate();
@@ -304,9 +305,19 @@ export default function ReceivePage() {
               使用 {selectedNetwork.name} 网络转账到以下地址
             </p>
             
-            <div className="bg-muted/50 rounded-xl p-2 font-mono text-xs break-all text-foreground">
-              {fullAddress}
-            </div>
+            <button 
+              onClick={() => setAddressExpanded(!addressExpanded)}
+              className="w-full bg-muted/50 rounded-xl p-3 font-mono text-xs text-foreground text-center transition-all active:bg-muted/70"
+            >
+              {addressExpanded ? (
+                <span className="break-all">{fullAddress}</span>
+              ) : (
+                <span>{fullAddress.slice(0, 12)}...{fullAddress.slice(-10)}</span>
+              )}
+              <span className="block text-[10px] text-muted-foreground mt-1">
+                {addressExpanded ? '点击收起' : '点击查看完整地址'}
+              </span>
+            </button>
           </motion.div>
 
           {/* Actions */}
