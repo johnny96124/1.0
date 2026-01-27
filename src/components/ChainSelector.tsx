@@ -27,7 +27,7 @@ export function ChainSelector({
           key={chain.id}
           onClick={() => onSelectChain(chain.id)}
           className={cn(
-            "relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap shrink-0",
+            "relative flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap shrink-0",
             selectedChain === chain.id
               ? "text-accent-foreground"
               : "bg-muted text-muted-foreground hover:bg-muted/80"
@@ -40,7 +40,7 @@ export function ChainSelector({
               transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
             />
           )}
-          <span className="relative z-10">
+          <span className="relative z-10 flex items-center">
             <ChainIcon chainId={chain.icon} size="sm" />
           </span>
           <span className="relative z-10">{chain.shortName}</span>
