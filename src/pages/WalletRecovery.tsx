@@ -185,7 +185,7 @@ export default function WalletRecoveryPage() {
 
       {/* Other options */}
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2 px-1">其他方式</p>
+        <p className="text-xs font-medium text-foreground mb-2 px-1">其他方式</p>
         <div className="space-y-2">
           {recoveryOptions.filter(o => !o.recommended && !o.warning).map(option => (
             <motion.button

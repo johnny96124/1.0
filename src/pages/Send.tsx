@@ -329,7 +329,7 @@ export default function SendPage() {
                 {/* Contacts */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-muted-foreground">常用联系人</h3>
+                    <h3 className="text-sm font-medium text-foreground">常用联系人</h3>
                     {contacts.length > 3 && (
                       <button
                         onClick={() => setShowContactDrawer(true)}
