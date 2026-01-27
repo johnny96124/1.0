@@ -296,14 +296,19 @@ export default function LoginPage() {
     try {
       const result = await login(provider);
       saveLastLogin(provider);
+      
+      // New user from social login: skip success state, go directly to set password
+      if (result.userType === 'new') {
+        navigate('/set-password?onboarding=true');
+        return;
+      }
+      
+      // Existing user: show success state then navigate
       setLoginResult(result);
       setLoginStep('success');
       
       setTimeout(() => {
-        // New user from social login: also go through mandatory password setup
-        if (result.userType === 'new') {
-          navigate('/set-password?onboarding=true');
-        } else if (result.hasExistingWallets) {
+        if (result.hasExistingWallets) {
           navigate('/home');
         } else {
           navigate('/create-wallet');
