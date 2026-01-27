@@ -1,170 +1,194 @@
 
-# Onboarding流程重构方案
+# 新用户登录流程优化方案
 
-## 目标
-将onboarding流程整合为一个完整的链路：登录 → 强制设置密码 → 创建钱包 → 备份 → 进入首页
+## 需求概述
 
-## 当前流程分析
+针对新用户 onboarding 流程，需要修复以下三个问题：
 
+1. **验证码/密码切换**：新用户也能看到切换选项
+2. **登录成功状态**：验证码通过后不显示"登录成功"，设置完密码后才显示
+3. **设置密码页面布局**：调整为与登录页密码输入相似的左对齐布局
+
+---
+
+## 问题分析
+
+### 问题 1：切换按钮对新用户隐藏
+
+当前代码逻辑：
 ```text
-当前流程存在的问题：
-┌─────────┐    ┌─────────────┐    ┌─────────────┐    ┌──────┐
-│  Login  │ -> │ SetPassword │ -> │ Onboarding  │ -> │ Home │
-└─────────┘    └─────────────┘    └─────────────┘    └──────┘
-                     ↓
-              可以跳过 (稍后设置)
+hasPassword = true  → 显示切换按钮
+hasPassword = false → 隐藏切换按钮（新用户看不到）
 ```
 
-## 重构后流程
+**解决思路**：对于新用户，虽然没有密码，但可以显示一个"使用密码登录"的入口，点击后提示需要先设置密码，或者直接引导到设置密码流程。
 
+### 问题 2：新用户验证码后显示"登录成功"
+
+当前流程：
 ```text
-Onboarding新用户流程（强制密码设置）：
-┌─────────┐    ┌─────────────┐    ┌─────────────┐    ┌──────┐
-│  Login  │ -> │ SetPassword │ -> │ Onboarding  │ -> │ Home │
-└─────────┘    └─────────────┘    └─────────────┘    └──────┘
- (new=true)    (不可跳过)        (钱包创建+备份)
-
-默认登录流程（老用户）：
-┌─────────┐    ┌──────┐
-│  Login  │ -> │ Home │
-└─────────┘    └──────┘
+验证码通过 → 显示"登录成功" → 1.5秒后跳转到设置密码页
 ```
+
+期望流程：
+```text
+验证码通过 → 直接跳转到设置密码页（不显示登录成功）
+设置密码完成 → 显示"登录成功" → 进入onboarding
+```
+
+### 问题 3：SetPassword 页面居中布局
+
+当前布局使用 `text-center` 和 `justify-center`，整体内容居中显示。
+
+期望布局应该和 Login.tsx 的密码输入步骤保持一致：
+- 标题和输入框左对齐
+- 按钮固定在底部
+- 移除居中对齐样式
+
+---
 
 ## 技术方案
 
-### 1. 新增Onboarding状态管理
+### 1. 修改 Login.tsx - 支持新用户看到切换选项
 
-在 `WalletContext` 中添加onboarding状态：
+**文件**: `src/pages/Login.tsx`
 
+**改动内容**:
+- 修改切换按钮的显示条件，新用户也能看到
+- 新用户点击"使用密码登录"时，提示需要先完成验证码登录后设置密码
+
+**代码逻辑**:
 ```typescript
-interface OnboardingState {
-  isOnboarding: boolean;        // 是否在onboarding流程中
-  passwordRequired: boolean;    // 是否需要强制设置密码
-  passwordSet: boolean;         // 密码是否已设置
-}
-```
-
-### 2. 修改 Login.tsx
-
-**变更内容：**
-- 新用户首次登录时，设置 `isOnboarding: true`
-- 导航到 `/set-password?onboarding=true` 替代 `/set-password`
-
-**关键逻辑：**
-```typescript
-// 登录成功后的导航逻辑
-if (result.userType === 'new') {
-  // 新用户进入onboarding流程
-  navigate('/set-password?onboarding=true');
-} else if (result.hasExistingWallets) {
-  // 老用户直接进入首页
-  navigate('/home');
-} else {
-  // 老用户无钱包，创建钱包
-  navigate('/create-wallet');
-}
-```
-
-### 3. 修改 SetPassword.tsx
-
-**变更内容：**
-- 检测URL参数 `onboarding=true` 判断是否为onboarding流程
-- **onboarding流程中**：移除"稀后设置"按钮，密码设置为强制
-- **非onboarding流程**：保持现有逻辑，允许跳过
-- 成功后导航到 `/onboarding?new=true`
-
-**关键代码改动：**
-```typescript
-const [searchParams] = useSearchParams();
-const isOnboardingFlow = searchParams.get('onboarding') === 'true';
-
-// 移除跳过按钮的条件渲染
-{!isOnboardingFlow && (
-  <button onClick={handleSkip}>
-    稀后设置
+// 始终显示切换按钮，但新用户点击密码登录时给出提示
+<div className="text-center mt-2">
+  <button onClick={handleSwitchAuthMode}>
+    {authMode === 'otp' ? '使用密码登录' : '使用验证码登录'}
   </button>
-)}
+</div>
 
-// 返回按钮逻辑
-const handleBack = () => {
-  if (isOnboardingFlow) {
-    // onboarding流程中不允许返回，或返回到登录页
-    navigate('/login');
-  } else {
-    navigate(-1);
+// 切换处理逻辑
+const handleSwitchAuthMode = () => {
+  if (!hasPassword && authMode === 'otp') {
+    // 新用户想用密码登录，但没有密码
+    // 可以显示提示，或直接保持OTP模式
+    toast.info('请先完成验证码登录，设置密码后可使用密码登录');
+    return;
   }
+  // 正常切换逻辑...
 };
 ```
 
-### 4. 修改 Onboarding.tsx
+### 2. 修改 Login.tsx - 新用户验证码通过后跳过成功状态
 
-**变更内容：**
-- 确保流程完成后导航到 `/home`
-- 添加流程完成状态标记
-- 禁止在onboarding流程中返回到之前的步骤（第一步除外）
+**文件**: `src/pages/Login.tsx`
 
-**关键改动：**
+**改动内容**:
+- 修改 `handleVerifyCode` 函数
+- 新用户验证码通过后，直接跳转到设置密码页，不显示 success 状态
+
+**代码逻辑**:
 ```typescript
-const handleBack = () => {
-  if (currentStep > 1) {
-    setCurrentStep(currentStep - 1);
-  } else if (isNewUser) {
-    // 新用户在第一步时，返回会退出onboarding
-    // 可以选择返回登录页或保持在当前步骤
-    navigate('/login');
-  } else {
-    navigate('/home');
-  }
-};
-```
-
-### 5. 社交登录流程同步更新
-
-**变更内容：**
-- Apple/Google 登录成功后，新用户同样进入密码设置流程
-
-```typescript
-const handleSocialLogin = async (provider: 'apple' | 'google') => {
-  // ... 登录逻辑
+const handleVerifyCode = async (code: string) => {
+  // ...验证逻辑
+  
+  const result = await verifyCode(identifier, code);
+  saveLastLogin(loginMethod);
+  
+  // 新用户：跳过成功状态，直接进入设置密码
   if (result.userType === 'new') {
     navigate('/set-password?onboarding=true');
-  } else if (result.hasExistingWallets) {
-    navigate('/home');
-  } else {
-    navigate('/create-wallet');
+    return;
   }
+  
+  // 老用户：显示登录成功状态
+  setLoginResult(result);
+  setLoginStep('success');
+  
+  setTimeout(() => {
+    if (result.hasExistingWallets) {
+      navigate('/home');
+    } else {
+      navigate('/create-wallet');
+    }
+  }, 1500);
 };
 ```
+
+### 3. 修改 SetPassword.tsx - 调整布局风格
+
+**文件**: `src/pages/SetPassword.tsx`
+
+**改动内容**:
+- 移除整体居中布局
+- 标题和输入框改为左对齐
+- 保持图标居中显示（与 Login 页面一致）
+- 按钮区域固定在底部
+- 成功状态显示改为"登录成功"（因为这是新用户流程的最后认证步骤）
+
+**布局调整**:
+```text
+当前:                        改为:
+┌─────────────────┐         ┌─────────────────┐
+│                 │         │  ← 返回         │
+│    [🔒 图标]     │         │                 │
+│                 │         │    [🔒 图标]     │
+│  设置登录密码    │         │                 │
+│  居中描述文字    │         │ 设置登录密码     │ ← 左对齐
+│                 │         │ 描述文字         │ ← 左对齐
+│  [密码输入框]    │         │                 │
+│  [确认输入框]    │         │ [密码输入框]     │
+│                 │         │ [确认输入框]     │
+│   [设置密码]     │         │                 │
+│                 │         │                 │
+└─────────────────┘         │   [设置密码]     │ ← 底部固定
+                            └─────────────────┘
+```
+
+**成功状态文案调整**:
+- 标题: "密码设置成功" → "登录成功"  
+- 描述: "正在进入下一步..." → "正在进入创建钱包..."
+
+---
 
 ## 文件改动清单
 
 | 文件 | 改动类型 | 改动说明 |
 |------|----------|----------|
-| `src/pages/Login.tsx` | 修改 | 更新新用户导航逻辑，添加 onboarding 参数 |
-| `src/pages/SetPassword.tsx` | 修改 | 添加 onboarding 模式判断，条件性隐藏跳过按钮，更新返回逻辑 |
-| `src/pages/Onboarding.tsx` | 修改 | 更新返回按钮逻辑，确保流程完整性 |
+| `src/pages/Login.tsx` | 修改 | 1. 切换按钮始终显示，新用户点击密码登录时提示<br>2. 新用户验证码通过后直接跳转，不显示成功状态 |
+| `src/pages/SetPassword.tsx` | 修改 | 1. 调整布局为左对齐风格<br>2. 成功状态文案改为"登录成功" |
 
-## 用户体验优化
+---
 
-1. **强制密码设置页面**：
-   - 标题更改为"设置登录密码"，突出安全性
-   - 移除"稀后设置"选项，仅保留主要操作按钮
-   - 返回按钮行为：返回登录页（需重新登录）
+## 用户体验流程对比
 
-2. **流程连贯性**：
-   - 每个步骤明确显示进度
-   - 用户无法跳过关键步骤
-   - 完成后直接进入钱包首页
+### 改动前
 
-## 边界情况处理
+```text
+新用户验证码登录:
+输入验证码 → 显示"登录成功" → 1.5秒 → 设置密码页 → 设置成功 → onboarding
+```
 
-1. **用户刷新页面**：通过 localStorage 或 sessionStorage 保存 onboarding 状态
-2. **用户直接访问 URL**：验证用户是否已登录，未登录则重定向到登录页
-3. **网络异常**：保持当前步骤状态，允许重试
+### 改动后
 
-## 实施顺序
+```text
+新用户验证码登录:
+输入验证码 → 直接进入设置密码页 → 设置成功显示"登录成功" → onboarding
+```
 
-1. 修改 `SetPassword.tsx` - 添加 onboarding 模式支持
-2. 修改 `Login.tsx` - 更新导航逻辑
-3. 修改 `Onboarding.tsx` - 更新返回逻辑
-4. 测试完整流程
+---
+
+## 细节说明
+
+### 关于切换按钮的显示策略
+
+有两种方案可选：
+
+**方案 A（推荐）**：始终显示切换按钮
+- 新用户看到"使用密码登录"，点击后提示"请先完成验证登录并设置密码"
+- 保持 UI 一致性
+
+**方案 B**：新用户不显示切换按钮
+- 保持现有逻辑
+- 新用户完成 onboarding 后再回来登录时自然会看到切换按钮
+
+建议采用方案 A，保持界面一致性。
