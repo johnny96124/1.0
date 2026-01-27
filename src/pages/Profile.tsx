@@ -65,28 +65,28 @@ export default function ProfilePage() {
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             return (
-              <button
-                key={item.path}
-                onClick={() => {
-                  if (item.path === '/profile/wallets') {
-                    navigate('/profile/wallets');
-                  } else {
-                    navigate(item.path);
-                  }
-                }}
-                className={cn(
-                  'w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors',
-                  index !== menuItems.length - 1 && 'border-b border-border'
-                )}
-              >
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                  <Icon className="w-4 h-4 text-muted-foreground" />
-                </div>
-                <span className="flex-1 text-left font-medium text-foreground text-sm">
-                  {item.label}
-                </span>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </button>
+                <button
+                  key={item.path}
+                  onClick={() => {
+                    if (item.path === '/profile/wallets') {
+                      navigate('/profile/wallets');
+                    } else {
+                      navigate(item.path);
+                    }
+                  }}
+                  className={cn(
+                    'w-full p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors',
+                    index !== menuItems.length - 1 && 'border-b border-border'
+                  )}
+                >
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <span className="flex-1 text-left font-medium text-foreground text-sm">
+                    {item.label}
+                  </span>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </button>
             );
           })}
         </motion.div>
@@ -100,10 +100,10 @@ export default function ProfilePage() {
             logout();
             navigate('/');
           }}
-          className="w-full card-elevated p-3 flex items-center gap-3 text-destructive hover:bg-destructive/5 transition-colors"
+          className="w-full card-elevated p-4 flex items-center gap-3 text-destructive hover:bg-destructive/5 transition-colors"
         >
-          <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
-            <LogOut className="w-4 h-4" />
+          <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
+            <LogOut className="w-5 h-5" />
           </div>
           <span className="font-medium text-sm">退出登录</span>
         </motion.button>
