@@ -577,32 +577,41 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
           )}
         </div>
 
+          {error && (
+            <p className="text-sm text-destructive flex items-center gap-1">
+              <AlertTriangle className="w-4 h-4" />
+              {error}
+            </p>
+          )}
+
+          {/* Buttons - inside same container for consistent width */}
+          <div className="pt-6 space-y-3">
+            <Button
+              size="lg"
+              className="w-full text-base font-medium"
+              onClick={handleBackup}
+              disabled={isLoading || !password || !confirmPassword}
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              ) : (
+                <CloudUpload className="w-5 h-5 mr-2" />
+              )}
+              备份到 iCloud
+            </Button>
+            <Button
+              variant="ghost"
+              size="lg"
+              className="w-full text-base text-muted-foreground"
+              onClick={handleSkipClick}
+            >
+              稍后备份
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="pb-8 space-y-3">
-        <Button
-          size="lg"
-          className="w-full text-base font-medium"
-          onClick={handleBackup}
-          disabled={isLoading || !password || !confirmPassword}
-        >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-          ) : (
-            <Cloud className="w-5 h-5 mr-2" />
-          )}
-          备份到 iCloud
-        </Button>
-        <Button
-          variant="ghost"
-          size="lg"
-          className="w-full text-base text-muted-foreground"
-          onClick={handleSkipClick}
-        >
-          稍后备份
-        </Button>
-      </div>
+      <div className="pb-8" />
 
       {/* Skip Warning Dialog */}
       <AlertDialog open={showSkipWarning} onOpenChange={setShowSkipWarning}>
