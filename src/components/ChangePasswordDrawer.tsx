@@ -233,7 +233,7 @@ export function ChangePasswordDrawer({
   return (
     <Drawer open={open} onOpenChange={handleClose}>
       <DrawerContent className="max-h-[85vh]">
-        <DrawerHeader className="text-left pb-2">
+        <DrawerHeader className="text-left pb-0">
           <DrawerTitle className="flex items-center gap-2 text-xl font-semibold">
             {(step === 'forgot-choose' || step === 'forgot-otp') && (
               <button
@@ -246,6 +246,9 @@ export function ChangePasswordDrawer({
             {getTitle()}
           </DrawerTitle>
         </DrawerHeader>
+        
+        {/* Separator line */}
+        <div className="mx-6 my-4 border-t border-border" />
 
         <div className="px-6 pb-8">
           <AnimatePresence mode="wait">
@@ -476,9 +479,6 @@ export function ChangePasswordDrawer({
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-4"
               >
-                <p className="text-sm text-muted-foreground text-center mb-4">
-                  请设置您的新密码
-                </p>
                 
                 {/* New Password */}
                 <div className="space-y-2">
