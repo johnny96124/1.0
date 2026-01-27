@@ -86,6 +86,7 @@ export default function SendPage() {
   const [showPSPWarningDialog, setShowPSPWarningDialog] = useState(false);
   const [showPSPBlockedDialog, setShowPSPBlockedDialog] = useState(false);
   const [pspInfo, setPspInfo] = useState<{ isPSP: boolean; pspName?: string } | null>(null);
+  const [isAddressFocused, setIsAddressFocused] = useState(false);
 
   // Get limit status
   const limitStatus = getLimitStatus();
@@ -260,8 +261,24 @@ export default function SendPage() {
                         setAddress(e.target.value);
                         setSelectedContact(null);
                       }}
-                      className="pr-[88px] text-base"
+                      onFocus={() => setIsAddressFocused(true)}
+                      onBlur={() => setIsAddressFocused(false)}
+                      className={cn(
+                        "pr-[88px] text-base",
+                        address && !isAddressFocused && "text-transparent"
+                      )}
                     />
+                    {/* Truncated address display when not focused */}
+                    {address && !isAddressFocused && (
+                      <div 
+                        className="absolute left-4 top-1/2 -translate-y-1/2 right-[88px] text-base text-foreground pointer-events-none truncate"
+                      >
+                        {address.length > 20 
+                          ? `${address.slice(0, 10)}...${address.slice(-8)}`
+                          : address
+                        }
+                      </div>
+                    )}
                     <div className="absolute right-1 top-1/2 -translate-y-1/2 flex">
                       <Button 
                         variant="ghost" 
