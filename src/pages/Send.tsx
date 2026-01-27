@@ -260,13 +260,13 @@ export default function SendPage() {
                         setAddress(e.target.value);
                         setSelectedContact(null);
                       }}
-                      className="pr-20 text-base"
+                      className="pr-[88px] text-base"
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex">
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-10 w-10"
+                        className="h-9 w-9"
                         onClick={() => setShowQRScanner(true)}
                       >
                         <Scan className="w-5 h-5 text-muted-foreground" />
@@ -274,7 +274,7 @@ export default function SendPage() {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="h-10 w-10"
+                        className="h-9 w-9"
                         onClick={() => setShowContactDrawer(true)}
                       >
                         <Users className="w-5 h-5 text-muted-foreground" />
