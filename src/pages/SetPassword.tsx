@@ -92,7 +92,7 @@ export default function SetPassword() {
     }
   };
 
-  // Success state
+  // Success state - Show "Login Successful" for onboarding flow
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
@@ -116,7 +116,7 @@ export default function SetPassword() {
           transition={{ delay: 0.3 }}
           className="text-xl font-semibold text-foreground mb-2"
         >
-          密码设置成功
+          {isOnboardingFlow ? '登录成功' : '密码设置成功'}
         </motion.h2>
         <motion.p
           initial={{ opacity: 0 }}
@@ -124,7 +124,7 @@ export default function SetPassword() {
           transition={{ delay: 0.4 }}
           className="text-muted-foreground text-center"
         >
-          正在进入下一步...
+          {isOnboardingFlow ? '正在进入创建钱包...' : '正在进入下一步...'}
         </motion.p>
       </div>
     );
@@ -161,12 +161,12 @@ export default function SetPassword() {
           </motion.div>
         </div>
 
-        {/* Title */}
+        {/* Title - Left aligned like Login page */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-center mb-8"
+          className="mb-8"
         >
           <h1 className="text-2xl font-bold text-foreground mb-2">设置登录密码</h1>
           <p className="text-muted-foreground">为您的账户设置一个安全密码</p>
