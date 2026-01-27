@@ -152,7 +152,7 @@ export default function PersonalInfo() {
           >
             {/* User ID */}
             <div className="card-elevated p-4 space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">用户 ID</label>
+              <label className="text-sm font-medium text-foreground">用户 ID</label>
               <div className="flex items-center gap-2">
                 <Input
                   value={userId}
@@ -193,7 +193,7 @@ export default function PersonalInfo() {
 
             {/* Nickname */}
             <div className="card-elevated p-4 space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">昵称</label>
+              <label className="text-sm font-medium text-foreground">昵称</label>
               <Input
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
@@ -205,7 +205,7 @@ export default function PersonalInfo() {
             {/* Phone Binding Card */}
             <div className="card-elevated p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <label className="text-sm font-medium text-foreground flex items-center gap-2">
                   <Phone className="w-4 h-4" />
                   手机号
                 </label>
@@ -249,7 +249,7 @@ export default function PersonalInfo() {
             {/* Email Binding Card */}
             <div className="card-elevated p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <label className="text-sm font-medium text-foreground flex items-center gap-2">
                   <Mail className="w-4 h-4" />
                   邮箱
                 </label>
@@ -293,7 +293,7 @@ export default function PersonalInfo() {
             {/* Password Setting Card */}
             <div className="card-elevated p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <label className="text-sm font-medium text-foreground flex items-center gap-2">
                   <Lock className="w-4 h-4" />
                   登录密码
                 </label>
