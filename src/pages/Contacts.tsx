@@ -116,8 +116,8 @@ export default function ContactsPage() {
                 exit={{ opacity: 0, y: -20 }}
                 className="flex flex-col items-center justify-center h-full py-12"
               >
-                <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-                  <Users className="w-8 h-8 text-muted-foreground" />
+                <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                  <Users className="w-10 h-10 text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground mb-1">
                   {searchQuery ? '没有找到匹配的联系人' : '还没有联系人'}

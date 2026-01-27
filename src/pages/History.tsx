@@ -418,7 +418,7 @@ export default function HistoryPage() {
               <div className="relative mb-4">
                 <div className="flex justify-center mb-3">
                   <div className="relative">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
                       <CryptoIcon symbol={selectedTx.symbol} size="lg" />
                     </div>
                     <div className={cn(

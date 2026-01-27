@@ -20,10 +20,12 @@
    - rounded-xl (12px) - Cards, dialogs, modals
    - rounded-2xl (16px) - Large containers, drawer top corners
    
-   Icon Containers:
-   - sm: 32px - Small icons in lists
-   - md: 40px - Standard icon containers
-   - lg: 48px - Large feature icons
+   Icon Containers (with icons half the container size):
+   - sm: 32px (w-8 h-8) + icon 16px (w-4 h-4) - List items, menu icons
+   - md: 40px (w-10 h-10) + icon 20px (w-5 h-5) - Card icons, feature icons  
+   - lg: 48px (w-12 h-12) + icon 24px (w-6 h-6) - Hero icons, primary features
+   - xl: 64px (w-16 h-16) + icon 32px (w-8 h-8) - Page hero, onboarding steps
+   - 2xl: 80px (w-20 h-20) + icon 40px (w-10 h-10) - Success states, completion
    
    === STATUS COLORS ===
    Use semantic tokens instead of hardcoded colors:

@@ -78,15 +78,15 @@ export function PSPLogo({ pspId, pspName, size = 'md', className }: PSPLogoProps
   const Icon = brand?.icon || Globe;
   
   const sizeClasses = {
-    sm: 'w-10 h-10',
-    md: 'w-12 h-12',
-    lg: 'w-14 h-14',
+    sm: 'w-8 h-8',    // 32px - sm tier
+    md: 'w-10 h-10',  // 40px - md tier
+    lg: 'w-12 h-12',  // 48px - lg tier
   };
   
   const iconSizes = {
-    sm: 'w-5 h-5',
-    md: 'w-6 h-6',
-    lg: 'w-7 h-7',
+    sm: 'w-4 h-4',    // 16px
+    md: 'w-5 h-5',    // 20px
+    lg: 'w-6 h-6',    // 24px
   };
 
   return (

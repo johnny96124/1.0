@@ -39,7 +39,7 @@ export function EmptyState({
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.1, duration: 0.3 }}
         className={cn(
-          "w-14 h-14 rounded-full flex items-center justify-center mb-4",
+          "w-16 h-16 rounded-full flex items-center justify-center mb-4",
           variant === 'success' ? 'bg-success/10' : 'bg-muted/50'
         )}
       >
@@ -49,7 +49,7 @@ export function EmptyState({
           transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
         >
           <Icon className={cn(
-            "w-7 h-7",
+            "w-8 h-8",
             variant === 'success' ? 'text-success' : 'text-muted-foreground'
           )} />
         </motion.div>
