@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getChainIconUrl } from '@/lib/crypto-icons';
 import { cn } from '@/lib/utils';
-import { Coins } from 'lucide-react';
+import { LayoutGrid } from 'lucide-react';
 
 interface ChainIconProps {
   chainId: string;
@@ -23,7 +23,7 @@ export function ChainIcon({ chainId, size = 'md', className }: ChainIconProps) {
   if (chainId === 'all') {
     return (
       <div className={cn(sizeMap[size], 'flex items-center justify-center', className)}>
-        <Coins className="w-full h-full" />
+        <LayoutGrid className="w-full h-full" />
       </div>
     );
   }
