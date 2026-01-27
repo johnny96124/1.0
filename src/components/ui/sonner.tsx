@@ -65,7 +65,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       gap={8}
       visibleToasts={4}
       richColors={false}
-      closeButton={true}
+      closeButton={false}
       icons={{
         success: <SuccessIcon />,
         error: <ErrorIcon />,
