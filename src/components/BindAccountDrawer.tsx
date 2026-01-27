@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Phone, Loader2, CheckCircle2, ArrowLeft, Shield } from 'lucide-react';
+import { Mail, Phone, Loader2, CheckCircle2, ArrowLeft, Shield, Lock, Eye, EyeOff, ChevronRight } from 'lucide-react';
 import {
   Drawer,
   DrawerContent,
@@ -21,6 +21,7 @@ type BindType = 'email' | 'phone';
 type BindMode = 'bind' | 'rebind';
 type OAuthProvider = 'google' | 'apple';
 type BindStep = 'verify-old' | 'input' | 'verification' | 'success';
+type VerifyMode = 'otp' | 'password';
 
 interface BindAccountDrawerProps {
   open: boolean;
@@ -29,6 +30,7 @@ interface BindAccountDrawerProps {
   mode?: BindMode;
   currentValue?: string;
   onSuccess?: (value: string) => void;
+  hasPassword?: boolean;
 }
 
 export function BindAccountDrawer({
@@ -37,7 +39,8 @@ export function BindAccountDrawer({
   type,
   mode = 'bind',
   currentValue,
-  onSuccess
+  onSuccess,
+  hasPassword = false
 }: BindAccountDrawerProps) {
   const [step, setStep] = useState<BindStep>(mode === 'rebind' ? 'verify-old' : 'input');
   const [value, setValue] = useState('');
@@ -51,6 +54,12 @@ export function BindAccountDrawer({
   const [oldCodeError, setOldCodeError] = useState('');
   const [oldCodeSent, setOldCodeSent] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]);
+  
+  // Password verification state
+  const [verifyMode, setVerifyMode] = useState<VerifyMode>('otp');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
   const isEmail = type === 'email';
   const isRebind = mode === 'rebind';
@@ -256,6 +265,29 @@ export function BindAccountDrawer({
     }, 1000);
   };
 
+  const handleVerifyPassword = async () => {
+    if (!password) {
+      setPasswordError('请输入密码');
+      return;
+    }
+    
+    setIsLoading(true);
+    setPasswordError('');
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const savedPassword = localStorage.getItem('user_password');
+    if (password !== savedPassword) {
+      setPasswordError('密码不正确');
+      setIsLoading(false);
+      return;
+    }
+    
+    setIsLoading(false);
+    setStep('input'); // Proceed to new account input
+  };
+
   const handleClose = () => {
     onOpenChange(false);
     // Reset state after animation
@@ -270,6 +302,11 @@ export function BindAccountDrawer({
       setOauthLoading(null);
       setCountdown(0);
       setOldCountdown(0);
+      // Reset password verification state
+      setVerifyMode('otp');
+      setPassword('');
+      setShowPassword(false);
+      setPasswordError('');
     }, 300);
   };
 
@@ -282,6 +319,14 @@ export function BindAccountDrawer({
       setStep('verify-old');
       setOldCode('');
       setOldCodeError('');
+      setVerifyMode('otp');
+      setPassword('');
+      setPasswordError('');
+    } else if (step === 'verify-old' && verifyMode === 'password') {
+      // Go back to OTP mode
+      setVerifyMode('otp');
+      setPassword('');
+      setPasswordError('');
     }
   };
 
@@ -297,7 +342,7 @@ export function BindAccountDrawer({
       <DrawerContent>
         <DrawerHeader className="border-b border-border">
           <div className="flex items-center gap-3">
-            {(step === 'verification' || (step === 'input' && isRebind)) && (
+            {(step === 'verification' || (step === 'input' && isRebind) || (step === 'verify-old' && verifyMode === 'password')) && (
               <button onClick={handleBack} className="text-muted-foreground">
                 <ArrowLeft className="w-5 h-5" />
               </button>
@@ -317,76 +362,191 @@ export function BindAccountDrawer({
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-4"
               >
-                {/* Security Icon */}
-                <div className="flex justify-center mb-6">
-                  <div className="w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center">
-                    <Shield className="w-8 h-8 text-warning" />
-                  </div>
-                </div>
+                {verifyMode === 'otp' ? (
+                  <>
+                    {/* Security Icon */}
+                    <div className="flex justify-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-warning/10 flex items-center justify-center">
+                        <Shield className="w-8 h-8 text-warning" />
+                      </div>
+                    </div>
 
-                {/* Description */}
-                <div className="text-center space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    为确保账号安全，请先验证当前绑定的{isEmail ? '邮箱' : '手机号'}
-                  </p>
-                  <p className="font-medium text-foreground text-lg">
-                    {maskedCurrentValue}
-                  </p>
-                </div>
+                    {/* Description */}
+                    <div className="text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        为确保账号安全，请先验证当前绑定的{isEmail ? '邮箱' : '手机号'}
+                      </p>
+                      <p className="font-medium text-foreground text-lg">
+                        {maskedCurrentValue}
+                      </p>
+                    </div>
 
-                {!oldCodeSent ? (
-                  <Button
-                    className="w-full h-12"
-                    onClick={handleSendOldCode}
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      `发送验证码到${isEmail ? '原邮箱' : '原手机号'}`
-                    )}
-                  </Button>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="flex justify-center">
-                      <InputOTP
-                        maxLength={6}
-                        value={oldCode}
-                        onChange={handleOldCodeChange}
+                    {!oldCodeSent ? (
+                      <Button
+                        className="w-full h-12"
+                        onClick={handleSendOldCode}
                         disabled={isLoading}
                       >
-                        <InputOTPGroup>
-                          {[0, 1, 2, 3, 4, 5].map((index) => (
-                            <InputOTPSlot
-                              key={index}
-                              index={index}
-                              className={cn(
-                                "w-11 h-12 text-lg",
-                                oldCodeError && "border-destructive"
-                              )}
-                            />
-                          ))}
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </div>
+                        {isLoading ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          `发送验证码到${isEmail ? '原邮箱' : '原手机号'}`
+                        )}
+                      </Button>
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="flex justify-center">
+                          <InputOTP
+                            maxLength={6}
+                            value={oldCode}
+                            onChange={handleOldCodeChange}
+                            disabled={isLoading}
+                          >
+                            <InputOTPGroup>
+                              {[0, 1, 2, 3, 4, 5].map((index) => (
+                                <InputOTPSlot
+                                  key={index}
+                                  index={index}
+                                  className={cn(
+                                    "w-11 h-12 text-lg",
+                                    oldCodeError && "border-destructive"
+                                  )}
+                                />
+                              ))}
+                            </InputOTPGroup>
+                          </InputOTP>
+                        </div>
 
-                    {oldCodeError && (
-                      <p className="text-sm text-destructive text-center">{oldCodeError}</p>
+                        {oldCodeError && (
+                          <p className="text-sm text-destructive text-center">{oldCodeError}</p>
+                        )}
+
+                        <div className="text-center">
+                          <button
+                            onClick={handleResendOldCode}
+                            disabled={oldCountdown > 0 || isLoading}
+                            className={cn(
+                              "text-sm",
+                              oldCountdown > 0 ? "text-muted-foreground" : "text-primary hover:underline"
+                            )}
+                          >
+                            {oldCountdown > 0 ? `${oldCountdown}s 后重新发送` : '重新发送验证码'}
+                          </button>
+                        </div>
+                      </div>
                     )}
 
-                    <div className="text-center">
-                      <button
-                        onClick={handleResendOldCode}
-                        disabled={oldCountdown > 0 || isLoading}
-                        className={cn(
-                          "text-sm",
-                          oldCountdown > 0 ? "text-muted-foreground" : "text-primary hover:underline"
-                        )}
-                      >
-                        {oldCountdown > 0 ? `${oldCountdown}s 后重新发送` : '重新发送验证码'}
-                      </button>
+                    {/* Password verification option */}
+                    {hasPassword && (
+                      <>
+                        <div className="relative my-6">
+                          <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-border" />
+                          </div>
+                          <div className="relative flex justify-center text-xs">
+                            <span className="bg-background px-4 text-muted-foreground">或</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setVerifyMode('password')}
+                          className="w-full flex items-center justify-center gap-1 text-sm text-primary hover:underline"
+                        >
+                          使用密码验证
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* Password verification mode */}
+                    {/* Lock Icon */}
+                    <div className="flex justify-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Lock className="w-8 h-8 text-primary" />
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Description */}
+                    <div className="text-center mb-6">
+                      <p className="text-sm text-muted-foreground">
+                        请输入登录密码以验证身份
+                      </p>
+                    </div>
+
+                    {/* Password Input */}
+                    <div className="space-y-4">
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="请输入登录密码"
+                          value={password}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            setPasswordError('');
+                          }}
+                          className={cn(
+                            "h-12 pr-12",
+                            passwordError && "border-destructive focus-visible:ring-destructive"
+                          )}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+
+                      {passwordError && (
+                        <motion.p
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-sm text-destructive text-center"
+                        >
+                          {passwordError}
+                        </motion.p>
+                      )}
+
+                      <Button
+                        className="w-full h-12"
+                        onClick={handleVerifyPassword}
+                        disabled={isLoading || !password}
+                      >
+                        {isLoading ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          '确认'
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Switch back to OTP */}
+                    <div className="relative my-6">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-border" />
+                      </div>
+                      <div className="relative flex justify-center text-xs">
+                        <span className="bg-background px-4 text-muted-foreground">或</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setVerifyMode('otp');
+                        setPassword('');
+                        setPasswordError('');
+                      }}
+                      className="w-full flex items-center justify-center gap-1 text-sm text-primary hover:underline"
+                    >
+                      使用验证码验证
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
               </motion.div>
             )}
