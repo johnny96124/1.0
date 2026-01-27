@@ -65,17 +65,17 @@ const Splash = () => {
         <div className="relative">
           {/* Outer pulse ring - blue in light, white in dark */}
           <motion.div
-            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 dark:from-foreground/10 dark:to-muted/20"
+            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 dark:from-white/25 dark:to-white/15"
             style={{ 
               width: 120, 
               height: 120, 
               marginLeft: -18, 
               marginTop: -18,
             }}
-            initial={{ scale: 1, opacity: 0.4 }}
+            initial={{ scale: 1, opacity: 0.5 }}
             animate={{ 
               scale: [1, 1.5, 2],
-              opacity: [0.4, 0.2, 0]
+              opacity: [0.5, 0.25, 0]
             }}
             transition={{
               duration: 2.5,
@@ -85,17 +85,17 @@ const Splash = () => {
           />
           {/* Inner pulse ring */}
           <motion.div
-            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/25 to-primary/15 dark:from-foreground/15 dark:to-muted/25"
+            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/25 to-primary/15 dark:from-white/35 dark:to-white/20"
             style={{ 
               width: 120, 
               height: 120, 
               marginLeft: -18, 
               marginTop: -18,
             }}
-            initial={{ scale: 1, opacity: 0.4 }}
+            initial={{ scale: 1, opacity: 0.5 }}
             animate={{ 
               scale: [1, 1.5, 2],
-              opacity: [0.4, 0.2, 0]
+              opacity: [0.5, 0.25, 0]
             }}
             transition={{
               duration: 2.5,
