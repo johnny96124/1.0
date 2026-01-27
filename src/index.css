@@ -216,7 +216,8 @@
   }
 
   /* Global icon stroke width - consistent 1.5px across all icons */
-  .lucide {
+  .lucide,
+  [class*="lucide-"] {
     stroke-width: 1.5 !important;
   }
 
