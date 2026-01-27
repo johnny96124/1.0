@@ -236,8 +236,8 @@ export default function HelpPage() {
                     index !== moreItems.length - 1 && 'border-b border-border'
                   )}
                 >
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-accent" />
                   </div>
                   <span className="flex-1 text-left text-sm font-medium">{item.label}</span>
                   <ChevronRight className="w-4 h-4 text-muted-foreground" />

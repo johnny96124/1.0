@@ -179,8 +179,8 @@ export default function SecurityPage() {
               onClick={() => handleEditLimit('single')}
               className="w-full p-3 flex items-center gap-3 border-b border-border hover:bg-muted/50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
-                <DollarSign className="w-4 h-4 text-warning" />
+              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-accent" />
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium">单笔限额</p>
@@ -224,8 +224,8 @@ export default function SecurityPage() {
             </button>
             
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
-                <TestTube className="w-4 h-4 text-success" />
+              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+                <TestTube className="w-4 h-4 text-accent" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">首次转账测试</p>
