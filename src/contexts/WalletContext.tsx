@@ -843,7 +843,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Mock user data - can be toggled for testing different user types
-  const [mockIsNewUser] = useState(false); // Set to true to test new user flow
+  const [mockIsNewUser] = useState(true); // Set to true to test new user flow
 
   const setupExistingUser = useCallback(() => {
     const mockUserInfo: UserInfo = {
