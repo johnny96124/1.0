@@ -98,19 +98,14 @@ export function BottomNav() {
                 ))}
                 
                 <div className="relative flex items-center justify-center">
-                  {/* Active glass pill */}
+                  {/* Active pill - simple light blue circle */}
                   {isActive && (
                     <motion.div
                       layoutId="nav-active-pill"
-                      className="absolute w-10 h-10 rounded-full overflow-hidden"
+                      className="absolute w-10 h-10 rounded-full bg-accent/10"
                       initial={false}
                       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    >
-                      {/* Active pill glass effect */}
-                      <div className="absolute inset-0 bg-accent/15 dark:bg-accent/25" />
-                      <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent dark:from-white/10" />
-                      <div className="absolute inset-0 rounded-full shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] dark:shadow-[inset_0_1px_2px_rgba(255,255,255,0.15)]" />
-                    </motion.div>
+                    />
                   )}
                   
                   {/* Icon */}
@@ -129,8 +124,6 @@ export function BottomNav() {
                           : 'text-foreground'
                       )}
                       strokeWidth={1.5}
-                      fill={isActive ? 'currentColor' : 'none'}
-                      fillOpacity={isActive ? 0.15 : 0}
                     />
                   </motion.div>
                 </div>
