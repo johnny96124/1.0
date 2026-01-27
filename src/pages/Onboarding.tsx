@@ -622,12 +622,12 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
-            <AlertDialogCancel className="w-full mt-0">
+          <AlertDialogFooter>
+            <AlertDialogCancel>
               我再想想
             </AlertDialogCancel>
             <AlertDialogAction 
-              className="w-full bg-muted text-muted-foreground hover:bg-muted/80"
+              className="bg-muted text-muted-foreground hover:bg-muted/80"
               onClick={handleConfirmSkip}
             >
               我已了解风险，稍后备份
