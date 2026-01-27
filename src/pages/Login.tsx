@@ -371,20 +371,14 @@ export default function LoginPage() {
   };
 
   // Switch between OTP and password modes (preserves countdown state)
-  const handleSwitchAuthMode = async () => {
+  const handleSwitchAuthMode = () => {
     if (authMode === 'password') {
       // Switching to OTP mode - preserve countdown state
       setAuthMode('otp');
       setPassword('');
       setPasswordError('');
     } else {
-      // New user trying to use password login - show toast warning
-      if (!hasPassword) {
-        const { toast } = await import('@/lib/toast');
-        toast.info('请先完成验证码登录，设置密码后可使用密码登录');
-        return;
-      }
-      // Switching to password mode
+      // Switching to password mode - allow even if no password set
       setAuthMode('password');
       setVerificationCode('');
       setCodeError('');
