@@ -48,16 +48,16 @@ const recoveryOptions: RecoveryOption[] = [
     title: 'Google Drive 恢复',
     description: '从 Google Drive 备份恢复',
     icon: Cloud,
-    iconColor: 'text-green-500',
-    bgColor: 'bg-green-500/10',
+    iconColor: 'text-success',
+    bgColor: 'bg-success/10',
   },
   {
     id: 'local_file',
     title: '本地文件恢复',
     description: '导入 .backup 备份文件',
     icon: FileArchive,
-    iconColor: 'text-orange-500',
-    bgColor: 'bg-orange-500/10',
+    iconColor: 'text-warning',
+    bgColor: 'bg-warning/10',
   },
   {
     id: 'private_key',
@@ -357,11 +357,11 @@ export default function WalletRecoveryPage() {
           <div className="text-center">
             <div className={cn(
               "w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center",
-              selectedMethod === 'cloud_icloud' ? "bg-blue-500/10" : "bg-green-500/10"
+              selectedMethod === 'cloud_icloud' ? "bg-trust/10" : "bg-success/10"
             )}>
               <Cloud className={cn(
                 "w-8 h-8",
-                selectedMethod === 'cloud_icloud' ? "text-blue-500" : "text-green-500"
+                selectedMethod === 'cloud_icloud' ? "text-trust" : "text-success"
               )} />
             </div>
             <h2 className="text-lg font-semibold text-foreground mb-2">
@@ -450,8 +450,8 @@ export default function WalletRecoveryPage() {
           className="space-y-6"
         >
           <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-orange-500/10 mx-auto mb-4 flex items-center justify-center">
-              <FileArchive className="w-8 h-8 text-orange-500" />
+            <div className="w-16 h-16 rounded-full bg-warning/10 mx-auto mb-4 flex items-center justify-center">
+              <FileArchive className="w-8 h-8 text-warning" />
             </div>
             <h2 className="text-lg font-semibold text-foreground mb-2">选择备份文件</h2>
             <p className="text-sm text-muted-foreground">
@@ -485,7 +485,7 @@ export default function WalletRecoveryPage() {
           </div>
 
           <div className="p-3 bg-muted/50 rounded-lg flex items-center gap-3">
-            <FileArchive className="w-5 h-5 text-orange-500" />
+            <FileArchive className="w-5 h-5 text-warning" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">wallet_backup_2024.backup</p>
               <p className="text-xs text-muted-foreground">2.3 MB</p>

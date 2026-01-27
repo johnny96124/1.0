@@ -219,11 +219,11 @@ export default function TSSBackupManagement() {
               <div className="flex items-center gap-3">
                 <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                   tssNodeInfo.backup.hasCloudBackup 
-                    ? 'bg-green-500/10' 
+                    ? 'bg-success/10' 
                     : 'bg-muted'
                 }`}>
                   {tssNodeInfo.backup.hasCloudBackup ? (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-success" />
                   ) : (
                     <Cloud className="h-5 w-5 text-muted-foreground" />
                   )}
@@ -260,11 +260,11 @@ export default function TSSBackupManagement() {
               <div className="flex items-center gap-3">
                 <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
                   tssNodeInfo.backup.hasLocalBackup 
-                    ? 'bg-green-500/10' 
+                    ? 'bg-success/10' 
                     : 'bg-muted'
                 }`}>
                   {tssNodeInfo.backup.hasLocalBackup ? (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-success" />
                   ) : (
                     <HardDrive className="h-5 w-5 text-muted-foreground" />
                   )}
