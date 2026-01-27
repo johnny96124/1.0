@@ -29,7 +29,7 @@ export default function DeviceKickedPage() {
 
   return (
     <div className="h-full bg-background flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">
         {/* Warning Icon with Animation */}
         <motion.div
           initial={{ scale: 0 }}
@@ -133,7 +133,7 @@ export default function DeviceKickedPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="px-6 pb-6 space-y-3"
+        className="px-4 pb-6 space-y-3"
       >
         <Button
           size="lg"

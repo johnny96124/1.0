@@ -242,7 +242,7 @@ export default function WelcomePage() {
 
       {/* Content Area - OUTSIDE carousel, animated based on currentIndex */}
       <div className="flex-1 flex flex-col">
-        <div className="px-6 pt-4">
+        <div className="px-4 pt-4">
           {/* Progress Indicators */}
           <div className="flex items-center justify-center gap-2 mb-4">
             {slides.map((_, i) => (
@@ -290,7 +290,7 @@ export default function WelcomePage() {
       </div>
 
       {/* Fixed Buttons at Bottom */}
-      <div className="px-6 pb-8 pt-4 flex gap-3 bg-background">
+      <div className="px-4 pb-8 pt-4 flex gap-3 bg-background">
         <Button
           variant="outline"
           size="lg"

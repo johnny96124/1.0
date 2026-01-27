@@ -30,7 +30,7 @@ function EmptyWalletState() {
 
   return (
     <AppLayout showNav={false}>
-      <div className="h-full flex flex-col items-center justify-center px-6">
+      <div className="h-full flex flex-col items-center justify-center px-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

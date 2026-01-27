@@ -87,7 +87,7 @@ export default function SetPassword() {
   // Success state
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -135,7 +135,7 @@ export default function SetPassword() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 flex flex-col">
+      <div className="flex-1 px-4 flex flex-col">
         {/* Icon */}
         <div className="flex justify-center mb-6 mt-8">
           <motion.div

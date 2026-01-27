@@ -261,7 +261,7 @@ export default function TSSRecoveryPage() {
 
       {/* Contact Support */}
       {step !== 'success' && (
-        <div className="px-6 pb-6 pt-2 space-y-3">
+        <div className="px-4 pb-6 pt-2 space-y-3">
           <Button
             variant="outline"
             size="lg"

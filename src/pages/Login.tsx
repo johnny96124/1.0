@@ -379,7 +379,7 @@ export default function LoginPage() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex-1 px-6 flex flex-col"
+      className="flex-1 px-4 flex flex-col"
     >
       <div className="flex items-center mb-6">
         <button
@@ -465,7 +465,7 @@ export default function LoginPage() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex-1 px-6 flex flex-col"
+      className="flex-1 px-4 flex flex-col"
     >
       {/* Method Tabs */}
       <div className="flex gap-3 mb-4">
@@ -644,7 +644,7 @@ export default function LoginPage() {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex-1 px-6 flex flex-col"
+      className="flex-1 px-4 flex flex-col"
     >
       <div className="flex items-center mb-6">
         <button
@@ -729,7 +729,7 @@ export default function LoginPage() {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex-1 px-6 flex flex-col items-center justify-center"
+      className="flex-1 px-4 flex flex-col items-center justify-center"
     >
       <motion.div
         animate={{ rotate: 360 }}
@@ -748,7 +748,7 @@ export default function LoginPage() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex-1 px-6 flex flex-col items-center justify-center"
+      className="flex-1 px-4 flex flex-col items-center justify-center"
     >
       <motion.div
         initial={{ scale: 0 }}
@@ -953,7 +953,7 @@ export default function LoginPage() {
       )}
 
       {loginStep === 'input' && (
-        <div className="px-6 pt-4">
+        <div className="px-4 pt-4">
           <div className="flex items-center justify-center gap-2 mb-4">
             {slides.map((_, i) => (
               <motion.div
@@ -985,7 +985,7 @@ export default function LoginPage() {
       </AnimatePresence>
 
       {loginStep === 'input' && (
-        <div className="px-6 pb-8">
+        <div className="px-4 pb-8">
           <p className="text-xs text-center text-muted-foreground">
             继续即表示您同意我们的<button 
               className="text-primary hover:underline"
