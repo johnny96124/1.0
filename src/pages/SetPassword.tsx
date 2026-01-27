@@ -102,10 +102,10 @@ export default function SetPassword() {
   // Success state - Show welcome guidance for onboarding flow
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
+      <div className="min-h-screen bg-background flex flex-col px-4">
         {isOnboardingFlow ? (
-          // Onboarding flow: Show wallet creation guidance
-          <>
+          // Onboarding flow: Show wallet creation guidance - centered vertically
+          <div className="flex-1 flex flex-col items-center justify-center">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -164,7 +164,7 @@ export default function SetPassword() {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
-          </>
+          </div>
         ) : (
           // Non-onboarding flow: Show simple success
           <>
