@@ -441,7 +441,8 @@ export default function PSPConnectPage() {
 
                 {/* Continue Button */}
                 <Button 
-                  className="w-full h-12 gradient-primary"
+                  size="lg"
+                  className="w-full gradient-primary"
                   onClick={handleProceedToApplication}
                 >
                   下一步
@@ -532,7 +533,8 @@ export default function PSPConnectPage() {
 
               {/* Submit Button */}
               <Button 
-                className="w-full h-12 gradient-primary"
+                size="lg"
+                className="w-full gradient-primary"
                 onClick={handleSubmitApplication}
                 disabled={isSubmitting}
               >
@@ -628,7 +630,8 @@ export default function PSPConnectPage() {
               </div>
 
               <Button 
-                className="w-full h-12"
+                size="lg"
+                className="w-full"
                 onClick={() => navigate('/psp')}
               >
                 返回服务商列表

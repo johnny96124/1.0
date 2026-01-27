@@ -7,6 +7,23 @@
 /* Cobo Merchant Wallet Design System
    Professional, bank-grade aesthetic with trust & security focus
    All colors MUST be HSL.
+
+   === COMPONENT SIZE STANDARDS ===
+   
+   Button Heights:
+   - sm: 32px (h-8) - Small actions, tags
+   - md: 40px (h-10) - Secondary buttons, form inputs
+   - lg/default: 48px (h-12) - Primary CTAs, main actions
+   
+   Border Radius:
+   - rounded-lg (8px) - Buttons, inputs, small elements
+   - rounded-xl (12px) - Cards, dialogs, modals
+   - rounded-2xl (16px) - Large containers, drawer top corners
+   
+   Icon Containers:
+   - sm: 32px - Small icons in lists
+   - md: 40px - Standard icon containers
+   - lg: 48px - Large feature icons
 */
 
 @layer base {

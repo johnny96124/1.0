@@ -439,7 +439,7 @@ export default function SendPage() {
                 <div className="px-4 pb-2">
                   <Button
                     size="lg"
-                    className="w-full h-14 text-lg font-semibold bg-accent hover:bg-accent/90"
+                    className="w-full text-lg font-semibold"
                     onClick={handleContinue}
                     disabled={!amount || parseFloat(amount) <= 0 || parseFloat(amount) > selectedAsset.balance || !limitCheck.allowed}
                   >
@@ -575,7 +575,7 @@ export default function SendPage() {
                 
                 <Button
                   size="lg"
-                  className="w-full h-14 mt-8 bg-accent hover:bg-accent/90"
+                  className="w-full mt-8"
                   onClick={handleAuth}
                   disabled={isLoading}
                 >
@@ -611,7 +611,7 @@ export default function SendPage() {
                 <div className="w-full space-y-3 mt-8">
                   <Button
                     size="lg"
-                    className="w-full h-14 bg-accent hover:bg-accent/90"
+                    className="w-full"
                     onClick={() => navigate('/history')}
                   >
                     查看交易记录
@@ -619,7 +619,7 @@ export default function SendPage() {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="w-full h-14"
+                    className="w-full"
                     onClick={() => navigate('/home')}
                   >
                     返回首页
@@ -635,7 +635,7 @@ export default function SendPage() {
           <div className="p-4 border-t border-border shrink-0">
             <Button
               size="lg"
-              className="w-full h-14 bg-accent hover:bg-accent/90"
+              className="w-full"
               onClick={handleContinue}
               disabled={
                 (step === 'address' && (!address || riskScore?.score === 'red')) ||

@@ -271,7 +271,7 @@ export default function WelcomePage() {
         <Button
           variant="outline"
           size="lg"
-          className="flex-1 h-12 text-base font-medium"
+          className="flex-1 text-base font-medium"
           onClick={handleLogin}
         >
           注册
@@ -279,7 +279,7 @@ export default function WelcomePage() {
         <Button
           variant="default"
           size="lg"
-          className="flex-1 h-12 text-base font-medium"
+          className="flex-1 text-base font-medium"
           onClick={handleLogin}
         >
           登录

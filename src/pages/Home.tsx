@@ -112,7 +112,7 @@ function EmptyWalletState() {
           >
             <Button
               size="lg"
-              className="w-full h-12 text-base gradient-primary"
+              className="w-full text-base gradient-primary"
               onClick={() => navigate('/onboarding')}
             >
               <Plus className="w-5 h-5 mr-2" />

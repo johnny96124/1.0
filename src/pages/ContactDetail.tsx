@@ -284,7 +284,8 @@ export default function ContactDetailPage() {
         <div className="p-4 border-t border-border/50">
           <Button
             onClick={handleTransfer}
-            className="w-full h-12 gap-2"
+            size="lg"
+            className="w-full gap-2"
           >
             <Send className="w-5 h-5" />
             转账给 TA

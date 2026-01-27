@@ -265,7 +265,7 @@ export default function TSSRecoveryPage() {
           <Button
             variant="outline"
             size="lg"
-            className="w-full h-12 text-base"
+            className="w-full text-base"
             onClick={() => navigate('/help')}
           >
             <MessageCircle className="w-5 h-5 mr-2" />
@@ -485,7 +485,7 @@ function FileSelectStep({
       <div className="pb-6">
         <Button
           size="lg"
-          className="w-full h-12 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={handleContinue}
           disabled={!selectedFile}
         >
@@ -588,7 +588,7 @@ function PasswordStep({
       <div className="pb-6">
         <Button
           size="lg"
-          className="w-full h-12 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={onSubmit}
           disabled={isLoading || !password}
         >
@@ -676,7 +676,7 @@ function SuccessStep({ onEnter }: { onEnter: () => void }) {
       >
         <Button
           size="lg"
-          className="w-full h-12 text-base font-medium"
+          className="w-full text-base font-medium"
           onClick={onEnter}
         >
           进入钱包

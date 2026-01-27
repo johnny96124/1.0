@@ -339,7 +339,8 @@ export default function ContactFormPage() {
           <Button
             onClick={handleSave}
             disabled={isSaving || !name || !address || !isValidAddress}
-            className="w-full h-12"
+            size="lg"
+            className="w-full"
           >
             {isSaving ? (
               <>
