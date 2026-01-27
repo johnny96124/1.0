@@ -233,17 +233,16 @@ export function ChangePasswordDrawer({
   return (
     <Drawer open={open} onOpenChange={handleClose}>
       <DrawerContent className="max-h-[85vh]">
-        <DrawerHeader className="text-center pb-2">
-          <DrawerTitle className="flex items-center justify-center gap-2">
+        <DrawerHeader className="text-left pb-2">
+          <DrawerTitle className="flex items-center gap-2 text-xl font-semibold">
             {(step === 'forgot-choose' || step === 'forgot-otp') && (
               <button
                 onClick={handleBack}
-                className="absolute left-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+                className="mr-1 p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
             )}
-            <Lock className="w-5 h-5 text-primary" />
             {getTitle()}
           </DrawerTitle>
         </DrawerHeader>
