@@ -95,12 +95,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
         duration: 3000,
         classNames: {
           toast:
-            "w-full flex flex-row items-center gap-3 py-3 px-4 rounded-2xl shadow-lg pointer-events-auto bg-card",
-          title: "font-semibold text-base text-foreground leading-tight",
-          description: "text-sm text-muted-foreground mt-0.5",
+            "w-full flex flex-row items-center gap-3 p-4 rounded-2xl shadow-lg pointer-events-auto bg-card",
+          title: "font-semibold text-[16px] text-foreground leading-tight",
+          description: "text-[12px] text-muted-foreground mt-0.5",
           icon: "flex-shrink-0 order-1",
           content: "flex-1 min-w-0 order-2",
-          closeButton: "!static !transform-none order-3 flex-shrink-0 text-muted-foreground/50 hover:text-muted-foreground transition-colors !p-0 !bg-transparent !border-0 !shadow-none !w-auto !h-auto",
+          closeButton: "!static !transform-none order-3 flex-shrink-0 !p-0 !bg-transparent !border-0 !shadow-none !w-auto !h-auto",
           actionButton: "bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium",
           cancelButton: "bg-muted text-muted-foreground rounded-lg px-3 py-1.5 text-sm font-medium",
         },
