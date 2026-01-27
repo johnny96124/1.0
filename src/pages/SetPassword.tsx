@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, Loader2, Wallet, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -67,10 +67,13 @@ export default function SetPassword() {
       
       setIsSuccess(true);
       
-      // Navigate to onboarding after success animation
-      setTimeout(() => {
-        navigate('/onboarding?new=true');
-      }, 1500);
+      // Non-onboarding flow: auto navigate back after success
+      if (!isOnboardingFlow) {
+        setTimeout(() => {
+          navigate(-1);
+        }, 1500);
+      }
+      // Onboarding flow: user clicks button to continue
     } catch (err) {
       setError('设置密码失败，请重试');
     } finally {
@@ -92,40 +95,111 @@ export default function SetPassword() {
     }
   };
 
-  // Success state - Show "Login Successful" for onboarding flow
+  const handleContinueToOnboarding = () => {
+    navigate('/onboarding?new=true');
+  };
+
+  // Success state - Show welcome guidance for onboarding flow
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", duration: 0.5 }}
-          className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
-          >
-            <CheckCircle2 className="w-10 h-10 text-success" />
-          </motion.div>
-        </motion.div>
-        <motion.h2
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-xl font-semibold text-foreground mb-2"
-        >
-          {isOnboardingFlow ? '登录成功' : '密码设置成功'}
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-muted-foreground text-center"
-        >
-          {isOnboardingFlow ? '正在进入创建钱包...' : '正在进入下一步...'}
-        </motion.p>
+        {isOnboardingFlow ? (
+          // Onboarding flow: Show wallet creation guidance
+          <>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-8"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+              >
+                <Wallet className="w-12 h-12 text-primary" />
+              </motion.div>
+            </motion.div>
+            
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-2xl font-bold text-foreground mb-3 text-center"
+            >
+              欢迎加入 Cobo
+            </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-muted-foreground text-center mb-2 max-w-[280px]"
+            >
+              接下来我们将为您创建一个安全的数字钱包
+            </motion.p>
+            
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-sm text-muted-foreground/70 text-center mb-10 max-w-[280px]"
+            >
+              您的资产将通过多重签名技术保护，确保安全可靠
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="w-full max-w-[280px]"
+            >
+              <Button
+                variant="default"
+                size="lg"
+                className="w-full text-base font-medium"
+                onClick={handleContinueToOnboarding}
+              >
+                开始创建钱包
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
+          </>
+        ) : (
+          // Non-onboarding flow: Show simple success
+          <>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+              >
+                <CheckCircle2 className="w-10 h-10 text-success" />
+              </motion.div>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-xl font-semibold text-foreground mb-2"
+            >
+              密码设置成功
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="text-muted-foreground text-center"
+            >
+              正在返回...
+            </motion.p>
+          </>
+        )}
       </div>
     );
   }
