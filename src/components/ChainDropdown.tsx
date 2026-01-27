@@ -50,7 +50,7 @@ export function ChainDropdown({
         <Button
           variant="ghost"
           className={cn(
-            "h-8 px-2 gap-1.5 bg-secondary/80 hover:bg-secondary hover:text-foreground rounded-full",
+            "h-8 px-2 gap-1.5 bg-secondary/80 hover:bg-muted/50 hover:text-foreground rounded-full",
             className
           )}
         >
@@ -73,17 +73,14 @@ export function ChainDropdown({
               key={chain.id}
               onClick={() => onSelectChain(chain.id)}
               className={cn(
-                "flex items-center justify-between gap-3 py-3 px-3 cursor-pointer hover:bg-muted focus:bg-muted",
-                isSelected && "bg-muted"
+                "flex items-center justify-between gap-3 py-3 px-3 cursor-pointer hover:bg-muted/50 focus:bg-muted/50",
+                isSelected && "bg-muted/50"
               )}
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <ChainIcon chainId={chain.icon} size="lg" className="shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className={cn(
-                    "font-medium text-sm",
-                    isSelected ? "text-accent" : "text-foreground"
-                  )}>
+                  <p className="font-medium text-sm text-foreground">
                     {chain.name}
                   </p>
                   {showAddress && (
@@ -97,7 +94,7 @@ export function ChainDropdown({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 shrink-0 hover:bg-muted"
+                  className="h-7 w-7 shrink-0 hover:bg-muted/50"
                   onClick={(e) => handleCopyAddress(e, chain.id, address)}
                 >
                   {copiedChain === chain.id ? (

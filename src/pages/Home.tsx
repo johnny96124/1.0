@@ -347,7 +347,7 @@ export default function HomePage() {
                 ) : (
                   <>
                     <span className="text-3xl font-bold text-foreground">${balanceParts.integer}</span>
-                    <span className="text-lg font-medium text-muted-foreground">.{balanceParts.decimal}</span>
+                    <span className="text-lg font-medium text-foreground">.{balanceParts.decimal}</span>
                   </>
                 )}
               </motion.div>
