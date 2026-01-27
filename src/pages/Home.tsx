@@ -18,6 +18,7 @@ import { PullToRefresh } from '@/components/PullToRefresh';
 import { WalletSwitcher } from '@/components/WalletSwitcher';
 import { BalanceCardSkeleton, AssetListSkeleton, TransactionListSkeleton, RiskAlertSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
+import { AnimatedBalance } from '@/components/AnimatedNumber';
 
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
@@ -256,22 +257,27 @@ export default function HomePage() {
 
         {/* Header - Wallet Selector */}
         <div className="flex items-center justify-between mb-4">
-          <button 
+          <motion.button 
             onClick={() => setShowWalletSwitcher(true)}
-            className="flex items-center gap-3"
+            className="flex items-center gap-3 rounded-xl p-1 -m-1 active:bg-muted/50 transition-colors"
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
-            <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center",
-              currentWallet?.isEscaped 
-                ? "bg-warning/20" 
-                : "gradient-primary"
-            )}>
+            <motion.div 
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center",
+                currentWallet?.isEscaped 
+                  ? "bg-warning/20" 
+                  : "gradient-primary"
+              )}
+              whileTap={{ scale: 0.9 }}
+            >
               {currentWallet?.isEscaped ? (
                 <Key className="w-5 h-5 text-warning" />
               ) : (
                 <Wallet className="w-5 h-5 text-primary-foreground" />
               )}
-            </div>
+            </motion.div>
             <div className="text-left">
               <p className="text-xs text-muted-foreground">当前钱包</p>
               <div className="flex items-center gap-1">
@@ -286,20 +292,26 @@ export default function HomePage() {
                 <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </div>
             </div>
-          </button>
+          </motion.button>
           
           {/* Message Center Entry */}
-          <button 
-            className="relative p-2"
+          <motion.button 
+            className="relative p-2 rounded-full active:bg-muted/50 transition-colors"
             onClick={() => navigate('/messages')}
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
           >
             <Bell className="w-5 h-5 text-foreground" />
             {unreadNotificationCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center">
+              <motion.span 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center"
+              >
                 {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
-              </span>
+              </motion.span>
             )}
-          </button>
+          </motion.button>
         </div>
 
         {/* Balance Card with Light Gradient Overlay */}
@@ -336,24 +348,15 @@ export default function HomePage() {
                 />
               </div>
               
-              <motion.div
-                key={`${hideBalance}-${selectedChain}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-baseline gap-0.5 mb-4"
-              >
-                {hideBalance ? (
-                  <>
-                    <span className="text-3xl font-bold text-foreground">$****</span>
-                    <span className="text-lg font-medium text-foreground">.**</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-3xl font-bold text-foreground">${balanceParts.integer}</span>
-                    <span className="text-lg font-medium text-foreground">.{balanceParts.decimal}</span>
-                  </>
-                )}
-              </motion.div>
+              <div className="mb-4">
+                <AnimatedBalance
+                  integer={balanceParts.integer}
+                  decimal={balanceParts.decimal}
+                  hidden={hideBalance}
+                  integerClassName="text-3xl font-bold text-foreground"
+                  decimalClassName="text-lg font-medium text-foreground"
+                />
+              </div>
 
               {/* Quick Actions */}
               <div className="flex gap-3">

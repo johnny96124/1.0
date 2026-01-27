@@ -20,6 +20,30 @@ const menuItems = [
   { icon: HelpCircle, label: '帮助与支持', path: '/profile/help', badge: null },
 ];
 
+// Stagger animation for list items
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  show: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 300,
+      damping: 25,
+    }
+  },
+};
+
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { userInfo, logout } = useWallet();
@@ -37,14 +61,24 @@ export default function ProfilePage() {
           animate={{ opacity: 1, y: 0 }}
           className="card-elevated p-4 mb-4"
         >
-          <div className="flex items-center gap-4">
-            <Avatar className="w-16 h-16">
-              <AvatarImage src={userInfo?.avatar} alt="User avatar" />
-              <AvatarFallback className="bg-accent/20 text-accent text-xl font-semibold">
-                {displayName[0]?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
+          <motion.button
+            onClick={() => navigate('/profile/info')}
+            className="w-full flex items-center gap-4"
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          >
+            <motion.div
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <Avatar className="w-16 h-16">
+                <AvatarImage src={userInfo?.avatar} alt="User avatar" />
+                <AvatarFallback className="bg-accent/20 text-accent text-xl font-semibold">
+                  {displayName[0]?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </motion.div>
+            <div className="flex-1 min-w-0 text-left">
               <h2 className="text-lg font-bold text-foreground">
                 {displayName}
               </h2>
@@ -52,41 +86,45 @@ export default function ProfilePage() {
                 {userInfo?.email || '未设置邮箱'}
               </p>
             </div>
-          </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+          </motion.button>
         </motion.div>
 
-        {/* Menu Items */}
+        {/* Menu Items with staggered animation */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
           className="card-elevated overflow-hidden mb-4"
         >
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             return (
-                <button
-                  key={item.path}
-                  onClick={() => {
-                    if (item.path === '/profile/wallets') {
-                      navigate('/profile/wallets');
-                    } else {
-                      navigate(item.path);
-                    }
-                  }}
-                  className={cn(
-                    'w-full p-4 flex items-center gap-3 hover:bg-muted/50 transition-colors',
-                    index !== menuItems.length - 1 && 'border-b border-border'
-                  )}
-                >
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <span className="flex-1 text-left font-medium text-foreground text-sm">
-                    {item.label}
-                  </span>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                </button>
+              <motion.button
+                key={item.path}
+                variants={itemVariants}
+                onClick={() => {
+                  if (item.path === '/profile/wallets') {
+                    navigate('/profile/wallets');
+                  } else {
+                    navigate(item.path);
+                  }
+                }}
+                whileTap={{ scale: 0.98, backgroundColor: 'hsl(var(--muted) / 0.5)' }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className={cn(
+                  'w-full p-4 flex items-center gap-3 transition-colors active:bg-muted/50',
+                  index !== menuItems.length - 1 && 'border-b border-border'
+                )}
+              >
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <span className="flex-1 text-left font-medium text-foreground text-sm">
+                  {item.label}
+                </span>
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              </motion.button>
             );
           })}
         </motion.div>
@@ -95,12 +133,13 @@ export default function ProfilePage() {
         <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.3 }}
           onClick={() => {
             logout();
             navigate('/');
           }}
-          className="w-full card-elevated p-4 flex items-center gap-3 text-destructive hover:bg-destructive/5 transition-colors"
+          whileTap={{ scale: 0.98 }}
+          className="w-full card-elevated p-4 flex items-center gap-3 text-destructive hover:bg-destructive/5 active:bg-destructive/10 transition-colors"
         >
           <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
             <LogOut className="w-5 h-5" />
