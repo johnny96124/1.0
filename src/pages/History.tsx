@@ -237,38 +237,42 @@ export default function HistoryPage() {
             </motion.div>
           )}
 
-          {/* Search */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="搜索交易..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-10"
-            />
-          </div>
+          {isLoading ? (
+            <TransactionListSkeleton count={5} showSearchBar showTabs />
+          ) : (
+            <>
+              {/* Search */}
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="搜索交易..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-10"
+                />
+              </div>
 
-          {/* Filter Tabs */}
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="mb-4">
-            <TabsList className="w-full grid grid-cols-4 h-9">
-              <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
-              <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
-              <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
-              <TabsTrigger value="risk" className="text-xs">
-                风险
-                {riskCount > 0 && (
-                  <span className="ml-1 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
-                    {riskCount}
-                  </span>
-                )}
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+              {/* Filter Tabs */}
+              <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="mb-4">
+                <TabsList className="w-full grid grid-cols-4 h-9">
+                  <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
+                  <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
+                  <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
+                  <TabsTrigger value="risk" className="text-xs">
+                    风险
+                    {riskCount > 0 && (
+                      <span className="ml-1 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
+                        {riskCount}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </>
+          )}
 
           {/* Transactions List */}
-          {isLoading ? (
-            <TransactionListSkeleton count={5} />
-          ) : (
+          {!isLoading && (
             <div className="space-y-6">
               {Object.entries(groupedTransactions).map(([date, txs]) => (
                 <motion.div
