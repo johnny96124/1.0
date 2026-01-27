@@ -376,12 +376,13 @@ export default function PSPCenterPage() {
       onBack={() => navigate(-1)}
     >
       <div className="flex flex-col h-full">
+        <div className="px-4 pt-4">
         {/* Stats Card - only show if has active connections */}
         {activeConnections.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mx-4 mt-4 card-elevated p-4 relative overflow-hidden"
+            className="card-elevated p-4 relative overflow-hidden mb-4"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-success/5 pointer-events-none" />
             
@@ -418,7 +419,7 @@ export default function PSPCenterPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             onClick={handleConnect}
-            className="mx-4 mt-4 card-elevated p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors"
+            className="card-elevated p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors mt-4"
           >
             <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center">
               <Plus className="w-5 h-5 text-accent-foreground" />
@@ -439,7 +440,7 @@ export default function PSPCenterPage() {
 
         {/* Tab Navigation */}
         {pspConnections && pspConnections.length > 0 && (
-          <div className="px-4 mt-4">
+          <div className="mt-4">
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {visibleTabs.map((tab) => {
                 const Icon = tab.icon;
@@ -473,10 +474,11 @@ export default function PSPCenterPage() {
             </div>
           </div>
         )}
+        </div>
 
         {/* Tab Content */}
         {pspConnections && pspConnections.length > 0 && (
-          <div className="flex-1 px-4 py-4 overflow-y-auto">
+          <div className="flex-1 px-4 pb-4 overflow-y-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}

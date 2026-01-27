@@ -130,11 +130,11 @@ export default function RiskManagement() {
   return (
     <AppLayout showNav={false} title="风险资金处置" titleBadge={riskStatus.pendingRiskCount} showBack>
         <PullToRefresh onRefresh={handleRefresh} className="flex-1">
+          <div className="px-4 py-4">
           {/* Status Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mx-4 mt-4"
           >
             <div className={cn(
               "p-4 rounded-2xl border",
@@ -186,7 +186,7 @@ export default function RiskManagement() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="flex flex-col items-center justify-center px-4 py-16 text-center"
+              className="flex flex-col items-center justify-center py-12 text-center"
             >
               <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-4">
                 <Shield className="w-10 h-10 text-success" />
@@ -202,7 +202,7 @@ export default function RiskManagement() {
           ) : (
             <>
               {/* Tabs */}
-              <div className="px-4 mt-4">
+              <div className="mt-4">
                 <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
                   <TabsList className="w-full grid grid-cols-4 h-9">
                     <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
@@ -214,7 +214,7 @@ export default function RiskManagement() {
               </div>
               
               {/* Transaction List */}
-              <div className="px-4 mt-4 pb-6">
+              <div className="mt-4 pb-2">
                 {filteredTransactions.length === 0 ? (
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -298,6 +298,7 @@ export default function RiskManagement() {
               </div>
             </>
           )}
+          </div>
         </PullToRefresh>
       
       {/* Transaction Detail Drawer */}
