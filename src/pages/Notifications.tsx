@@ -75,8 +75,8 @@ export default function NotificationsPage() {
           <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">交易通知</h3>
           <div className="card-elevated overflow-hidden">
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
-                <ArrowDownLeft className="w-4 h-4 text-green-500" />
+              <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
+                <ArrowDownLeft className="w-4 h-4 text-success" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">收款到账通知</p>
@@ -103,8 +103,8 @@ export default function NotificationsPage() {
             </div>
             
             <div className="p-3 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <AlertTriangle className="w-4 h-4 text-orange-500" />
+              <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-warning" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">大额交易提醒</p>
@@ -149,8 +149,8 @@ export default function NotificationsPage() {
             </div>
             
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-red-500" />
+              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-destructive" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">安全风险提醒</p>

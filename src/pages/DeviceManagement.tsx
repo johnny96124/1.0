@@ -149,7 +149,7 @@ export default function DeviceManagementPage() {
                   <h4 className="font-medium text-foreground">
                     {currentDevice?.name || 'iPhone 15 Pro'}
                   </h4>
-                  <span className="text-[10px] px-1.5 py-0.5 bg-green-500/10 text-green-500 rounded">
+                  <span className="text-[10px] px-1.5 py-0.5 bg-success/10 text-success rounded">
                     在线
                   </span>
                 </div>

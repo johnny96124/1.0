@@ -24,6 +24,14 @@
    - sm: 32px - Small icons in lists
    - md: 40px - Standard icon containers
    - lg: 48px - Large feature icons
+   
+   === STATUS COLORS ===
+   Use semantic tokens instead of hardcoded colors:
+   - success (green) - Positive states, completed, online, received
+   - warning (amber/orange) - Caution, pending, large amounts
+   - destructive (red) - Errors, risks, failures, dangerous actions
+   - trust (teal) - iCloud, Apple-related positive states
+   - accent/primary (blue) - Interactive elements, links
 */
 
 @layer base {

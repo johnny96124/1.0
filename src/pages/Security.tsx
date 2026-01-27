@@ -97,11 +97,11 @@ export default function SecurityPage() {
           <div className="flex items-center gap-3 mb-3">
             <div className={cn(
               'w-10 h-10 rounded-full flex items-center justify-center',
-              securityScore >= 80 ? 'bg-green-500/20' : securityScore >= 50 ? 'bg-yellow-500/20' : 'bg-red-500/20'
+              securityScore >= 80 ? 'bg-success/20' : securityScore >= 50 ? 'bg-warning/20' : 'bg-destructive/20'
             )}>
               <Shield className={cn(
                 'w-5 h-5',
-                securityScore >= 80 ? 'text-green-500' : securityScore >= 50 ? 'text-yellow-500' : 'text-red-500'
+                securityScore >= 80 ? 'text-success' : securityScore >= 50 ? 'text-warning' : 'text-destructive'
               )} />
             </div>
             <div className="flex-1">
@@ -109,7 +109,7 @@ export default function SecurityPage() {
                 <span className="text-sm text-muted-foreground">安全等级</span>
                 <span className={cn(
                   'text-lg font-bold',
-                  securityScore >= 80 ? 'text-green-500' : securityScore >= 50 ? 'text-yellow-500' : 'text-red-500'
+                  securityScore >= 80 ? 'text-success' : securityScore >= 50 ? 'text-warning' : 'text-destructive'
                 )}>
                   {securityScore >= 80 ? '高' : securityScore >= 50 ? '中' : '低'}
                 </span>
@@ -137,7 +137,7 @@ export default function SecurityPage() {
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium">支付密码</p>
               </div>
-              <span className="text-xs text-green-500">{hasPin ? '已设置' : '未设置'}</span>
+              <span className="text-xs text-success">{hasPin ? '已设置' : '未设置'}</span>
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
             
@@ -179,8 +179,8 @@ export default function SecurityPage() {
               onClick={() => handleEditLimit('single')}
               className="w-full p-3 flex items-center gap-3 border-b border-border hover:bg-muted/50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
-                <DollarSign className="w-4 h-4 text-orange-500" />
+              <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-warning" />
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium">单笔限额</p>
@@ -224,8 +224,8 @@ export default function SecurityPage() {
             </button>
             
             <div className="p-3 flex items-center gap-3 border-b border-border">
-              <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center">
-                <TestTube className="w-4 h-4 text-green-500" />
+              <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
+                <TestTube className="w-4 h-4 text-success" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium">首次转账测试</p>
@@ -265,8 +265,8 @@ export default function SecurityPage() {
               onClick={() => setShowRiskDrawer(true)}
               className="w-full p-3 flex items-center gap-3 border-b border-border hover:bg-muted/50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                <AlertTriangle className="w-4 h-4 text-red-500" />
+              <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
               </div>
               <div className="flex-1 text-left">
                 <p className="text-sm font-medium">高风险地址处理</p>

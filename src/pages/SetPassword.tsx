@@ -25,8 +25,8 @@ const getPasswordStrength = (password: string): PasswordStrength => {
 
 const strengthConfig = {
   weak: { label: '弱', color: 'bg-destructive', segments: 1 },
-  medium: { label: '中', color: 'bg-yellow-500', segments: 2 },
-  strong: { label: '强', color: 'bg-green-500', segments: 3 },
+  medium: { label: '中', color: 'bg-warning', segments: 2 },
+  strong: { label: '强', color: 'bg-success', segments: 3 },
 };
 
 export default function SetPassword() {
@@ -92,14 +92,14 @@ export default function SetPassword() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", duration: 0.5 }}
-          className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mb-6"
+          className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring" }}
           >
-            <CheckCircle2 className="w-10 h-10 text-green-500" />
+            <CheckCircle2 className="w-10 h-10 text-success" />
           </motion.div>
         </motion.div>
         <motion.h2
@@ -218,8 +218,8 @@ export default function SetPassword() {
                 <span className={cn(
                   "text-sm font-medium",
                   strength === 'weak' && "text-destructive",
-                  strength === 'medium' && "text-yellow-500",
-                  strength === 'strong' && "text-green-500"
+                  strength === 'medium' && "text-warning",
+                  strength === 'strong' && "text-success"
                 )}>
                   {strengthInfo.label}
                 </span>
