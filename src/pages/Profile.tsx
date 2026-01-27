@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
 import { 
   Wallet, Shield, Smartphone, Users, User, BookUser,
-  Bell, HelpCircle, LogOut, ChevronRight, Building2
+  Bell, HelpCircle, LogOut, ChevronRight, Building2, Moon, Sun
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from 'next-themes';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 
@@ -47,6 +49,9 @@ const itemVariants = {
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { userInfo, logout } = useWallet();
+  const { theme, setTheme } = useTheme();
+
+  const isDark = theme === 'dark';
 
   // Get user display name from nickname or email
   const displayName = userInfo?.nickname || userInfo?.email?.split('@')[0] || '用户';
@@ -127,6 +132,31 @@ export default function ProfilePage() {
               </motion.button>
             );
           })}
+        </motion.div>
+
+        {/* Theme Toggle */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="card-elevated p-4 mb-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+              {isDark ? (
+                <Moon className="w-5 h-5 text-muted-foreground" />
+              ) : (
+                <Sun className="w-5 h-5 text-muted-foreground" />
+              )}
+            </div>
+            <span className="flex-1 font-medium text-foreground text-sm">
+              深色模式
+            </span>
+            <Switch
+              checked={isDark}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+            />
+          </div>
         </motion.div>
 
         {/* Logout */}
