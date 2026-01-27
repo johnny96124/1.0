@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowDownLeft, ArrowUpRight, Shield, ShieldAlert, AlertTriangle,
   Smartphone, Bell, Megaphone, Info, Building2, Gift, Wrench,
-  CheckCheck, ChevronRight, Inbox
+  ChevronRight, Inbox
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -137,7 +137,6 @@ export default function MessageCenter() {
             className="text-xs text-primary h-8 px-2"
             onClick={markAllNotificationsAsRead}
           >
-            <CheckCheck className="w-4 h-4 mr-1" />
             全部已读
           </Button>
         ) : null
@@ -191,7 +190,6 @@ export default function MessageCenter() {
                         <div className="space-y-2">
                           {group.items.map((notification, index) => {
                             const { icon: Icon, color, bg } = getNotificationIcon(notification.type);
-                            const isUrgent = notification.priority === 'urgent';
                             
                             return (
                               <motion.div
@@ -200,17 +198,16 @@ export default function MessageCenter() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.03 }}
                                 className={`
-                                  relative p-3 rounded-xl bg-card border border-border/50
-                                  ${isUrgent ? 'border-l-2 border-l-destructive' : ''}
+                                  p-4 rounded-xl bg-card border border-border/50
                                   ${notification.isRead ? 'opacity-70' : ''}
                                   active:scale-[0.98] transition-transform
                                 `}
                                 onClick={() => handleNotificationClick(notification)}
                               >
-                                <div className="flex gap-3">
-                                  {/* Icon */}
-                                  <div className={`w-10 h-10 rounded-full ${bg} flex items-center justify-center flex-shrink-0`}>
-                                    <Icon className={`w-5 h-5 ${color}`} />
+                                <div className="flex items-center gap-3">
+                                  {/* Icon - 32px container with 16px icon like toast */}
+                                  <div className={`w-8 h-8 rounded-full ${bg} flex items-center justify-center flex-shrink-0`}>
+                                    <Icon className={`w-4 h-4 ${color}`} />
                                   </div>
                                   
                                   {/* Content */}

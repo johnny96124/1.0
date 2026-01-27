@@ -293,7 +293,7 @@ export default function HomePage() {
             className="relative p-2"
             onClick={() => navigate('/messages')}
           >
-            <Bell className="w-5 h-5 text-muted-foreground" />
+            <Bell className="w-5 h-5 text-foreground" />
             {unreadNotificationCount > 0 && (
               <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-medium rounded-full flex items-center justify-center">
                 {unreadNotificationCount > 9 ? '9+' : unreadNotificationCount}
