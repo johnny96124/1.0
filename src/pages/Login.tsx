@@ -829,8 +829,7 @@ export default function LoginPage() {
     <div className="h-full flex flex-col overflow-hidden bg-background">
       {loginStep === 'input' && (
         <div className="relative">
-          <div className="pt-10" />
-          
+          {/* Removed pt-10 - gradient now extends to top */}
           <Carousel
             className="flex-shrink-0 relative z-10"
             setApi={setApi}
@@ -848,10 +847,10 @@ export default function LoginPage() {
             <CarouselContent className="ml-0">
               {slides.map((slide, index) => (
                 <CarouselItem key={index} className="pl-0">
-                  <div className="relative h-52 flex items-center justify-center">
-                    {/* Background Gradient - matching Welcome page */}
+                  <div className="relative h-56 pt-10 flex items-center justify-center">
+                    {/* Background Gradient - extends to top */}
                     <div 
-                      className={`absolute inset-0 ${
+                      className={`absolute inset-0 -top-20 ${
                         index === 0 
                           ? 'bg-gradient-to-b from-blue-500/15 via-blue-500/5 to-transparent' 
                           : index === 1 
