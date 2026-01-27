@@ -142,8 +142,8 @@ export default function SetPassword() {
         </button>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 px-4 flex flex-col">
+      {/* Scrollable Content */}
+      <div className="flex-1 px-4 overflow-y-auto">
         {/* Icon */}
         <div className="flex justify-center mb-6 mt-8">
           <motion.div
@@ -287,42 +287,39 @@ export default function SetPassword() {
             </motion.p>
           )}
         </motion.div>
-
-        {/* Spacer */}
-        <div className="flex-1 min-h-8" />
-
-        {/* Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="pb-8 space-y-4"
-        >
-          <Button
-            variant="default"
-            size="lg"
-            className="w-full text-base font-medium"
-            onClick={handleSetPassword}
-            disabled={isLoading || !password || !confirmPassword}
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            ) : null}
-            设置密码
-          </Button>
-
-          {/* Only show skip button when NOT in onboarding flow */}
-          {!isOnboardingFlow && (
-            <button
-              onClick={handleSkip}
-              disabled={isLoading}
-              className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-            >
-              稍后设置
-            </button>
-          )}
-        </motion.div>
       </div>
+
+      {/* Fixed Bottom Actions */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="px-4 pb-8 pt-4 bg-background"
+      >
+        <Button
+          variant="default"
+          size="lg"
+          className="w-full text-base font-medium"
+          onClick={handleSetPassword}
+          disabled={isLoading || !password || !confirmPassword}
+        >
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : null}
+          设置密码
+        </Button>
+
+        {/* Only show skip button when NOT in onboarding flow */}
+        {!isOnboardingFlow && (
+          <button
+            onClick={handleSkip}
+            disabled={isLoading}
+            className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 mt-4"
+          >
+            稀后设置
+          </button>
+        )}
+      </motion.div>
     </div>
   );
 }
