@@ -126,7 +126,7 @@ export function BottomNav() {
                         'w-[22px] h-[22px] relative z-10 transition-all duration-200',
                         isActive 
                           ? 'text-accent' 
-                          : 'text-muted-foreground/80'
+                          : 'text-foreground'
                       )}
                       strokeWidth={1.5}
                       fill={isActive ? 'currentColor' : 'none'}
