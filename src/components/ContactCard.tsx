@@ -67,13 +67,13 @@ export function ContactCard({
             {contact.name}
           </span>
           {contact.isWhitelisted && (
-            <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-success/10 text-success text-[10px]">
+            <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-success/10 text-success text-[10px] whitespace-nowrap flex-shrink-0">
               <Shield className="w-2.5 h-2.5" />
               白名单
             </span>
           )}
           {contact.isOfficial && (
-            <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">
+            <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] whitespace-nowrap flex-shrink-0">
               <Star className="w-2.5 h-2.5" />
               官方
             </span>
