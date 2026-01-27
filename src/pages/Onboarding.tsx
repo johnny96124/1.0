@@ -60,8 +60,8 @@ import {
 
 // Create wallet steps - optimized to 3 steps
 const createSteps = [
-  { id: 1, title: '安全授权', icon: Shield },
-  { id: 2, title: '创建钱包', icon: Fingerprint },
+  { id: 1, title: '安全授权', icon: Fingerprint },
+  { id: 2, title: '创建钱包', icon: Shield },
   { id: 3, title: '云端备份', icon: CloudUpload },
 ];
 
