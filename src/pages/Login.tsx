@@ -481,7 +481,7 @@ export default function LoginPage() {
           <Phone className="w-4 h-4" />
           手机号
           {lastLogin === 'phone' && (
-            <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
+            <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground rounded-full leading-none">
               上次
             </span>
           )}
@@ -498,7 +498,7 @@ export default function LoginPage() {
           <Mail className="w-4 h-4" />
           邮箱
           {lastLogin === 'email' && (
-            <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
+            <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground rounded-full leading-none">
               上次
             </span>
           )}
@@ -604,7 +604,7 @@ export default function LoginPage() {
             )}
           </Button>
           {lastLogin === 'apple' && (
-            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
+            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground rounded-full leading-none">
               上次
             </span>
           )}
@@ -629,7 +629,7 @@ export default function LoginPage() {
             )}
           </Button>
           {lastLogin === 'google' && (
-            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full leading-none">
+            <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground rounded-full leading-none">
               上次
             </span>
           )}
@@ -780,7 +780,7 @@ export default function LoginPage() {
             animate={{ scale: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.4 }}
           >
-            <CheckCircle2 className="w-12 h-12 text-white" strokeWidth={2.5} />
+            <CheckCircle2 className="w-12 h-12 text-white" strokeWidth={1.5} />
           </motion.div>
         </motion.div>
       </motion.div>
@@ -849,6 +849,16 @@ export default function LoginPage() {
               {slides.map((slide, index) => (
                 <CarouselItem key={index} className="pl-0">
                   <div className="relative h-52 flex items-center justify-center">
+                    {/* Background Gradient - matching Welcome page */}
+                    <div 
+                      className={`absolute inset-0 ${
+                        index === 0 
+                          ? 'bg-gradient-to-b from-blue-500/15 via-blue-500/5 to-transparent' 
+                          : index === 1 
+                          ? 'bg-gradient-to-b from-violet-500/15 via-violet-500/5 to-transparent'
+                          : 'bg-gradient-to-b from-emerald-500/15 via-emerald-500/5 to-transparent'
+                      }`}
+                    />
                   
                   <motion.div
                     animate={{ 
