@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getChainIconUrl } from '@/lib/crypto-icons';
 import { cn } from '@/lib/utils';
-import { Globe } from 'lucide-react';
+import { Coins } from 'lucide-react';
 
 interface ChainIconProps {
   chainId: string;
@@ -19,11 +19,11 @@ const sizeMap = {
 export function ChainIcon({ chainId, size = 'md', className }: ChainIconProps) {
   const [hasError, setHasError] = useState(false);
   
-  // For 'all' chains, show a globe icon with consistent sizing
+  // For 'all' chains, show a generic token icon that inherits color from parent
   if (chainId === 'all') {
     return (
       <div className={cn(sizeMap[size], 'flex items-center justify-center', className)}>
-        <Globe className="w-full h-full text-accent" />
+        <Coins className="w-full h-full" />
       </div>
     );
   }
