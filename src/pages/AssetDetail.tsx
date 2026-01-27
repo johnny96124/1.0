@@ -157,7 +157,7 @@ export default function AssetDetailPage() {
               <p className="text-3xl font-bold text-foreground mb-1">
                 {displayBalance.balance.toLocaleString()} {assetData.symbol}
               </p>
-              <p className="text-lg text-muted-foreground">
+              <p className="text-lg text-foreground">
                 {formatCurrency(displayBalance.usdValue)}
               </p>
             </motion.div>
@@ -274,7 +274,7 @@ export default function AssetDetailPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 * index }}
-                    className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                    className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
                     onClick={() => setSelectedTx(tx)}
                   >
                     <div className="flex items-center gap-2">
