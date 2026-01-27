@@ -345,6 +345,7 @@ export default function PersonalInfo() {
         mode={bindMode}
         currentValue={currentBindValue}
         onSuccess={handleBindSuccess}
+        hasPassword={hasExistingPassword}
       />
 
       {/* Change Password Drawer */}

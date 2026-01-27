@@ -39,6 +39,9 @@ export default function BindEmailDemo() {
   const [drawerMode, setDrawerMode] = useState<BindMode>('bind');
   const [boundEmail, setBoundEmail] = useState<string | null>(null);
   const [boundPhone, setBoundPhone] = useState<string | null>(null);
+  
+  // Check if user has password set
+  const hasPassword = Boolean(localStorage.getItem('user_password'));
 
   const handleOpenDrawer = (type: BindType, mode: BindMode) => {
     setDrawerType(type);
@@ -235,6 +238,7 @@ export default function BindEmailDemo() {
         mode={drawerMode}
         currentValue={getCurrentValue()}
         onSuccess={handleBindSuccess}
+        hasPassword={hasPassword}
       />
     </AppLayout>
   );
