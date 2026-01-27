@@ -245,16 +245,35 @@ export default function SetPassword() {
                 setConfirmPassword(e.target.value);
                 setError('');
               }}
-              className="h-12 text-base pr-12"
+              className={cn(
+                "h-12 text-base pr-20",
+                confirmPassword && password && confirmPassword === password && "border-success focus-visible:ring-success"
+              )}
               disabled={isLoading}
             />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+              {/* Password match indicator */}
+              {confirmPassword && password && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", duration: 0.3 }}
+                >
+                  {confirmPassword === password ? (
+                    <CheckCircle2 className="w-5 h-5 text-success" />
+                  ) : (
+                    <span className="text-xs text-destructive">不匹配</span>
+                  )}
+                </motion.div>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           {/* Error Message */}
