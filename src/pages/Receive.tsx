@@ -246,7 +246,7 @@ export default function ReceivePage() {
                     <div className="mb-4">
                       <div className="flex items-center gap-1.5 mb-2">
                         <Star className="w-3.5 h-3.5 text-warning fill-warning" />
-                        <span className="text-xs font-medium text-muted-foreground">常用网络</span>
+                        <span className="text-xs font-medium text-foreground">常用网络</span>
                       </div>
                       <div className="space-y-1">
                         {frequentNetworks.map((network) => (
@@ -259,7 +259,7 @@ export default function ReceivePage() {
                   {/* Other Networks or Search Results */}
                   <div>
                     {!searchQuery && otherNetworks.length > 0 && (
-                      <span className="text-xs font-medium text-muted-foreground mb-2 block">其他网络</span>
+                      <span className="text-xs font-medium text-foreground mb-2 block">其他网络</span>
                     )}
                     {searchQuery && frequentNetworks.length === 0 && otherNetworks.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
