@@ -64,19 +64,19 @@ export function BottomNav() {
       {/* Liquid Glass Container */}
       <div className="relative rounded-[22px] overflow-hidden">
         {/* Glass background layers */}
-        <div className="absolute inset-0 bg-white/70 dark:bg-card/90 backdrop-blur-2xl" />
+        <div className="absolute inset-0 bg-white/95 dark:bg-card/90 backdrop-blur-2xl" />
         
-        {/* Gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-transparent dark:from-white/5 dark:to-transparent" />
+        {/* Gradient overlay for depth - dark mode only */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-transparent dark:from-white/5 dark:to-transparent" />
         
-        {/* Top highlight - liquid glass edge */}
-        <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent dark:via-white/20" />
+        {/* Top highlight - liquid glass edge - dark mode only */}
+        <div className="absolute inset-x-0 top-0 h-[1px] bg-transparent dark:bg-gradient-to-r dark:from-transparent dark:via-white/20 dark:to-transparent" />
         
-        {/* Inner shadow for depth */}
-        <div className="absolute inset-0 rounded-[22px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),inset_0_-1px_1px_rgba(0,0,0,0.3)]" />
+        {/* Inner shadow for depth - dark mode only */}
+        <div className="absolute inset-0 rounded-[22px] shadow-none dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),inset_0_-1px_1px_rgba(0,0,0,0.3)]" />
         
-        {/* Border for dark mode */}
-        <div className="absolute inset-0 rounded-[22px] border border-white/20 dark:border-border/50" />
+        {/* Border - dark mode only */}
+        <div className="absolute inset-0 rounded-[22px] border-0 dark:border dark:border-border/50" />
         
                 <div className="relative flex items-center justify-around h-14 px-4">
           {navItems.map((item) => {
