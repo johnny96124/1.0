@@ -96,12 +96,12 @@ export default function WelcomePage() {
         <CarouselContent className="flex-1 ml-0">
           {slides.map((slide, index) => (
             <CarouselItem key={index} className="h-full pl-0">
-              <div className="h-full flex flex-col py-8">
+              <div className="h-full flex flex-col">
                 {/* Illustration Area */}
-                <div className="relative h-52 flex items-center justify-center">
-                  {/* Background Gradient */}
+                <div className="relative h-56 pt-8 flex items-center justify-center">
+                  {/* Background Gradient - extends to top */}
                   <div 
-                    className={`absolute inset-0 ${
+                    className={`absolute inset-0 -top-20 ${
                       index === 0 
                         ? 'bg-gradient-to-b from-blue-500/15 via-blue-500/5 to-transparent' 
                         : index === 1 
@@ -110,14 +110,14 @@ export default function WelcomePage() {
                     }`}
                   />
                   
-                  {/* Animated Background Orbs */}
+                  {/* Animated Background Orbs - matching Login page */}
                   <motion.div
                     animate={{ 
                       scale: [1, 1.2, 1],
                       opacity: [0.3, 0.5, 0.3],
                     }}
                     transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    className={`absolute top-4 left-1/4 w-24 h-24 rounded-full blur-3xl ${
+                    className={`absolute top-4 left-1/4 w-20 h-20 rounded-full blur-3xl ${
                       index === 0 ? 'bg-blue-500/20' : index === 1 ? 'bg-violet-500/20' : 'bg-emerald-500/20'
                     }`}
                   />
@@ -127,21 +127,21 @@ export default function WelcomePage() {
                       opacity: [0.2, 0.4, 0.2],
                     }}
                     transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                    className={`absolute bottom-4 right-1/4 w-28 h-28 rounded-full blur-3xl ${
+                    className={`absolute bottom-4 right-1/4 w-24 h-24 rounded-full blur-3xl ${
                       index === 0 ? 'bg-cyan-400/15' : index === 1 ? 'bg-purple-400/15' : 'bg-teal-400/15'
                     }`}
                   />
                   
-                  {/* Main Icon with Orbiting Elements */}
+                  {/* Main Icon with Orbiting Elements - matching Login page */}
                   <div className="relative z-10">
                     {/* Outer Ring */}
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                      className="absolute inset-0 w-44 h-44 -m-6"
+                      className="absolute inset-0 w-36 h-36 -m-4"
                       style={{ transformOrigin: 'center' }}
                     >
-                      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full ${
+                      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full ${
                         index === 0 ? 'bg-blue-400/40' : index === 1 ? 'bg-violet-400/40' : 'bg-emerald-400/40'
                       }`} />
                       <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full ${
@@ -149,11 +149,11 @@ export default function WelcomePage() {
                       }`} />
                     </motion.div>
 
-                    {/* Floating Icons */}
+                    {/* Floating Icons - matching Login page sizing */}
                     <motion.div
-                      animate={{ y: [0, -10, 0], x: [0, 4, 0] }}
+                      animate={{ y: [0, -8, 0], x: [0, 3, 0] }}
                       transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                      className={`absolute -top-6 -right-4 w-9 h-9 rounded-xl flex items-center justify-center shadow-lg ${
+                      className={`absolute -top-5 -right-3 w-8 h-8 rounded-xl flex items-center justify-center shadow-lg ${
                         index === 0 ? 'bg-blue-500/90 text-white' : index === 1 ? 'bg-violet-500/90 text-white' : 'bg-emerald-500/90 text-white'
                       }`}
                     >
@@ -161,9 +161,9 @@ export default function WelcomePage() {
                     </motion.div>
 
                     <motion.div
-                      animate={{ y: [0, 6, 0], x: [0, -3, 0] }}
+                      animate={{ y: [0, 5, 0], x: [0, -2, 0] }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                      className={`absolute -bottom-3 -left-6 w-7 h-7 rounded-lg flex items-center justify-center shadow-md ${
+                      className={`absolute -bottom-2 -left-5 w-6 h-6 rounded-lg flex items-center justify-center shadow-md ${
                         index === 0 ? 'bg-cyan-500/80 text-white' : index === 1 ? 'bg-purple-500/80 text-white' : 'bg-teal-500/80 text-white'
                       }`}
                     >
@@ -171,16 +171,16 @@ export default function WelcomePage() {
                     </motion.div>
 
                     <motion.div
-                      animate={{ y: [0, -5, 0], rotate: [0, 8, 0] }}
+                      animate={{ y: [0, -4, 0], rotate: [0, 6, 0] }}
                       transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                      className={`absolute top-1/2 -right-10 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center shadow-md ${
+                      className={`absolute top-1/2 -right-8 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center shadow-md ${
                         index === 0 ? 'bg-blue-400/70 text-white' : index === 1 ? 'bg-violet-400/70 text-white' : 'bg-emerald-400/70 text-white'
                       }`}
                     >
                       {slide.floatingIcons[2]}
                     </motion.div>
 
-                    {/* Main Icon Container with Pulse */}
+                    {/* Main Icon Container with Pulse - matching Login page */}
                     <motion.div
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -191,42 +191,43 @@ export default function WelcomePage() {
                       <motion.div
                         animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }}
                         transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-                        className={`absolute inset-0 rounded-3xl ${
+                        className={`absolute inset-0 rounded-2xl ${
                           index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-violet-500' : 'bg-emerald-500'
                         }`}
                       />
                       
-                      {/* Icon Box */}
-                      <div className={`relative w-28 h-28 rounded-3xl ${slide.iconBg} flex items-center justify-center shadow-2xl`}>
+                      {/* Icon Box - matching Login page size */}
+                      <div className={`relative w-24 h-24 rounded-2xl ${slide.iconBg} flex items-center justify-center shadow-2xl`}>
                         <motion.div
-                          animate={{ rotate: [0, 5, -5, 0] }}
+                          animate={{ rotate: [0, 4, -4, 0] }}
                           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                          className="w-10 h-10 text-white [&>svg]:w-10 [&>svg]:h-10"
                         >
                           {slide.icon}
                         </motion.div>
                       </div>
                     </motion.div>
 
-                    {/* Sparkle Effects */}
+                    {/* Sparkle Effects - matching Login page */}
                     <motion.div
                       animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-                      className={`absolute -top-1 left-0 w-2 h-2 rounded-full ${
+                      className={`absolute -top-1 left-0 w-1.5 h-1.5 rounded-full ${
                         index === 0 ? 'bg-blue-400' : index === 1 ? 'bg-violet-400' : 'bg-emerald-400'
                       }`}
                     />
                     <motion.div
                       animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0.7 }}
-                      className={`absolute bottom-3 -right-3 w-1.5 h-1.5 rounded-full ${
+                      className={`absolute bottom-2 -right-2 w-1 h-1 rounded-full ${
                         index === 0 ? 'bg-cyan-400' : index === 1 ? 'bg-purple-400' : 'bg-teal-400'
                       }`}
                     />
                   </div>
                 </div>
 
-                {/* Content Area */}
-                <div className="px-6 flex-1 flex flex-col justify-center">
+                {/* Content Area - center aligned */}
+                <div className="px-6 flex-1 flex flex-col justify-center text-center">
                   {/* Progress Indicators */}
                   <div className="flex items-center justify-center gap-2 mb-6">
                     {slides.map((_, i) => (
@@ -244,19 +245,19 @@ export default function WelcomePage() {
                     ))}
                   </div>
 
-                  {/* Brand */}
-                  <div className="flex items-center gap-2 mb-3">
+                  {/* Brand - centered */}
+                  <div className="flex items-center justify-center gap-2 mb-3">
                     <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                       <Shield className="w-4 h-4 text-primary-foreground" />
                     </div>
                     <span className="text-sm font-semibold text-foreground">商户钱包</span>
                   </div>
 
-                  {/* Title & Description */}
+                  {/* Title & Description - centered */}
                   <h1 className="text-2xl font-bold text-foreground mb-2 leading-tight">
                     {slide.title}
                   </h1>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
+                  <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
                     {slide.description}
                   </p>
                 </div>
