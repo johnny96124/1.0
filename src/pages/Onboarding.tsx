@@ -323,11 +323,11 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
       className="flex flex-col h-full items-center justify-center text-center"
     >
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        animate={{ scale: [1, 1.1, 1] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
         className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
       >
-        <Fingerprint className="w-12 h-12 text-accent" strokeWidth={1.5} />
+        <Shield className="w-12 h-12 text-accent" strokeWidth={1.5} />
       </motion.div>
       
       <AnimatePresence mode="wait">
