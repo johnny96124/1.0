@@ -254,7 +254,7 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
           transition={{ delay: 0.2 }}
           className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6"
         >
-          <Shield className="w-10 h-10 text-accent" strokeWidth={1.5} />
+          <Fingerprint className="w-10 h-10 text-accent" strokeWidth={1.5} />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
