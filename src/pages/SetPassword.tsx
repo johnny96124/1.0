@@ -102,10 +102,10 @@ export default function SetPassword() {
   // Success state - Show welcome guidance for onboarding flow
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-background flex flex-col px-4">
+      <div className="h-full bg-background flex flex-col px-4">
         {isOnboardingFlow ? (
           // Onboarding flow: Show wallet creation guidance - centered vertically
-          <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="flex-1 flex flex-col items-center justify-center -mt-16">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
