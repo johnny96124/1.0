@@ -2,9 +2,37 @@ import { Toaster as Sonner, toast } from "sonner";
 import { useEffect, useState } from "react";
 import { getDrawerContainer } from "@/components/layout/PhoneFrame";
 import { createPortal } from "react-dom";
-import { CheckCircle2, XCircle, AlertTriangle, Info, X } from "lucide-react";
+import { Check, X, AlertTriangle, Info } from "lucide-react";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
+
+// Custom success icon - solid green circle with white checkmark
+const SuccessIcon = () => (
+  <div className="w-7 h-7 rounded-full bg-success flex items-center justify-center flex-shrink-0">
+    <Check className="w-4 h-4 text-white" strokeWidth={3} />
+  </div>
+);
+
+// Custom error icon - solid red circle with X
+const ErrorIcon = () => (
+  <div className="w-7 h-7 rounded-full bg-destructive flex items-center justify-center flex-shrink-0">
+    <X className="w-4 h-4 text-white" strokeWidth={3} />
+  </div>
+);
+
+// Custom warning icon - solid orange circle with triangle
+const WarningIcon = () => (
+  <div className="w-7 h-7 rounded-full bg-warning flex items-center justify-center flex-shrink-0">
+    <AlertTriangle className="w-4 h-4 text-white" strokeWidth={2.5} />
+  </div>
+);
+
+// Custom info icon
+const InfoIcon = () => (
+  <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+    <Info className="w-4 h-4 text-white" strokeWidth={2.5} />
+  </div>
+);
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const [container, setContainer] = useState<HTMLElement | null>(null);
@@ -39,10 +67,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       richColors={false}
       closeButton={true}
       icons={{
-        success: <CheckCircle2 className="w-6 h-6 text-success" />,
-        error: <XCircle className="w-6 h-6 text-destructive" />,
-        warning: <AlertTriangle className="w-6 h-6 text-warning" />,
-        info: <Info className="w-6 h-6 text-primary" />,
+        success: <SuccessIcon />,
+        error: <ErrorIcon />,
+        warning: <WarningIcon />,
+        info: <InfoIcon />,
         close: <X className="w-4 h-4" />,
       }}
       /**
@@ -67,19 +95,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
         duration: 3000,
         classNames: {
           toast:
-            "w-full flex items-start gap-3 p-4 rounded-xl shadow-lg pointer-events-auto bg-card border border-border/30",
+            "w-full flex items-center gap-3 p-4 rounded-2xl shadow-lg pointer-events-auto bg-card relative",
           title: "font-semibold text-base text-foreground leading-tight",
           description: "text-sm text-muted-foreground mt-0.5",
-          icon: "flex-shrink-0 mt-0.5",
-          content: "flex-1 min-w-0",
-          closeButton: "absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted",
+          icon: "flex-shrink-0",
+          content: "flex-1 min-w-0 pr-6",
+          closeButton: "!static !transform-none !right-0 !top-0 ml-auto text-muted-foreground/60 hover:text-muted-foreground transition-colors p-0 !bg-transparent !border-0 !shadow-none",
           actionButton: "bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-sm font-medium",
           cancelButton: "bg-muted text-muted-foreground rounded-lg px-3 py-1.5 text-sm font-medium",
         },
         style: {
           background: "hsl(var(--card))",
           color: "hsl(var(--card-foreground))",
-          boxShadow: "0 4px 20px -4px rgba(0, 0, 0, 0.15), 0 2px 8px -2px rgba(0, 0, 0, 0.08)",
+          boxShadow: "0 4px 20px -4px rgba(0, 0, 0, 0.12), 0 2px 8px -2px rgba(0, 0, 0, 0.06)",
         },
       }}
       {...props}
