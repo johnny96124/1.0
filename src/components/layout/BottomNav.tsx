@@ -76,10 +76,7 @@ export function BottomNav() {
         <div className="absolute inset-0 rounded-[22px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),inset_0_-1px_1px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),inset_0_-1px_1px_rgba(0,0,0,0.3)]" />
         
         {/* Border for dark mode */}
-        <div className="absolute inset-0 rounded-[22px] border border-transparent dark:border-border/50" />
-        
-        {/* Outer glow */}
-        <div className="absolute -inset-[1px] rounded-[23px] bg-gradient-to-b from-white/50 to-white/20 dark:from-white/10 dark:to-transparent -z-10 blur-[0.5px]" />
+        <div className="absolute inset-0 rounded-[22px] border border-white/20 dark:border-border/50" />
         
                 <div className="relative flex items-center justify-around h-14 px-4">
           {navItems.map((item) => {
