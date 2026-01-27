@@ -262,5 +262,10 @@
     left: unset !important;
     right: unset !important;
     top: unset !important;
+    color: #6b7280 !important;
+  }
+
+  [data-sonner-toaster] [data-sonner-toast] [data-close-button]:hover {
+    color: #374151 !important;
   }
 }
