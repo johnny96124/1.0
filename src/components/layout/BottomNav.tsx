@@ -125,11 +125,12 @@ export function BottomNav() {
                       className={cn(
                         'w-[22px] h-[22px] relative z-10 transition-all duration-200',
                         isActive 
-                          ? 'text-accent stroke-[2px]' 
-                          : 'text-muted-foreground/80 stroke-[1.5px]'
+                          ? 'text-accent' 
+                          : 'text-muted-foreground/80'
                       )}
+                      strokeWidth={1.5}
                       fill={isActive ? 'currentColor' : 'none'}
-                      fillOpacity={isActive ? 0.2 : 0}
+                      fillOpacity={isActive ? 0.15 : 0}
                     />
                   </motion.div>
                 </div>
