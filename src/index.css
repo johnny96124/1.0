@@ -27,6 +27,18 @@
    - xl: 64px (w-16 h-16) + icon 32px (w-8 h-8) - Page hero, onboarding steps
    - 2xl: 80px (w-20 h-20) + icon 40px (w-10 h-10) - Success states, completion
    
+   === TYPOGRAPHY STANDARDS ===
+   
+   Font Sizes (for forms/inputs):
+   - text-base (16px) - All form inputs, textareas, selects (default)
+   - text-sm (14px) - Labels, helper text, secondary info
+   - text-xs (12px) - Captions, timestamps, meta info
+   
+   Text Colors:
+   - foreground - Primary text, key information
+   - muted-foreground / text-secondary - Secondary labels, descriptions
+   - text-placeholder - Input placeholders, prompts (lighter grey)
+   
    === STATUS COLORS ===
    Use semantic tokens instead of hardcoded colors:
    - success (green) - Positive states, completed, online, received
