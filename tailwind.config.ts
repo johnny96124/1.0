@@ -39,6 +39,9 @@ export default {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+        // Text hierarchy tokens
+        "text-secondary": "hsl(var(--text-secondary))",
+        "text-placeholder": "hsl(var(--text-placeholder))",
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
