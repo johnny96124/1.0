@@ -301,9 +301,9 @@ export default function HistoryPage() {
                           "w-full p-3 rounded-xl flex items-center justify-between text-left transition-all",
                           "hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50",
                           isPendingRisk && tx.riskScore === 'red' 
-                            ? "bg-destructive/5 border border-destructive/30" 
+                            ? "bg-destructive/10 border-2 border-destructive/50 shadow-[0_0_12px_-3px_hsl(var(--destructive)/0.4)]" 
                             : isPendingRisk && tx.riskScore === 'yellow'
-                            ? "bg-warning/5 border border-warning/30"
+                            ? "bg-warning/10 border-2 border-warning/50 shadow-[0_0_12px_-3px_hsl(var(--warning)/0.4)]"
                             : "bg-card border border-border/50"
                         )}
                       >
