@@ -260,7 +260,7 @@ export default function SendPage() {
                         setAddress(e.target.value);
                         setSelectedContact(null);
                       }}
-                      className="h-14 pr-20 text-base"
+                      className="pr-20 text-base"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                       <Button 

@@ -490,7 +490,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
                   setPassword(e.target.value);
                   setError('');
                 }}
-                className="h-14 pr-12"
+                className="pr-12"
               />
               <button
                 type="button"
@@ -535,7 +535,7 @@ function CloudBackupStep({ onComplete }: { onComplete: () => void }) {
               setConfirmPassword(e.target.value);
               setError('');
             }}
-            className="h-14"
+            className=""
           />
 
           {/* Password warning banner */}
@@ -837,7 +837,7 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
               setPassword(e.target.value);
               setError('');
             }}
-            className="h-14 pr-12"
+            className="pr-12"
           />
           <button
             type="button"
