@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Lock, Zap, Wallet, CreditCard, TrendingUp, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel';
+
 interface SlideData {
   icon: React.ReactNode;
   iconBg: string;
@@ -18,10 +19,47 @@ interface SlideData {
   floatingIcons: React.ReactNode[];
 }
 
+// Color themes for each slide - matching Login page
+const colorThemes = [
+  {
+    iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-400',
+    orbColor: 'bg-blue-500/20',
+    orbColor2: 'bg-cyan-400/15',
+    dotColor: 'bg-blue-400/40',
+    dotColor2: 'bg-cyan-400/30',
+    floatingBg: ['bg-blue-500/90', 'bg-cyan-500/80', 'bg-blue-400/70'],
+    sparkleColor: 'bg-blue-400',
+    pulseColor: 'bg-blue-500',
+    gradientBg: 'bg-gradient-to-b from-blue-500/15 via-blue-500/5 to-transparent',
+  },
+  {
+    iconBg: 'bg-gradient-to-br from-violet-500 to-purple-400',
+    orbColor: 'bg-violet-500/20',
+    orbColor2: 'bg-purple-400/15',
+    dotColor: 'bg-violet-400/40',
+    dotColor2: 'bg-purple-400/30',
+    floatingBg: ['bg-violet-500/90', 'bg-purple-500/80', 'bg-violet-400/70'],
+    sparkleColor: 'bg-violet-400',
+    pulseColor: 'bg-violet-500',
+    gradientBg: 'bg-gradient-to-b from-violet-500/15 via-violet-500/5 to-transparent',
+  },
+  {
+    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-400',
+    orbColor: 'bg-emerald-500/20',
+    orbColor2: 'bg-teal-400/15',
+    dotColor: 'bg-emerald-400/40',
+    dotColor2: 'bg-teal-400/30',
+    floatingBg: ['bg-emerald-500/90', 'bg-teal-500/80', 'bg-emerald-400/70'],
+    sparkleColor: 'bg-emerald-400',
+    pulseColor: 'bg-emerald-500',
+    gradientBg: 'bg-gradient-to-b from-emerald-500/15 via-emerald-500/5 to-transparent',
+  },
+];
+
 const slides: SlideData[] = [
   {
-    icon: <Shield className="w-12 h-12 text-white" />,
-    iconBg: 'bg-gradient-to-br from-blue-500 to-cyan-400',
+    icon: <Shield className="w-10 h-10 text-white" />,
+    iconBg: colorThemes[0].iconBg,
     title: '轻松管理您的数字资产',
     description: '一站式管理您的收款和结算资金，安全便捷的交易体验，随时随地掌控您的财务。',
     floatingIcons: [
@@ -31,8 +69,8 @@ const slides: SlideData[] = [
     ],
   },
   {
-    icon: <Lock className="w-12 h-12 text-white" />,
-    iconBg: 'bg-gradient-to-br from-violet-500 to-purple-400',
+    icon: <Lock className="w-10 h-10 text-white" />,
+    iconBg: colorThemes[1].iconBg,
     title: '顶级安全，无忧交易',
     description: '采用MPC多方计算技术保护您的资产，非托管设计确保只有您能控制自己的资金。',
     floatingIcons: [
@@ -42,8 +80,8 @@ const slides: SlideData[] = [
     ],
   },
   {
-    icon: <Zap className="w-12 h-12 text-white" />,
-    iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-400',
+    icon: <Zap className="w-10 h-10 text-white" />,
+    iconBg: colorThemes[2].iconBg,
     title: '快速收款，即时到账',
     description: '支持多种数字货币收款，实时查看交易记录，让您的业务结算更加高效。',
     floatingIcons: [
@@ -79,47 +117,37 @@ export default function WelcomePage() {
 
   return (
     <div className="h-full bg-background flex flex-col overflow-hidden">
-      <Carousel
-        className="flex-1 flex flex-col"
-        setApi={setApi}
-        opts={{
-          align: 'start',
-          loop: true,
-        }}
-        plugins={[
-          Autoplay({
-            delay: 3000,
-            stopOnInteraction: true,
-          }),
-        ]}
-      >
-        <CarouselContent className="flex-1 ml-0">
-          {slides.map((slide, index) => (
-            <CarouselItem key={index} className="h-full pl-0">
-              <div className="h-full flex flex-col">
-                {/* Illustration Area */}
-                <div className="relative h-56 pt-8 flex items-center justify-center">
-                  {/* Background Gradient - extends to top */}
-                  <div 
-                    className={`absolute inset-0 -top-20 ${
-                      index === 0 
-                        ? 'bg-gradient-to-b from-blue-500/15 via-blue-500/5 to-transparent' 
-                        : index === 1 
-                        ? 'bg-gradient-to-b from-violet-500/15 via-violet-500/5 to-transparent'
-                        : 'bg-gradient-to-b from-emerald-500/15 via-emerald-500/5 to-transparent'
-                    }`}
-                  />
+      {/* Graphics Carousel - matching Login page structure */}
+      <div className="relative">
+        <Carousel
+          className="flex-shrink-0 relative z-10"
+          setApi={setApi}
+          opts={{
+            align: 'start',
+            loop: true,
+          }}
+          plugins={[
+            Autoplay({
+              delay: 3000,
+              stopOnInteraction: true,
+            }),
+          ]}
+        >
+          <CarouselContent className="ml-0">
+            {slides.map((slide, index) => (
+              <CarouselItem key={index} className="pl-0">
+                <div className="relative h-56 pt-10 flex items-center justify-center">
+                  {/* Background Gradient - extends to top edge */}
+                  <div className={`absolute inset-0 -top-20 ${colorThemes[index].gradientBg}`} />
                   
-                  {/* Animated Background Orbs - matching Login page */}
+                  {/* Animated Background Orbs */}
                   <motion.div
                     animate={{ 
                       scale: [1, 1.2, 1],
                       opacity: [0.3, 0.5, 0.3],
                     }}
                     transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                    className={`absolute top-4 left-1/4 w-20 h-20 rounded-full blur-3xl ${
-                      index === 0 ? 'bg-blue-500/20' : index === 1 ? 'bg-violet-500/20' : 'bg-emerald-500/20'
-                    }`}
+                    className={`absolute top-4 left-1/4 w-20 h-20 rounded-full blur-3xl ${colorThemes[index].orbColor}`}
                   />
                   <motion.div
                     animate={{ 
@@ -127,12 +155,10 @@ export default function WelcomePage() {
                       opacity: [0.2, 0.4, 0.2],
                     }}
                     transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                    className={`absolute bottom-4 right-1/4 w-24 h-24 rounded-full blur-3xl ${
-                      index === 0 ? 'bg-cyan-400/15' : index === 1 ? 'bg-purple-400/15' : 'bg-teal-400/15'
-                    }`}
+                    className={`absolute bottom-4 right-1/4 w-24 h-24 rounded-full blur-3xl ${colorThemes[index].orbColor2}`}
                   />
                   
-                  {/* Main Icon with Orbiting Elements - matching Login page */}
+                  {/* Main Icon with Orbiting Elements */}
                   <div className="relative z-10">
                     {/* Outer Ring */}
                     <motion.div
@@ -141,21 +167,15 @@ export default function WelcomePage() {
                       className="absolute inset-0 w-36 h-36 -m-4"
                       style={{ transformOrigin: 'center' }}
                     >
-                      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full ${
-                        index === 0 ? 'bg-blue-400/40' : index === 1 ? 'bg-violet-400/40' : 'bg-emerald-400/40'
-                      }`} />
-                      <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full ${
-                        index === 0 ? 'bg-cyan-400/30' : index === 1 ? 'bg-purple-400/30' : 'bg-teal-400/30'
-                      }`} />
+                      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full ${colorThemes[index].dotColor}`} />
+                      <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full ${colorThemes[index].dotColor2}`} />
                     </motion.div>
 
-                    {/* Floating Icons - matching Login page sizing */}
+                    {/* Floating Icons */}
                     <motion.div
                       animate={{ y: [0, -8, 0], x: [0, 3, 0] }}
                       transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                      className={`absolute -top-5 -right-3 w-8 h-8 rounded-xl flex items-center justify-center shadow-lg ${
-                        index === 0 ? 'bg-blue-500/90 text-white' : index === 1 ? 'bg-violet-500/90 text-white' : 'bg-emerald-500/90 text-white'
-                      }`}
+                      className={`absolute -top-5 -right-3 w-8 h-8 rounded-xl flex items-center justify-center shadow-lg ${colorThemes[index].floatingBg[0]} text-white`}
                     >
                       {slide.floatingIcons[0]}
                     </motion.div>
@@ -163,9 +183,7 @@ export default function WelcomePage() {
                     <motion.div
                       animate={{ y: [0, 5, 0], x: [0, -2, 0] }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                      className={`absolute -bottom-2 -left-5 w-6 h-6 rounded-lg flex items-center justify-center shadow-md ${
-                        index === 0 ? 'bg-cyan-500/80 text-white' : index === 1 ? 'bg-purple-500/80 text-white' : 'bg-teal-500/80 text-white'
-                      }`}
+                      className={`absolute -bottom-2 -left-5 w-6 h-6 rounded-lg flex items-center justify-center shadow-md ${colorThemes[index].floatingBg[1]} text-white`}
                     >
                       {slide.floatingIcons[1]}
                     </motion.div>
@@ -173,14 +191,12 @@ export default function WelcomePage() {
                     <motion.div
                       animate={{ y: [0, -4, 0], rotate: [0, 6, 0] }}
                       transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                      className={`absolute top-1/2 -right-8 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center shadow-md ${
-                        index === 0 ? 'bg-blue-400/70 text-white' : index === 1 ? 'bg-violet-400/70 text-white' : 'bg-emerald-400/70 text-white'
-                      }`}
+                      className={`absolute top-1/2 -right-8 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center shadow-md ${colorThemes[index].floatingBg[2]} text-white`}
                     >
                       {slide.floatingIcons[2]}
                     </motion.div>
 
-                    {/* Main Icon Container with Pulse - matching Login page */}
+                    {/* Main Icon Container with Pulse */}
                     <motion.div
                       initial={{ scale: 0.5, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
@@ -191,81 +207,87 @@ export default function WelcomePage() {
                       <motion.div
                         animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }}
                         transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-                        className={`absolute inset-0 rounded-2xl ${
-                          index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-violet-500' : 'bg-emerald-500'
-                        }`}
+                        className={`absolute inset-0 rounded-2xl ${colorThemes[index].pulseColor}`}
                       />
                       
-                      {/* Icon Box - matching Login page size */}
+                      {/* Icon Box */}
                       <div className={`relative w-24 h-24 rounded-2xl ${slide.iconBg} flex items-center justify-center shadow-2xl`}>
                         <motion.div
                           animate={{ rotate: [0, 4, -4, 0] }}
                           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                          className="w-10 h-10 text-white [&>svg]:w-10 [&>svg]:h-10"
                         >
                           {slide.icon}
                         </motion.div>
                       </div>
                     </motion.div>
 
-                    {/* Sparkle Effects - matching Login page */}
+                    {/* Sparkle Effects */}
                     <motion.div
                       animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0 }}
-                      className={`absolute -top-1 left-0 w-1.5 h-1.5 rounded-full ${
-                        index === 0 ? 'bg-blue-400' : index === 1 ? 'bg-violet-400' : 'bg-emerald-400'
-                      }`}
+                      className={`absolute -top-1 left-0 w-1.5 h-1.5 rounded-full ${colorThemes[index].sparkleColor}`}
                     />
                     <motion.div
                       animate={{ scale: [0, 1, 0], opacity: [0, 1, 0] }}
                       transition={{ duration: 2, repeat: Infinity, delay: 0.7 }}
-                      className={`absolute bottom-2 -right-2 w-1 h-1 rounded-full ${
-                        index === 0 ? 'bg-cyan-400' : index === 1 ? 'bg-purple-400' : 'bg-teal-400'
-                      }`}
+                      className={`absolute bottom-2 -right-2 w-1 h-1 rounded-full ${colorThemes[index].sparkleColor}`}
                     />
                   </div>
                 </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </div>
 
-                {/* Content Area - center aligned */}
-                <div className="px-6 flex-1 flex flex-col justify-center text-center">
-                  {/* Progress Indicators */}
-                  <div className="flex items-center justify-center gap-2 mb-6">
-                    {slides.map((_, i) => (
-                      <motion.div
-                        key={i}
-                        animate={{
-                          width: i === currentIndex ? 32 : 8,
-                          backgroundColor: i === currentIndex 
-                            ? 'hsl(var(--foreground))' 
-                            : 'hsl(var(--muted-foreground) / 0.3)',
-                        }}
-                        transition={{ duration: 0.3 }}
-                        className="h-1 rounded-full"
-                      />
-                    ))}
-                  </div>
+      {/* Content Area - OUTSIDE carousel, animated based on currentIndex */}
+      <div className="flex-1 flex flex-col">
+        <div className="px-6 pt-4">
+          {/* Progress Indicators */}
+          <div className="flex items-center justify-center gap-2 mb-4">
+            {slides.map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  width: i === currentIndex ? 24 : 6,
+                  backgroundColor: i === currentIndex 
+                    ? 'hsl(var(--foreground))' 
+                    : 'hsl(var(--muted-foreground) / 0.3)',
+                }}
+                transition={{ duration: 0.3 }}
+                className="h-1 rounded-full"
+              />
+            ))}
+          </div>
 
-                  {/* Brand - centered */}
-                  <div className="flex items-center justify-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-                      <Shield className="w-4 h-4 text-primary-foreground" />
-                    </div>
-                    <span className="text-sm font-semibold text-foreground">商户钱包</span>
-                  </div>
+          {/* Brand */}
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+              <Shield className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="text-sm font-semibold text-foreground">商户钱包</span>
+          </div>
 
-                  {/* Title & Description - centered */}
-                  <h1 className="text-2xl font-bold text-foreground mb-2 leading-tight">
-                    {slide.title}
-                  </h1>
-                  <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
-                    {slide.description}
-                  </p>
-                </div>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
+          {/* Animated Title & Description - matching Login pattern */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="text-center"
+            >
+              <h1 className="text-xl font-bold text-foreground mb-2 leading-tight">
+                {slides[currentIndex].title}
+              </h1>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
+                {slides[currentIndex].description}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </div>
 
       {/* Fixed Buttons at Bottom */}
       <div className="px-6 pb-8 pt-4 flex gap-3 bg-background">
