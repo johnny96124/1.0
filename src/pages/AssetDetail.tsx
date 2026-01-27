@@ -16,6 +16,7 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { TransactionListSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
+import { SwipeBack } from '@/components/SwipeBack';
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { toast } from '@/lib/toast';
 
@@ -113,6 +114,7 @@ export default function AssetDetailPage() {
 
   return (
     <AppLayout showNav={false}>
+      <SwipeBack>
       <div className="h-full flex flex-col">
         {/* Header */}
         <div className="px-4 py-3 border-b border-border">
@@ -453,6 +455,7 @@ export default function AssetDetailPage() {
           )}
         </AnimatePresence>
       </div>
+      </SwipeBack>
     </AppLayout>
   );
 }

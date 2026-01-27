@@ -6,6 +6,7 @@ import {
   ChevronRight, Inbox
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { SwipeBack } from '@/components/SwipeBack';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWallet } from '@/contexts/WalletContext';
@@ -142,6 +143,7 @@ export default function MessageCenter() {
         ) : null
       }
     >
+      <SwipeBack>
       <div className="flex flex-col h-full">
         {isLoading ? (
           <MessageListSkeleton count={5} showTabs />
@@ -249,6 +251,7 @@ export default function MessageCenter() {
           </>
         )}
       </div>
+      </SwipeBack>
     </AppLayout>
   );
 }

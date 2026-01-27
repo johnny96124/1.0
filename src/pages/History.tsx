@@ -298,7 +298,7 @@ export default function HistoryPage() {
                           transition={{ delay: 0.05 * index }}
                           onClick={() => setSelectedTx(tx)}
                           className={cn(
-                            "w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors",
+                            "w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50 transition-all",
                             isPendingRisk && "border-l-4",
                             isPendingRisk && tx.riskScore === 'red' && "border-l-destructive",
                             isPendingRisk && tx.riskScore === 'yellow' && "border-l-warning"

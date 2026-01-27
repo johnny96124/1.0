@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Copy, Download, CheckCircle2, ChevronDown, Info, Search, Star } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { SwipeBack } from '@/components/SwipeBack';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
@@ -196,6 +197,7 @@ export default function ReceivePage() {
 
   return (
     <AppLayout showBack title="收款" onBack={handleBack}>
+      <SwipeBack>
       <div className="px-4 py-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -345,6 +347,7 @@ export default function ReceivePage() {
           </div>
         </motion.div>
       </div>
+      </SwipeBack>
     </AppLayout>
   );
 }
