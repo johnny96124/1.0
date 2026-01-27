@@ -221,6 +221,12 @@
     stroke-width: 1.5 !important;
   }
 
+  /* Remove icon margins inside buttons - button gap-2 handles spacing */
+  button svg,
+  [role="button"] svg {
+    margin: 0 !important;
+  }
+
   /* Custom scrollbar - minimal, modern style */
   ::-webkit-scrollbar {
     width: 4px;
