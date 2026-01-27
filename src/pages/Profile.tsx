@@ -12,7 +12,6 @@ import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { icon: User, label: '个人信息', path: '/profile/info', badge: null },
   { icon: Wallet, label: '钱包管理', path: '/profile/wallets', badge: null },
   { icon: Building2, label: '服务商管理', path: '/psp', badge: null },
   { icon: Shield, label: '安全与风控', path: '/profile/security', badge: null },
