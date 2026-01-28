@@ -112,14 +112,14 @@ export default function SetPassword() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-8"
+              className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-8"
             >
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring" }}
               >
-                <Wallet className="w-12 h-12 text-primary" />
+                <Wallet className="w-10 h-10 text-primary" strokeWidth={1.5} />
               </motion.div>
             </motion.div>
             
@@ -136,7 +136,7 @@ export default function SetPassword() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
-              className="text-muted-foreground text-center mb-2 max-w-[280px]"
+              className="text-muted-foreground text-center mb-2"
             >
               接下来我们将为您创建一个安全的数字钱包
             </motion.p>
@@ -145,7 +145,7 @@ export default function SetPassword() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="text-sm text-muted-foreground/70 text-center mb-10 max-w-[280px]"
+              className="text-sm text-muted-foreground/70 text-center mb-10"
             >
               您的资产将通过多重签名技术保护，确保安全可靠
             </motion.p>
@@ -154,16 +154,16 @@ export default function SetPassword() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="w-full max-w-[280px]"
+              className="w-full"
             >
               <Button
                 variant="default"
                 size="lg"
-                className="w-full text-base font-medium"
+                className="w-full h-12 text-base font-medium"
                 onClick={handleContinueToOnboarding}
               >
                 开始创建钱包
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-5 h-5 ml-2" strokeWidth={1.5} />
               </Button>
             </motion.div>
           </div>
@@ -181,7 +181,7 @@ export default function SetPassword() {
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring" }}
               >
-                <CheckCircle2 className="w-10 h-10 text-success" />
+                <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
               </motion.div>
             </motion.div>
             <motion.h2
@@ -214,7 +214,7 @@ export default function SetPassword() {
           onClick={handleBack}
           className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
         </button>
       </div>
 
@@ -232,7 +232,7 @@ export default function SetPassword() {
               animate={{ rotate: [0, -10, 10, 0] }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <Lock className="w-10 h-10 text-primary" />
+              <Lock className="w-10 h-10 text-primary" strokeWidth={1.5} />
             </motion.div>
           </motion.div>
         </div>
@@ -273,7 +273,7 @@ export default function SetPassword() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? <EyeOff className="w-5 h-5" strokeWidth={1.5} /> : <Eye className="w-5 h-5" strokeWidth={1.5} />}
             </button>
           </div>
 
@@ -329,7 +329,7 @@ export default function SetPassword() {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showConfirmPassword ? <EyeOff className="w-5 h-5" strokeWidth={1.5} /> : <Eye className="w-5 h-5" strokeWidth={1.5} />}
             </button>
           </div>
 
@@ -353,7 +353,7 @@ export default function SetPassword() {
             disabled={isLoading || !password || !confirmPassword}
           >
             {isLoading ? (
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
             ) : null}
             设置密码
           </Button>
