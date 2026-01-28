@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronRight, X, Zap, Clock, Turtle } from 'lucide-react';
+import { ChevronRight, X, Zap, Clock, Turtle, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Drawer,
@@ -31,7 +31,7 @@ interface NetworkFeeSelectorProps {
 const FEE_OPTIONS: FeeOption[] = [
   {
     tier: 'slow',
-    label: '经济',
+    label: '慢速',
     labelEn: 'Slow',
     time: '~30分钟',
     fee: 0.80,
@@ -132,9 +132,6 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
                 <div className="flex-1 text-left">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-foreground">{option.label}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {option.labelEn}
-                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {option.time}
@@ -147,12 +144,17 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
                   <p className="text-xs text-muted-foreground">≈ ${option.fee.toFixed(2)}</p>
                 </div>
 
-                {/* Selected Indicator */}
-                {selectedTier === option.tier && (
-                  <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
-                    <div className="w-2 h-2 bg-accent-foreground rounded-full" />
-                  </div>
-                )}
+                {/* Selected Indicator - Circle with checkmark */}
+                <div className={cn(
+                  "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                  selectedTier === option.tier
+                    ? "border-primary bg-transparent"
+                    : "border-border bg-transparent"
+                )}>
+                  {selectedTier === option.tier && (
+                    <Check className="w-4 h-4 text-primary" />
+                  )}
+                </div>
               </button>
             ))}
 
