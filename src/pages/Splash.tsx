@@ -27,7 +27,7 @@ const Splash = () => {
 
   return (
     <motion.div 
-      className="fixed inset-0 bg-background flex flex-col items-center justify-center overflow-hidden"
+      className="absolute inset-0 bg-background flex flex-col items-center justify-center overflow-hidden"
       initial={{ opacity: 1 }}
       animate={{ opacity: isExiting ? 0 : 1, y: isExiting ? -20 : 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
