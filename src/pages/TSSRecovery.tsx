@@ -149,75 +149,25 @@ export default function TSSRecoveryPage() {
         { id: 1, title: '验证密码', icon: Lock, step: 'password' },
       ];
 
-  const showProgressIndicator = step !== 'method' && step !== 'success';
-
   return (
     <div className="h-full bg-background flex flex-col">
       {/* Header */}
       <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={handleBack}
-              className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            {showProgressIndicator && (
-              <span className="text-sm text-muted-foreground">
-                步骤 {currentStepIndex} / {totalSteps}
-              </span>
-            )}
-          </div>
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={handleBack}
+            className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
           {/* Only show title when not on method selection step */}
           {step !== 'method' && (
             <span className="text-sm font-medium text-foreground">
               {getStepTitle()}
             </span>
           )}
+          {step === 'method' && <div />}
         </div>
-        
-        {showProgressIndicator && (
-          <>
-            <Progress value={progress} className="h-1" />
-            
-            {/* Step indicators */}
-            <div className="flex items-center mt-6">
-              {displaySteps.map((stepItem, index) => {
-                const Icon = stepItem.icon;
-                const isComplete = currentStepIndex > stepItem.id;
-                const isCurrent = currentStepIndex === stepItem.id;
-                
-                return (
-                  <div key={stepItem.id} className="flex items-center flex-1 last:flex-none">
-                    <div
-                      className={cn(
-                        'w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0',
-                        isComplete && 'bg-success text-success-foreground',
-                        isCurrent && 'bg-accent text-accent-foreground',
-                        !isComplete && !isCurrent && 'bg-muted text-muted-foreground'
-                      )}
-                    >
-                      {isComplete ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : (
-                        <Icon className="w-4 h-4" />
-                      )}
-                    </div>
-                    {index < displaySteps.length - 1 && (
-                      <div
-                        className={cn(
-                          'flex-1 h-0.5',
-                          currentStepIndex > stepItem.id ? 'bg-success' : 'bg-muted'
-                        )}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
       </div>
 
       {/* Content */}
@@ -262,8 +212,8 @@ export default function TSSRecoveryPage() {
         </AnimatePresence>
       </div>
 
-      {/* Contact Support */}
-      {step !== 'success' && (
+      {/* Contact Support - only show on method selection step */}
+      {step === 'method' && (
         <div className="px-4 pb-6 pt-2 space-y-3">
           <Button
             variant="outline"
