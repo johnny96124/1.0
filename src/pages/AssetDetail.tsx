@@ -255,7 +255,7 @@ export default function AssetDetailPage() {
                         </div>
                       </div>
                       {address && (
-                        <AddressDisplay address={address} />
+                        <AddressDisplay address={address} showFull />
                       )}
                     </div>
                   );
