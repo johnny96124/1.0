@@ -50,57 +50,61 @@ export function AppLockScreen() {
           {/* Main content */}
           <div className="relative z-10 flex flex-col items-center">
             {/* Lock icon with pulse animation */}
-            <div className="relative">
-              {/* Outer pulse ring */}
+            <div className="relative flex items-center justify-center">
+              {/* Third pulse ring (outermost) */}
               <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 dark:from-white/25 dark:to-white/15"
-                style={{ 
-                  width: 140, 
-                  height: 140, 
-                  marginLeft: -22, 
-                  marginTop: -22,
-                }}
-                initial={{ scale: 1, opacity: 0.5 }}
+                className="absolute rounded-full bg-primary/5 dark:bg-white/5"
+                style={{ width: 200, height: 200 }}
                 animate={{ 
-                  scale: [1, 1.4, 1.8],
-                  opacity: [0.5, 0.25, 0]
+                  scale: [0.5, 1],
+                  opacity: [0.6, 0]
                 }}
                 transition={{
-                  duration: 2.5,
+                  duration: 3,
                   repeat: Infinity,
-                  ease: "easeOut"
+                  ease: [0.4, 0, 0.2, 1],
+                  delay: 1.2
                 }}
               />
-              {/* Inner pulse ring */}
+              {/* Second pulse ring */}
               <motion.div
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/25 to-primary/15 dark:from-white/35 dark:to-white/20"
-                style={{ 
-                  width: 140, 
-                  height: 140, 
-                  marginLeft: -22, 
-                  marginTop: -22,
-                }}
-                initial={{ scale: 1, opacity: 0.5 }}
+                className="absolute rounded-full bg-primary/10 dark:bg-white/10"
+                style={{ width: 160, height: 160 }}
                 animate={{ 
-                  scale: [1, 1.4, 1.8],
-                  opacity: [0.5, 0.25, 0]
+                  scale: [0.5, 1],
+                  opacity: [0.7, 0]
                 }}
                 transition={{
-                  duration: 2.5,
+                  duration: 3,
                   repeat: Infinity,
-                  ease: "easeOut",
-                  delay: 0.8
+                  ease: [0.4, 0, 0.2, 1],
+                  delay: 0.6
+                }}
+              />
+              {/* First pulse ring (closest) */}
+              <motion.div
+                className="absolute rounded-full bg-primary/15 dark:bg-white/15"
+                style={{ width: 120, height: 120 }}
+                animate={{ 
+                  scale: [0.8, 1],
+                  opacity: [0.8, 0]
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: [0.4, 0, 0.2, 1]
                 }}
               />
               
               {/* Lock icon container */}
               <motion.button
                 onClick={handleIconClick}
-                className="w-24 h-24 rounded-full bg-primary/10 dark:bg-white/10 flex items-center justify-center shadow-xl cursor-pointer hover:bg-primary/20 dark:hover:bg-white/20 transition-colors"
+                className="relative w-24 h-24 rounded-full bg-primary/10 dark:bg-white/10 flex items-center justify-center shadow-lg cursor-pointer hover:bg-primary/15 dark:hover:bg-white/15 transition-colors"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
               >
-                <Lock className="w-12 h-12 text-primary dark:text-white" strokeWidth={1.5} />
+                <Lock className="w-10 h-10 text-primary dark:text-white" strokeWidth={1.5} />
               </motion.button>
             </div>
 
