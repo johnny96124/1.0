@@ -270,10 +270,10 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
         </p>
       </div>
 
-      <div className="pb-6">
+      <div className="pb-8">
         <Button
           size="lg"
-          className="w-full text-base font-medium"
+          className="w-full h-12 text-base font-medium"
           onClick={handleAuthorize}
           disabled={isLoading}
         >
@@ -483,7 +483,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
         <div className="pb-8">
           <Button
             size="lg"
-            className="w-full text-base font-medium"
+            className="w-full h-12 text-base font-medium"
             onClick={onComplete}
           >
             开始使用钱包
@@ -615,34 +615,33 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
             </p>
           )}
 
-          {/* Buttons - inside same container for consistent width */}
-          <div className="pt-6 space-y-3">
-            <Button
-              size="lg"
-              className="w-full text-base font-medium"
-              onClick={handleBackup}
-              disabled={isLoading || !password || !confirmPassword || !confirmed}
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
-              ) : (
-                <CloudUpload className="w-5 h-5 mr-2" strokeWidth={1.5} />
-              )}
-              备份到 iCloud
-            </Button>
-            <Button
-              variant="ghost"
-              size="lg"
-              className="w-full text-base text-muted-foreground"
-              onClick={handleSkipClick}
-            >
-              稍后备份
-            </Button>
-          </div>
         </div>
       </div>
 
-      <div className="pb-8" />
+      {/* Fixed Bottom Buttons */}
+      <div className="px-4 pb-8 space-y-3">
+        <Button
+          size="lg"
+          className="w-full h-12 text-base font-medium"
+          onClick={handleBackup}
+          disabled={isLoading || !password || !confirmPassword || !confirmed}
+        >
+          {isLoading ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
+          ) : (
+            <CloudUpload className="w-5 h-5 mr-2" strokeWidth={1.5} />
+          )}
+          备份到 iCloud
+        </Button>
+        <Button
+          variant="ghost"
+          size="lg"
+          className="w-full h-12 text-base text-muted-foreground"
+          onClick={handleSkipClick}
+        >
+          稍后备份
+        </Button>
+      </div>
 
       {/* Skip Warning Dialog */}
       <AlertDialog open={showSkipWarning} onOpenChange={setShowSkipWarning}>
@@ -752,7 +751,7 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-8">
         <Button
           size="lg"
-          className="w-full text-base font-medium"
+          className="w-full h-12 text-base font-medium"
           disabled={!selectedMethod}
           onClick={onComplete}
         >
@@ -897,10 +896,11 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
         )}
       </div>
 
+      {/* Fixed Bottom Buttons */}
       <div className="pb-8 space-y-3">
         <Button
           size="lg"
-          className="w-full text-base font-medium"
+          className="w-full h-12 text-base font-medium"
           onClick={handleRestore}
           disabled={isLoading || !password}
         >
@@ -912,7 +912,7 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
         <Button
           variant="ghost"
           size="lg"
-          className="w-full text-base text-muted-foreground"
+          className="w-full h-12 text-base text-muted-foreground"
           onClick={() => {
             setSource(null);
             setPassword('');
@@ -971,7 +971,7 @@ function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-8">
         <Button
           size="lg"
-          className="w-full text-base font-medium"
+          className="w-full h-12 text-base font-medium"
           onClick={handleVerify}
           disabled={isLoading}
         >
@@ -1028,7 +1028,7 @@ function RecoveryCompleteStep({ onComplete }: { onComplete: () => void }) {
       <div className="pb-8">
         <Button
           size="lg"
-          className="w-full text-base font-medium"
+          className="w-full h-12 text-base font-medium"
           onClick={onComplete}
         >
           进入钱包
