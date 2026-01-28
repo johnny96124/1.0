@@ -3,8 +3,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { WalletProvider, useWallet } from "@/contexts/WalletContext";
+import { AppLockProvider } from "@/contexts/AppLockContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PhoneFrame } from "@/components/layout/PhoneFrame";
+import { AppLockScreen } from "@/components/AppLockScreen";
 import Splash from "./pages/Splash";
 import Welcome from "./pages/Welcome";
 import Login from "./pages/Login";
@@ -107,14 +109,17 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <WalletProvider>
-        <TooltipProvider>
-          <BrowserRouter>
-            <PhoneFrame>
-              <Toaster />
-              <AppRoutes />
-            </PhoneFrame>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AppLockProvider>
+          <TooltipProvider>
+            <BrowserRouter>
+              <PhoneFrame>
+                <Toaster />
+                <AppLockScreen />
+                <AppRoutes />
+              </PhoneFrame>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AppLockProvider>
       </WalletProvider>
     </ThemeProvider>
   </QueryClientProvider>
