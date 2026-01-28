@@ -17,6 +17,7 @@ import { ChainIcon } from '@/components/ChainIcon';
 import { TransactionListSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
 import { SwipeBack } from '@/components/SwipeBack';
+import { ChainSelectDrawer } from '@/components/ChainSelectDrawer';
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { toast } from '@/lib/toast';
 
@@ -26,6 +27,8 @@ export default function AssetDetailPage() {
   const [selectedChain, setSelectedChain] = useState<ChainId>('all');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showChainSelectDrawer, setShowChainSelectDrawer] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'send' | 'receive' | null>(null);
   const { assets, transactions, currentWallet } = useWallet();
 
   // Simulate initial loading
@@ -174,7 +177,21 @@ export default function AssetDetailPage() {
           >
             <Button
               className="flex-1 h-10 gradient-accent text-accent-foreground"
-              onClick={() => navigate(`/send?asset=${symbol}`)}
+              onClick={() => {
+                if (selectedChain === 'all') {
+                  // Show chain select drawer if on All view
+                  if (assetData.chains.length === 1) {
+                    // Only one chain, navigate directly
+                    navigate(`/send?asset=${symbol}&chain=${assetData.chains[0].network}`);
+                  } else {
+                    setPendingAction('send');
+                    setShowChainSelectDrawer(true);
+                  }
+                } else {
+                  // Navigate directly with selected chain
+                  navigate(`/send?asset=${symbol}&chain=${selectedChain}`);
+                }
+              }}
             >
               <Send className="w-4 h-4 mr-2" />
               转账
@@ -182,7 +199,21 @@ export default function AssetDetailPage() {
             <Button
               variant="outline"
               className="flex-1 h-10"
-              onClick={() => navigate('/receive')}
+              onClick={() => {
+                if (selectedChain === 'all') {
+                  // Show chain select drawer if on All view
+                  if (assetData.chains.length === 1) {
+                    // Only one chain, navigate directly
+                    navigate(`/receive?chain=${assetData.chains[0].network}`);
+                  } else {
+                    setPendingAction('receive');
+                    setShowChainSelectDrawer(true);
+                  }
+                } else {
+                  // Navigate directly with selected chain
+                  navigate(`/receive?chain=${selectedChain}`);
+                }
+              }}
             >
               <QrCode className="w-4 h-4 mr-2" />
               收款
@@ -454,6 +485,29 @@ export default function AssetDetailPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Chain Select Drawer for All Chains view */}
+        {assetData && (
+          <ChainSelectDrawer
+            open={showChainSelectDrawer}
+            onOpenChange={setShowChainSelectDrawer}
+            title={pendingAction === 'send' ? '选择转账网络' : '选择收款网络'}
+            assetSymbol={assetData.symbol}
+            chains={assetData.chains.map(c => ({
+              network: c.network as Exclude<ChainId, 'all'>,
+              balance: c.balance,
+              usdValue: c.usdValue,
+            }))}
+            onSelectChain={(chainId) => {
+              if (pendingAction === 'send') {
+                navigate(`/send?asset=${symbol}&chain=${chainId}`);
+              } else if (pendingAction === 'receive') {
+                navigate(`/receive?chain=${chainId}`);
+              }
+              setPendingAction(null);
+            }}
+          />
+        )}
       </div>
       </SwipeBack>
     </AppLayout>

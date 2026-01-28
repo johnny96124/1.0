@@ -37,16 +37,29 @@ const MOCK_ADDRESSES: Record<Exclude<ChainId, 'all'>, string> = {
 const frequentNetworkIds = ['ethereum', 'tron'];
 
 export default function ReceivePage() {
-  const [selectedNetwork, setSelectedNetwork] = useState(networks[0]);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { currentWallet } = useWallet();
+  const qrRef = useRef<HTMLDivElement>(null);
+  
+  // Parse chain from URL query params (e.g., /receive?chain=ethereum)
+  const searchParams = new URLSearchParams(location.search);
+  const chainFromUrl = searchParams.get('chain') as Exclude<ChainId, 'all'> | null;
+  
+  // Find initial network based on URL param
+  const initialNetwork = useMemo(() => {
+    if (chainFromUrl) {
+      return networks.find(n => n.id === chainFromUrl) || networks[0];
+    }
+    return networks[0];
+  }, [chainFromUrl]);
+
+  const [selectedNetwork, setSelectedNetwork] = useState(initialNetwork);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addressExpanded, setAddressExpanded] = useState(false);
-  const qrRef = useRef<HTMLDivElement>(null);
-  const { currentWallet } = useWallet();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   // Handle context-aware back navigation
   const handleBack = useCallback(() => {

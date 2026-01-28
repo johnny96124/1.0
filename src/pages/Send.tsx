@@ -53,14 +53,25 @@ export default function SendPage() {
     fromPSP?: boolean;
   } | null;
   
-  // Parse asset from URL query params (e.g., /send?asset=USDC)
+  // Parse asset and chain from URL query params (e.g., /send?asset=USDC&chain=ethereum)
   const searchParams = new URLSearchParams(location.search);
   const assetFromUrl = searchParams.get('asset');
+  const chainFromUrl = searchParams.get('chain') as ChainId | null;
   
-  // Find the matching asset from URL param
-  const initialAsset = assetFromUrl 
-    ? assets.find(a => a.symbol.toUpperCase() === assetFromUrl.toUpperCase()) || null
-    : null;
+  // Find the matching asset from URL params - if chain is specified, match both symbol AND network
+  const initialAsset = useMemo(() => {
+    if (assetFromUrl && chainFromUrl && chainFromUrl !== 'all') {
+      // Find specific asset matching both symbol and chain
+      return assets.find(a => 
+        a.symbol.toUpperCase() === assetFromUrl.toUpperCase() && 
+        a.network === chainFromUrl
+      ) || null;
+    } else if (assetFromUrl) {
+      // Find first asset matching symbol
+      return assets.find(a => a.symbol.toUpperCase() === assetFromUrl.toUpperCase()) || null;
+    }
+    return null;
+  }, [assets, assetFromUrl, chainFromUrl]);
 
   // Determine initial step based on context
   const getInitialStep = (): Step => {
@@ -68,7 +79,11 @@ export default function SendPage() {
     if (prefilledData?.fromPSP && prefilledData?.prefilledAddress) {
       return 'amount';
     }
-    // If asset specified via URL, skip asset selection
+    // If both asset and chain specified via URL, skip to address input
+    if (assetFromUrl && chainFromUrl && chainFromUrl !== 'all' && initialAsset) {
+      return 'address';
+    }
+    // If only asset specified via URL, still skip to address (for backward compatibility)
     if (assetFromUrl && initialAsset) {
       return 'address';
     }
