@@ -704,7 +704,7 @@ export default function SendPage() {
                 </div>
 
                 {/* Send Button */}
-                <div className="px-4 pb-2">
+                <div className="px-4 pb-2 pt-4">
                   <Button
                     size="lg"
                     className="w-full text-lg font-semibold h-12"
