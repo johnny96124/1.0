@@ -29,11 +29,11 @@ export function NumericKeypad({ onInput, onDelete, className }: NumericKeypadPro
       {KEYS.flat().map((key, index) => (
         <motion.button
           key={key}
-          whileTap={{ scale: 0.95, backgroundColor: 'hsl(var(--muted))' }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => handleKeyPress(key)}
           className={cn(
-            "h-14 rounded-xl text-xl font-medium transition-colors flex items-center justify-center",
-            "bg-card hover:bg-muted active:bg-muted border border-border/50",
+            "h-14 rounded-xl text-xl font-medium flex items-center justify-center",
+            "bg-secondary border border-border/30",
             key === 'delete' && "text-muted-foreground"
           )}
         >
