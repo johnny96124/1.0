@@ -44,6 +44,7 @@ import DeviceKicked from "./pages/DeviceKicked";
 import SecurityRequired from "./pages/SecurityRequired";
 import SetPassword from "./pages/SetPassword";
 import BindEmailDemo from "./pages/BindEmailDemo";
+import LockScreenDemo from "./pages/LockScreenDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -100,6 +101,7 @@ function AppRoutes() {
       <Route path="/security-required" element={<SecurityRequired />} />
       <Route path="/set-password" element={<ProtectedRoute><SetPassword /></ProtectedRoute>} />
       <Route path="/bind-email-demo" element={<BindEmailDemo />} />
+      <Route path="/lock-screen-demo" element={<LockScreenDemo />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
