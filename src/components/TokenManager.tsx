@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Plus, Check, TrendingUp, TrendingDown, Trash2, Coins } from 'lucide-react';
+import { Search, ChevronLeft, Plus, Check, TrendingUp, TrendingDown, Trash2, Coins } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -107,11 +107,11 @@ export function TokenManager({ addedSymbols, addedAssets, onAddToken, onRemoveTo
     <div className="h-full flex flex-col bg-background overflow-hidden relative">
       {/* Header */}
       <div className="px-4 py-3 border-b border-border">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-foreground">管理代币</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="w-5 h-5" />
+        <div className="flex items-center gap-2 mb-3">
+          <Button variant="ghost" size="icon" onClick={onClose} className="-ml-2">
+            <ChevronLeft className="w-5 h-5" />
           </Button>
+          <h2 className="text-lg font-bold text-foreground">管理代币</h2>
         </div>
 
         {/* Tabs */}
