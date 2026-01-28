@@ -79,7 +79,7 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
           </div>
           <div className="flex items-center gap-1">
             <span className="text-sm font-medium text-foreground">
-              {currentOption.gasAmount} {gasToken} (~${currentOption.fee.toFixed(2)})
+              ${currentOption.fee.toFixed(2)}
             </span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </div>
@@ -137,7 +137,7 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    预计确认时间 {option.time}
+                    {option.time}
                   </p>
                 </div>
 
