@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import { CryptoIcon } from '@/components/CryptoIcon';
+import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
+import { ChainId } from '@/types/wallet';
 
 interface AmountDisplayProps {
   amount: string;
@@ -8,6 +10,7 @@ interface AmountDisplayProps {
   tokenPrice: number;
   maxBalance: number;
   onMaxClick: () => void;
+  chainId?: ChainId;
   className?: string;
 }
 
@@ -17,6 +20,7 @@ export function AmountDisplay({
   tokenPrice,
   maxBalance,
   onMaxClick,
+  chainId,
   className,
 }: AmountDisplayProps) {
   const numAmount = parseFloat(amount) || 0;
@@ -25,20 +29,25 @@ export function AmountDisplay({
   // Display token amount
   const displayAmount = `${numAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 })} ${symbol}`;
   
-  // USD conversion
+  // USD conversion - always show, even when 0
   const usdValue = numAmount * tokenPrice;
   const usdText = `≈ $${usdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <div className={cn("flex flex-col items-center justify-center py-8", className)}>
-      {/* Token Icon */}
+      {/* Token Icon with Chain Badge */}
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="mb-4"
       >
-        <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center">
+        <div className="relative w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center">
           <CryptoIcon symbol={symbol} size="lg" className="w-12 h-12" />
+          {chainId && (
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-card border-2 border-card flex items-center justify-center">
+              <ChainIcon chainId={chainId} size="sm" />
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -61,14 +70,14 @@ export function AmountDisplay({
         </motion.div>
       </div>
 
-      {/* USD Conversion */}
+      {/* USD Conversion - Always show */}
       <motion.p
         key={usdText}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="text-muted-foreground mt-2"
       >
-        {amount && parseFloat(amount) > 0 ? usdText : ''}
+        {usdText}
       </motion.p>
 
       {/* Error Message */}

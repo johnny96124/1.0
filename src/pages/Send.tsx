@@ -631,13 +631,13 @@ export default function SendPage() {
                     tokenPrice={tokenPrice}
                     maxBalance={selectedAsset.balance}
                     onMaxClick={() => setAmount(selectedAsset.balance.toString())}
+                    chainId={selectedAsset.network}
                   />
                   
                   {/* Balance Info with Max Button */}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
                     <span>可用:</span>
                     <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-lg">
-                      <CryptoIcon symbol={selectedAsset.symbol} size="sm" />
                       <span className="font-medium text-foreground">{selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
                     </div>
                     <button
