@@ -205,9 +205,9 @@ export default function SetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="h-full bg-background flex flex-col px-4">
       {/* Header */}
-      <div className="flex items-center px-4 py-3">
+      <div className="flex items-center py-3">
         <button
           onClick={handleBack}
           className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
@@ -217,7 +217,7 @@ export default function SetPassword() {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 px-4 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         {/* Icon */}
         <div className="flex justify-center mb-6 mt-8">
           <motion.div
