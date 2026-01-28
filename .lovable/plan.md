@@ -1,185 +1,144 @@
 
-# 方案A：智能提示条 + 快捷修改按钮
+# Asset Detail Page Chain-Aware Transfer Flow
 
-## 设计思路
+## Overview
+Enhance the asset detail page to handle chain selection before initiating transfers or receiving, based on the current filter context.
 
-将小额测试引导从确认页面前移到金额输入页面，当用户输入较大金额且收款地址为首次转账时，在金额显示区域下方显示一个醒目但不阻断的提示条，引导用户先进行小额测试。
+## User Flow
 
-## 触发条件
-
-同时满足以下条件时显示提示条：
-1. **首次转账地址**：收款地址不在联系人列表中（即陌生地址）
-2. **大额转账**：输入金额的法币价值超过 $100（可配置阈值）
-3. **非自动填充**：用户手动输入了金额（非通过"全部"按钮填入）
-
-## UI 设计细节
-
+**Scenario 1: All Chains View**
 ```text
-┌─────────────────────────────────────────────────┐
-│                                                 │
-│              [USDT Logo + Chain]                │
-│                 1,000 USDT                      │
-│                 ≈ $1,000.00                     │
-│                                                 │
-│  ┌─────────────────────────────────────────┐   │
-│  │ 💡 首次转账建议先验证                      │   │
-│  │    确认地址正确后再转大额                   │   │
-│  │                                         │   │
-│  │  [ 改为 1 USDT 测试 ]        [ 知道了 ]   │   │
-│  └─────────────────────────────────────────┘   │
-│                                                 │
-│         可用: 5,000 USDT  [全部]               │
-│                                                 │
-│              [ 发送 ]                           │
-│                                                 │
-│          [ 数字键盘 ]                           │
-└─────────────────────────────────────────────────┘
+User on Asset Detail (USDT, All chains)
+    |
+    +--> Clicks "Transfer" or "Receive"
+    |
+    +--> Chain Selection Drawer opens
+    |     - Shows available chains for this asset
+    |     - Shows balance per chain
+    |
+    +--> User selects a chain (e.g., Ethereum)
+    |
+    +--> Navigates to Send/Receive page with asset+chain pre-selected
 ```
 
-### 提示条样式
-
-| 属性 | 值 |
-|------|-----|
-| 背景色 | `bg-amber-500/10` (警示黄的 10% 透明度) |
-| 边框 | `border border-amber-500/30` |
-| 圆角 | `rounded-xl` |
-| 图标 | `Lightbulb` 或 `Info` (amber-500 色) |
-| 内边距 | `p-4` |
-
-### 按钮设计
-
-| 按钮 | 样式 | 行为 |
-|------|------|------|
-| **改为 1 USDT 测试** | 主按钮 `bg-amber-500 text-white` | 点击后自动将金额改为 "1"，并折叠提示条 |
-| **知道了** | 次要按钮 `text-muted-foreground` | 点击后折叠提示条，用户可继续原金额 |
-
-## 交互流程
-
+**Scenario 2: Specific Chain View**
 ```text
-用户输入金额
-     │
-     ▼
-金额 > $100 且 首次地址？
-     │
-    是 ──▶ 显示提示条（带动画滑入）
-     │           │
-     │     ┌─────┴─────┐
-     │     ▼           ▼
-     │  [测试]      [知道了]
-     │     │           │
-     │     ▼           ▼
-     │  金额→1      关闭提示
-     │     │           │
-     │     └─────┬─────┘
-     │           ▼
-    否 ──▶ 用户点击"发送"
-              │
-              ▼
-          进入确认页
+User on Asset Detail (USDT, ETH chain selected)
+    |
+    +--> Clicks "Transfer"
+    |
+    +--> Directly navigates to Send page
+    |     - Asset: USDT on Ethereum
+    |     - Skips asset selection step
+    |     - Starts at address input
 ```
 
-## 技术实现
+## Technical Implementation
 
-### 1. 新增状态变量
+### 1. Create ChainSelectDrawer Component
+**New file: `src/components/ChainSelectDrawer.tsx`**
 
-在 `Send.tsx` 中添加：
-- `showTestTransferTip`: boolean - 控制提示条显示
-- `testTipDismissed`: boolean - 用户已手动关闭提示
+A reusable drawer component for selecting a chain when initiating from "All" view:
+- Props: `open`, `onOpenChange`, `assetSymbol`, `chains[]`, `onSelectChain`
+- Display each chain with:
+  - Chain icon and name
+  - Balance for this asset on that chain
+  - USD value
+- Styled consistently with existing drawer components
 
-### 2. 触发逻辑
+### 2. Modify AssetDetail.tsx
 
-```typescript
-// 判断是否显示小额测试提示
-const shouldShowTestTip = useMemo(() => {
-  if (testTipDismissed) return false;
-  if (!amount || parseFloat(amount) <= 0) return false;
-  
-  const usdValue = parseFloat(amount) * tokenPrice;
-  const isNewAddress = !contacts.find(c => 
-    c.address.toLowerCase() === address.toLowerCase()
-  );
-  
-  return isNewAddress && usdValue > 100;
-}, [amount, tokenPrice, contacts, address, testTipDismissed]);
+**Add state and handlers:**
+- New state: `showChainSelectDrawer`, `pendingAction` (to track if "send" or "receive")
+- Handler `handleTransfer()`:
+  - If `selectedChain === 'all'`: open chain select drawer with action = 'send'
+  - Else: navigate to `/send?asset=SYMBOL&chain=CHAIN_ID`
+- Handler `handleReceive()`:
+  - If `selectedChain === 'all'`: open chain select drawer with action = 'receive'
+  - Else: navigate to `/receive?chain=CHAIN_ID`
+- Handler `handleChainSelected(chainId)`:
+  - If pending action is 'send': navigate to `/send?asset=SYMBOL&chain=CHAIN_ID`
+  - If pending action is 'receive': navigate to `/receive?chain=CHAIN_ID`
+
+**Update button onClick handlers:**
+```tsx
+<Button onClick={handleTransfer}>转账</Button>
+<Button onClick={handleReceive}>收款</Button>
 ```
 
-### 3. 提示条组件
+### 3. Modify Send.tsx
 
-在金额显示区域和可用余额之间插入提示条，使用 `AnimatePresence` 实现平滑动画：
+**Enhance URL parameter parsing:**
+- Parse `chain` from URL query params (in addition to existing `asset`)
+- When both `asset` and `chain` are specified:
+  - Find the specific asset matching both symbol AND network
+  - Set as `selectedAsset`
+  - Skip to `address` step directly
 
-```typescript
-<AnimatePresence>
-  {shouldShowTestTip && (
-    <motion.div
-      initial={{ opacity: 0, height: 0, marginTop: 0 }}
-      animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-      exit={{ opacity: 0, height: 0, marginTop: 0 }}
-      className="overflow-hidden"
-    >
-      <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10">
-        <div className="flex items-start gap-3">
-          <Lightbulb className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="font-medium text-foreground">首次转账建议先验证</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              确认地址正确后再转大额
-            </p>
-            <div className="flex items-center gap-3 mt-3">
-              <Button
-                size="sm"
-                className="bg-amber-500 hover:bg-amber-600 text-white"
-                onClick={handleTestTransfer}
-              >
-                改为 1 {selectedAsset.symbol} 测试
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-muted-foreground"
-                onClick={() => setTestTipDismissed(true)}
-              >
-                知道了
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
+**Update initial asset logic:**
+```tsx
+const chainFromUrl = searchParams.get('chain') as ChainId | null;
+const assetFromUrl = searchParams.get('asset');
+
+const initialAsset = (assetFromUrl && chainFromUrl)
+  ? assets.find(a => 
+      a.symbol.toUpperCase() === assetFromUrl.toUpperCase() && 
+      a.network === chainFromUrl
+    )
+  : assetFromUrl 
+    ? assets.find(a => a.symbol.toUpperCase() === assetFromUrl.toUpperCase())
+    : null;
 ```
 
-### 4. 测试转账处理函数
+### 4. Modify Receive.tsx
 
-```typescript
-const handleTestTransfer = () => {
-  setAmount('1');
-  setTestTipDismissed(true);
-  // 可选：显示一个轻量级 toast 确认
-  toast.success('已改为测试金额');
-};
+**Add URL parameter support:**
+- Parse `chain` from URL query params
+- Pre-select the network if chain is specified in URL:
+```tsx
+const searchParams = new URLSearchParams(location.search);
+const chainFromUrl = searchParams.get('chain') as Exclude<ChainId, 'all'> | null;
+
+const initialNetwork = chainFromUrl 
+  ? networks.find(n => n.id === chainFromUrl) || networks[0]
+  : networks[0];
+
+const [selectedNetwork, setSelectedNetwork] = useState(initialNetwork);
 ```
 
-### 5. 状态重置
+## Files to Modify
 
-当用户返回修改地址时，重置 `testTipDismissed` 状态：
+| File | Changes |
+|------|---------|
+| `src/components/ChainSelectDrawer.tsx` | New component |
+| `src/pages/AssetDetail.tsx` | Add chain selection drawer, update navigation logic |
+| `src/pages/Send.tsx` | Parse chain from URL, find asset by symbol+network |
+| `src/pages/Receive.tsx` | Parse chain from URL, pre-select network |
 
-```typescript
-// 在 handleBack 函数中
-case 'amount':
-  setTestTipDismissed(false); // 重置提示状态
-  setStep('address');
-  break;
+## Component Design: ChainSelectDrawer
+
+```tsx
+interface ChainSelectDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string; // "选择转账网络" or "选择收款网络"
+  assetSymbol: string;
+  chains: { network: ChainId; balance: number; usdValue: number }[];
+  onSelectChain: (chainId: ChainId) => void;
+}
 ```
 
-## 需要修改的文件
+The drawer will display:
+- Header with title
+- List of available chains with:
+  - Chain icon (ChainIcon component)
+  - Chain name
+  - Asset balance on that chain
+  - USD value
+- Tappable rows that trigger `onSelectChain`
 
-| 文件 | 修改内容 |
-|------|----------|
-| `src/pages/Send.tsx` | 添加状态、触发逻辑、提示条 UI、处理函数 |
+## Edge Cases
 
-## 额外优化建议
-
-1. **记住用户偏好**：如果用户连续 3 次点击"知道了"，可以在本地存储中记录，下次默认不显示
-2. **动态阈值**：根据用户历史转账习惯动态调整触发阈值（如用户经常转 $500 以上，则阈值提高到 $300）
-3. **确认页保留提示**：在确认页仍保留一个小型的"这是测试转账"标识（如果用户选择了测试）
+1. **Asset only exists on one chain**: If the asset data shows only one chain in `chains[]`, skip the drawer and navigate directly
+2. **Zero balance on a chain**: Still show the chain option but with 0 balance displayed
+3. **Back navigation**: When user navigates back from Send/Receive, the chain selection should reset appropriately
