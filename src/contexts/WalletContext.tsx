@@ -816,6 +816,9 @@ interface WalletContextType extends WalletState {
   checkTSSNodeExists: () => Promise<{ exists: boolean; hasCloudBackup: boolean; cloudProvider?: string; hasLocalBackup: boolean }>;
   recoverTSSNode: (method: 'cloud' | 'local_file' | 'old_device', password?: string) => Promise<void>;
   createTSSNode: () => Promise<void>;
+  
+  // Dev mode
+  devModeLogin: () => void;
 }
 
 const WalletContext = createContext<WalletContextType | null>(null);
@@ -1061,6 +1064,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       };
     }
   }, [mockIsNewUser, setupExistingUser]);
+
+  // Dev mode login - instant login with existing user data for testing
+  const devModeLogin = useCallback(() => {
+    setIsAuthenticated(true);
+    setupExistingUser();
+  }, [setupExistingUser]);
 
   const logout = useCallback(() => {
     setIsAuthenticated(false);
@@ -1501,6 +1510,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     checkTSSNodeExists,
     recoverTSSNode,
     createTSSNode: createTSSNodeFn,
+    // Dev mode
+    devModeLogin,
   };
 
   return (

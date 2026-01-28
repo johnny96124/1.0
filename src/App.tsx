@@ -49,8 +49,14 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useWallet();
+function ProtectedRoute({ children, bypassAuth = false }: { children: React.ReactNode; bypassAuth?: boolean }) {
+  const { isAuthenticated, devModeLogin } = useWallet();
+  
+  // If bypassAuth is true, auto-login and render children
+  if (bypassAuth && !isAuthenticated) {
+    devModeLogin();
+    return null; // Will re-render after login
+  }
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
@@ -67,7 +73,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/create-wallet" element={<ProtectedRoute><CreateWallet /></ProtectedRoute>} />
-      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="/home" element={<ProtectedRoute bypassAuth><Home /></ProtectedRoute>} />
       <Route path="/send" element={<ProtectedRoute><Send /></ProtectedRoute>} />
       <Route path="/receive" element={<ProtectedRoute><Receive /></ProtectedRoute>} />
       <Route path="/asset/:symbol" element={<ProtectedRoute><AssetDetail /></ProtectedRoute>} />
