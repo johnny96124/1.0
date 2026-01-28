@@ -600,7 +600,7 @@ export default function LoginPage() {
         <button
           onClick={() => handleMethodChange('phone')}
           className={cn(
-            "flex-1 py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 relative",
+            "flex-1 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 relative",
             loginMethod === 'phone'
               ? "bg-muted/50 text-foreground border border-border"
               : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
@@ -617,7 +617,7 @@ export default function LoginPage() {
         <button
           onClick={() => handleMethodChange('email')}
           className={cn(
-            "flex-1 py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 relative",
+            "flex-1 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 relative",
             loginMethod === 'email'
               ? "bg-muted/50 text-foreground border border-border"
               : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
@@ -699,18 +699,16 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Email Error Message - Fixed height container to prevent layout shift */}
-      <div className="h-5">
-        {emailError && loginMethod === 'email' && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-sm text-destructive"
-          >
-            {emailError}
-          </motion.p>
-        )}
-      </div>
+      {/* Email Error Message */}
+      {emailError && loginMethod === 'email' && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-sm text-destructive mb-4 -mt-2"
+        >
+          {emailError}
+        </motion.p>
+      )}
 
       {/* Continue Button */}
       <Button
