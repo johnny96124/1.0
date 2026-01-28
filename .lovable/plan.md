@@ -1,144 +1,53 @@
 
-# Asset Detail Page Chain-Aware Transfer Flow
+# 统一交易详情抽屉样式计划
 
-## Overview
-Enhance the asset detail page to handle chain selection before initiating transfers or receiving, based on the current filter context.
+## 问题分析
 
-## User Flow
+通过对比两个页面的代码，发现字号差异明显：
 
-**Scenario 1: All Chains View**
-```text
-User on Asset Detail (USDT, All chains)
-    |
-    +--> Clicks "Transfer" or "Receive"
-    |
-    +--> Chain Selection Drawer opens
-    |     - Shows available chains for this asset
-    |     - Shows balance per chain
-    |
-    +--> User selects a chain (e.g., Ethereum)
-    |
-    +--> Navigates to Send/Receive page with asset+chain pre-selected
-```
+| 元素 | 首页 (图1) | 交易历史 (图2) |
+|------|-----------|---------------|
+| 代币图标 | 64px (w-16 h-16) | 48px (w-12 h-12) |
+| 金额文字 | text-3xl (30px) | text-2xl (24px) |
+| USD 价值 | text-sm (14px) | text-xs (12px) |
+| 标签文字 | 默认 16px | text-xs (12px) |
+| 值文字 | font-medium | text-xs font-medium |
+| 抽屉内边距 | p-6 pb-8 | p-5 pb-6 |
 
-**Scenario 2: Specific Chain View**
-```text
-User on Asset Detail (USDT, ETH chain selected)
-    |
-    +--> Clicks "Transfer"
-    |
-    +--> Directly navigates to Send page
-    |     - Asset: USDT on Ethereum
-    |     - Skips asset selection step
-    |     - Starts at address input
-```
+## 设计规范对照
 
-## Technical Implementation
+根据 `src/index.css` 中定义的全局规范：
+- **text-base (16px)** - 表单输入、主要内容
+- **text-sm (14px)** - 标签、帮助文本、次要信息  
+- **text-xs (12px)** - 仅用于标题、时间戳、元信息
 
-### 1. Create ChainSelectDrawer Component
-**New file: `src/components/ChainSelectDrawer.tsx`**
+## 结论
 
-A reusable drawer component for selecting a chain when initiating from "All" view:
-- Props: `open`, `onOpenChange`, `assetSymbol`, `chains[]`, `onSelectChain`
-- Display each chain with:
-  - Chain icon and name
-  - Balance for this asset on that chain
-  - USD value
-- Styled consistently with existing drawer components
+**图1 (首页交易详情) 更符合全局设计规范**
 
-### 2. Modify AssetDetail.tsx
+理由：
+1. 金额使用 `text-3xl` 作为主要信息突出显示
+2. USD 价值使用 `text-sm` 符合"次要信息"标准
+3. 详情标签使用默认字号 (16px) 符合"标签"标准
+4. 图标尺寸 64px 符合"xl"级别的英雄区域标准
+5. 整体间距更宽敞，视觉层次更清晰
 
-**Add state and handlers:**
-- New state: `showChainSelectDrawer`, `pendingAction` (to track if "send" or "receive")
-- Handler `handleTransfer()`:
-  - If `selectedChain === 'all'`: open chain select drawer with action = 'send'
-  - Else: navigate to `/send?asset=SYMBOL&chain=CHAIN_ID`
-- Handler `handleReceive()`:
-  - If `selectedChain === 'all'`: open chain select drawer with action = 'receive'
-  - Else: navigate to `/receive?chain=CHAIN_ID`
-- Handler `handleChainSelected(chainId)`:
-  - If pending action is 'send': navigate to `/send?asset=SYMBOL&chain=CHAIN_ID`
-  - If pending action is 'receive': navigate to `/receive?chain=CHAIN_ID`
+## 实施方案
 
-**Update button onClick handlers:**
-```tsx
-<Button onClick={handleTransfer}>转账</Button>
-<Button onClick={handleReceive}>收款</Button>
-```
+将交易历史页面 (History.tsx) 的交易详情抽屉样式统一为首页样式：
 
-### 3. Modify Send.tsx
+### 修改文件
+`src/pages/History.tsx` (第 411-598 行)
 
-**Enhance URL parameter parsing:**
-- Parse `chain` from URL query params (in addition to existing `asset`)
-- When both `asset` and `chain` are specified:
-  - Find the specific asset matching both symbol AND network
-  - Set as `selectedAsset`
-  - Skip to `address` step directly
-
-**Update initial asset logic:**
-```tsx
-const chainFromUrl = searchParams.get('chain') as ChainId | null;
-const assetFromUrl = searchParams.get('asset');
-
-const initialAsset = (assetFromUrl && chainFromUrl)
-  ? assets.find(a => 
-      a.symbol.toUpperCase() === assetFromUrl.toUpperCase() && 
-      a.network === chainFromUrl
-    )
-  : assetFromUrl 
-    ? assets.find(a => a.symbol.toUpperCase() === assetFromUrl.toUpperCase())
-    : null;
-```
-
-### 4. Modify Receive.tsx
-
-**Add URL parameter support:**
-- Parse `chain` from URL query params
-- Pre-select the network if chain is specified in URL:
-```tsx
-const searchParams = new URLSearchParams(location.search);
-const chainFromUrl = searchParams.get('chain') as Exclude<ChainId, 'all'> | null;
-
-const initialNetwork = chainFromUrl 
-  ? networks.find(n => n.id === chainFromUrl) || networks[0]
-  : networks[0];
-
-const [selectedNetwork, setSelectedNetwork] = useState(initialNetwork);
-```
-
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/components/ChainSelectDrawer.tsx` | New component |
-| `src/pages/AssetDetail.tsx` | Add chain selection drawer, update navigation logic |
-| `src/pages/Send.tsx` | Parse chain from URL, find asset by symbol+network |
-| `src/pages/Receive.tsx` | Parse chain from URL, pre-select network |
-
-## Component Design: ChainSelectDrawer
-
-```tsx
-interface ChainSelectDrawerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string; // "选择转账网络" or "选择收款网络"
-  assetSymbol: string;
-  chains: { network: ChainId; balance: number; usdValue: number }[];
-  onSelectChain: (chainId: ChainId) => void;
-}
-```
-
-The drawer will display:
-- Header with title
-- List of available chains with:
-  - Chain icon (ChainIcon component)
-  - Chain name
-  - Asset balance on that chain
-  - USD value
-- Tappable rows that trigger `onSelectChain`
-
-## Edge Cases
-
-1. **Asset only exists on one chain**: If the asset data shows only one chain in `chains[]`, skip the drawer and navigate directly
-2. **Zero balance on a chain**: Still show the chain option but with 0 balance displayed
-3. **Back navigation**: When user navigates back from Send/Receive, the chain selection should reset appropriately
+### 具体调整
+1. **代币图标**: w-12 h-12 改为 w-16 h-16
+2. **状态徽章**: w-5 h-5 改为 w-6 h-6
+3. **金额文字**: text-2xl 改为 text-3xl
+4. **USD 价值**: text-xs 改为 text-sm，mt-0.5 改为 mt-1
+5. **状态标签**: px-2 py-0.5 改为 px-3 py-1，gap-1 改为 gap-1.5
+6. **详情区域**: 
+   - 标签: text-xs 改为默认字号
+   - 值: text-xs font-medium 改为 font-medium (默认字号)
+   - 地址: text-xs 改为 text-sm
+7. **抽屉内边距**: p-5 pb-6 改为 p-6 pb-8
+8. **间距调整**: mb-4 改为 mb-6，mb-3 改为 mb-4 等
