@@ -216,159 +216,157 @@ export default function SetPassword() {
         </button>
       </div>
 
-      {/* Scrollable Content - Centered */}
-      <div className="flex-1 px-4 overflow-y-auto flex flex-col items-center justify-center">
-        <div className="w-full max-w-sm">
-          {/* Icon */}
-          <div className="flex justify-center mb-6">
+      {/* Scrollable Content */}
+      <div className="flex-1 px-4 overflow-y-auto">
+        {/* Icon */}
+        <div className="flex justify-center mb-6 mt-8">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center"
+          >
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center"
+              animate={{ rotate: [0, -10, 10, 0] }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <motion.div
-                animate={{ rotate: [0, -10, 10, 0] }}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <Lock className="w-10 h-10 text-primary" />
-              </motion.div>
+              <Lock className="w-10 h-10 text-primary" />
             </motion.div>
-          </div>
-
-          {/* Title - Centered */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8 text-center"
-          >
-            <h1 className="text-2xl font-bold text-foreground mb-2">设置登录密码</h1>
-            <p className="text-muted-foreground">为您的账户设置一个安全密码</p>
-          </motion.div>
-
-          {/* Password Input */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="space-y-4"
-          >
-            {/* New Password */}
-            <div className="relative">
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="请输入新密码"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setError('');
-                }}
-                className="h-12 text-base pr-12"
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-
-            {/* Password Strength Indicator */}
-            {password && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="space-y-2"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">密码强度:</span>
-                  <div className="flex gap-1 flex-1">
-                    {[1, 2, 3].map((segment) => (
-                      <div
-                        key={segment}
-                        className={cn(
-                          "h-1.5 flex-1 rounded-full transition-colors",
-                          segment <= strengthInfo.segments
-                            ? strengthInfo.color
-                            : "bg-muted"
-                        )}
-                      />
-                    ))}
-                  </div>
-                  <span className={cn(
-                    "text-sm font-medium",
-                    strength === 'weak' && "text-destructive",
-                    strength === 'medium' && "text-warning",
-                    strength === 'strong' && "text-success"
-                  )}>
-                    {strengthInfo.label}
-                  </span>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Confirm Password */}
-            <div className="relative">
-              <Input
-                type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="确认密码"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  setError('');
-                }}
-                className="h-12 text-base pr-12"
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-destructive text-center"
-              >
-                {error}
-              </motion.p>
-            )}
-
-            {/* Set Password Button - Below confirm password */}
-            <Button
-              variant="default"
-              size="lg"
-              className="w-full text-base font-medium mt-4"
-              onClick={handleSetPassword}
-              disabled={isLoading || !password || !confirmPassword}
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              ) : null}
-              设置密码
-            </Button>
-
-            {/* Only show skip button when NOT in onboarding flow */}
-            {!isOnboardingFlow && (
-              <button
-                onClick={handleSkip}
-                disabled={isLoading}
-                className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 mt-2"
-              >
-                稍后设置
-              </button>
-            )}
           </motion.div>
         </div>
+
+        {/* Title - Left aligned like Login page */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <h1 className="text-2xl font-bold text-foreground mb-2">设置登录密码</h1>
+          <p className="text-muted-foreground">为您的账户设置一个安全密码</p>
+        </motion.div>
+
+        {/* Password Input */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-4"
+        >
+          {/* New Password */}
+          <div className="relative">
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="请输入新密码"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError('');
+              }}
+              className="h-12 text-base pr-12"
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Password Strength Indicator */}
+          {password && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="space-y-2"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">密码强度:</span>
+                <div className="flex gap-1 flex-1">
+                  {[1, 2, 3].map((segment) => (
+                    <div
+                      key={segment}
+                      className={cn(
+                        "h-1.5 flex-1 rounded-full transition-colors",
+                        segment <= strengthInfo.segments
+                          ? strengthInfo.color
+                          : "bg-muted"
+                      )}
+                    />
+                  ))}
+                </div>
+                <span className={cn(
+                  "text-sm font-medium",
+                  strength === 'weak' && "text-destructive",
+                  strength === 'medium' && "text-warning",
+                  strength === 'strong' && "text-success"
+                )}>
+                  {strengthInfo.label}
+                </span>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Confirm Password */}
+          <div className="relative">
+            <Input
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="确认密码"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setError('');
+              }}
+              className="h-12 text-base pr-12"
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-sm text-destructive text-center"
+            >
+              {error}
+            </motion.p>
+          )}
+
+          {/* Set Password Button - Below confirm password */}
+          <Button
+            variant="default"
+            size="lg"
+            className="w-full text-base font-medium mt-4"
+            onClick={handleSetPassword}
+            disabled={isLoading || !password || !confirmPassword}
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            ) : null}
+            设置密码
+          </Button>
+
+          {/* Only show skip button when NOT in onboarding flow */}
+          {!isOnboardingFlow && (
+            <button
+              onClick={handleSkip}
+              disabled={isLoading}
+              className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 mt-2"
+            >
+              稍后设置
+            </button>
+          )}
+        </motion.div>
       </div>
     </div>
   );
