@@ -1,193 +1,282 @@
 
+# 转账流程优化实施计划
 
-## 应用后台锁屏保护功能
+## 项目概述
 
-### 功能概述
-当钱包应用切换到后台一段时间后再次唤起时，需要：
-1. **隐藏屏幕内容** - 保护敏感的资产和交易信息
-2. **显示锁屏界面** - 居中显示一个大图标
-3. **用户点击验证** - 点击图标后进行身份验证（生物识别/密码）
-4. **验证通过后恢复** - 解锁后恢复正常页面展示
+将现有转账流程从 **地址 → 金额 → 确认** 优化为 **币种选择 → 地址输入 → 金额输入 → 确认** 的新流程，提升用户体验和操作效率。
 
 ---
 
-### 实现方案
-
-#### 1. 创建 App Lock Context（应用锁状态管理）
-
-**新建文件：** `src/contexts/AppLockContext.tsx`
-
-负责管理应用锁定状态：
-- 锁定状态（`locked` / `unlocked`）
-- 后台时间戳记录
-- 锁定超时配置（默认30秒可配置）
-- 监听页面可见性变化（`visibilitychange` 事件）
-- 提供解锁方法
+## 新流程设计
 
 ```text
-┌─────────────────────────────────────────────────┐
-│              AppLockContext                      │
-├─────────────────────────────────────────────────┤
-│  State:                                          │
-│  - isLocked: boolean                             │
-│  - backgroundTimestamp: Date | null              │
-│  - lockTimeout: number (seconds)                 │
-│                                                  │
-│  Methods:                                        │
-│  - unlock(): void                                │
-│  - setLockTimeout(seconds): void                 │
-│                                                  │
-│  Auto-lock Logic:                                │
-│  - visibilitychange → hidden: record timestamp  │
-│  - visibilitychange → visible: check duration   │
-│  - if duration > lockTimeout → lock             │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           新转账流程                                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│   Step 1: 选择币种      Step 2: 输入地址      Step 3: 输入金额           │
+│   ┌──────────────┐     ┌──────────────┐     ┌──────────────┐            │
+│   │  搜索框       │     │  地址输入框   │     │  金额显示     │           │
+│   │  链筛选器     │ ──► │  扫码按钮     │ ──► │  数字键盘     │           │
+│   │  币种列表     │     │  联系人按钮   │     │  可用余额     │           │
+│   │  (按余额排序) │     │  风险评估     │     │  MAX按钮     │            │
+│   └──────────────┘     └──────────────┘     └──────────────┘            │
+│                                                      │                   │
+│                                                      ▼                   │
+│                        Step 4: 确认转账      Step 5: 验证 & 成功         │
+│                        ┌──────────────┐     ┌──────────────┐            │
+│                        │  交易摘要     │     │  生物识别     │           │
+│                        │  网络费用     │ ──► │  转账成功     │           │
+│                        │  备注输入     │     │  查看记录     │           │
+│                        │  风险确认     │     └──────────────┘            │
+│                        └──────────────┘                                  │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
-
-#### 2. 创建锁屏覆盖组件
-
-**新建文件：** `src/components/AppLockScreen.tsx`
-
-全屏覆盖层组件：
-- 模糊背景（隐藏底层内容）
-- 居中显示大图标（锁头或钱包图标）
-- 点击图标触发验证
-- 验证方式：
-  - 优先使用生物识别（如果已启用）
-  - 退回到密码验证
-- 平滑的解锁动画
-
-```text
-┌─────────────────────────────────────────────────┐
-│                 Lock Screen                      │
-│                                                  │
-│          ┌──────────────────────┐               │
-│          │                      │               │
-│          │    ┌──────────┐      │               │
-│          │    │   🔒     │      │  ← 大图标     │
-│          │    │  点击解锁 │      │               │
-│          │    └──────────┘      │               │
-│          │                      │               │
-│          │   商户钱包           │               │
-│          │   点击图标解锁       │               │
-│          │                      │               │
-│          └──────────────────────┘               │
-│                                                  │
-│         Blurred Background Layer                 │
-└─────────────────────────────────────────────────┘
-```
-
-#### 3. 修改应用入口集成锁屏
-
-**修改文件：** `src/App.tsx`
-
-- 在 `PhoneFrame` 内部添加 `AppLockProvider`
-- 在应用顶层渲染 `AppLockScreen` 组件（仅在锁定状态显示）
-- 确保锁屏层级高于所有其他内容
-
-#### 4. 创建解锁验证抽屉
-
-**新建文件：** `src/components/UnlockDrawer.tsx`
-
-验证抽屉组件：
-- 支持密码输入验证
-- 支持生物识别验证（模拟）
-- 验证失败显示错误提示
-- 验证成功后调用解锁方法
 
 ---
 
-### 技术细节
+## 实施任务分解
 
-#### 页面可见性检测
+### 任务 1: 创建增强版币种选择器组件 (AssetPickerDrawer)
+
+**创建新文件**: `src/components/AssetPickerDrawer.tsx`
+
+**功能特性**:
+- 全屏抽屉式选择器
+- 顶部搜索栏（支持币种名称/符号搜索）
+- 链筛选器（复用现有 `ChainSelector` 样式）
+- 币种列表默认按 USD 余额降序排序
+- 每个币种卡片显示: 图标、符号、链标识、余额、USD 价值
+- 空状态和搜索无结果状态处理
+
+**组件接口**:
+```typescript
+interface AssetPickerDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  assets: Asset[];
+  onSelect: (asset: Asset) => void;
+  selectedAsset?: Asset;
+}
+```
+
+**UI 布局**:
 ```text
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    // 记录进入后台时间
-    setBackgroundTimestamp(new Date());
-  } else {
-    // 检查后台时长
-    if (超过锁定时间) {
-      setIsLocked(true);
-    }
+┌──────────────────────────────────┐
+│  ← 选择币种                       │ Header
+├──────────────────────────────────┤
+│  🔍 搜索币种...                   │ 搜索框
+├──────────────────────────────────┤
+│  [All] [ETH] [TRX] [BNB]         │ 链筛选器
+├──────────────────────────────────┤
+│  ┌─────────────────────────────┐ │
+│  │ 🪙 USDT     ETH    $8,500  │ │
+│  │    Tether   8,500 USDT      │ │
+│  └─────────────────────────────┘ │
+│  ┌─────────────────────────────┐ │
+│  │ ⚡ ETH      ETH    $8,575  │ │
+│  │    Ethereum 2.45 ETH        │ │
+│  └─────────────────────────────┘ │
+│          ... 更多币种 ...         │
+└──────────────────────────────────┘
+```
+
+---
+
+### 任务 2: 重构 Send.tsx 步骤顺序
+
+**修改文件**: `src/pages/Send.tsx`
+
+**变更内容**:
+
+1. **步骤状态更新**:
+   ```typescript
+   // 旧流程
+   type Step = 'address' | 'amount' | 'confirm' | 'auth' | 'success';
+   
+   // 新流程
+   type Step = 'asset' | 'address' | 'amount' | 'confirm' | 'auth' | 'success';
+   ```
+
+2. **初始步骤变更**:
+   - 默认从 `asset` 步骤开始
+   - 如果通过 URL 参数指定了币种（如 `/send?asset=USDC`），则跳过币种选择
+   - 如果来自 PSP 页面并带有预填地址，保持现有逻辑
+
+3. **Header 标题映射更新**:
+   ```typescript
+   const getStepTitle = () => {
+     switch (step) {
+       case 'asset': return '选择币种';
+       case 'address': return '收款地址';
+       case 'amount': return '输入金额';
+       case 'confirm': return '确认转账';
+       case 'auth': return '验证身份';
+       case 'success': return '转账成功';
+     }
+   };
+   ```
+
+4. **返回逻辑更新**:
+   ```typescript
+   // 返回按钮逻辑
+   if (step === 'asset') navigate(-1);
+   else if (step === 'address') setStep('asset');
+   else if (step === 'amount') setStep('address');
+   // ... 其余保持不变
+   ```
+
+---
+
+### 任务 3: 实现币种选择步骤 UI
+
+**位置**: `Send.tsx` 内新增 `step === 'asset'` 分支
+
+**功能**:
+- 显示搜索框（实时过滤）
+- 显示链筛选器（水平滚动）
+- 显示按余额排序的币种列表
+- 点击币种后自动进入地址步骤
+
+**过滤与排序逻辑**:
+```typescript
+const filteredAndSortedAssets = useMemo(() => {
+  let result = assets;
+  
+  // 链筛选
+  if (selectedChain !== 'all') {
+    result = result.filter(a => a.network === selectedChain);
   }
-});
-```
-
-#### 锁屏样式
-- 使用 `position: fixed` 覆盖整个视口
-- `backdrop-filter: blur(20px)` 模糊背景
-- `z-index` 高于所有其他元素
-- 使用 Framer Motion 实现平滑过渡动画
-
-#### 安全考虑
-- 锁屏状态存储在内存中（不持久化）
-- 页面刷新时重新登录
-- 可在安全设置中配置锁定时长
-
----
-
-### 文件变更清单
-
-| 操作 | 文件路径 | 说明 |
-|------|---------|------|
-| 新建 | `src/contexts/AppLockContext.tsx` | 应用锁状态管理 Context |
-| 新建 | `src/components/AppLockScreen.tsx` | 锁屏覆盖界面组件 |
-| 新建 | `src/components/UnlockDrawer.tsx` | 解锁验证抽屉组件 |
-| 修改 | `src/App.tsx` | 集成 AppLockProvider 和 AppLockScreen |
-| 修改 | `src/pages/Security.tsx` | 添加锁定超时配置选项（可选） |
-
----
-
-### 用户流程
-
-```text
-用户正常使用 App
-      │
-      ▼
-App 切换到后台
-      │
-      ▼
-记录后台时间戳
-      │
-      ▼
-用户回到 App
-      │
-      ├─── 后台时间 < 30秒 ───► 正常显示
-      │
-      └─── 后台时间 ≥ 30秒 ───► 显示锁屏
-                                    │
-                                    ▼
-                            点击中央图标
-                                    │
-                                    ▼
-                            弹出验证抽屉
-                                    │
-                        ┌───────────┴───────────┐
-                        │                       │
-                   生物识别验证            密码验证
-                        │                       │
-                        ▼                       ▼
-                   验证成功/失败          验证成功/失败
-                        │                       │
-                        └───────────┬───────────┘
-                                    │
-                        ┌───────────┴───────────┐
-                        │                       │
-                     成功                    失败
-                        │                       │
-                        ▼                       ▼
-                   解锁，恢复页面          显示错误提示
+  
+  // 搜索过滤
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    result = result.filter(a => 
+      a.symbol.toLowerCase().includes(query) ||
+      a.name.toLowerCase().includes(query)
+    );
+  }
+  
+  // 按 USD 价值降序排序
+  return result.sort((a, b) => b.usdValue - a.usdValue);
+}, [assets, selectedChain, searchQuery]);
 ```
 
 ---
 
-### 界面设计要点
+### 任务 4: 优化地址输入步骤
 
-锁屏界面参考现有 Splash 页面风格：
-- 居中的大图标（锁头图标，`w-24 h-24`）
-- 图标容器带有呼吸动画效果
-- 下方显示 "点击解锁" 提示文字
-- 底部保留 "Powered by COBO" 标识
-- 支持深色/浅色主题
+**修改文件**: `src/pages/Send.tsx`
 
+**优化内容**:
+
+1. **显示已选币种信息**:
+   - 在地址输入区域上方显示当前选择的币种和余额
+   - 可点击切换回币种选择步骤
+
+2. **地址输入区域**:
+   - 保持现有输入框、扫码、联系人按钮
+   - 保持风险评估功能
+
+3. **联系人筛选**:
+   - 联系人列表可按当前选择的链进行预筛选
+   - 传递 `selectedNetwork={selectedAsset.network}` 给 `ContactDrawer`
+
+---
+
+### 任务 5: 优化确认页面
+
+**修改文件**: `src/pages/Send.tsx` 的 `step === 'confirm'` 部分
+
+**优化内容**:
+
+1. **信息布局优化**:
+   ```text
+   ┌────────────────────────────────┐
+   │      🪙 1,000 USDT            │  金额卡片
+   │       ≈ $1,000.00             │
+   ├────────────────────────────────┤
+   │  收款方                         │
+   │  张三                          │
+   │  0x1234...abcd                │
+   ├────────────────────────────────┤
+   │  网络          Ethereum ⚡     │
+   │  网络费用      ~$2.50 (标准)   │
+   │  预计到账      约 5 分钟        │
+   ├────────────────────────────────┤
+   │  备注 (可选)                   │
+   │  ┌─────────────────────────┐  │
+   │  │ 添加对账信息...          │  │
+   │  └─────────────────────────┘  │
+   └────────────────────────────────┘
+   ```
+
+2. **风险提示保持现有逻辑**
+
+3. **底部按钮样式统一**:
+   - 确保使用 `h-12` 高度
+   - 底部间距 `pb-8`
+
+---
+
+### 任务 6: 移除旧的币种选择器调用
+
+**修改文件**: `src/pages/Send.tsx`
+
+**变更**:
+- 移除 `amount` 步骤中的内联币种切换逻辑
+- 移除 `showAssetPicker` 相关 Drawer 和状态
+- 金额步骤只显示当前选中币种的余额信息
+
+---
+
+## 文件变更清单
+
+| 文件路径 | 操作 | 说明 |
+|---------|------|------|
+| `src/components/AssetPickerDrawer.tsx` | 新建 | 增强版币种选择器组件 |
+| `src/pages/Send.tsx` | 修改 | 重构步骤流程，新增 asset 步骤 |
+| `src/components/skeletons/index.ts` | 修改 | 导出 AssetListSkeleton (如需要) |
+
+---
+
+## 兼容性考虑
+
+1. **URL 参数兼容**: `/send?asset=USDC` 仍然可用，自动跳过币种选择
+2. **PSP 预填兼容**: 来自 PSP 页面的转账保持现有跳转逻辑
+3. **联系人页面兼容**: 从联系人详情发起的转账，预填地址后从地址步骤开始
+
+---
+
+## 技术细节
+
+### 使用的现有组件
+- `ChainSelector` - 链筛选器
+- `ChainIcon` - 链图标
+- `CryptoIcon` - 币种图标
+- `ContactDrawer` - 联系人选择
+- `QRScanner` - 扫码
+- `NumericKeypad` - 数字键盘
+- `AmountDisplay` - 金额显示
+- `AddressBar` - 地址栏
+- `NetworkFeeSelector` - 网络费用选择
+
+### 状态管理
+- 所有状态继续在 `Send.tsx` 内管理
+- 新增 `searchQuery` 和 `filterChain` 状态用于币种筛选
+- 移除 `showAssetPicker` 状态
+
+---
+
+## 预估工作量
+
+| 任务 | 复杂度 | 预估时间 |
+|-----|-------|---------|
+| 创建 AssetPickerDrawer | 中 | 15 分钟 |
+| 重构 Send.tsx 步骤 | 高 | 20 分钟 |
+| 币种选择 UI | 中 | 15 分钟 |
+| 地址步骤优化 | 低 | 10 分钟 |
+| 确认页面优化 | 低 | 10 分钟 |
+| 测试和调整 | 中 | 10 分钟 |
+| **总计** | | **约 80 分钟** |
