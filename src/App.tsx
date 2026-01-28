@@ -38,7 +38,6 @@ import AuthorizeDevice from "./pages/AuthorizeDevice";
 import TssKeyRecovery from "./pages/TssKeyRecovery";
 import TSSBackupManagement from "./pages/TSSBackupManagement";
 import DeviceKicked from "./pages/DeviceKicked";
-import CloudRecoveryUnavailable from "./pages/CloudRecoveryUnavailable";
 import SecurityRequired from "./pages/SecurityRequired";
 import SetPassword from "./pages/SetPassword";
 import BindEmailDemo from "./pages/BindEmailDemo";
@@ -93,7 +92,6 @@ function AppRoutes() {
       <Route path="/wallet/escape/:id" element={<ProtectedRoute><WalletEscape /></ProtectedRoute>} />
       <Route path="/profile/devices/authorize" element={<ProtectedRoute><AuthorizeDevice /></ProtectedRoute>} />
       <Route path="/tss-recovery" element={<TssKeyRecovery />} />
-      <Route path="/cloud-recovery-unavailable" element={<CloudRecoveryUnavailable />} />
       <Route path="/device-kicked" element={<DeviceKicked />} />
       <Route path="/security-required" element={<SecurityRequired />} />
       <Route path="/set-password" element={<ProtectedRoute><SetPassword /></ProtectedRoute>} />

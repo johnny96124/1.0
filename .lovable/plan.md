@@ -1,119 +1,166 @@
 
+# Add Password Verification Option to Phone/Email Rebind Flow
 
-# 新增云端恢复不可用页面
+## Overview
+Currently, when users want to rebind their phone number or email, they must verify their identity by receiving an OTP code on their **current** bound account. Since all users now have a password (mandatory during onboarding), we will add an alternative verification method: users can choose to verify using their password instead of OTP.
 
-## 概述
-
-创建一个新页面，用于展示当用户没有完成云端备份时，无法使用云恢复功能的状态。这个页面将引导用户了解情况并提供替代方案。
-
----
-
-## 页面设计
-
-### 视觉结构
+## User Flow
 
 ```text
-+----------------------------------+
-|  ← 返回                          |
-+----------------------------------+
-|                                  |
-|           (云端图标)              |
-|       带有警告/禁用状态            |
-|                                  |
-|       云端恢复暂不可用             |
-|    您尚未在云端完成备份，无法使     |
-|    用此恢复方式                   |
-|                                  |
-+----------------------------------+
-|                                  |
-|  ⚠️ 提示信息卡片                  |
-|  说明为什么无法使用云端恢复        |
-|                                  |
-+----------------------------------+
-|                                  |
-|  💡 推荐操作                      |
-|  - 使用本地文件恢复               |
-|  - 联系客服获取帮助               |
-|                                  |
-+----------------------------------+
-|                                  |
-|  [使用本地文件恢复] (主按钮)       |
-|  [联系客服] (次要按钮)            |
-|                                  |
-+----------------------------------+
+┌─────────────────────────────────────────────────────────────────┐
+│                      Current Rebind Flow                        │
+│                                                                 │
+│  1. User clicks "换绑" on phone/email                           │
+│  2. Drawer opens → "安全验证" step                              │
+│  3. User must verify via OTP to current bound account           │
+│  4. After verification → Enter new account                      │
+│  5. Verify new account via OTP                                  │
+│  6. Success                                                     │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                   Enhanced Rebind Flow                          │
+│                                                                 │
+│  1. User clicks "换绑" on phone/email                           │
+│  2. Drawer opens → "安全验证" step                              │
+│  3. Two verification options:                                   │
+│     a) OTP to current bound account (existing flow)             │
+│     b) Password verification (NEW)                              │
+│  4. After verification → Enter new account                      │
+│  5. Verify new account via OTP                                  │
+│  6. Success                                                     │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### 页面元素
+## UI Design (Based on Reference Screenshots)
 
-1. **顶部导航**：返回箭头
-
-2. **主视觉区域**：
-   - 云端图标（带禁用/警告状态）
-   - 主标题："云端恢复暂不可用"
-   - 副标题说明原因
-
-3. **信息提示卡**：
-   - 警告图标
-   - 解释为何无法使用云端恢复
-   - 提示用户之前没有完成云端备份
-
-4. **替代方案区域**：
-   - 本地文件恢复选项
-   - 联系客服选项
-
-5. **底部操作按钮**：
-   - 主按钮：使用本地文件恢复
-   - 次要按钮：联系客服
-
----
-
-## 技术实现
-
-### 新增文件
-
-| 文件路径 | 说明 |
-|---------|------|
-| `src/pages/CloudRecoveryUnavailable.tsx` | 云端恢复不可用页面组件 |
-
-### 路由配置更新
-
-在 `src/App.tsx` 中添加新路由：
+In the "安全验证" step (verify-old), we will add a link at the bottom of the drawer:
 
 ```text
-/cloud-recovery-unavailable → CloudRecoveryUnavailable
+┌─────────────────────────────────────────────────┐
+│  安全验证                                        │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│              [Shield Icon]                      │
+│                                                 │
+│  为确保账号安全，请先验证当前绑定的手机号          │
+│                                                 │
+│            +86 138****1234                      │
+│                                                 │
+│     ┌─────────────────────────────────────┐     │
+│     │      发送验证码到原手机号            │     │
+│     └─────────────────────────────────────┘     │
+│                                                 │
+│         ───────── 或 ─────────                  │
+│                                                 │
+│            使用密码验证 →                        │
+│                                                 │
+└─────────────────────────────────────────────────┘
 ```
 
-### 组件依赖
+When user clicks "使用密码验证", the view switches to a password input mode:
 
-将复用以下现有组件和工具：
-- `Button` 组件
-- `motion` (framer-motion) 用于动画
-- `lucide-react` 图标：`Cloud`, `AlertTriangle`, `HardDrive`, `ArrowLeft`, `MessageCircle`, `CloudOff`
-- `cn` 工具函数
-
-### 页面功能
-
-1. **返回导航**：点击返回箭头回到上一页（登录或恢复方法选择页）
-2. **本地文件恢复跳转**：点击后跳转到 `/tss-recovery?cloud=false`，直接进入本地文件恢复流程
-3. **联系客服**：点击后跳转到帮助页面 `/help`
-
-### 样式规范
-
-- 使用 16px 统一水平内边距（遵循项目规范）
-- 页面垂直居中布局
-- 使用 `warning` 主题色表示警告状态
-- 与现有 TssKeyRecovery 页面风格保持一致
+```text
+┌─────────────────────────────────────────────────┐
+│  ← 安全验证                                      │
+├─────────────────────────────────────────────────┤
+│                                                 │
+│              [Lock Icon]                        │
+│                                                 │
+│         请输入登录密码以验证身份                  │
+│                                                 │
+│     ┌─────────────────────────────────────┐     │
+│     │  ••••••••                       👁   │     │
+│     └─────────────────────────────────────┘     │
+│                                                 │
+│     ┌─────────────────────────────────────┐     │
+│     │              确认                    │     │
+│     └─────────────────────────────────────┘     │
+│                                                 │
+│         使用验证码验证 →                         │
+│                                                 │
+└─────────────────────────────────────────────────┘
+```
 
 ---
 
-## 实现步骤
+## Technical Implementation
 
-1. **创建新页面文件** `src/pages/CloudRecoveryUnavailable.tsx`
-   - 实现完整的页面组件
-   - 包含动画效果
-   - 响应式布局
+### Files to Modify
 
-2. **更新路由配置** `src/App.tsx`
-   - 添加 import 语句
-   - 添加新的 Route 配置
+1. **`src/components/BindAccountDrawer.tsx`** - Main changes
 
+### Changes Required
+
+#### 1. Add New Props
+- Add `hasPassword?: boolean` prop to indicate if password verification is available
+
+#### 2. Add New State Variables
+```typescript
+// Password verification mode
+const [verifyMode, setVerifyMode] = useState<'otp' | 'password'>('otp');
+const [password, setPassword] = useState('');
+const [showPassword, setShowPassword] = useState(false);
+const [passwordError, setPasswordError] = useState('');
+```
+
+#### 3. Add Password Verification Handler
+```typescript
+const handleVerifyPassword = async () => {
+  setIsLoading(true);
+  setPasswordError('');
+  
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  const savedPassword = localStorage.getItem('user_password');
+  if (password !== savedPassword) {
+    setPasswordError('密码不正确');
+    setIsLoading(false);
+    return;
+  }
+  
+  setIsLoading(false);
+  setStep('input'); // Proceed to new account input
+};
+```
+
+#### 4. Update the "verify-old" Step UI
+- When `verifyMode === 'otp'`:
+  - Show current OTP verification UI
+  - Add divider and "使用密码验证 →" link at the bottom (only if `hasPassword` is true)
+- When `verifyMode === 'password'`:
+  - Show password input field with visibility toggle
+  - Show confirm button
+  - Add "使用验证码验证 →" link at the bottom to switch back
+
+#### 5. Update Reset Logic
+- Reset `verifyMode` to 'otp' when drawer closes
+- Reset password-related state (`password`, `passwordError`, `showPassword`)
+
+#### 6. Update Back Navigation
+- When in password mode, back arrow returns to OTP mode (not closing drawer)
+
+### Update PersonalInfo.tsx
+
+Pass the `hasPassword` prop when opening BindAccountDrawer:
+
+```typescript
+<BindAccountDrawer
+  open={bindDrawerOpen}
+  onOpenChange={setBindDrawerOpen}
+  type={bindType}
+  mode={bindMode}
+  currentValue={currentBindValue}
+  onSuccess={handleBindSuccess}
+  hasPassword={hasExistingPassword}  // NEW
+/>
+```
+
+---
+
+## Summary of Changes
+
+| File | Changes |
+|------|---------|
+| `src/components/BindAccountDrawer.tsx` | Add password verification mode with toggle between OTP and password in the verify-old step |
+| `src/pages/PersonalInfo.tsx` | Pass `hasExistingPassword` prop to BindAccountDrawer |
