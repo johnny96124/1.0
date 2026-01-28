@@ -145,16 +145,11 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
                 </div>
 
                 {/* Selected Indicator - Circle with checkmark */}
-                <div className={cn(
-                  "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
-                  selectedTier === option.tier
-                    ? "border-primary bg-transparent"
-                    : "border-border bg-transparent"
-                )}>
-                  {selectedTier === option.tier && (
+                {selectedTier === option.tier && (
+                  <div className="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center shrink-0">
                     <Check className="w-4 h-4 text-primary" />
-                  )}
-                </div>
+                  </div>
+                )}
               </button>
             ))}
 
