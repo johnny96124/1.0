@@ -411,6 +411,11 @@ export default function HistoryPage() {
                                     <CheckCircle2 className="w-3 h-3" />
                                   </span>
                                 )}
+                                {tx.status === 'failed' && (
+                                  <span className="text-xs text-destructive flex items-center gap-0.5">
+                                    <XCircle className="w-3 h-3" />
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
