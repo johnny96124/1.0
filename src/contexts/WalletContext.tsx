@@ -244,6 +244,53 @@ const mockTransactionsWallet1: Transaction[] = [
     network: 'tron',
     riskScore: 'green',
   },
+  // Failed transaction 1 - insufficient gas
+  {
+    id: 'failed-1',
+    type: 'send',
+    amount: 1000,
+    symbol: 'USDT',
+    usdValue: 1000,
+    status: 'failed',
+    counterparty: '0xFailed123456789012345678901234567890abcd',
+    counterpartyLabel: 'External Wallet',
+    timestamp: new Date(Date.now() - 180000000),
+    txHash: '0xfailedtx1234567890abcdef1234567890abcd',
+    network: 'ethereum',
+    fee: 0,
+    riskScore: 'green',
+  },
+  // Failed transaction 2 - network error
+  {
+    id: 'failed-2',
+    type: 'send',
+    amount: 2.5,
+    symbol: 'ETH',
+    usdValue: 8750,
+    status: 'failed',
+    counterparty: '0xNetworkErr789012345678901234567890abcdef',
+    timestamp: new Date(Date.now() - 259200000),
+    txHash: '0xfailedtx2345678901234567890abcdef12345',
+    network: 'ethereum',
+    fee: 0,
+    riskScore: 'green',
+  },
+  // Failed transaction 3 - on Tron network
+  {
+    id: 'failed-3',
+    type: 'send',
+    amount: 500,
+    symbol: 'USDT',
+    usdValue: 500,
+    status: 'failed',
+    counterparty: 'TFailedAddr1234567890abcdef12345678',
+    counterpartyLabel: 'Partner Ltd.',
+    timestamp: new Date(Date.now() - 518400000),
+    txHash: 'failedhash789012345678901234567890abcd',
+    network: 'tron',
+    fee: 0,
+    riskScore: 'green',
+  },
 ];
 
 const mockTransactionsWallet2: Transaction[] = [
