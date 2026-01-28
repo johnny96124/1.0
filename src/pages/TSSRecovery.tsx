@@ -154,12 +154,20 @@ export default function TSSRecoveryPage() {
       {/* Header */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between">
-          <button 
-            onClick={handleBack}
-            className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleBack}
+              className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            {/* Show step counter only for local file recovery flow */}
+            {selectedMethod === 'local_file' && step !== 'method' && step !== 'success' && (
+              <span className="text-sm text-muted-foreground">
+                步骤 {step === 'file_select' ? 1 : 2} / 2
+              </span>
+            )}
+          </div>
           {/* Only show title when not on method selection step */}
           {step !== 'method' && (
             <span className="text-sm font-medium text-foreground">
