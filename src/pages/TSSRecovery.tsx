@@ -169,9 +169,12 @@ export default function TSSRecoveryPage() {
               </span>
             )}
           </div>
-          <span className="text-sm font-medium text-foreground">
-            {getStepTitle()}
-          </span>
+          {/* Only show title when not on method selection step */}
+          {step !== 'method' && (
+            <span className="text-sm font-medium text-foreground">
+              {getStepTitle()}
+            </span>
+          )}
         </div>
         
         {showProgressIndicator && (
@@ -312,7 +315,7 @@ function MethodSelectionStep({
           检测到已有安全账户
         </h2>
         <p className="text-sm text-muted-foreground max-w-[280px]">
-          您已在其他设备创建过 TSS Node，请选择恢复方式以继续使用
+          您已在其他设备创建过钱包，请选择恢复方式以继续使用
         </p>
       </div>
 
