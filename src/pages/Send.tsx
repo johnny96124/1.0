@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Scan, Users, AlertTriangle, 
-  CheckCircle2, Loader2, Shield, Search, X,
+  CheckCircle2, Loader2, Search, X, Shield,
   Info, ChevronRight, ShieldAlert, Lightbulb
 } from 'lucide-react';
 import { toast } from '@/lib/toast';
@@ -35,7 +35,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
-type Step = 'asset' | 'address' | 'amount' | 'confirm' | 'auth' | 'success';
+type Step = 'asset' | 'address' | 'amount' | 'confirm' | 'success';
 
 export default function SendPage() {
   const navigate = useNavigate();
@@ -227,7 +227,8 @@ export default function SendPage() {
       setStep('confirm');
     } else if (step === 'confirm') {
       if (riskScore?.score === 'yellow' && !confirmRisk) return;
-      setStep('auth');
+      // Directly trigger authentication and send
+      handleAuth();
     }
   };
 
@@ -290,7 +291,6 @@ export default function SendPage() {
       case 'address': return '收款地址';
       case 'amount': return '输入金额';
       case 'confirm': return '确认转账';
-      case 'auth': return '验证身份';
       case 'success': return '转账成功';
     }
   };
@@ -749,11 +749,20 @@ export default function SendPage() {
                 <div className="card-elevated p-4 space-y-4">
                   <div>
                     <p className="text-sm text-muted-foreground">收款方</p>
-                    <p className="font-medium text-foreground mt-1">
-                      {pspRecipientName || selectedContact?.name || '未知地址'}
-                    </p>
-                    <p className="text-sm font-mono text-muted-foreground mt-0.5">
-                      {address.slice(0, 12)}...{address.slice(-10)}
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="font-medium text-foreground">
+                        {pspRecipientName || selectedContact?.name || '未知地址'}
+                      </p>
+                      {!selectedContact && !pspRecipientName && (
+                        <span className="text-xs bg-warning/10 text-warning px-2 py-0.5 rounded-full">
+                          新地址
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm font-mono text-muted-foreground mt-1">
+                      <span className="font-bold text-foreground">{address.slice(0, 4)}</span>
+                      {address.slice(4, -4)}
+                      <span className="font-bold text-foreground">{address.slice(-4)}</span>
                     </p>
                   </div>
                   <div className="h-px bg-border" />
@@ -820,42 +829,7 @@ export default function SendPage() {
               </motion.div>
             )}
 
-            {/* Step 4: Auth */}
-            {step === 'auth' && (
-              <motion.div
-                key="auth"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="flex-1 flex flex-col items-center justify-center text-center px-4 py-12"
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mb-6"
-                >
-                  <Shield className="w-12 h-12 text-accent" />
-                </motion.div>
-                <h2 className="text-xl font-bold text-foreground mb-2">
-                  验证身份
-                </h2>
-                <p className="text-muted-foreground text-sm max-w-[280px]">
-                  请使用面容 ID 或指纹验证以确认转账
-                </p>
-                
-                <Button
-                  size="lg"
-                  className="w-full mt-8 h-12"
-                  onClick={handleAuth}
-                  disabled={isLoading}
-                >
-                  {isLoading && <Loader2 className="w-5 h-5 mr-2 animate-spin" />}
-                  确认并转账
-                </Button>
-              </motion.div>
-            )}
-
-            {/* Step 5: Success */}
+            {/* Step 4: Success */}
             {step === 'success' && (
               <motion.div
                 key="success"
@@ -909,9 +883,11 @@ export default function SendPage() {
               onClick={handleContinue}
               disabled={
                 (step === 'address' && (!address || isScanning || !riskScore || riskScore.score === 'red')) ||
-                (step === 'confirm' && riskScore?.score === 'yellow' && !confirmRisk)
+                (step === 'confirm' && (riskScore?.score === 'yellow' && !confirmRisk)) ||
+                isLoading
               }
             >
+              {isLoading && <Loader2 className="w-5 h-5 mr-2 animate-spin" />}
               {step === 'confirm' ? '确认并转账' : '继续'}
             </Button>
           </div>
