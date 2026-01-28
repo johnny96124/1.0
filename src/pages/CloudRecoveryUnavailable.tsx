@@ -1,10 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  CloudOff, ArrowLeft, Smartphone, Cloud, 
-  CheckCircle2, ArrowRight, MessageCircle
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CloudOff, ArrowLeft, Smartphone } from 'lucide-react';
 
 export default function CloudRecoveryUnavailable() {
   const navigate = useNavigate();
@@ -13,10 +9,6 @@ export default function CloudRecoveryUnavailable() {
 
   const handleBack = () => {
     navigate('/tss-recovery?cloud=false');
-  };
-
-  const handleContactSupport = () => {
-    navigate('/help');
   };
 
   const providerName = cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive';
@@ -48,17 +40,13 @@ export default function CloudRecoveryUnavailable() {
     <div className="h-full bg-background flex flex-col">
       {/* Header */}
       <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <button 
             onClick={handleBack}
             className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
           </button>
-          <span className="text-sm font-medium text-foreground">
-            云端备份不可用
-          </span>
-          <div className="w-5" />
         </div>
       </div>
 
@@ -87,7 +75,7 @@ export default function CloudRecoveryUnavailable() {
           </div>
 
           {/* Backup Instructions */}
-          <div className="bg-card border border-border rounded-xl p-4 mb-4">
+          <div className="bg-card border border-border rounded-xl p-4">
             <div className="flex items-center gap-2 mb-4">
               <Smartphone className="w-5 h-5 text-primary" />
               <span className="font-medium text-foreground">
@@ -121,69 +109,7 @@ export default function CloudRecoveryUnavailable() {
               ))}
             </div>
           </div>
-
-          {/* After Backup Tip */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="bg-success/5 border border-success/20 rounded-xl p-4 mb-4"
-          >
-            <div className="flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-success">
-                  备份完成后
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  返回此页面，选择「云端恢复」即可继续
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Alternative Option */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="bg-muted/30 rounded-xl p-4"
-          >
-            <p className="text-sm text-muted-foreground mb-3">
-              如果您有本地备份文件，也可以使用本地文件恢复
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => navigate('/tss-recovery?cloud=false')}
-            >
-              使用本地文件恢复
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </motion.div>
         </motion.div>
-      </div>
-
-      {/* Footer */}
-      <div className="px-4 pb-6 pt-4 space-y-3">
-        <Button
-          size="lg"
-          className="w-full text-base font-medium"
-          onClick={handleBack}
-        >
-          <Cloud className="w-5 h-5 mr-2" />
-          已完成备份，重新检测
-        </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full text-base"
-          onClick={handleContactSupport}
-        >
-          <MessageCircle className="w-5 h-5 mr-2" />
-          联系客服
-        </Button>
       </div>
     </div>
   );
