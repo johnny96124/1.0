@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Copy, Download, Check, ChevronDown, Info, Search } from 'lucide-react';
+import { Copy, Download, CheckCircle2, ChevronDown, Info, Search } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
@@ -196,9 +196,7 @@ export default function ReceivePage() {
         <span className="text-xs text-muted-foreground">{network.shortName}</span>
       </div>
       {selectedNetwork.id === network.id && (
-        <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center">
-          <Check className="w-3 h-3 text-white" strokeWidth={3} />
-        </div>
+        <CheckCircle2 className="w-5 h-5 text-accent" />
       )}
     </button>
   );
@@ -311,11 +309,9 @@ export default function ReceivePage() {
               onClick={handleCopy}
             >
               {copied ? (
-                <div className="w-4 h-4 mr-2 rounded-full bg-success flex items-center justify-center">
-                  <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                </div>
+                <CheckCircle2 className="w-4 h-4 mr-2 text-success" />
               ) : (
-                <Copy className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                <Copy className="w-4 h-4 mr-2" />
               )}
               复制地址
             </Button>
