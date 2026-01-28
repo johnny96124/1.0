@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Copy, Download, CheckCircle2, ChevronDown, Info, Search, Star } from 'lucide-react';
+import { Copy, Download, CheckCircle2, ChevronDown, Info, Search } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
@@ -32,9 +32,6 @@ const MOCK_ADDRESSES: Record<Exclude<ChainId, 'all'>, string> = {
   tron: 'TN7qZLpmCvTnfbXnYFMBEZAjuZwKyxqvMb',
   bsc: '0x8B4c5A9d3E7f1C2b0A6D8E9F4C3B2A1E7D6C5B4A',
 };
-
-// Frequently used networks (can be customized based on user history)
-const frequentNetworkIds = ['ethereum', 'tron'];
 
 export default function ReceivePage() {
   const navigate = useNavigate();
@@ -85,18 +82,13 @@ export default function ReceivePage() {
     return MOCK_ADDRESSES[selectedNetwork.id];
   }, [currentWallet, selectedNetwork.id]);
 
-  // Filter and sort networks
-  const { frequentNetworks, otherNetworks } = useMemo(() => {
+  // Filter networks by search query
+  const filteredNetworks = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    const filtered = networks.filter(n => 
+    return networks.filter(n => 
       n.name.toLowerCase().includes(query) || 
       n.shortName.toLowerCase().includes(query)
     );
-    
-    const frequent = filtered.filter(n => frequentNetworkIds.includes(n.id));
-    const others = filtered.filter(n => !frequentNetworkIds.includes(n.id));
-    
-    return { frequentNetworks: frequent, otherNetworks: others };
   }, [searchQuery]);
 
   const handleCopy = useCallback(async () => {
@@ -255,41 +247,17 @@ export default function ReceivePage() {
                     />
                   </div>
 
-                  {/* Frequent Networks */}
-                  {frequentNetworks.length > 0 && !searchQuery && (
-                    <div className="mb-4">
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <Star className="w-3.5 h-3.5 text-warning fill-warning" />
-                        <span className="text-xs font-medium text-foreground">常用网络</span>
-                      </div>
-                      <div className="space-y-1">
-                        {frequentNetworks.map((network) => (
-                          <NetworkItem key={network.id} network={network} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Other Networks or Search Results */}
+                  {/* Network List */}
                   <div>
-                    {!searchQuery && otherNetworks.length > 0 && (
-                      <span className="text-xs font-medium text-foreground mb-2 block">其他网络</span>
-                    )}
-                    {searchQuery && frequentNetworks.length === 0 && otherNetworks.length === 0 ? (
+                    {filteredNetworks.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         未找到匹配的网络
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        {searchQuery ? (
-                          [...frequentNetworks, ...otherNetworks].map((network) => (
-                            <NetworkItem key={network.id} network={network} />
-                          ))
-                        ) : (
-                          otherNetworks.map((network) => (
-                            <NetworkItem key={network.id} network={network} />
-                          ))
-                        )}
+                        {filteredNetworks.map((network) => (
+                          <NetworkItem key={network.id} network={network} />
+                        ))}
                       </div>
                     )}
                   </div>
