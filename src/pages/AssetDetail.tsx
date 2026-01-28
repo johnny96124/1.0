@@ -162,7 +162,7 @@ export default function AssetDetailPage() {
               <p className="text-3xl font-bold text-foreground mb-1">
                 {displayBalance.balance.toLocaleString()} {assetData.symbol}
               </p>
-              <p className="text-lg text-foreground">
+              <p className="text-lg text-muted-foreground">
                 {formatCurrency(displayBalance.usdValue)}
               </p>
             </motion.div>
