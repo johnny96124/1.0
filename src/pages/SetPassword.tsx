@@ -45,11 +45,13 @@ export default function SetPassword() {
   const strength = getPasswordStrength(password);
   const strengthInfo = strengthConfig[strength];
   
-  const isValid = password.length >= 6 && password === confirmPassword;
+  const isValid = password.length >= 8 && password === confirmPassword;
 
   const handleSetPassword = async () => {
     if (!isValid) {
-      if (password !== confirmPassword) {
+      if (password.length < 8) {
+        setError('密码长度至少为8位');
+      } else if (password !== confirmPassword) {
         setError('两次输入的密码不一致');
       }
       return;
