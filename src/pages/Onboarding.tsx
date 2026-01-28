@@ -140,9 +140,9 @@ export default function OnboardingPage() {
                   )}
                 >
                   {isComplete ? (
-                    <CheckCircle2 className="w-5 h-5" />
+                    <CheckCircle2 className="w-5 h-5" strokeWidth={1.5} />
                   ) : (
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-5 h-5" strokeWidth={1.5} />
                   )}
                 </div>
                 {index < steps.length - 1 && (
@@ -265,7 +265,7 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
         <h2 className="text-xl font-bold text-foreground mb-2">
           授权使用系统安全认证
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[260px] leading-relaxed">
+        <p className="text-muted-foreground text-sm leading-relaxed">
           使用面容ID / 指纹 / 设备密码保护您的资产安全
         </p>
       </div>
@@ -278,9 +278,9 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
           disabled={isLoading}
         >
           {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
           ) : (
-            <Lock className="w-5 h-5 mr-2" />
+            <Lock className="w-5 h-5 mr-2" strokeWidth={1.5} />
           )}
           授权安全认证
         </Button>
@@ -456,13 +456,13 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
             transition={{ type: "spring", duration: 0.5 }}
             className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
           >
-            <CheckCircle2 className="w-10 h-10 text-success" />
+            <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
           </motion.div>
           
           <h2 className="text-xl font-bold text-foreground mb-2">
             备份完成
           </h2>
-          <p className="text-muted-foreground text-sm max-w-[260px]">
+          <p className="text-muted-foreground text-sm">
             您的钱包已安全备份到 iCloud
           </p>
 
@@ -471,9 +471,9 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-6 p-3 bg-muted/50 rounded-xl flex items-start gap-2 max-w-[280px]"
+            className="mt-6 p-3 bg-muted/50 rounded-xl flex items-start gap-2"
           >
-            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" strokeWidth={1.5} />
             <p className="text-xs text-muted-foreground text-left">
               建议在「设置 → 钱包管理」中额外创建本地备份，双重保障更安心
             </p>
@@ -515,12 +515,12 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
         <h2 className="text-xl font-bold text-foreground mb-2">
           备份到 iCloud
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[260px] text-center mb-6">
+        <p className="text-muted-foreground text-sm text-center mb-6">
           设置密码加密您的备份，用于换机恢复
         </p>
 
         {/* Password form */}
-        <div className="w-full max-w-[300px] space-y-4">
+        <div className="w-full space-y-4">
           <div className="space-y-2">
             <div className="relative">
               <Input
@@ -538,7 +538,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-5 h-5" strokeWidth={1.5} /> : <Eye className="w-5 h-5" strokeWidth={1.5} />}
               </button>
             </div>
             
@@ -583,7 +583,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
           <div className="p-4 bg-warning/10 border border-warning/30 rounded-xl">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-4 h-4 text-warning" />
+                <AlertTriangle className="w-4 h-4 text-warning" strokeWidth={1.5} />
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">
@@ -610,7 +610,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
 
           {error && (
             <p className="text-sm text-destructive flex items-center gap-1">
-              <AlertTriangle className="w-4 h-4" />
+              <AlertTriangle className="w-4 h-4" strokeWidth={1.5} />
               {error}
             </p>
           )}
@@ -624,9 +624,9 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
               disabled={isLoading || !password || !confirmPassword || !confirmed}
             >
               {isLoading ? (
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
               ) : (
-                <CloudUpload className="w-5 h-5 mr-2" />
+                <CloudUpload className="w-5 h-5 mr-2" strokeWidth={1.5} />
               )}
               备份到 iCloud
             </Button>
@@ -649,7 +649,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-2 text-warning mb-2">
-              <AlertTriangle className="w-5 h-5" />
+              <AlertTriangle className="w-5 h-5" strokeWidth={1.5} />
               <AlertDialogTitle>确定要跳过备份吗？</AlertDialogTitle>
             </div>
             <AlertDialogDescription asChild>
@@ -700,17 +700,17 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
           transition={{ delay: 0.2 }}
           className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6"
         >
-          <CloudDownload className="w-10 h-10 text-accent" />
+          <CloudDownload className="w-10 h-10 text-accent" strokeWidth={1.5} />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
           恢复资产保险箱
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[260px] mb-6">
+        <p className="text-muted-foreground text-sm mb-6">
           选择一种方式恢复您的钱包
         </p>
 
-        <div className="w-full max-w-[300px] space-y-3">
+        <div className="w-full space-y-3">
           <button
             onClick={() => setSelectedMethod('scan')}
             className={cn(
@@ -721,7 +721,7 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
             )}
           >
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <QrCode className="w-6 h-6 text-foreground" />
+              <QrCode className="w-6 h-6 text-foreground" strokeWidth={1.5} />
             </div>
             <div className="flex-1 text-left">
               <p className="font-medium text-foreground">扫码恢复</p>
@@ -739,7 +739,7 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
             )}
           >
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-              <Cloud className="w-6 h-6 text-foreground" />
+              <Cloud className="w-6 h-6 text-foreground" strokeWidth={1.5} />
             </div>
             <div className="flex-1 text-left">
               <p className="font-medium text-foreground">从云端恢复</p>
@@ -757,7 +757,7 @@ function RecoveryMethodStep({ onComplete }: { onComplete: () => void }) {
           onClick={onComplete}
         >
           继续
-          <ChevronRight className="w-5 h-5 ml-1" />
+          <ChevronRight className="w-5 h-5 ml-1" strokeWidth={1.5} />
         </Button>
       </div>
     </motion.div>
@@ -802,23 +802,23 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
           <h2 className="text-xl font-bold text-foreground mb-2">
             选择备份来源
           </h2>
-          <p className="text-muted-foreground text-sm max-w-[260px] mb-6">
+          <p className="text-muted-foreground text-sm mb-6">
             选择您的备份存储位置
           </p>
 
-          <div className="w-full max-w-[300px] space-y-3">
+          <div className="w-full space-y-3">
             <button
               onClick={() => setSource('icloud')}
               className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors"
             >
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <Cloud className="w-6 h-6 text-foreground" />
+                <Cloud className="w-6 h-6 text-foreground" strokeWidth={1.5} />
               </div>
               <div className="flex-1 text-left">
                 <p className="font-medium text-foreground">iCloud</p>
                 <p className="text-sm text-muted-foreground">从 iCloud 恢复</p>
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              <ChevronRight className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
             </button>
 
             <button
@@ -826,13 +826,13 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
               className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors"
             >
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <Cloud className="w-6 h-6 text-foreground" />
+                <Cloud className="w-6 h-6 text-foreground" strokeWidth={1.5} />
               </div>
               <div className="flex-1 text-left">
                 <p className="font-medium text-foreground">Google Drive</p>
                 <p className="text-sm text-muted-foreground">从 Google Drive 恢复</p>
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              <ChevronRight className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
             </button>
 
             <button
@@ -840,13 +840,13 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
               className="w-full flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:border-accent transition-colors"
             >
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-                <FileDown className="w-6 h-6 text-foreground" />
+                <FileDown className="w-6 h-6 text-foreground" strokeWidth={1.5} />
               </div>
               <div className="flex-1 text-left">
                 <p className="font-medium text-foreground">本地文件</p>
                 <p className="text-sm text-muted-foreground">选择备份文件</p>
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              <ChevronRight className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
             </button>
           </div>
         </div>
@@ -885,13 +885,13 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
             className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
             onClick={() => setShowPassword(!showPassword)}
           >
-            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            {showPassword ? <EyeOff className="w-5 h-5" strokeWidth={1.5} /> : <Eye className="w-5 h-5" strokeWidth={1.5} />}
           </button>
         </div>
 
         {error && (
           <p className="text-sm text-destructive flex items-center gap-1">
-            <AlertTriangle className="w-4 h-4" />
+            <AlertTriangle className="w-4 h-4" strokeWidth={1.5} />
             {error}
           </p>
         )}
@@ -905,7 +905,7 @@ function RecoveryDataStep({ onComplete }: { onComplete: () => void }) {
           disabled={isLoading || !password}
         >
           {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
           ) : null}
           恢复数据
         </Button>
@@ -957,13 +957,13 @@ function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
           transition={{ delay: 0.2 }}
           className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-6"
         >
-          <Fingerprint className="w-10 h-10 text-accent" />
+          <Fingerprint className="w-10 h-10 text-accent" strokeWidth={1.5} />
         </motion.div>
         
         <h2 className="text-xl font-bold text-foreground mb-2">
           验证您的身份
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[260px]">
+        <p className="text-muted-foreground text-sm">
           使用生物识别完成身份验证
         </p>
       </div>
@@ -976,9 +976,9 @@ function RecoveryVerifyStep({ onComplete }: { onComplete: () => void }) {
           disabled={isLoading}
         >
           {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
           ) : (
-            <Fingerprint className="w-5 h-5 mr-2" />
+            <Fingerprint className="w-5 h-5 mr-2" strokeWidth={1.5} />
           )}
           开始验证
         </Button>
@@ -1001,25 +1001,25 @@ function RecoveryCompleteStep({ onComplete }: { onComplete: () => void }) {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", duration: 0.5 }}
-          className="w-24 h-24 rounded-full bg-success/10 flex items-center justify-center mb-6"
+          className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
         >
-          <CheckCircle2 className="w-12 h-12 text-success" />
+          <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
         </motion.div>
         
         <h2 className="text-2xl font-bold text-foreground mb-2">
           恢复完成
         </h2>
-        <p className="text-muted-foreground text-sm max-w-[280px] mb-8">
+        <p className="text-muted-foreground text-sm mb-8">
           您的钱包已成功恢复，所有资产均可正常使用
         </p>
 
-        <div className="w-full max-w-[300px] space-y-2">
+        <div className="w-full space-y-2">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10">
-            <CheckCircle2 className="w-5 h-5 text-success" />
+            <CheckCircle2 className="w-5 h-5 text-success" strokeWidth={1.5} />
             <span className="text-sm text-foreground">资产保险箱已恢复</span>
           </div>
           <div className="flex items-center gap-3 p-3 rounded-xl bg-success/10">
-            <CheckCircle2 className="w-5 h-5 text-success" />
+            <CheckCircle2 className="w-5 h-5 text-success" strokeWidth={1.5} />
             <span className="text-sm text-foreground">安全设置已同步</span>
           </div>
         </div>
