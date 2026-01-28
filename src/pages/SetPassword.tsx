@@ -104,57 +104,60 @@ export default function SetPassword() {
   // Success state - Show welcome guidance for onboarding flow
   if (isSuccess) {
     return (
-      <div className="h-full bg-background flex flex-col px-4">
+      <div className="h-full bg-background flex flex-col">
         {isOnboardingFlow ? (
-          // Onboarding flow: Show wallet creation guidance - centered vertically
-          <div className="flex-1 flex flex-col items-center justify-center -mt-16">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-8"
-            >
+          // Onboarding flow: Show wallet creation guidance
+          <>
+            <div className="flex-1 flex flex-col items-center justify-center px-4">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring" }}
+                transition={{ type: "spring", duration: 0.5 }}
+                className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-8"
               >
-                <Wallet className="w-10 h-10 text-primary" strokeWidth={1.5} />
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring" }}
+                >
+                  <Wallet className="w-10 h-10 text-primary" strokeWidth={1.5} />
+                </motion.div>
               </motion.div>
-            </motion.div>
+              
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="text-2xl font-bold text-foreground mb-3 text-center"
+              >
+                欢迎加入 Cobo
+              </motion.h2>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="text-muted-foreground text-center mb-2"
+              >
+                接下来我们将为您创建一个安全的数字钱包
+              </motion.p>
+              
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-sm text-muted-foreground/70 text-center"
+              >
+                您的资产将通过多重签名技术保护，确保安全可靠
+              </motion.p>
+            </div>
             
-            <motion.h2
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-2xl font-bold text-foreground mb-3 text-center"
-            >
-              欢迎加入 Cobo
-            </motion.h2>
-            
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-muted-foreground text-center mb-2"
-            >
-              接下来我们将为您创建一个安全的数字钱包
-            </motion.p>
-            
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="text-sm text-muted-foreground/70 text-center mb-10"
-            >
-              您的资产将通过多重签名技术保护，确保安全可靠
-            </motion.p>
-            
+            {/* Fixed Bottom Button */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="w-full"
+              className="px-4 pb-8"
             >
               <Button
                 variant="default"
@@ -166,10 +169,10 @@ export default function SetPassword() {
                 <ArrowRight className="w-5 h-5 ml-2" strokeWidth={1.5} />
               </Button>
             </motion.div>
-          </div>
+          </>
         ) : (
-          // Non-onboarding flow: Show simple success
-          <>
+          // Non-onboarding flow: Show simple success - centered
+          <div className="flex-1 flex flex-col items-center justify-center px-4">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -200,7 +203,7 @@ export default function SetPassword() {
             >
               正在返回...
             </motion.p>
-          </>
+          </div>
         )}
       </div>
     );
