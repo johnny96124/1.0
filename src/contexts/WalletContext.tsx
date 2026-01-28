@@ -49,8 +49,19 @@ const mockAssetsWallet3: Asset[] = [
   { symbol: 'USDT', name: 'Tether USD', balance: 800.00, usdValue: 800.00, change24h: 0.01, icon: 'USDT', network: 'tron' },
 ];
 
-// Mock assets for newly created wallets (empty)
-const mockAssetsNewWallet: Asset[] = [];
+// Mock assets for newly created wallets - with sample balances for testing
+const mockAssetsNewWallet: Asset[] = [
+  // Ethereum chain
+  { symbol: 'USDT', name: 'Tether USD', balance: 5000.00, usdValue: 5000.00, change24h: 0.01, icon: 'USDT', network: 'ethereum' },
+  { symbol: 'USDC', name: 'USD Coin', balance: 2000.00, usdValue: 2000.00, change24h: 0.00, icon: 'USDC', network: 'ethereum' },
+  { symbol: 'ETH', name: 'Ethereum', balance: 1.5, usdValue: 5250.00, change24h: 2.34, icon: 'ETH', network: 'ethereum' },
+  // Tron chain
+  { symbol: 'USDT', name: 'Tether USD', balance: 3000.00, usdValue: 3000.00, change24h: 0.01, icon: 'USDT', network: 'tron' },
+  { symbol: 'TRX', name: 'Tron', balance: 8000, usdValue: 880.00, change24h: -1.2, icon: 'TRX', network: 'tron' },
+  // BSC chain
+  { symbol: 'USDT', name: 'Tether USD', balance: 1200.00, usdValue: 1200.00, change24h: 0.01, icon: 'USDT', network: 'bsc' },
+  { symbol: 'BNB', name: 'BNB', balance: 2.0, usdValue: 1200.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
+];
 
 // Wallet ID to assets mapping
 const walletAssetsMap: Record<string, Asset[]> = {
@@ -1085,8 +1096,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       custodyType: 'mpc',
     };
     
-    // Register new wallet in the assets map
-    walletAssetsMap[newWallet.id] = [];
+    // Register new wallet in the assets map with sample assets for testing
+    walletAssetsMap[newWallet.id] = [...mockAssetsNewWallet];
     walletTransactionsMap[newWallet.id] = [];
     
     setWallets(prev => [...prev, newWallet]);

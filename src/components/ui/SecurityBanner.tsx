@@ -6,18 +6,24 @@ import { getTSSNodeInfo } from '@/lib/tss-node';
 import { useNavigate } from 'react-router-dom';
 
 export function SecurityBanner() {
-  const { walletStatus } = useWallet();
+  const { walletStatus, currentWallet } = useWallet();
   const navigate = useNavigate();
 
   const getBannerConfig = () => {
     // Check TSS Node backup status (account-level, not wallet-level)
     const tssNodeInfo = getTSSNodeInfo();
     const hasTSSNodeBackup = tssNodeInfo.backup.hasCloudBackup || tssNodeInfo.backup.hasLocalBackup;
+    
+    // Also check current wallet backup status
+    const isWalletBackedUp = currentWallet?.isBackedUp || false;
+    
+    // If both TSS Node is backed up AND wallet is backed up, don't show banner
+    const isFullyBackedUp = hasTSSNodeBackup || isWalletBackedUp;
 
     switch (walletStatus) {
       case 'created_no_backup':
-        // Only show if TSS Node is not backed up
-        if (hasTSSNodeBackup) {
+        // Only show if neither TSS Node nor wallet is backed up
+        if (isFullyBackedUp) {
           return { show: false };
         }
         return {
@@ -46,9 +52,13 @@ export function SecurityBanner() {
           action: '了解更多',
           show: true,
         };
+      case 'backup_complete':
+      case 'fully_secure':
+        // Already backed up, don't show banner
+        return { show: false };
       default:
-        // Check if TSS Node needs backup
-        if (!hasTSSNodeBackup && tssNodeInfo.status !== 'not_created') {
+        // Check if TSS Node needs backup (only for wallets that exist but aren't backed up)
+        if (!isFullyBackedUp && tssNodeInfo.status !== 'not_created') {
           return {
             type: 'error' as const,
             icon: ShieldAlert,
