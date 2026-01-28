@@ -4,7 +4,8 @@ import {
   Search, Send, TrendingDown, 
   CheckCircle2, XCircle,
   ExternalLink, Copy, ChevronRight, Clock,
-  Shield, ShieldAlert, AlertTriangle, RotateCcw
+  Shield, ShieldAlert, AlertTriangle, RotateCcw,
+  ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -12,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
-import { Transaction, SUPPORTED_CHAINS, AccountRiskStatus } from '@/types/wallet';
+import { Transaction, SUPPORTED_CHAINS, ChainId, AccountRiskStatus } from '@/types/wallet';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
@@ -20,6 +21,12 @@ import { toast } from '@/lib/toast';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SecurityCardSkeleton, TransactionListSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type FilterType = 'all' | 'send' | 'receive' | 'risk';
 
@@ -79,6 +86,7 @@ export default function HistoryPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
+  const [chainFilter, setChainFilter] = useState<ChainId>('all');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
@@ -105,6 +113,9 @@ export default function HistoryPage() {
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter(tx => {
+      // Filter by chain
+      if (chainFilter !== 'all' && tx.network !== chainFilter) return false;
+      
       // Filter by type
       if (filter === 'send' && tx.type !== 'send') return false;
       if (filter === 'receive' && tx.type !== 'receive') return false;
@@ -126,7 +137,7 @@ export default function HistoryPage() {
       }
       return true;
     });
-  }, [transactions, filter, searchQuery]);
+  }, [transactions, filter, chainFilter, searchQuery]);
 
   // Group by date
   const groupedTransactions = useMemo(() => {
@@ -241,15 +252,54 @@ export default function HistoryPage() {
             <TransactionListSkeleton count={5} showSearchBar showTabs />
           ) : (
             <>
-              {/* Search */}
-              <div className="relative mb-3">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="搜索交易..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10"
-                />
+              {/* Search + Chain Filter */}
+              <div className="flex gap-2 mb-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="搜索交易..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 h-10"
+                  />
+                </div>
+                
+                {/* Chain Filter Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="h-10 px-3 gap-1.5 shrink-0"
+                    >
+                      <ChainIcon chainId={chainFilter} size="sm" />
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent 
+                    align="end" 
+                    className="w-48 bg-popover border border-border shadow-xl z-50 max-h-[60vh] overflow-y-auto"
+                    container={document.getElementById('phone-frame-container') || undefined}
+                  >
+                    {SUPPORTED_CHAINS.map((chain) => {
+                      const isSelected = chainFilter === chain.id;
+                      return (
+                        <DropdownMenuItem
+                          key={chain.id}
+                          onClick={() => setChainFilter(chain.id)}
+                          className={cn(
+                            "flex items-center gap-3 py-2.5 px-3 cursor-pointer hover:bg-muted/50 focus:bg-muted/50",
+                            isSelected && "bg-muted/50"
+                          )}
+                        >
+                          <ChainIcon chainId={chain.icon} size="md" className="shrink-0" />
+                          <span className="font-medium text-sm text-foreground">
+                            {chain.name}
+                          </span>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               {/* Filter Tabs */}
