@@ -240,7 +240,7 @@ export default function SetPassword() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-8"
+          className="mb-8 text-center"
         >
           <h1 className="text-2xl font-bold text-foreground mb-2">设置登录密码</h1>
           <p className="text-muted-foreground">为您的账户设置一个安全密码</p>
