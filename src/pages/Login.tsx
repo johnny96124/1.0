@@ -700,7 +700,7 @@ export default function LoginPage() {
       </div>
 
       {/* Email Error Message - Fixed height container to prevent layout shift */}
-      <div className="h-6 mb-2 -mt-2">
+      <div className="h-5">
         {emailError && loginMethod === 'email' && (
           <motion.p
             initial={{ opacity: 0 }}
