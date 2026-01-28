@@ -177,9 +177,9 @@ export default function TSSRecoveryPage() {
           {step === 'method' && <div />}
         </div>
         
-        {/* Step icons indicator for local file recovery */}
+        {/* Step icons indicator for local file recovery - full width like onboarding */}
         {selectedMethod === 'local_file' && step !== 'method' && step !== 'success' && (
-          <div className="flex items-center justify-center gap-0 mt-2">
+          <div className="flex items-center mt-6">
             {[
               { id: 1, icon: HardDrive, step: 'file_select' },
               { id: 2, icon: Lock, step: 'password' },
@@ -190,26 +190,26 @@ export default function TSSRecoveryPage() {
               const isCurrent = currentStepNum === stepItem.id;
               
               return (
-                <div key={stepItem.id} className="flex items-center">
+                <div key={stepItem.id} className="flex items-center flex-1 last:flex-none">
                   <div
                     className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0',
+                      'w-10 h-10 rounded-full flex items-center justify-center transition-all shrink-0',
                       isComplete && 'bg-success text-success-foreground',
                       isCurrent && 'bg-primary text-primary-foreground',
                       !isComplete && !isCurrent && 'bg-muted text-muted-foreground'
                     )}
                   >
                     {isComplete ? (
-                      <CheckCircle2 className="w-4 h-4" strokeWidth={1.5} />
+                      <CheckCircle2 className="w-5 h-5" strokeWidth={1.5} />
                     ) : (
-                      <Icon className="w-4 h-4" strokeWidth={1.5} />
+                      <Icon className="w-5 h-5" strokeWidth={1.5} />
                     )}
                   </div>
                   {index < arr.length - 1 && (
                     <div
                       className={cn(
-                        'w-12 h-0.5 mx-1',
-                        currentStepNum > stepItem.id ? 'bg-success' : 'bg-muted'
+                        'flex-1 h-0.5 mx-2',
+                        currentStepNum > stepItem.id ? 'bg-success' : 'bg-border'
                       )}
                     />
                   )}
