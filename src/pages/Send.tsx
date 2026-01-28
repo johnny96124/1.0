@@ -658,6 +658,20 @@ export default function SendPage() {
                     chainId={selectedAsset.network}
                   />
 
+                  {/* Balance Info with Max Button */}
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
+                    <span>可用:</span>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted rounded-lg">
+                      <span className="font-medium text-foreground">{selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
+                    </div>
+                    <button
+                      onClick={() => setAmount(selectedAsset.balance.toString())}
+                      className="px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+                    >
+                      全部
+                    </button>
+                  </div>
+
                   {/* Test Transfer Tip - Compact Version */}
                   <AnimatePresence>
                     {shouldShowTestTip && (
@@ -667,12 +681,12 @@ export default function SendPage() {
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden w-full max-w-sm mt-3"
                       >
-                        <div className="px-3 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 flex items-center gap-2">
-                          <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
-                          <span className="text-sm text-foreground flex-1">首次转账建议先小额验证</span>
+                        <div className="px-3 py-2 rounded-lg border border-warning/30 bg-warning/10 flex items-center gap-2">
+                          <Lightbulb className="w-3.5 h-3.5 text-warning shrink-0" />
+                          <span className="text-xs text-foreground flex-1">首次转账建议先小额验证</span>
                           <Button
                             size="sm"
-                            className="h-7 px-2.5 text-xs bg-amber-500 hover:bg-amber-600 text-white"
+                            className="h-6 px-2 text-xs bg-warning hover:bg-warning/90 text-warning-foreground"
                             onClick={handleTestTransfer}
                           >
                             改为 1 {selectedAsset.symbol}
@@ -687,20 +701,6 @@ export default function SendPage() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  
-                  {/* Balance Info with Max Button */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
-                    <span>可用:</span>
-                    <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-lg">
-                      <span className="font-medium text-foreground">{selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
-                    </div>
-                    <button
-                      onClick={() => setAmount(selectedAsset.balance.toString())}
-                      className="px-3 py-1 text-xs font-medium text-accent bg-accent/10 rounded-full hover:bg-accent/20 transition-colors"
-                    >
-                      全部
-                    </button>
-                  </div>
                 </div>
 
                 {/* Send Button */}
