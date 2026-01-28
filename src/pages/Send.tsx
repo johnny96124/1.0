@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Scan, Users, AlertTriangle, 
   CheckCircle2, Loader2, Shield, Search, X,
-  Info, ChevronRight, ShieldAlert
+  Info, ChevronRight, ShieldAlert, Lightbulb
 } from 'lucide-react';
+import { toast } from '@/lib/toast';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
@@ -93,6 +94,7 @@ export default function SendPage() {
   const [showPSPWarningDialog, setShowPSPWarningDialog] = useState(false);
   const [showPSPBlockedDialog, setShowPSPBlockedDialog] = useState(false);
   const [pspInfo, setPspInfo] = useState<{ isPSP: boolean; pspName?: string } | null>(null);
+  const [testTipDismissed, setTestTipDismissed] = useState(false);
   
 
   // Asset selection step states
@@ -133,6 +135,26 @@ export default function SendPage() {
     // Sort by USD value descending
     return result.sort((a, b) => b.usdValue - a.usdValue);
   }, [assets, assetFilterChain, assetSearchQuery]);
+
+  // Check if should show test transfer tip (for new addresses with large amounts)
+  const shouldShowTestTip = useMemo(() => {
+    if (testTipDismissed) return false;
+    if (!amount || parseFloat(amount) <= 0) return false;
+    
+    const usdValue = parseFloat(amount) * tokenPrice;
+    const isNewAddress = !contacts.find(c => 
+      c.address.toLowerCase() === address.toLowerCase()
+    );
+    
+    return isNewAddress && usdValue > 100;
+  }, [amount, tokenPrice, contacts, address, testTipDismissed]);
+
+  // Handle test transfer button click
+  const handleTestTransfer = () => {
+    setAmount('1');
+    setTestTipDismissed(true);
+    toast.success('已改为测试金额');
+  };
 
   // Scan address risk when address changes
   useEffect(() => {
@@ -242,6 +264,8 @@ export default function SendPage() {
         }
         break;
       case 'amount':
+        // Reset test tip state when going back
+        setTestTipDismissed(false);
         // If from PSP, go back to previous page
         if (prefilledData?.fromPSP) {
           navigate(-1);
@@ -633,9 +657,50 @@ export default function SendPage() {
                     onMaxClick={() => setAmount(selectedAsset.balance.toString())}
                     chainId={selectedAsset.network}
                   />
+
+                  {/* Test Transfer Tip */}
+                  <AnimatePresence>
+                    {shouldShowTestTip && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                        animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                        className="overflow-hidden w-full max-w-sm"
+                      >
+                        <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10">
+                          <div className="flex items-start gap-3">
+                            <Lightbulb className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              <p className="font-medium text-foreground">首次转账建议先验证</p>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                确认地址正确后再转大额
+                              </p>
+                              <div className="flex items-center gap-3 mt-3">
+                                <Button
+                                  size="sm"
+                                  className="bg-amber-500 hover:bg-amber-600 text-white"
+                                  onClick={handleTestTransfer}
+                                >
+                                  改为 1 {selectedAsset.symbol} 测试
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="text-muted-foreground"
+                                  onClick={() => setTestTipDismissed(true)}
+                                >
+                                  知道了
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   
                   {/* Balance Info with Max Button */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-4">
                     <span>可用:</span>
                     <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-lg">
                       <span className="font-medium text-foreground">{selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
