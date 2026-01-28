@@ -17,6 +17,7 @@ interface FeeOption {
   labelEn: string;
   time: string;
   fee: number;
+  gasAmount: number; // Gas token amount (e.g., ETH)
   icon: React.ReactNode;
 }
 
@@ -24,6 +25,7 @@ interface NetworkFeeSelectorProps {
   selectedTier: FeeTier;
   onSelect: (tier: FeeTier) => void;
   networkName?: string;
+  gasToken?: string; // e.g., 'ETH', 'BNB'
 }
 
 const FEE_OPTIONS: FeeOption[] = [
@@ -33,6 +35,7 @@ const FEE_OPTIONS: FeeOption[] = [
     labelEn: 'Slow',
     time: '~30分钟',
     fee: 0.80,
+    gasAmount: 0.00023,
     icon: <Turtle className="w-5 h-5" />,
   },
   {
@@ -41,6 +44,7 @@ const FEE_OPTIONS: FeeOption[] = [
     labelEn: 'Standard',
     time: '~5分钟',
     fee: 2.50,
+    gasAmount: 0.00072,
     icon: <Clock className="w-5 h-5" />,
   },
   {
@@ -49,11 +53,12 @@ const FEE_OPTIONS: FeeOption[] = [
     labelEn: 'Fast',
     time: '~1分钟',
     fee: 5.00,
+    gasAmount: 0.00145,
     icon: <Zap className="w-5 h-5" />,
   },
 ];
 
-export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethereum' }: NetworkFeeSelectorProps) {
+export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethereum', gasToken = 'ETH' }: NetworkFeeSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const currentOption = FEE_OPTIONS.find(opt => opt.tier === selectedTier) || FEE_OPTIONS[1];
 
@@ -73,7 +78,9 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-sm font-medium text-foreground">~${currentOption.fee.toFixed(2)}</span>
+            <span className="text-sm font-medium text-foreground">
+              {currentOption.gasAmount} {gasToken} (~${currentOption.fee.toFixed(2)})
+            </span>
             <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </div>
         </div>
@@ -136,7 +143,8 @@ export function NetworkFeeSelector({ selectedTier, onSelect, networkName = 'Ethe
 
                 {/* Fee */}
                 <div className="text-right shrink-0">
-                  <p className="font-semibold text-foreground">${option.fee.toFixed(2)}</p>
+                  <p className="font-semibold text-foreground">{option.gasAmount} {gasToken}</p>
+                  <p className="text-xs text-muted-foreground">≈ ${option.fee.toFixed(2)}</p>
                 </div>
 
                 {/* Selected Indicator */}
