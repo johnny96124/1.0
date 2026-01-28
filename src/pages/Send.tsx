@@ -759,11 +759,11 @@ export default function SendPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm font-mono text-muted-foreground mt-1">
-                      <span className="font-bold text-foreground">{address.slice(0, 4)}</span>
-                      {address.slice(4, -4)}
-                      <span className="font-bold text-foreground">{address.slice(-4)}</span>
-                    </p>
+                  <p className="text-sm font-mono text-muted-foreground mt-1 break-all">
+                    <span className="font-bold text-foreground">{address.slice(0, 4)}</span>
+                    {address.slice(4, -4)}
+                    <span className="font-bold text-foreground">{address.slice(-4)}</span>
+                  </p>
                   </div>
                   <div className="h-px bg-border" />
                   <div className="flex justify-between items-center">
