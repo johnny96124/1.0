@@ -564,7 +564,7 @@ export default function SendPage() {
                 {/* Contacts */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-foreground">常用联系人</h3>
+                    <h3 className="text-sm font-medium text-foreground">最近交易</h3>
                     {contacts.length > 3 && (
                       <button
                         onClick={() => setShowContactDrawer(true)}
@@ -611,13 +611,10 @@ export default function SendPage() {
                     ))}
                     
                     {contacts.length === 0 && (
-                      <button
-                        onClick={() => navigate('/profile/contacts/add')}
-                        className="w-full p-4 rounded-xl border border-dashed border-border text-center text-muted-foreground hover:border-accent/50 hover:text-foreground transition-colors"
-                      >
-                        <Users className="w-5 h-5 mx-auto mb-2" />
-                        <p className="text-sm">添加常用联系人</p>
-                      </button>
+                      <div className="w-full p-4 rounded-xl border border-dashed border-border text-center text-muted-foreground">
+                        <Users className="w-5 h-5 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">暂无最近交易</p>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -871,7 +868,7 @@ export default function SendPage() {
               className="w-full h-12"
               onClick={handleContinue}
               disabled={
-                (step === 'address' && (!address || riskScore?.score === 'red')) ||
+                (step === 'address' && (!address || isScanning || !riskScore || riskScore.score === 'red')) ||
                 (step === 'confirm' && riskScore?.score === 'yellow' && !confirmRisk)
               }
             >
