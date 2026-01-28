@@ -230,6 +230,7 @@ export default function TSSRecoveryPage() {
               cloudProvider={cloudProvider}
               lastBackupTime={lastBackupTime}
               onSelect={handleSelectMethod}
+              onCloudUnavailable={() => navigate('/cloud-recovery-unavailable?provider=' + cloudProvider)}
             />
           )}
           {step === 'file_select' && (
@@ -289,11 +290,13 @@ function MethodSelectionStep({
   cloudProvider,
   lastBackupTime,
   onSelect,
+  onCloudUnavailable,
 }: {
   hasCloudBackup: boolean;
   cloudProvider: string;
   lastBackupTime: string;
   onSelect: (method: RecoveryMethod) => void;
+  onCloudUnavailable: () => void;
 }) {
   return (
     <motion.div
@@ -319,57 +322,38 @@ function MethodSelectionStep({
         </p>
       </div>
 
-      {/* No Cloud Backup Warning */}
-      {!hasCloudBackup && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-warning/10 border border-warning/30 rounded-xl p-4 mb-4"
-        >
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-warning">云端暂无备份</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                您尚未在云端进行备份，请通过本地方式恢复
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
       {/* Recovery Options */}
       <div className="space-y-3 flex-1">
-        {/* Cloud Recovery - only show if available */}
-        {hasCloudBackup && (
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            onClick={() => onSelect('cloud')}
-            className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-accent/50 transition-colors"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Cloud className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">云端恢复</span>
+        {/* Cloud Recovery - always show */}
+        <motion.button
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          onClick={() => hasCloudBackup ? onSelect('cloud') : onCloudUnavailable()}
+          className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-accent/50 transition-colors"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Cloud className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-foreground">云端恢复</span>
+                {hasCloudBackup && (
                   <span className="text-xs text-success bg-success/10 px-2 py-0.5 rounded-full">
                     推荐
                   </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  从 {cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive'} 恢复
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  上次备份：{lastBackupTime}
-                </p>
+                )}
               </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                从 {cloudProvider === 'icloud' ? 'iCloud' : 'Google Drive'} 恢复
+              </p>
+              <p className={`text-xs mt-1 ${hasCloudBackup ? 'text-muted-foreground' : 'text-warning'}`}>
+                {hasCloudBackup ? `上次备份：${lastBackupTime}` : '无备份记录'}
+              </p>
             </div>
-          </motion.button>
-        )}
+          </div>
+        </motion.button>
 
         {/* Local File Recovery */}
         <motion.button
