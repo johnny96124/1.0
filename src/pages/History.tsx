@@ -89,6 +89,7 @@ export default function HistoryPage() {
   const [chainFilter, setChainFilter] = useState<ChainId>('all');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [copiedHash, setCopiedHash] = useState(false);
   const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
 
   // Simulate initial loading
@@ -609,11 +610,17 @@ export default function HistoryPage() {
                       <button 
                         onClick={() => {
                           navigator.clipboard.writeText(selectedTx.txHash!);
+                          setCopiedHash(true);
                           toast.success('已复制到剪贴板');
+                          setTimeout(() => setCopiedHash(false), 2000);
                         }}
                         className="p-1.5 hover:bg-muted rounded"
                       >
-                        <Copy className="w-4 h-4 text-muted-foreground" />
+                        {copiedHash ? (
+                          <CheckCircle2 className="w-4 h-4 text-success" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-muted-foreground" />
+                        )}
                       </button>
                       <button className="p-1.5 hover:bg-muted rounded">
                         <ExternalLink className="w-4 h-4 text-muted-foreground" />
