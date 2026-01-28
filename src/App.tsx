@@ -35,7 +35,7 @@ import MessageCenter from "./pages/MessageCenter";
 import WalletRecovery from "./pages/WalletRecovery";
 import WalletEscape from "./pages/WalletEscape";
 import AuthorizeDevice from "./pages/AuthorizeDevice";
-import TSSRecovery from "./pages/TSSRecovery";
+import TssKeyRecovery from "./pages/TssKeyRecovery";
 import TSSBackupManagement from "./pages/TSSBackupManagement";
 import DeviceKicked from "./pages/DeviceKicked";
 import SecurityRequired from "./pages/SecurityRequired";
@@ -91,7 +91,7 @@ function AppRoutes() {
       <Route path="/wallet/recovery" element={<WalletRecovery />} />
       <Route path="/wallet/escape/:id" element={<ProtectedRoute><WalletEscape /></ProtectedRoute>} />
       <Route path="/profile/devices/authorize" element={<ProtectedRoute><AuthorizeDevice /></ProtectedRoute>} />
-      <Route path="/tss-recovery" element={<TSSRecovery />} />
+      <Route path="/tss-recovery" element={<TssKeyRecovery />} />
       <Route path="/device-kicked" element={<DeviceKicked />} />
       <Route path="/security-required" element={<SecurityRequired />} />
       <Route path="/set-password" element={<ProtectedRoute><SetPassword /></ProtectedRoute>} />
