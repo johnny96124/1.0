@@ -120,18 +120,16 @@ export function AssetPickerDrawer({
                   key={chain.id}
                   onClick={() => setActiveChain(chain.id)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all border",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all",
                     activeChain === chain.id
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-background text-muted-foreground border-border hover:border-primary/50"
+                      ? "bg-muted text-foreground"
+                      : "border border-border text-muted-foreground hover:bg-muted/30"
                   )}
                 >
                   {chain.id !== 'all' && (
-                    <span className="relative z-10">
-                      <ChainIcon chainId={chain.id} size="sm" />
-                    </span>
+                    <ChainIcon chainId={chain.id} size="sm" />
                   )}
-                  <span className="relative z-10">{chain.shortName}</span>
+                  <span>{chain.shortName}</span>
                 </button>
               ))}
             </div>
