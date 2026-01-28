@@ -26,8 +26,11 @@ export function AmountDisplay({
   const numAmount = parseFloat(amount) || 0;
   const isExceedMax = numAmount > maxBalance;
   
-  // Display token amount
-  const displayAmount = `${numAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 })} ${symbol}`;
+  // Display token amount - preserve raw input for typing states like "0.0" or "1."
+  const isTypingDecimal = amount.endsWith('.') || (amount.includes('.') && amount.endsWith('0') && parseFloat(amount) !== numAmount);
+  const displayAmount = isTypingDecimal 
+    ? `${amount} ${symbol}` 
+    : `${numAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 })} ${symbol}`;
   
   // USD conversion - always show, even when 0
   const usdValue = numAmount * tokenPrice;

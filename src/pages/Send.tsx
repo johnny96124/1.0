@@ -658,42 +658,31 @@ export default function SendPage() {
                     chainId={selectedAsset.network}
                   />
 
-                  {/* Test Transfer Tip */}
+                  {/* Test Transfer Tip - Compact Version */}
                   <AnimatePresence>
                     {shouldShowTestTip && (
                       <motion.div
-                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                        animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                        className="overflow-hidden w-full max-w-sm"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden w-full max-w-sm mt-3"
                       >
-                        <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/10">
-                          <div className="flex items-start gap-3">
-                            <Lightbulb className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-                            <div className="flex-1">
-                              <p className="font-medium text-foreground">首次转账建议先验证</p>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                确认地址正确后再转大额
-                              </p>
-                              <div className="flex items-center gap-3 mt-3">
-                                <Button
-                                  size="sm"
-                                  className="bg-amber-500 hover:bg-amber-600 text-white"
-                                  onClick={handleTestTransfer}
-                                >
-                                  改为 1 {selectedAsset.symbol} 测试
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-muted-foreground"
-                                  onClick={() => setTestTipDismissed(true)}
-                                >
-                                  知道了
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
+                        <div className="px-3 py-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 flex items-center gap-2">
+                          <Lightbulb className="w-4 h-4 text-amber-500 shrink-0" />
+                          <span className="text-sm text-foreground flex-1">首次转账建议先小额验证</span>
+                          <Button
+                            size="sm"
+                            className="h-7 px-2.5 text-xs bg-amber-500 hover:bg-amber-600 text-white"
+                            onClick={handleTestTransfer}
+                          >
+                            改为 1 {selectedAsset.symbol}
+                          </Button>
+                          <button
+                            className="text-xs text-muted-foreground hover:text-foreground"
+                            onClick={() => setTestTipDismissed(true)}
+                          >
+                            忽略
+                          </button>
                         </div>
                       </motion.div>
                     )}
