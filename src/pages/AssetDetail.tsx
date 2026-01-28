@@ -399,45 +399,79 @@ export default function AssetDetailPage() {
                   <div className="w-10 h-1 bg-muted rounded-full" />
                 </div>
 
-                {/* Transaction Status */}
-                <div className="text-center mb-6">
-                  <div className="w-12 h-12 rounded-full bg-muted mx-auto flex items-center justify-center mb-3">
-                    {getStatusIcon(selectedTx.status)}
+                {/* Hero Section: Token Icon + Amount */}
+                <div className="relative mb-6">
+                  {/* Large Token Icon as Hero */}
+                  <div className="flex justify-center mb-4">
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
+                        <CryptoIcon symbol={selectedTx.symbol} size="xl" />
+                      </div>
+                      {/* Status Badge Overlay */}
+                      <div className={cn(
+                        "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-card",
+                        selectedTx.status === 'confirmed' && "bg-success",
+                        selectedTx.status === 'pending' && "bg-warning",
+                        selectedTx.status === 'failed' && "bg-destructive"
+                      )}>
+                        {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                        {selectedTx.status === 'pending' && <Clock className="w-3.5 h-3.5 text-white" />}
+                        {selectedTx.status === 'failed' && <XCircle className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                    </div>
                   </div>
-                  <p className="font-semibold text-lg">
-                    {selectedTx.type === 'receive' ? '收款' : '转账'}
-                    {getStatusText(selectedTx.status)}
-                  </p>
-                </div>
 
-                {/* Amount */}
-                <div className="text-center mb-6">
-                  <p className={cn(
-                    'text-3xl font-bold',
-                    selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
-                  )}>
-                    {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
-                  </p>
-                  <p className="text-muted-foreground">
-                    ≈ ${(selectedTx.amount * 1).toFixed(2)}
-                  </p>
+                  {/* Amount Display */}
+                  <div className="text-center">
+                    <p className={cn(
+                      'text-3xl font-bold tracking-tight',
+                      selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
+                    )}>
+                      {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
+                    </p>
+                    <p className="text-muted-foreground text-sm mt-1">
+                      ≈ ${(selectedTx.amount * 1).toLocaleString()}
+                    </p>
+                  </div>
+
+                  {/* Status Tag */}
+                  <div className="flex justify-center mt-3">
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium",
+                      selectedTx.status === 'confirmed' && "bg-success/10 text-success",
+                      selectedTx.status === 'pending' && "bg-warning/10 text-warning",
+                      selectedTx.status === 'failed' && "bg-destructive/10 text-destructive"
+                    )}>
+                      {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-3 h-3" />}
+                      {selectedTx.status === 'pending' && <Clock className="w-3 h-3" />}
+                      {selectedTx.status === 'failed' && <XCircle className="w-3 h-3" />}
+                      {selectedTx.type === 'receive' ? '收款' : '转账'}
+                      {selectedTx.status === 'confirmed' && '已完成'}
+                      {selectedTx.status === 'pending' && '处理中'}
+                      {selectedTx.status === 'failed' && '失败'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Details */}
                 <div className="space-y-4">
-                  <div className="flex justify-between py-2 border-b border-border">
+                  <div className="flex justify-between items-start py-2 border-b border-border">
                     <span className="text-muted-foreground">
                       {selectedTx.type === 'receive' ? '付款方' : '收款方'}
                     </span>
-                    <span className="font-medium text-foreground">
-                      {selectedTx.counterpartyLabel || 
-                        `${selectedTx.counterparty.slice(0, 8)}...${selectedTx.counterparty.slice(-6)}`}
-                    </span>
+                    <div className="text-right">
+                      {selectedTx.counterpartyLabel && (
+                        <p className="font-medium text-foreground">{selectedTx.counterpartyLabel}</p>
+                      )}
+                      <p className="text-sm text-muted-foreground font-mono">
+                        {`${selectedTx.counterparty.slice(0, 10)}...${selectedTx.counterparty.slice(-8)}`}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex justify-between py-2 border-b border-border">
+                  <div className="flex justify-between items-center py-2 border-b border-border">
                     <span className="text-muted-foreground">网络</span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <ChainIcon chainId={selectedTx.network} size="sm" />
                       <span className="font-medium text-foreground">
                         {SUPPORTED_CHAINS.find(c => c.id === selectedTx.network)?.name}
@@ -461,12 +495,12 @@ export default function AssetDetailPage() {
                         </span>
                         <button 
                           onClick={() => copyToClipboard(selectedTx.txHash!)}
-                          className="text-muted-foreground hover:text-foreground"
+                          className="p-1 hover:bg-muted rounded"
                         >
-                          <Copy className="w-4 h-4" />
+                          <Copy className="w-4 h-4 text-muted-foreground" />
                         </button>
-                        <button className="text-muted-foreground hover:text-foreground">
-                          <ExternalLink className="w-4 h-4" />
+                        <button className="p-1 hover:bg-muted rounded">
+                          <ExternalLink className="w-4 h-4 text-muted-foreground" />
                         </button>
                       </div>
                     </div>
