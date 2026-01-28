@@ -26,8 +26,13 @@ export function AmountDisplay({
   const numAmount = parseFloat(amount) || 0;
   const isExceedMax = numAmount > maxBalance;
   
-  // Display token amount - preserve raw input for typing states like "0.0" or "1."
-  const isTypingDecimal = amount.endsWith('.') || (amount.includes('.') && amount.endsWith('0') && parseFloat(amount) !== numAmount);
+  // Display token amount - preserve raw input for typing states like "0.0", "0.00", "1." etc.
+  // Show raw amount when: ends with decimal, or has trailing zeros after decimal point
+  const hasDecimalPoint = amount.includes('.');
+  const isTypingDecimal = amount.endsWith('.') || 
+    (hasDecimalPoint && /\.0+$/.test(amount)) || // ends with .0, .00, .000, etc.
+    (hasDecimalPoint && /\.\d*0$/.test(amount));  // ends with trailing zero like .10, .20
+  
   const displayAmount = isTypingDecimal 
     ? `${amount} ${symbol}` 
     : `${numAmount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 })} ${symbol}`;

@@ -648,7 +648,7 @@ export default function SendPage() {
                 </div>
 
                 {/* Amount Display - Centered */}
-                <div className="flex-1 flex flex-col items-center justify-center px-4">
+                <div className="flex-1 flex flex-col items-center justify-center px-4 min-h-0">
                   <AmountDisplay
                     amount={amount}
                     symbol={selectedAsset.symbol}
@@ -656,10 +656,11 @@ export default function SendPage() {
                     maxBalance={selectedAsset.balance}
                     onMaxClick={() => setAmount(selectedAsset.balance.toString())}
                     chainId={selectedAsset.network}
+                    className="py-4"
                   />
 
                   {/* Balance Info with Max Button */}
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span>可用:</span>
                     <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted rounded-lg">
                       <span className="font-medium text-foreground">{selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
@@ -671,7 +672,10 @@ export default function SendPage() {
                       全部
                     </button>
                   </div>
+                </div>
 
+                {/* Test Transfer Tip + Send Button - Fixed height section */}
+                <div className="px-4 pb-2 space-y-3 shrink-0">
                   {/* Test Transfer Tip - Compact Version */}
                   <AnimatePresence>
                     {shouldShowTestTip && (
@@ -679,7 +683,7 @@ export default function SendPage() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden w-full max-w-sm mt-3"
+                        className="overflow-hidden"
                       >
                         <div className="px-3 py-2 rounded-lg border border-warning/30 bg-warning/10 flex items-center gap-2">
                           <Lightbulb className="w-3.5 h-3.5 text-warning shrink-0" />
@@ -701,10 +705,8 @@ export default function SendPage() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </div>
 
-                {/* Send Button */}
-                <div className="px-4 pb-2 pt-4">
+                  {/* Send Button */}
                   <Button
                     size="lg"
                     className="w-full text-lg font-semibold h-12"
