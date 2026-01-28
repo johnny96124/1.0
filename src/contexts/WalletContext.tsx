@@ -244,7 +244,7 @@ const mockTransactionsWallet1: Transaction[] = [
     network: 'tron',
     riskScore: 'green',
   },
-  // Failed transaction 1 - insufficient gas
+  // Failed transaction 1 - insufficient gas (today)
   {
     id: 'failed-1',
     type: 'send',
@@ -254,13 +254,13 @@ const mockTransactionsWallet1: Transaction[] = [
     status: 'failed',
     counterparty: '0xFailed123456789012345678901234567890abcd',
     counterpartyLabel: 'External Wallet',
-    timestamp: new Date(Date.now() - 180000000),
+    timestamp: new Date(Date.now() - 3600000), // 1 hour ago
     txHash: '0xfailedtx1234567890abcdef1234567890abcd',
     network: 'ethereum',
     fee: 0,
     riskScore: 'green',
   },
-  // Failed transaction 2 - network error
+  // Failed transaction 2 - network error (today)
   {
     id: 'failed-2',
     type: 'send',
@@ -269,13 +269,13 @@ const mockTransactionsWallet1: Transaction[] = [
     usdValue: 8750,
     status: 'failed',
     counterparty: '0xNetworkErr789012345678901234567890abcdef',
-    timestamp: new Date(Date.now() - 259200000),
+    timestamp: new Date(Date.now() - 10800000), // 3 hours ago
     txHash: '0xfailedtx2345678901234567890abcdef12345',
     network: 'ethereum',
     fee: 0,
     riskScore: 'green',
   },
-  // Failed transaction 3 - on Tron network
+  // Failed transaction 3 - on Tron network (yesterday)
   {
     id: 'failed-3',
     type: 'send',
@@ -285,7 +285,7 @@ const mockTransactionsWallet1: Transaction[] = [
     status: 'failed',
     counterparty: 'TFailedAddr1234567890abcdef12345678',
     counterpartyLabel: 'Partner Ltd.',
-    timestamp: new Date(Date.now() - 518400000),
+    timestamp: new Date(Date.now() - 90000000), // ~1 day ago
     txHash: 'failedhash789012345678901234567890abcd',
     network: 'tron',
     fee: 0,
