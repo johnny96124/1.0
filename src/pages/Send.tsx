@@ -582,8 +582,8 @@ export default function SendPage() {
                             </div>
                             <div className="flex items-center gap-2 mt-1">
                               <ChainIcon chainId={contact.network as ChainId} size="xs" />
-                              <p className="text-sm text-muted-foreground font-mono">
-                                {contact.address.slice(0, 8)}...{contact.address.slice(-6)}
+                              <p className="text-sm text-muted-foreground font-mono break-all">
+                                {contact.address}
                               </p>
                             </div>
                           </div>

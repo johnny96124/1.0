@@ -71,8 +71,7 @@ export function ContactDrawer({
   };
 
   const formatAddress = (addr: string) => {
-    if (addr.length <= 16) return addr;
-    return `${addr.slice(0, 8)}...${addr.slice(-6)}`;
+    return addr;
   };
 
   const getAvatarText = (name: string) => {
