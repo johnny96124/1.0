@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, Scan, Users, AlertTriangle, 
-  CheckCircle2, Loader2, Shield,
+  CheckCircle2, Loader2, Shield, Search, X,
   Info, ChevronRight, ShieldAlert
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
-import { RiskColor, SUPPORTED_CHAINS, ChainId } from '@/types/wallet';
+import { RiskColor, SUPPORTED_CHAINS, ChainId, Asset } from '@/types/wallet';
 import { QRScanner } from '@/components/QRScanner';
 import { ParsedQRData } from '@/lib/qr-parser';
 import { NumericKeypad } from '@/components/NumericKeypad';
@@ -22,12 +22,7 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { NetworkFeeSelector, FeeTier } from '@/components/NetworkFeeSelector';
 import { ContactDrawer } from '@/components/ContactDrawer';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +33,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+
+type Step = 'asset' | 'address' | 'amount' | 'confirm' | 'auth' | 'success';
 
 export default function SendPage() {
   const navigate = useNavigate();
@@ -59,20 +56,31 @@ export default function SendPage() {
   const searchParams = new URLSearchParams(location.search);
   const assetFromUrl = searchParams.get('asset');
   
-  // Find the matching asset from URL param, or fall back to first asset
+  // Find the matching asset from URL param
   const initialAsset = assetFromUrl 
-    ? assets.find(a => a.symbol.toUpperCase() === assetFromUrl.toUpperCase()) || assets[0]
-    : assets[0];
+    ? assets.find(a => a.symbol.toUpperCase() === assetFromUrl.toUpperCase()) || null
+    : null;
+
+  // Determine initial step based on context
+  const getInitialStep = (): Step => {
+    // If coming from PSP with prefilled address, skip to amount
+    if (prefilledData?.fromPSP && prefilledData?.prefilledAddress) {
+      return 'amount';
+    }
+    // If asset specified via URL, skip asset selection
+    if (assetFromUrl && initialAsset) {
+      return 'address';
+    }
+    // Default: start with asset selection
+    return 'asset';
+  };
   
-  // If coming from PSP, skip address step and go directly to amount
-  const initialStep = prefilledData?.fromPSP && prefilledData?.prefilledAddress ? 'amount' : 'address';
-  
-  const [step, setStep] = useState<'address' | 'amount' | 'confirm' | 'auth' | 'success'>(initialStep);
+  const [step, setStep] = useState<Step>(getInitialStep());
   const [address, setAddress] = useState(prefilledData?.prefilledAddress || '');
   const [pspRecipientName, setPspRecipientName] = useState(prefilledData?.pspName || '');
   const [selectedContact, setSelectedContact] = useState<typeof contacts[0] | null>(null);
   const [amount, setAmount] = useState('');
-  const [selectedAsset, setSelectedAsset] = useState(initialAsset);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(initialAsset || (assets[0] || null));
   const [memo, setMemo] = useState('');
   const [riskScore, setRiskScore] = useState<{ score: RiskColor; reasons: string[] } | null>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -81,12 +89,15 @@ export default function SendPage() {
   const [confirmRisk, setConfirmRisk] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [feeTier, setFeeTier] = useState<FeeTier>('standard');
-  const [showAssetPicker, setShowAssetPicker] = useState(false);
   const [showContactDrawer, setShowContactDrawer] = useState(false);
   const [showPSPWarningDialog, setShowPSPWarningDialog] = useState(false);
   const [showPSPBlockedDialog, setShowPSPBlockedDialog] = useState(false);
   const [pspInfo, setPspInfo] = useState<{ isPSP: boolean; pspName?: string } | null>(null);
   const [isAddressFocused, setIsAddressFocused] = useState(false);
+
+  // Asset selection step states
+  const [assetSearchQuery, setAssetSearchQuery] = useState('');
+  const [assetFilterChain, setAssetFilterChain] = useState<ChainId>('all');
 
   // Get limit status
   const limitStatus = getLimitStatus();
@@ -94,9 +105,34 @@ export default function SendPage() {
   const limitCheck = checkTransferLimit(currentAmount);
 
   // Mock token price (in real app, fetch from API)
-  const tokenPrice = selectedAsset.symbol === 'USDT' || selectedAsset.symbol === 'USDC' ? 1 : 
-                     selectedAsset.symbol === 'ETH' ? 3500 : 
-                     selectedAsset.symbol === 'BTC' ? 97500 : 1;
+  const tokenPrice = selectedAsset 
+    ? (selectedAsset.symbol === 'USDT' || selectedAsset.symbol === 'USDC' ? 1 : 
+       selectedAsset.symbol === 'ETH' ? 3500 : 
+       selectedAsset.symbol === 'BTC' ? 97500 : 1)
+    : 1;
+
+  // Filtered and sorted assets for asset selection step
+  const filteredAssets = useMemo(() => {
+    let result = [...assets];
+
+    // Chain filter
+    if (assetFilterChain !== 'all') {
+      result = result.filter(asset => asset.network === assetFilterChain);
+    }
+
+    // Search filter
+    if (assetSearchQuery.trim()) {
+      const query = assetSearchQuery.toLowerCase().trim();
+      result = result.filter(
+        asset =>
+          asset.symbol.toLowerCase().includes(query) ||
+          asset.name.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort by USD value descending
+    return result.sort((a, b) => b.usdValue - a.usdValue);
+  }, [assets, assetFilterChain, assetSearchQuery]);
 
   // Scan address risk when address changes
   useEffect(() => {
@@ -114,6 +150,12 @@ export default function SendPage() {
     };
     scan();
   }, [address, scanAddressRisk, contacts]);
+
+  const handleSelectAsset = (asset: Asset) => {
+    setSelectedAsset(asset);
+    setAmount(''); // Reset amount when changing asset
+    setStep('address');
+  };
 
   const handleSelectContact = (contact: typeof contacts[0]) => {
     setSelectedContact(contact);
@@ -143,7 +185,7 @@ export default function SendPage() {
   const handleContinue = () => {
     if (step === 'address' && address && (!riskScore || riskScore.score !== 'red')) {
       setStep('amount');
-    } else if (step === 'amount' && parseFloat(amount) > 0 && limitCheck.allowed) {
+    } else if (step === 'amount' && parseFloat(amount) > 0 && limitCheck.allowed && selectedAsset) {
       // Check PSP address and account risk status before confirming
       const pspCheck = isPSPAddress(address);
       setPspInfo(pspCheck);
@@ -173,6 +215,7 @@ export default function SendPage() {
   };
 
   const handleAuth = async () => {
+    if (!selectedAsset) return;
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -185,12 +228,42 @@ export default function SendPage() {
     }
   };
 
+  const handleBack = () => {
+    switch (step) {
+      case 'asset':
+        navigate(-1);
+        break;
+      case 'address':
+        // If coming from URL with asset specified, go back to previous page
+        if (assetFromUrl && initialAsset) {
+          navigate(-1);
+        } else {
+          setStep('asset');
+        }
+        break;
+      case 'amount':
+        // If from PSP, go back to previous page
+        if (prefilledData?.fromPSP) {
+          navigate(-1);
+        } else {
+          setStep('address');
+        }
+        break;
+      case 'confirm':
+        setStep('amount');
+        break;
+      default:
+        setStep('address');
+    }
+  };
+
   const isLimitedTransfer = walletStatus === 'created_no_backup';
   const transferLimit = isLimitedTransfer ? 50 : limitStatus.singleLimit;
 
   const getStepTitle = () => {
     switch (step) {
-      case 'address': return '转账';
+      case 'asset': return '选择币种';
+      case 'address': return '收款地址';
       case 'amount': return '输入金额';
       case 'confirm': return '确认转账';
       case 'auth': return '验证身份';
@@ -198,29 +271,19 @@ export default function SendPage() {
     }
   };
 
+  const getChainName = (chainId: ChainId): string => {
+    const chain = SUPPORTED_CHAINS.find(c => c.id === chainId);
+    return chain?.shortName || chainId;
+  };
+
   return (
     <AppLayout showNav={false} showSecurityBanner={false}>
-      <SwipeBack enabled={step === 'address'}>
+      <SwipeBack enabled={step === 'asset' || (step === 'address' && !!assetFromUrl)}>
       <div className="flex flex-col h-full bg-background">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 shrink-0">
           <button
-            onClick={() => {
-              if (step === 'address') {
-                navigate(-1);
-              } else if (step === 'amount') {
-                // If from PSP, go back to previous page; otherwise go to address step
-                if (prefilledData?.fromPSP) {
-                  navigate(-1);
-                } else {
-                  setStep('address');
-                }
-              } else if (step === 'confirm') {
-                setStep('amount');
-              } else {
-                setStep('address');
-              }
-            }}
+            onClick={handleBack}
             className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -230,7 +293,7 @@ export default function SendPage() {
         </div>
 
         {/* Limit Warning for unbacked wallet */}
-        {isLimitedTransfer && step !== 'success' && (
+        {isLimitedTransfer && step !== 'success' && step !== 'asset' && (
           <div className="mx-4 mb-3 p-3 bg-warning/10 border border-warning/20 rounded-xl">
             <p className="text-sm text-warning">
               ⚠️ 未完成备份，单笔限额 {transferLimit} USDT
@@ -240,6 +303,130 @@ export default function SendPage() {
 
         <div className="flex-1 flex flex-col overflow-hidden">
           <AnimatePresence mode="wait">
+            {/* Step 0: Asset Selection */}
+            {step === 'asset' && (
+              <motion.div
+                key="asset"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="flex-1 flex flex-col overflow-hidden"
+              >
+                {/* Search Bar */}
+                <div className="px-4 pt-2 pb-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="搜索币种名称或符号"
+                      value={assetSearchQuery}
+                      onChange={(e) => setAssetSearchQuery(e.target.value)}
+                      className="pl-9 pr-9 bg-muted/50 border-0 h-12"
+                    />
+                    {assetSearchQuery && (
+                      <button
+                        onClick={() => setAssetSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                      >
+                        <X className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Chain Filter */}
+                <div className="px-4 pb-3">
+                  <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
+                    {SUPPORTED_CHAINS.map((chain) => (
+                      <button
+                        key={chain.id}
+                        onClick={() => setAssetFilterChain(chain.id)}
+                        className={cn(
+                          "relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all",
+                          assetFilterChain === chain.id
+                            ? "text-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/50"
+                        )}
+                      >
+                        {assetFilterChain === chain.id && (
+                          <motion.div
+                            layoutId="sendAssetChainSelector"
+                            className="absolute inset-0 bg-muted rounded-full"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                          />
+                        )}
+                        {chain.id !== 'all' && (
+                          <span className="relative z-10">
+                            <ChainIcon chainId={chain.id} size="sm" />
+                          </span>
+                        )}
+                        <span className="relative z-10">{chain.shortName}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Asset List */}
+                <ScrollArea className="flex-1 px-4 pb-4">
+                  {filteredAssets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                        <Search className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground text-sm">
+                        {assetSearchQuery ? '没有找到匹配的币种' : '暂无可用币种'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {filteredAssets.map((asset, index) => (
+                        <motion.button
+                          key={`${asset.symbol}-${asset.network}`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.03 }}
+                          onClick={() => handleSelectAsset(asset)}
+                          className="w-full p-3 rounded-xl bg-card border border-border/50 flex items-center gap-3 text-left hover:bg-muted/50 transition-colors"
+                        >
+                          {/* Token Icon with Chain Badge */}
+                          <div className="relative shrink-0">
+                            <CryptoIcon symbol={asset.symbol} size="lg" />
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-card border-2 border-card flex items-center justify-center">
+                              <ChainIcon chainId={asset.network} size="sm" />
+                            </div>
+                          </div>
+
+                          {/* Token Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-foreground">
+                                {asset.symbol}
+                              </span>
+                              <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                {getChainName(asset.network)}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground truncate mt-0.5">
+                              {asset.name}
+                            </p>
+                          </div>
+
+                          {/* Balance */}
+                          <div className="text-right shrink-0">
+                            <p className="font-medium text-foreground">
+                              {asset.balance.toLocaleString()}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              ${asset.usdValue.toLocaleString()}
+                            </p>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
+              </motion.div>
+            )}
+
             {/* Step 1: Address */}
             {step === 'address' && (
               <motion.div
@@ -249,6 +436,37 @@ export default function SendPage() {
                 exit={{ opacity: 0, x: -20 }}
                 className="flex-1 px-4 py-4 overflow-y-auto space-y-4"
               >
+                {/* Selected Asset Display */}
+                {selectedAsset && (
+                  <button
+                    onClick={() => {
+                      if (!assetFromUrl) {
+                        setStep('asset');
+                      }
+                    }}
+                    className={cn(
+                      "w-full p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-3",
+                      !assetFromUrl && "hover:bg-muted/80 transition-colors"
+                    )}
+                  >
+                    <div className="relative shrink-0">
+                      <CryptoIcon symbol={selectedAsset.symbol} size="md" />
+                      <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-card border border-card flex items-center justify-center">
+                        <ChainIcon chainId={selectedAsset.network} size="xs" />
+                      </div>
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-medium text-foreground">{selectedAsset.symbol}</p>
+                      <p className="text-xs text-muted-foreground">
+                        余额: {selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}
+                      </p>
+                    </div>
+                    {!assetFromUrl && (
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
+                )}
+
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     收款地址
@@ -264,7 +482,7 @@ export default function SendPage() {
                       onFocus={() => setIsAddressFocused(true)}
                       onBlur={() => setIsAddressFocused(false)}
                       className={cn(
-                        "pr-[88px] text-base",
+                        "pr-[88px] text-base h-12",
                         address && !isAddressFocused && "text-transparent"
                       )}
                     />
@@ -407,7 +625,7 @@ export default function SendPage() {
             )}
 
             {/* Step 2: Amount - Mobile Optimized */}
-            {step === 'amount' && (
+            {step === 'amount' && selectedAsset && (
               <motion.div
                 key="amount"
                 initial={{ opacity: 0, x: 20 }}
@@ -437,14 +655,10 @@ export default function SendPage() {
                   {/* Balance Info with Max Button */}
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
                     <span>可用:</span>
-                    <button 
-                      onClick={() => setShowAssetPicker(true)}
-                      className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                    >
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-muted rounded-lg">
                       <CryptoIcon symbol={selectedAsset.symbol} size="sm" />
                       <span className="font-medium text-foreground">{selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
+                    </div>
                     <button
                       onClick={() => setAmount(selectedAsset.balance.toString())}
                       className="px-3 py-1 text-xs font-medium text-accent bg-accent/10 rounded-full hover:bg-accent/20 transition-colors"
@@ -458,7 +672,7 @@ export default function SendPage() {
                 <div className="px-4 pb-2">
                   <Button
                     size="lg"
-                    className="w-full text-lg font-semibold"
+                    className="w-full text-lg font-semibold h-12"
                     onClick={handleContinue}
                     disabled={!amount || parseFloat(amount) <= 0 || parseFloat(amount) > selectedAsset.balance || !limitCheck.allowed}
                   >
@@ -475,7 +689,7 @@ export default function SendPage() {
             )}
 
             {/* Step 3: Confirm */}
-            {step === 'confirm' && (
+            {step === 'confirm' && selectedAsset && (
               <motion.div
                 key="confirm"
                 initial={{ opacity: 0, x: 20 }}
@@ -594,7 +808,7 @@ export default function SendPage() {
                 
                 <Button
                   size="lg"
-                  className="w-full mt-8"
+                  className="w-full mt-8 h-12"
                   onClick={handleAuth}
                   disabled={isLoading}
                 >
@@ -630,7 +844,7 @@ export default function SendPage() {
                 <div className="w-full space-y-3 mt-8">
                   <Button
                     size="lg"
-                    className="w-full"
+                    className="w-full h-12"
                     onClick={() => navigate('/history')}
                   >
                     查看交易记录
@@ -638,7 +852,7 @@ export default function SendPage() {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="w-full"
+                    className="w-full h-12"
                     onClick={() => navigate('/home')}
                   >
                     返回首页
@@ -651,10 +865,10 @@ export default function SendPage() {
 
         {/* Bottom Action - Only for address and confirm steps */}
         {(step === 'address' || step === 'confirm') && (
-          <div className="p-4 border-t border-border shrink-0">
+          <div className="p-4 pb-8 border-t border-border shrink-0">
             <Button
               size="lg"
-              className="w-full"
+              className="w-full h-12"
               onClick={handleContinue}
               disabled={
                 (step === 'address' && (!address || riskScore?.score === 'red')) ||
@@ -681,55 +895,8 @@ export default function SendPage() {
         onOpenChange={setShowContactDrawer}
         contacts={contacts}
         onSelect={handleSelectContact}
+        selectedNetwork={selectedAsset?.network}
       />
-
-      {/* Asset Picker Drawer */}
-      <Drawer open={showAssetPicker} onOpenChange={setShowAssetPicker}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>选择币种</DrawerTitle>
-          </DrawerHeader>
-          <div className="px-4 pb-6 space-y-2 max-h-[60vh] overflow-y-auto">
-            {assets.map((asset) => (
-              <button
-                key={`${asset.symbol}-${asset.network}`}
-                onClick={() => {
-                  setSelectedAsset(asset);
-                  setAmount(''); // Reset amount when changing asset
-                  setShowAssetPicker(false);
-                }}
-                className={cn(
-                  'w-full p-4 rounded-xl border text-left transition-colors flex items-center gap-3',
-                  selectedAsset.symbol === asset.symbol && selectedAsset.network === asset.network
-                    ? 'border-accent bg-accent/5' 
-                    : 'border-border hover:border-accent/50'
-                )}
-              >
-                <CryptoIcon symbol={asset.symbol} size="md" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-foreground">{asset.symbol}</span>
-                    <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
-                      {SUPPORTED_CHAINS.find(c => c.id === asset.network)?.shortName}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {asset.balance.toLocaleString()} {asset.symbol}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">
-                    ${asset.usdValue.toLocaleString()}
-                  </p>
-                </div>
-                {selectedAsset.symbol === asset.symbol && selectedAsset.network === asset.network && (
-                  <CheckCircle2 className="w-5 h-5 text-accent shrink-0" />
-                )}
-              </button>
-            ))}
-          </div>
-        </DrawerContent>
-      </Drawer>
 
       {/* PSP Warning Dialog - Account has warning status */}
       <AlertDialog open={showPSPWarningDialog} onOpenChange={setShowPSPWarningDialog}>
