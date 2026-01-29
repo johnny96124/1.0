@@ -252,7 +252,7 @@ export default function SendPage() {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await sendTransaction(address, parseFloat(amount), selectedAsset.symbol, memo);
+      await sendTransaction(address, parseFloat(amount), selectedAsset.symbol, selectedAsset.network, memo);
       setStep('success');
     } catch (error) {
       console.error('Transaction failed:', error);

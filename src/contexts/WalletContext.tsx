@@ -871,7 +871,7 @@ interface WalletContextType extends WalletState {
   completeFileBackup: (password: string) => Promise<boolean>;
   
   // Transaction actions
-  sendTransaction: (to: string, amount: number, symbol: string, memo?: string) => Promise<string>;
+  sendTransaction: (to: string, amount: number, symbol: string, network: ChainId, memo?: string) => Promise<string>;
   scanAddressRisk: (address: string) => Promise<{ score: RiskColor; reasons: string[] }>;
   
   // Limit actions
@@ -1296,35 +1296,62 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return true;
   }, [backupStatus.cloudBackup]);
 
-  const sendTransaction = useCallback(async (to: string, amount: number, symbol: string, memo?: string): Promise<string> => {
+  const sendTransaction = useCallback(async (to: string, amount: number, symbol: string, network: ChainId, memo?: string): Promise<string> => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     const txHash = `0x${Math.random().toString(16).slice(2)}`;
+    
+    // Determine gas token and approximate gas amount based on network
+    const gasConfig: Record<ChainId, { token: string; amount: number; feeUsd: number }> = {
+      ethereum: { token: 'ETH', amount: 0.00072, feeUsd: 2.5 },
+      tron: { token: 'TRX', amount: 22.5, feeUsd: 2.5 },
+      bsc: { token: 'BNB', amount: 0.0012, feeUsd: 0.5 },
+      all: { token: 'ETH', amount: 0.00072, feeUsd: 2.5 },
+    };
+    
+    const gas = gasConfig[network] || gasConfig.ethereum;
+    
+    // Find the asset to get USD value
+    const asset = assets.find(a => a.symbol === symbol && a.network === network);
+    const usdValue = asset ? (amount * asset.usdValue / asset.balance) : amount;
     
     const newTx: Transaction = {
       id: `tx-${Date.now()}`,
       type: 'send',
       amount,
       symbol,
-      usdValue: amount, // Simplified
+      usdValue,
       status: 'pending',
       counterparty: to,
       timestamp: new Date(),
       txHash,
-      network: 'Ethereum',
-      fee: 2.5,
+      network,
+      fee: gas.feeUsd,
+      gasAmount: gas.amount,
+      gasToken: gas.token,
+      nonce: Math.floor(Math.random() * 100),
+      isRbfEnabled: network !== 'tron',
       memo,
+      riskScore: 'green',
     };
+    
+    // Add transaction to wallet-specific map
+    if (currentWallet) {
+      if (!walletTransactionsMap[currentWallet.id]) {
+        walletTransactionsMap[currentWallet.id] = [];
+      }
+      walletTransactionsMap[currentWallet.id] = [newTx, ...walletTransactionsMap[currentWallet.id]];
+    }
     
     setTransactions(prev => [newTx, ...prev]);
     
     // Update balance
     setAssets(prev => prev.map(a => 
-      a.symbol === symbol ? { ...a, balance: a.balance - amount, usdValue: a.usdValue - amount } : a
+      (a.symbol === symbol && a.network === network) ? { ...a, balance: a.balance - amount, usdValue: a.usdValue - (amount * a.usdValue / a.balance) } : a
     ));
     
     return txHash;
-  }, []);
+  }, [assets, currentWallet]);
 
   const scanAddressRisk = useCallback(async (address: string): Promise<{ score: RiskColor; reasons: string[] }> => {
     await new Promise(resolve => setTimeout(resolve, 800));
