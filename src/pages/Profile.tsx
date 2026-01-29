@@ -121,8 +121,8 @@ export default function ProfilePage() {
                   index !== menuItems.length - 1 && 'border-b border-border'
                 )}
               >
-                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-accent" />
+                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
                 </div>
                 <span className="flex-1 text-left font-medium text-foreground text-sm">
                   {item.label}
@@ -141,11 +141,11 @@ export default function ProfilePage() {
           className="card-elevated p-4 mb-4"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
               {isDark ? (
-                <Moon className="w-5 h-5 text-accent" />
+                <Moon className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
               ) : (
-                <Sun className="w-5 h-5 text-accent" />
+                <Sun className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
               )}
             </div>
             <span className="flex-1 font-medium text-foreground text-sm">
