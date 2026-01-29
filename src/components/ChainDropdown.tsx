@@ -50,7 +50,7 @@ export function ChainDropdown({
         <Button
           variant="ghost"
           className={cn(
-            "h-8 px-2 gap-1.5 bg-secondary/80 hover:bg-muted/50 hover:text-foreground rounded-full",
+            "h-8 px-2 gap-1.5 bg-secondary/80 hover:bg-muted/50 hover:text-foreground rounded-full focus-visible:ring-0 focus-visible:ring-offset-0",
             className
           )}
         >
