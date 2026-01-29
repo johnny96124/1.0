@@ -438,10 +438,10 @@ export default function PSPCenterPage() {
         )}
 
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation - Underline style for secondary filters */}
         {pspConnections && pspConnections.length > 0 && (
-          <div className="mt-4">
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="mt-4 border-b border-border">
+            <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {visibleTabs.map((tab) => {
                 const Icon = tab.icon;
                 const count = getTabCount(tab.id);
@@ -452,10 +452,10 @@ export default function PSPCenterPage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all',
+                      'flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative',
                       isActive 
-                        ? 'bg-accent text-accent-foreground' 
-                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                        ? 'text-accent' 
+                        : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -463,10 +463,13 @@ export default function PSPCenterPage() {
                     {count > 0 && (
                       <span className={cn(
                         'px-1.5 py-0.5 rounded-full text-xs',
-                        isActive ? 'bg-accent-foreground/20' : 'bg-background'
+                        isActive ? 'bg-accent/20 text-accent' : 'bg-muted'
                       )}>
                         {count}
                       </span>
+                    )}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
                     )}
                   </button>
                 );

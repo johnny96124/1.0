@@ -8,12 +8,12 @@ import {
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useWallet } from '@/contexts/WalletContext';
 import { useNavigate } from 'react-router-dom';
 import { Notification, NotificationCategory, NotificationType } from '@/types/wallet';
 import { MessageListSkeleton } from '@/components/skeletons/MessageListSkeleton';
 import { EmptyState } from '@/components/EmptyState';
+import { cn } from '@/lib/utils';
 
 type FilterTab = 'all' | NotificationCategory;
 
@@ -149,28 +149,38 @@ export default function MessageCenter() {
           <MessageListSkeleton count={5} showTabs />
         ) : (
           <>
-            {/* Filter Tabs */}
-            <div className="px-4 py-3">
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as FilterTab)}>
-                <TabsList className="w-full grid grid-cols-4 h-9">
-                  {FILTER_TABS.map(tab => {
-                    const count = tab.key === 'all' 
-                      ? unreadNotificationCount 
-                      : notifications.filter(n => n.category === tab.key && !n.isRead).length;
-                    
-                    return (
-                      <TabsTrigger key={tab.key} value={tab.key} className="text-xs">
-                        {tab.label}
-                        {count > 0 && (
-                          <span className="ml-1 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
-                            {count > 99 ? '99+' : count}
-                          </span>
-                        )}
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-              </Tabs>
+            {/* Filter Tabs - Underline style for secondary filters */}
+            <div className="border-b border-border">
+              <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {FILTER_TABS.map(tab => {
+                  const count = tab.key === 'all' 
+                    ? unreadNotificationCount 
+                    : notifications.filter(n => n.category === tab.key && !n.isRead).length;
+                  
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={cn(
+                        "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative flex items-center gap-1.5",
+                        activeTab === tab.key
+                          ? "text-accent"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {tab.label}
+                      {count > 0 && (
+                        <span className="min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
+                          {count > 99 ? '99+' : count}
+                        </span>
+                      )}
+                      {activeTab === tab.key && (
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Notifications List */}

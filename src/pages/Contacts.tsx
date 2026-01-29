@@ -85,21 +85,24 @@ export default function ContactsPage() {
           </div>
         </div>
 
-        {/* Filter Tags */}
-        <div className="px-4 pb-3">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+        {/* Filter Tags - Underline style for secondary filters */}
+        <div className="border-b border-border">
+          <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {TAG_FILTERS.map((filter) => (
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
                 className={cn(
-                  "px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors",
+                  "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative",
                   activeFilter === filter.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    ? "text-accent"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {filter.label}
+                {activeFilter === filter.id && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
+                )}
               </button>
             ))}
           </div>
