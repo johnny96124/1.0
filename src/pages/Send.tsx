@@ -545,10 +545,9 @@ export default function SendPage() {
 
                 {/* Address Validation Status */}
                 {address && !isAddressValid && (
-                  <div className="flex items-center gap-2 text-destructive p-2">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span className="text-sm">请输入有效的钱包地址</span>
-                  </div>
+                  <p className="text-sm text-destructive mt-1.5 px-1">
+                    请输入有效的钱包地址
+                  </p>
                 )}
 
                 {/* Contacts - filtered by same chain family */}
