@@ -70,10 +70,9 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
         <DrawerFooter className="px-4 pb-6">
           <Button 
             variant="destructive"
-            className="w-full gap-2 h-12"
+            className="w-full h-12"
             onClick={handleConfirm}
           >
-            <X className="w-4 h-4" />
             确认取消
           </Button>
         </DrawerFooter>

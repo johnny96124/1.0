@@ -342,14 +342,7 @@ export default function ContactFormPage() {
             size="lg"
             className="w-full"
           >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                保存中...
-              </>
-            ) : (
-              isEditing ? '保存修改' : '添加联系人'
-            )}
+            {isSaving ? '保存中...' : (isEditing ? '保存修改' : '添加联系人')}
           </Button>
         </div>
       </div>

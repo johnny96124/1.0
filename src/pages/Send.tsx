@@ -863,8 +863,7 @@ export default function SendPage() {
                 isLoading
               }
             >
-              {isLoading && <Loader2 className="w-5 h-5 mr-2 animate-spin" />}
-              {step === 'confirm' ? '确认并转账' : '继续'}
+              {isLoading ? '处理中...' : (step === 'confirm' ? '确认并转账' : '继续')}
             </Button>
           </div>
         )}

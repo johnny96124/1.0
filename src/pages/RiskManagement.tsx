@@ -446,18 +446,16 @@ export default function RiskManagement() {
                 <div className="space-y-2">
                   <Button
                     variant="destructive"
-                    className="w-full gap-2"
+                    className="w-full"
                     onClick={() => handleReturn(selectedTx.id)}
                   >
-                    <RotateCcw className="w-4 h-4" />
                     退回资金
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full gap-2"
+                    className="w-full"
                     onClick={() => handleAcknowledge(selectedTx.id)}
                   >
-                    <Eye className="w-4 h-4" />
                     我已知晓风险
                   </Button>
                 </div>
