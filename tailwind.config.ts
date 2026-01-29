@@ -53,6 +53,7 @@ export default {
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",
+          surface: "hsl(var(--warning-surface))",
         },
         trust: {
           DEFAULT: "hsl(var(--trust))",

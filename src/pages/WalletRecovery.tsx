@@ -10,7 +10,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { RecoveryMethod } from '@/types/wallet';
 import { QRCodeSVG } from 'qrcode.react';
 

@@ -33,7 +33,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { getTSSNodeInfo, updateTSSNodeBackup, formatTimeAgo } from '@/lib/tss-node';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 type BackupType = 'cloud' | 'local';
 
@@ -116,9 +116,7 @@ export default function TSSBackupManagement() {
       });
       setTssNodeInfo(updated);
       
-      toast.success('云备份完成', {
-        description: '已备份到 iCloud',
-      });
+      toast.success('云备份完成', '已备份到 iCloud');
       setActiveBackupType(null);
       resetForm();
     } finally {
@@ -154,9 +152,7 @@ export default function TSSBackupManagement() {
       });
       setTssNodeInfo(updated);
       
-      toast.success('备份文件已导出', {
-        description: '请妥善保管备份文件',
-      });
+      toast.success('备份文件已导出', '请妥善保管备份文件');
       setActiveBackupType(null);
       resetForm();
     } finally {
