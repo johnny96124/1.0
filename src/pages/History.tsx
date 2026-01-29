@@ -599,6 +599,14 @@ export default function HistoryPage() {
                 </div>
               )}
 
+              {/* Failure Reason - for failed transactions */}
+              {selectedTx.status === 'failed' && selectedTx.failureReason && (
+                <div className="p-3 rounded-xl border bg-destructive/10 border-destructive/30 mb-4">
+                  <p className="text-sm font-medium text-destructive mb-1">失败原因</p>
+                  <p className="text-sm text-muted-foreground">{selectedTx.failureReason}</p>
+                </div>
+              )}
+
               {/* Details */}
               <div className="space-y-0">
                 <div className="flex justify-between items-center py-3 border-b border-border">
@@ -632,10 +640,60 @@ export default function HistoryPage() {
                   </span>
                 </div>
 
+                {/* Network Fee with token amount + USD */}
                 {selectedTx.fee !== undefined && selectedTx.fee > 0 && (
                   <div className="flex justify-between items-center py-3 border-b border-border">
                     <span className="text-muted-foreground">网络费用</span>
-                    <span className="font-medium text-foreground">${selectedTx.fee}</span>
+                    <div className="text-right">
+                      {selectedTx.gasAmount && selectedTx.gasToken && (
+                        <p className="font-medium text-foreground">
+                          {selectedTx.gasAmount.toFixed(6)} {selectedTx.gasToken}
+                        </p>
+                      )}
+                      <p className={selectedTx.gasAmount ? "text-sm text-muted-foreground" : "font-medium text-foreground"}>
+                        ≈ ${selectedTx.fee.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Confirmations - for confirmed transactions */}
+                {selectedTx.status === 'confirmed' && selectedTx.confirmations !== undefined && (
+                  <div className="flex justify-between items-center py-3 border-b border-border">
+                    <span className="text-muted-foreground">确认数</span>
+                    <span className="font-medium text-foreground">
+                      {selectedTx.confirmations >= 100 ? '100+' : selectedTx.confirmations} 次确认
+                    </span>
+                  </div>
+                )}
+
+                {/* Block Height - for confirmed transactions */}
+                {selectedTx.status === 'confirmed' && selectedTx.blockHeight && (
+                  <div className="flex justify-between items-center py-3 border-b border-border">
+                    <span className="text-muted-foreground">区块高度</span>
+                    <span className="font-medium text-foreground font-mono">
+                      #{selectedTx.blockHeight.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+
+                {/* Nonce - for EVM transactions */}
+                {selectedTx.nonce !== undefined && (
+                  <div className="flex justify-between items-center py-3 border-b border-border">
+                    <span className="text-muted-foreground">Nonce</span>
+                    <span className="font-medium text-foreground font-mono">
+                      {selectedTx.nonce}
+                    </span>
+                  </div>
+                )}
+
+                {/* Memo */}
+                {selectedTx.memo && (
+                  <div className="flex justify-between items-center py-3 border-b border-border">
+                    <span className="text-muted-foreground">备注</span>
+                    <span className="font-medium text-foreground max-w-[60%] text-right truncate">
+                      {selectedTx.memo}
+                    </span>
                   </div>
                 )}
 

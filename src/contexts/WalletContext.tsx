@@ -138,6 +138,13 @@ const mockTransactionsWallet1: Transaction[] = [
     txHash: '0xabc123def456789012345678901234567890abcdef',
     network: 'ethereum',
     riskScore: 'green',
+    confirmations: 156,
+    blockHeight: 19234567,
+    fee: 3.2,
+    gasAmount: 0.00091,
+    gasToken: 'ETH',
+    nonce: 38,
+    memo: '货款结算 - 订单号 #20240115',
   },
   {
     id: '2',
@@ -152,7 +159,12 @@ const mockTransactionsWallet1: Transaction[] = [
     txHash: 'abc123def456789012345678901234567890',
     network: 'tron',
     fee: 2.5,
+    gasAmount: 22.5,
+    gasToken: 'TRX',
+    nonce: 25,
     riskScore: 'green',
+    confirmations: 1250,
+    blockHeight: 58912345,
   },
   // High risk incoming transaction 1
   {
@@ -301,6 +313,8 @@ const mockTransactionsWallet1: Transaction[] = [
     network: 'ethereum',
     fee: 0,
     riskScore: 'green',
+    failureReason: 'Gas 不足：交易执行时余额不足以支付网络费用',
+    nonce: 45,
   },
   // Failed transaction 2 - network error (today)
   {
@@ -316,6 +330,8 @@ const mockTransactionsWallet1: Transaction[] = [
     network: 'ethereum',
     fee: 0,
     riskScore: 'green',
+    failureReason: '执行失败：合约调用时发生 revert，可能是目标地址拒绝接收',
+    nonce: 44,
   },
   // Failed transaction 3 - on Tron network (yesterday)
   {
@@ -332,6 +348,8 @@ const mockTransactionsWallet1: Transaction[] = [
     network: 'tron',
     fee: 0,
     riskScore: 'green',
+    failureReason: '能量不足：TRX 余额不足以提供交易所需的能量',
+    nonce: 12,
   },
 ];
 

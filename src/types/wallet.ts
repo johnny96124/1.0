@@ -136,6 +136,11 @@ export interface Transaction {
   fee?: number;
   riskScore?: RiskColor;
   memo?: string;
+  // Confirmation & block info
+  confirmations?: number;           // Number of block confirmations
+  blockHeight?: number;             // Block number where tx was included
+  // Failure info
+  failureReason?: string;           // Reason for failed transactions
   // Risk scanning fields
   riskReasons?: string[];           // KYT risk reasons
   riskScanTime?: Date;              // When the risk scan was performed
