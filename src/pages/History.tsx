@@ -96,7 +96,7 @@ export default function HistoryPage() {
   const [copiedHash, setCopiedHash] = useState(false);
   const [speedUpDrawerOpen, setSpeedUpDrawerOpen] = useState(false);
   const [cancelDrawerOpen, setCancelDrawerOpen] = useState(false);
-  const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
+  const { transactions, getAccountRiskStatus, acknowledgeRiskTx, currentWallet } = useWallet();
 
   // Simulate initial loading
   useEffect(() => {
@@ -609,17 +609,63 @@ export default function HistoryPage() {
 
               {/* Details */}
               <div className="space-y-0">
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">
-                    {selectedTx.type === 'receive' ? '付款方' : '收款方'}
-                  </span>
-                  <div className="text-right">
-                    {selectedTx.counterpartyLabel && (
+                {/* Sender Address */}
+                <div className="flex justify-between items-start py-3 border-b border-border">
+                  <span className="text-muted-foreground shrink-0">发送方</span>
+                  <div className="text-right flex-1 ml-4">
+                    {selectedTx.type === 'receive' && selectedTx.counterpartyLabel && (
                       <p className="font-medium text-foreground">{selectedTx.counterpartyLabel}</p>
                     )}
-                    <p className="text-sm text-muted-foreground font-mono">
-                      {`${selectedTx.counterparty.slice(0, 10)}...${selectedTx.counterparty.slice(-8)}`}
-                    </p>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <p className="text-sm text-muted-foreground font-mono break-all">
+                        {selectedTx.type === 'receive' 
+                          ? `${selectedTx.counterparty.slice(0, 10)}...${selectedTx.counterparty.slice(-8)}`
+                          : `${(currentWallet?.addresses?.[selectedTx.network as ChainId] || '').slice(0, 10)}...${(currentWallet?.addresses?.[selectedTx.network as ChainId] || '').slice(-8)}`
+                        }
+                      </p>
+                      <button 
+                        onClick={() => {
+                          const addr = selectedTx.type === 'receive' 
+                            ? selectedTx.counterparty 
+                            : (currentWallet?.addresses?.[selectedTx.network as ChainId] || '');
+                          navigator.clipboard.writeText(addr);
+                          toast.success('发送方地址已复制');
+                        }}
+                        className="p-1.5 hover:bg-muted rounded shrink-0"
+                      >
+                        <Copy className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Receiver Address */}
+                <div className="flex justify-between items-start py-3 border-b border-border">
+                  <span className="text-muted-foreground shrink-0">收款方</span>
+                  <div className="text-right flex-1 ml-4">
+                    {selectedTx.type === 'send' && selectedTx.counterpartyLabel && (
+                      <p className="font-medium text-foreground">{selectedTx.counterpartyLabel}</p>
+                    )}
+                    <div className="flex items-center justify-end gap-1.5">
+                      <p className="text-sm text-muted-foreground font-mono break-all">
+                        {selectedTx.type === 'send' 
+                          ? `${selectedTx.counterparty.slice(0, 10)}...${selectedTx.counterparty.slice(-8)}`
+                          : `${(currentWallet?.addresses?.[selectedTx.network as ChainId] || '').slice(0, 10)}...${(currentWallet?.addresses?.[selectedTx.network as ChainId] || '').slice(-8)}`
+                        }
+                      </p>
+                      <button 
+                        onClick={() => {
+                          const addr = selectedTx.type === 'send' 
+                            ? selectedTx.counterparty 
+                            : (currentWallet?.addresses?.[selectedTx.network as ChainId] || '');
+                          navigator.clipboard.writeText(addr);
+                          toast.success('收款方地址已复制');
+                        }}
+                        className="p-1.5 hover:bg-muted rounded shrink-0"
+                      >
+                        <Copy className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    </div>
                   </div>
                 </div>
 
