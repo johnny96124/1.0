@@ -569,20 +569,20 @@ export default function SendPage() {
                         <div className="flex items-center gap-2">
                           {riskScore.score === 'green' && (
                             <>
-                              <CheckCircle2 className="w-5 h-5 text-success" />
-                              <span className="font-medium text-success">该地址信誉良好</span>
+                              <CheckCircle2 className="w-4 h-4 text-success" />
+                              <span className="text-sm text-success">该地址信誉良好</span>
                             </>
                           )}
                           {riskScore.score === 'yellow' && (
                             <>
-                              <AlertTriangle className="w-5 h-5 text-warning" />
-                              <span className="font-medium text-warning">该地址缺少足够记录，请谨慎</span>
+                              <AlertTriangle className="w-4 h-4 text-warning" />
+                              <span className="text-sm text-warning">该地址缺少足够记录，请谨慎</span>
                             </>
                           )}
                           {riskScore.score === 'red' && (
                             <>
-                              <Shield className="w-5 h-5 text-destructive" />
-                              <span className="font-medium text-destructive">该地址存在高风险，已阻止转账</span>
+                              <Shield className="w-4 h-4 text-destructive" />
+                              <span className="text-sm text-destructive">该地址存在高风险，已阻止转账</span>
                             </>
                           )}
                         </div>
