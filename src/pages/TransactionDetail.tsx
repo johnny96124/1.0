@@ -327,16 +327,6 @@ export default function TransactionDetail() {
                 </div>
               )}
 
-              {/* Nonce */}
-              {transaction.nonce !== undefined && (
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-sm text-muted-foreground">Nonce</span>
-                  <span className="font-medium text-foreground font-mono">
-                    {transaction.nonce}
-                  </span>
-                </div>
-              )}
-
               {/* Memo */}
               {transaction.memo && (
                 <div className="flex justify-between items-center py-3 border-b border-border">
