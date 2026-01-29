@@ -111,6 +111,16 @@ export interface AggregatedAsset {
   chains: { network: ChainId; balance: number; usdValue: number }[];
 }
 
+// RBF (Replace-By-Fee) record for tracking acceleration/cancellation history
+export interface RbfRecord {
+  action: 'speedup' | 'cancel';
+  oldTxHash: string;
+  newTxHash: string;
+  oldFee: number;
+  newFee: number;
+  timestamp: Date;
+}
+
 export interface Transaction {
   id: string;
   type: 'send' | 'receive';
@@ -132,6 +142,15 @@ export interface Transaction {
   disposalStatus?: 'pending' | 'returned' | 'acknowledged'; // Disposal status for risky inflows
   disposalTxHash?: string;          // TX hash if funds were returned
   disposalTime?: Date;              // When the disposal action was taken
+  // RBF (Replace-By-Fee) fields
+  isRbfEnabled?: boolean;           // Whether RBF is enabled (for BTC opt-in RBF)
+  originalTxHash?: string;          // If this is a replacement tx, the original tx hash
+  replacedByTxHash?: string;        // If replaced, the new tx hash
+  rbfHistory?: RbfRecord[];         // History of RBF operations
+  nonce?: number;                   // EVM transaction nonce
+  gasPrice?: number;                // Current gas price in USD
+  gasAmount?: number;               // Gas token amount (e.g., ETH amount)
+  gasToken?: string;                // Gas token symbol (e.g., 'ETH', 'BNB')
 }
 
 export interface Contact {

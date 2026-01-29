@@ -27,6 +27,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { RbfActionSection } from '@/components/RbfActionSection';
+import { SpeedUpDrawer } from '@/components/SpeedUpDrawer';
+import { CancelTxDrawer } from '@/components/CancelTxDrawer';
+import { canSpeedUp, SpeedUpTier } from '@/lib/rbf-utils';
 
 type FilterType = 'all' | 'send' | 'receive' | 'risk';
 
@@ -90,6 +94,8 @@ export default function HistoryPage() {
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copiedHash, setCopiedHash] = useState(false);
+  const [speedUpDrawerOpen, setSpeedUpDrawerOpen] = useState(false);
+  const [cancelDrawerOpen, setCancelDrawerOpen] = useState(false);
   const { transactions, getAccountRiskStatus, acknowledgeRiskTx } = useWallet();
 
   // Simulate initial loading
@@ -180,6 +186,29 @@ export default function HistoryPage() {
   const handleReturn = (txId: string) => {
     setSelectedTx(null);
     navigate(`/risk-management/return/${txId}`);
+  };
+
+  // RBF handlers
+  const handleSpeedUpClick = () => {
+    setSpeedUpDrawerOpen(true);
+  };
+
+  const handleCancelClick = () => {
+    setCancelDrawerOpen(true);
+  };
+
+  const handleSpeedUpConfirm = (tier: SpeedUpTier, newFee: number, newGasAmount: number) => {
+    setSpeedUpDrawerOpen(false);
+    // In a real app, this would call the blockchain API to submit the replacement tx
+    toast.success('加速请求已提交', '新交易正在广播中');
+    setSelectedTx(null);
+  };
+
+  const handleCancelConfirm = (cancelFee: number, cancelGasAmount: number) => {
+    setCancelDrawerOpen(false);
+    // In a real app, this would call the blockchain API to submit the cancellation tx
+    toast.success('取消请求已提交', '原交易将被替换');
+    setSelectedTx(null);
   };
 
   // Check if transaction is a pending risk transaction
@@ -646,6 +675,17 @@ export default function HistoryPage() {
                 )}
               </div>
 
+              {/* RBF Action Section - for pending send transactions */}
+              {selectedTx.status === 'pending' && selectedTx.type === 'send' && !isRiskTx(selectedTx) && (
+                <div className="mt-4">
+                  <RbfActionSection
+                    transaction={selectedTx}
+                    onSpeedUp={handleSpeedUpClick}
+                    onCancel={handleCancelClick}
+                  />
+                </div>
+              )}
+
               {/* Actions */}
               {isRiskTx(selectedTx) ? (
                 <div className="space-y-2 mt-4">
@@ -665,7 +705,7 @@ export default function HistoryPage() {
                     我已知晓风险，保留资金
                   </Button>
                 </div>
-              ) : (
+              ) : selectedTx.status !== 'pending' || selectedTx.type !== 'send' ? (
                 <Button
                   variant="outline"
                   className="w-full mt-4 h-10"
@@ -673,11 +713,29 @@ export default function HistoryPage() {
                 >
                   关闭
                 </Button>
-              )}
+              ) : null}
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* RBF Drawers */}
+      {selectedTx && (
+        <>
+          <SpeedUpDrawer
+            open={speedUpDrawerOpen}
+            onOpenChange={setSpeedUpDrawerOpen}
+            transaction={selectedTx}
+            onConfirm={handleSpeedUpConfirm}
+          />
+          <CancelTxDrawer
+            open={cancelDrawerOpen}
+            onOpenChange={setCancelDrawerOpen}
+            transaction={selectedTx}
+            onConfirm={handleCancelConfirm}
+          />
+        </>
+      )}
     </AppLayout>
   );
 }
