@@ -308,6 +308,11 @@ export default function ReceivePage() {
               className="flex-1 h-10"
               onClick={handleCopy}
             >
+              {copied ? (
+                <Check className="w-4 h-4 mr-2" strokeWidth={1.5} />
+              ) : (
+                <Copy className="w-4 h-4 mr-2" strokeWidth={1.5} />
+              )}
               {copied ? '已复制' : '复制地址'}
             </Button>
             <Button
@@ -315,6 +320,7 @@ export default function ReceivePage() {
               onClick={handleSaveQRCode}
               disabled={saving}
             >
+              <Download className="w-4 h-4 mr-2" strokeWidth={1.5} />
               {saving ? '保存中...' : '保存二维码'}
             </Button>
           </div>
