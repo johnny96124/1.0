@@ -240,24 +240,19 @@ export default function WalletManagementPage() {
             </div>
           </motion.div>
 
-          {/* MPC Info - Orange Tier Alert */}
+          {/* MPC Info - Neutral Info Style */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-6 p-4 bg-warning-surface rounded-xl border border-warning/30 flex items-center gap-3"
+            className="mt-6 px-4 py-3 bg-muted/50 rounded-xl border border-border"
           >
-            <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center flex-shrink-0">
-              <Info className="w-4 h-4 text-warning" strokeWidth={1.5} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                MPC 多重签名保护
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                您的每个钱包都受到银行级安全保护，私钥分片存储，任何单一方都无法访问您的资产。
-              </p>
-            </div>
+            <p className="text-sm font-medium text-foreground mb-1">
+              MPC 多重签名保护
+            </p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              您的每个钱包都受到银行级安全保护，私钥分片存储，任何单一方都无法访问您的资产。
+            </p>
           </motion.div>
 
         </div>
