@@ -116,7 +116,6 @@ function EmptyWalletState() {
               className="w-full text-base gradient-primary"
               onClick={() => navigate('/onboarding')}
             >
-              <Plus className="w-5 h-5 mr-2" />
               创建钱包
             </Button>
             <p className="text-xs text-muted-foreground">
@@ -366,7 +365,6 @@ export default function HomePage() {
                   className="flex-1 h-10 gradient-accent text-accent-foreground"
                   onClick={() => navigate('/send')}
                 >
-                  <Send className="w-4 h-4 mr-2" />
                   转账
                 </Button>
                 <Button
@@ -374,7 +372,6 @@ export default function HomePage() {
                   className="flex-1 h-10"
                   onClick={() => navigate('/receive')}
                 >
-                  <QrCode className="w-4 h-4 mr-2" />
                   收款
                 </Button>
               </div>

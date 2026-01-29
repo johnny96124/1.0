@@ -131,9 +131,7 @@ export default function ContactsPage() {
                 {!searchQuery && (
                   <Button
                     onClick={() => navigate('/profile/contacts/add')}
-                    className="gap-2"
                   >
-                    <Plus className="w-4 h-4" />
                     添加第一个联系人
                   </Button>
                 )}

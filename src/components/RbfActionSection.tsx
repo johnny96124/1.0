@@ -42,18 +42,16 @@ export function RbfActionSection({ transaction, onSpeedUp, onCancel }: RbfAction
       <div className="flex gap-2">
         <Button
           variant="default"
-          className="flex-1 gap-2 h-10"
+          className="flex-1 h-10"
           onClick={onSpeedUp}
         >
-          <Rocket className="w-4 h-4" />
           加速交易
         </Button>
         <Button
           variant="outline"
-          className="flex-1 gap-2 h-10"
+          className="flex-1 h-10"
           onClick={onCancel}
         >
-          <X className="w-4 h-4" />
           取消交易
         </Button>
       </div>

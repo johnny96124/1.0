@@ -389,10 +389,9 @@ export default function TransactionDetail() {
               <div className="space-y-2 mt-4">
                 <Button
                   variant="destructive"
-                  className="w-full gap-2 h-12"
+                  className="w-full h-12"
                   onClick={() => handleReturn(transaction.id)}
                 >
-                  <RotateCcw className="w-4 h-4" />
                   退回资金
                 </Button>
                 <Button

@@ -137,10 +137,9 @@ export function SpeedUpDrawer({ open, onOpenChange, transaction, onConfirm }: Sp
         {/* Footer */}
         <DrawerFooter className="px-4 pb-6">
           <Button 
-            className="w-full gap-2 h-12"
+            className="w-full h-12"
             onClick={handleConfirm}
           >
-            <Rocket className="w-4 h-4" />
             确认加速
           </Button>
         </DrawerFooter>

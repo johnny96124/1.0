@@ -308,19 +308,13 @@ export default function ReceivePage() {
               className="flex-1 h-10"
               onClick={handleCopy}
             >
-              {copied ? (
-                <Check className="w-4 h-4 mr-2 text-success" />
-              ) : (
-                <Copy className="w-4 h-4 mr-2" />
-              )}
-              复制地址
+              {copied ? '已复制' : '复制地址'}
             </Button>
             <Button
               className="flex-1 h-10"
               onClick={handleSaveQRCode}
               disabled={saving}
             >
-              <Download className="w-4 h-4 mr-2" />
               {saving ? '保存中...' : '保存二维码'}
             </Button>
           </div>

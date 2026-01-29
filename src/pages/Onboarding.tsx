@@ -271,18 +271,13 @@ function SystemAuthStep({ onComplete }: { onComplete: () => void }) {
       </div>
 
       <div className="pb-8">
-        <Button
+          <Button
           size="lg"
           className="w-full h-12 text-base font-medium"
           onClick={handleAuthorize}
           disabled={isLoading}
         >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
-          ) : (
-            <Lock className="w-5 h-5 mr-2" strokeWidth={1.5} />
-          )}
-          授权安全认证
+          {isLoading ? '授权中...' : '授权安全认证'}
         </Button>
       </div>
     </motion.div>
@@ -648,12 +643,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
           onClick={handleBackup}
           disabled={isLoading || !password || !confirmPassword || !confirmed}
         >
-          {isLoading ? (
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" strokeWidth={1.5} />
-          ) : (
-            <CloudUpload className="w-5 h-5 mr-2" strokeWidth={1.5} />
-          )}
-          备份到 iCloud
+          {isLoading ? '备份中...' : '备份到 iCloud'}
         </Button>
         <Button
           variant="ghost"

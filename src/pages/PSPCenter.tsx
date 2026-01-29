@@ -230,8 +230,7 @@ function EmptyState({ onConnect }: { onConnect: () => void }) {
       <p className="text-sm text-muted-foreground mb-6 max-w-xs">
         通过扫码或输入授权码，连接您的支付服务商，享受专属服务
       </p>
-      <Button onClick={onConnect} className="gradient-accent gap-2">
-        <Plus className="w-4 h-4" />
+      <Button onClick={onConnect} className="gradient-accent">
         添加服务商
       </Button>
     </motion.div>
