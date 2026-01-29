@@ -360,6 +360,19 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
           />
         ))}
       </div>
+
+      {/* Warning message - do not close app */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mt-8 flex items-center gap-2 px-4 py-2.5 bg-warning/10 rounded-full"
+      >
+        <AlertTriangle className="w-4 h-4 text-warning shrink-0" strokeWidth={1.5} />
+        <span className="text-xs text-warning font-medium">
+          创建过程中请勿关闭 App
+        </span>
+      </motion.div>
     </motion.div>
   );
 }
