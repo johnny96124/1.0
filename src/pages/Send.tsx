@@ -619,7 +619,9 @@ export default function SendPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="font-medium text-foreground">{contact.name}</p>
+                              <p className="font-medium text-foreground">
+                                {contact.name || `${contact.address.slice(0, 8)}...${contact.address.slice(-6)}`}
+                              </p>
                               {contact.isWhitelisted && (
                                 <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">
                                   白名单
