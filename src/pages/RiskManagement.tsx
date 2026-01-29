@@ -137,13 +137,13 @@ export default function RiskManagement() {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className={cn(
-              "p-4 rounded-2xl border",
+              "p-4 rounded-xl border",
               statusConfig.bg,
               statusConfig.border
             )}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bg)}>
-                  <StatusIcon className={cn("w-5 h-5", statusConfig.color)} />
+              <div className="flex items-center gap-3">
+                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", statusConfig.bg)}>
+                  <StatusIcon className={cn("w-4 h-4", statusConfig.color)} />
                 </div>
                 <div>
                   <p className={cn("font-semibold", statusConfig.color)}>{statusConfig.label}</p>
