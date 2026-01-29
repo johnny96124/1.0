@@ -699,14 +699,6 @@ export default function HistoryPage() {
                     我已知晓风险，保留资金
                   </Button>
                 </div>
-              ) : selectedTx.status !== 'pending' || selectedTx.type !== 'send' ? (
-                <Button
-                  variant="outline"
-                  className="w-full mt-4 h-10"
-                  onClick={() => setSelectedTx(null)}
-                >
-                  关闭
-                </Button>
               ) : null}
             </motion.div>
           </motion.div>
