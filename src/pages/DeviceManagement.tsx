@@ -166,17 +166,14 @@ export default function DeviceManagementPage() {
           </div>
         </motion.div>
 
-        {/* Security Note - Orange Tier Alert */}
+        {/* Security Note - Neutral Info Style */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="p-4 bg-warning-surface rounded-xl border border-warning/30 flex items-center gap-3"
+          className="px-4 py-3 bg-muted/50 rounded-xl border border-border"
         >
-          <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center flex-shrink-0">
-            <Info className="w-4 h-4 text-warning" strokeWidth={1.5} />
-          </div>
-          <p className="text-xs text-foreground leading-relaxed">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             为了账户安全，同一账户仅允许一台设备在线。在新设备登录时，当前设备将自动退出。
           </p>
         </motion.div>
