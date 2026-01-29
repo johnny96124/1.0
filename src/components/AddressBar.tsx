@@ -9,25 +9,17 @@ interface AddressBarProps {
 }
 
 export function AddressBar({ address, label, onClear, className }: AddressBarProps) {
-  const truncatedAddress = address.length > 16 
-    ? `${address.slice(0, 6)}...${address.slice(-4)}`
-    : address;
-
   return (
     <div className={cn(
-      "flex items-center gap-3 px-4 py-3 bg-muted/50 rounded-xl border border-border/50",
+      "flex items-start gap-3 px-4 py-3 bg-muted/50 rounded-xl border border-border/50",
       className
     )}>
-      <span className="text-sm text-muted-foreground shrink-0">To</span>
+      <span className="text-sm text-muted-foreground shrink-0 mt-0.5">To</span>
       <div className="flex-1 min-w-0">
-        {label ? (
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-foreground truncate">{label}</span>
-            <span className="text-sm text-muted-foreground font-mono">{truncatedAddress}</span>
-          </div>
-        ) : (
-          <span className="font-mono text-foreground">{truncatedAddress}</span>
+        {label && (
+          <p className="font-medium text-foreground mb-1">{label}</p>
         )}
+        <p className="text-sm text-muted-foreground font-mono break-all">{address}</p>
       </div>
       {onClear && (
         <button
