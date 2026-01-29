@@ -49,20 +49,9 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
           </DrawerClose>
         </DrawerHeader>
 
-        {/* Current Fee */}
-        <div className="px-4 py-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">当前费用</span>
-            <div className="text-right">
-              <span className="font-medium text-foreground">{currentGasAmount.toFixed(5)} {gasToken}</span>
-              <span className="text-muted-foreground ml-2">≈ ${currentFee.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-
         {/* Cancel Fee */}
         <div className="p-4 pt-2">
-          <div className="flex items-center justify-between text-sm py-3 border-t border-border">
+          <div className="flex items-center justify-between text-sm py-3">
             <span className="text-muted-foreground">取消费用</span>
             <div className="text-right">
               <span className="font-medium text-foreground">{cancelFeeInfo.gasAmount.toFixed(5)} {gasToken}</span>
@@ -71,7 +60,7 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
           </div>
         </div>
         {/* Footer */}
-        <DrawerFooter className="px-4 pb-6 gap-2">
+        <DrawerFooter className="px-4 pb-6">
           <Button 
             variant="destructive"
             className="w-full gap-2 h-12"
@@ -80,11 +69,6 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
             <X className="w-4 h-4" />
             确认取消
           </Button>
-          <DrawerClose asChild>
-            <Button variant="outline" className="w-full h-12">
-              返回
-            </Button>
-          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
