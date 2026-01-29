@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Send, QrCode, TrendingDown, 
+  ChevronLeft, Send, QrCode, TrendingDown, 
   CheckCircle2, AlertCircle, ChevronRight, Clock, XCircle, Copy, ExternalLink
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -128,7 +128,7 @@ export default function AssetDetailPage() {
               onClick={() => navigate('/home')}
               className="shrink-0"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ChevronLeft className="w-6 h-6" />
             </Button>
             <div className="flex items-center gap-2">
               <CryptoIcon symbol={assetData.symbol} size="lg" />

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  ArrowLeft, Wallet, Plus,
+  Wallet, Plus,
   CheckCircle2, AlertTriangle, Shield, MoreHorizontal,
-  Edit3, Cloud, HardDrive, Info
+  Edit3, Cloud, HardDrive
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -70,15 +70,8 @@ export default function WalletManagementPage() {
 
 
   return (
-    <AppLayout showNav={false}>
+    <AppLayout showNav={false} showBack title="钱包管理">
       <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="px-4 py-3 border-b border-border flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-lg font-bold text-foreground">钱包管理</h1>
-        </div>
 
         <div className="flex-1 overflow-auto px-4 py-4">
           {/* TSS Node Backup Status Card */}

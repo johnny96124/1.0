@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Eye, EyeOff, ArrowLeft, CheckCircle2, Loader2, Wallet, ArrowRight } from 'lucide-react';
+import { Lock, Eye, EyeOff, CheckCircle2, Loader2, Wallet, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 type PasswordStrength = 'weak' | 'medium' | 'strong';
 
@@ -104,122 +105,115 @@ export default function SetPassword() {
   // Success state - Show welcome guidance for onboarding flow
   if (isSuccess) {
     return (
-      <div className="h-full bg-background flex flex-col">
-        {isOnboardingFlow ? (
-          // Onboarding flow: Show wallet creation guidance
-          <>
+      <AppLayout showNav={false} showSecurityBanner={false}>
+        <div className="h-full flex flex-col">
+          {isOnboardingFlow ? (
+            // Onboarding flow: Show wallet creation guidance
+            <>
+              <div className="flex-1 flex flex-col items-center justify-center px-4">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", duration: 0.5 }}
+                  className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-8"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring" }}
+                  >
+                    <Wallet className="w-10 h-10 text-primary" strokeWidth={1.5} />
+                  </motion.div>
+                </motion.div>
+                
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-2xl font-bold text-foreground mb-3 text-center"
+                >
+                  欢迎加入 Cobo
+                </motion.h2>
+                
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-muted-foreground text-center mb-2"
+                >
+                  接下来我们将为您创建一个安全的数字钱包
+                </motion.p>
+                
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-sm text-muted-foreground/70 text-center"
+                >
+                  您的资产将通过多重签名技术保护，确保安全可靠
+                </motion.p>
+              </div>
+              
+              {/* Fixed Bottom Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="px-4 pb-8"
+              >
+                <Button
+                  variant="default"
+                  size="lg"
+                  className="w-full h-12 text-base font-medium"
+                  onClick={handleContinueToOnboarding}
+                >
+                  开始创建钱包
+                  <ArrowRight className="w-5 h-5 ml-2" strokeWidth={1.5} />
+                </Button>
+              </motion.div>
+            </>
+          ) : (
+            // Non-onboarding flow: Show simple success - centered
             <div className="flex-1 flex flex-col items-center justify-center px-4">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", duration: 0.5 }}
-                className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-8"
+                className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
               >
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring" }}
                 >
-                  <Wallet className="w-10 h-10 text-primary" strokeWidth={1.5} />
+                  <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
                 </motion.div>
               </motion.div>
-              
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-2xl font-bold text-foreground mb-3 text-center"
+                className="text-xl font-semibold text-foreground mb-2"
               >
-                欢迎加入 Cobo
+                密码设置成功
               </motion.h2>
-              
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="text-muted-foreground text-center mb-2"
+                className="text-muted-foreground text-center"
               >
-                接下来我们将为您创建一个安全的数字钱包
-              </motion.p>
-              
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="text-sm text-muted-foreground/70 text-center"
-              >
-                您的资产将通过多重签名技术保护，确保安全可靠
+                正在返回...
               </motion.p>
             </div>
-            
-            {/* Fixed Bottom Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="px-4 pb-8"
-            >
-              <Button
-                variant="default"
-                size="lg"
-                className="w-full h-12 text-base font-medium"
-                onClick={handleContinueToOnboarding}
-              >
-                开始创建钱包
-                <ArrowRight className="w-5 h-5 ml-2" strokeWidth={1.5} />
-              </Button>
-            </motion.div>
-          </>
-        ) : (
-          // Non-onboarding flow: Show simple success - centered
-          <div className="flex-1 flex flex-col items-center justify-center px-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mb-6"
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring" }}
-              >
-                <CheckCircle2 className="w-10 h-10 text-success" strokeWidth={1.5} />
-              </motion.div>
-            </motion.div>
-            <motion.h2
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-xl font-semibold text-foreground mb-2"
-            >
-              密码设置成功
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-muted-foreground text-center"
-            >
-              正在返回...
-            </motion.p>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="h-full bg-background flex flex-col">
-      {/* Header */}
-      <div className="flex items-center px-4 py-3">
-        <button
-          onClick={handleBack}
-          className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
-        </button>
-      </div>
+    <AppLayout showNav={false} showBack onBack={handleBack} showSecurityBanner={false}>
 
       {/* Scrollable Content */}
       <div className="flex-1 px-4 overflow-y-auto">
@@ -377,6 +371,6 @@ export default function SetPassword() {
           </Button>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }

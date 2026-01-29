@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, Send, TrendingDown, 
+  Send, TrendingDown, 
   CheckCircle2, XCircle, Clock,
   ExternalLink, Copy,
   Shield, ShieldAlert, AlertTriangle, RotateCcw
@@ -13,6 +13,7 @@ import { Transaction, SUPPORTED_CHAINS, ChainId } from '@/types/wallet';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { Button } from '@/components/ui/button';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { PageTransition } from '@/components/PageTransition';
 import { toast } from '@/lib/toast';
 import { RbfActionSection } from '@/components/RbfActionSection';
@@ -110,20 +111,11 @@ export default function TransactionDetail() {
   if (!transaction) {
     return (
       <PageTransition>
-        <div className="h-full flex flex-col bg-background">
-          <header className="flex items-center px-4 py-3 border-b border-border">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-foreground" />
-            </button>
-            <h1 className="text-lg font-semibold text-foreground ml-2">交易详情</h1>
-          </header>
+        <AppLayout showNav={false} showBack title="交易详情">
           <div className="flex-1 flex items-center justify-center p-4">
             <p className="text-muted-foreground">交易不存在</p>
           </div>
-        </div>
+        </AppLayout>
       </PageTransition>
     );
   }
@@ -138,18 +130,7 @@ export default function TransactionDetail() {
 
   return (
     <PageTransition>
-      <div className="h-full flex flex-col bg-background">
-        {/* Header */}
-        <header className="flex items-center px-4 py-3 border-b border-border">
-          <button
-            onClick={() => navigate(-1)}
-            className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-foreground" />
-          </button>
-          <h1 className="text-lg font-semibold text-foreground ml-2">交易详情</h1>
-        </header>
-
+      <AppLayout showNav={false} showBack title="交易详情">
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 py-6">
@@ -439,7 +420,7 @@ export default function TransactionDetail() {
           transaction={transaction}
           onConfirm={handleCancelConfirm}
         />
-      </div>
+      </AppLayout>
     </PageTransition>
   );
 }

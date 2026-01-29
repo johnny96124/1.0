@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, RotateCcw, AlertTriangle, CheckCircle2, 
+  ChevronLeft, RotateCcw, AlertTriangle, CheckCircle2, 
   Fingerprint, Loader2
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -91,9 +91,9 @@ export default function RiskReturn() {
                 } else if (step === 'auth') {
                   setStep('fee');
                 }
-              }}
-            >
-              <ArrowLeft className="w-5 h-5" />
+            }}
+          >
+            <ChevronLeft className="w-6 h-6" />
             </Button>
           )}
           <h1 className="font-semibold text-foreground">

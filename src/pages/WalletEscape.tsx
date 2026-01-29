@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, AlertTriangle, Shield, ShieldOff, Key, Cloud,
+  ChevronLeft, AlertTriangle, Shield, ShieldOff, Key, Cloud,
   FileArchive, Smartphone, Check, Loader2, Download, Lock,
   Eye, EyeOff, CheckCircle2
 } from 'lucide-react';
@@ -566,7 +566,7 @@ export default function WalletEscapePage() {
             }}
             disabled={step >= 3 && step < 5}
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ChevronLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-lg font-bold text-foreground">MPC 逃逸</h1>
         </div>
