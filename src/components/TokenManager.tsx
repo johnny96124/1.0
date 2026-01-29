@@ -146,20 +146,23 @@ export function TokenManager({ addedSymbols, addedAssets, onAddToken, onRemoveTo
           </div>
 
           {/* Category Filter */}
-          <div className="px-4 py-2 border-b border-border">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="border-b border-border">
+            <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => setCategoryFilter(cat.id)}
                   className={cn(
-                    "px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors",
+                    "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative",
                     categoryFilter === cat.id
-                      ? "bg-accent text-accent-foreground"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {cat.label}
+                  {categoryFilter === cat.id && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-foreground rounded-full" />
+                  )}
                 </button>
               ))}
             </div>
