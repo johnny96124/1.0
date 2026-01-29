@@ -38,21 +38,6 @@ export function RbfActionSection({ transaction, onSpeedUp, onCancel }: RbfAction
 
   return (
     <div className="mb-4">
-      {/* Info Card */}
-      <div className="p-4 rounded-xl bg-accent/5 border border-accent/20 mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-            <Zap className="w-4 h-4 text-accent" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground">交易等待确认中</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              已等待 {waitTime}，网络拥堵可能导致确认延迟
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Action Buttons */}
       <div className="flex gap-2">
         <Button
