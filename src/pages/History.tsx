@@ -529,15 +529,9 @@ export default function HistoryPage() {
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
                       <CryptoIcon symbol={selectedTx.symbol} size="xl" />
                     </div>
-                    <div className={cn(
-                      "absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-card",
-                      selectedTx.status === 'confirmed' && "bg-success",
-                      selectedTx.status === 'pending' && "bg-warning",
-                      selectedTx.status === 'failed' && "bg-destructive"
-                    )}>
-                      {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                      {selectedTx.status === 'pending' && <Clock className="w-3.5 h-3.5 text-white" />}
-                      {selectedTx.status === 'failed' && <XCircle className="w-3.5 h-3.5 text-white" />}
+                    {/* Always show chain icon badge */}
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-card bg-card">
+                      <ChainIcon chainId={selectedTx.network} size="sm" />
                     </div>
                   </div>
                 </div>

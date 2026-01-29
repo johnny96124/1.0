@@ -22,19 +22,15 @@ export function RbfActionSection({ transaction, onSpeedUp, onCancel }: RbfAction
   
   // Don't render anything if RBF is not applicable
   if (!rbfSupport.canSpeedUp && !rbfSupport.canCancel) {
-    // Show reason if it's a pending send tx on unsupported network
-    if (transaction.status === 'pending' && transaction.type === 'send' && rbfSupport.reason) {
+    // Only show reason for Bitcoin with RBF disabled
+    if (rbfSupport.reason) {
       return (
-        <div className="p-4 rounded-xl bg-muted/50 border border-border mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-              <Info className="w-4 h-4 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground flex-1">{rbfSupport.reason}</p>
-          </div>
+        <div className="px-4 py-3 bg-muted/50 rounded-xl border border-border mb-4">
+          <p className="text-xs text-muted-foreground leading-relaxed">{rbfSupport.reason}</p>
         </div>
       );
     }
+    // For all other unsupported cases, hide the section entirely
     return null;
   }
 
