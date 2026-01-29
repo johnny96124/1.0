@@ -83,6 +83,48 @@ export const getWalletTotalBalance = (walletId: string): number => {
 
 // Mock transactions per wallet (with risk data for testing)
 const mockTransactionsWallet1: Transaction[] = [
+  // Pending send transaction on Ethereum - RBF enabled
+  {
+    id: 'pending-eth-1',
+    type: 'send',
+    amount: 1,
+    symbol: 'ETH',
+    usdValue: 3500,
+    status: 'pending',
+    counterparty: '0x1234567890abcdef1234567890abcdef12345678',
+    counterpartyLabel: '',
+    timestamp: new Date(),
+    txHash: '0x17f65d9a2b3c4e5f6a7b8c9d0e1f2a3b4c5d6e7917af',
+    network: 'ethereum',
+    fee: 2.5,
+    gasPrice: 2.5,
+    gasAmount: 0.00072,
+    gasToken: 'ETH',
+    nonce: 42,
+    isRbfEnabled: true,
+    riskScore: 'green',
+  },
+  // Pending send transaction on BSC - RBF enabled
+  {
+    id: 'pending-bsc-1',
+    type: 'send',
+    amount: 500,
+    symbol: 'USDT',
+    usdValue: 500,
+    status: 'pending',
+    counterparty: '0xBSC1234567890abcdef1234567890abcdef1234',
+    counterpartyLabel: 'Exchange Wallet',
+    timestamp: new Date(Date.now() - 300000), // 5 mins ago
+    txHash: '0xbsc17f65d9a2b3c4e5f6a7b8c9d0e1f2a3b4c5d6e7',
+    network: 'bsc',
+    fee: 0.5,
+    gasPrice: 0.5,
+    gasAmount: 0.0012,
+    gasToken: 'BNB',
+    nonce: 15,
+    isRbfEnabled: true,
+    riskScore: 'green',
+  },
   {
     id: '1',
     type: 'receive',

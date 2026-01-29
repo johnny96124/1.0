@@ -31,15 +31,21 @@ const SYMBOL_MAP: Record<string, string> = {
 };
 
 // Chain icons - using native token icons or specific chain icons
+// CDN uses lowercase symbol names for icons
 const CHAIN_ICON_MAP: Record<string, string> = {
   'ethereum': 'eth',
+  'eth': 'eth',
   'tron': 'trx',
+  'trx': 'trx',
   'bsc': 'bnb',
+  'bnb': 'bnb',
   'polygon': 'matic',
   'arbitrum': 'arb',
   'optimism': 'op',
   'avalanche': 'avax',
   'solana': 'sol',
+  'bitcoin': 'btc',
+  'btc': 'btc',
 };
 
 /**
