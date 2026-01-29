@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import { useWallet } from '@/contexts/WalletContext';
 
 type KeySource = 'device' | 'icloud' | 'google_drive' | 'local_file';

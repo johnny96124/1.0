@@ -9,28 +9,28 @@ type ToasterProps = React.ComponentProps<typeof Sonner>;
 // Custom success icon - solid green circle with white checkmark
 const SuccessIcon = () => (
   <div className="w-7 h-7 rounded-full bg-success flex items-center justify-center flex-shrink-0">
-    <Check className="w-4 h-4 text-white" strokeWidth={3} />
+    <Check className="w-4 h-4 text-white" strokeWidth={1.5} />
   </div>
 );
 
 // Custom error icon - solid red circle with X
 const ErrorIcon = () => (
   <div className="w-7 h-7 rounded-full bg-destructive flex items-center justify-center flex-shrink-0">
-    <X className="w-4 h-4 text-white" strokeWidth={3} />
+    <X className="w-4 h-4 text-white" strokeWidth={1.5} />
   </div>
 );
 
 // Custom warning icon - solid orange circle with triangle
 const WarningIcon = () => (
   <div className="w-7 h-7 rounded-full bg-warning flex items-center justify-center flex-shrink-0">
-    <AlertTriangle className="w-4 h-4 text-white" strokeWidth={2.5} />
+    <AlertTriangle className="w-4 h-4 text-white" strokeWidth={1.5} />
   </div>
 );
 
 // Custom info icon
 const InfoIcon = () => (
   <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-    <Info className="w-4 h-4 text-white" strokeWidth={2.5} />
+    <Info className="w-4 h-4 text-white" strokeWidth={1.5} />
   </div>
 );
 
