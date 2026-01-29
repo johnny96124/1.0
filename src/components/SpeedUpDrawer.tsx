@@ -60,10 +60,7 @@ export function SpeedUpDrawer({ open, onOpenChange, transaction, onConfirm }: Sp
       <DrawerContent className="max-h-[85vh]">
         {/* Header */}
         <DrawerHeader className="flex flex-row items-start justify-between p-4 pb-2 text-left">
-          <div>
-            <DrawerTitle className="text-lg font-semibold text-foreground">加速交易</DrawerTitle>
-            <p className="text-sm text-muted-foreground mt-1">{networkName} 网络</p>
-          </div>
+          <DrawerTitle className="text-lg font-semibold text-foreground">加速交易</DrawerTitle>
           <DrawerClose asChild>
             <button className="p-2 -mr-2 -mt-1 hover:bg-muted rounded-full transition-colors">
               <X className="w-5 h-5 text-muted-foreground" />
@@ -128,23 +125,6 @@ export function SpeedUpDrawer({ open, onOpenChange, transaction, onConfirm }: Sp
             </button>
           ))}
 
-          {/* Additional Fee Info */}
-          <div className="flex items-center justify-between py-3 border-t border-border mt-2">
-            <span className="text-sm text-muted-foreground">额外支付</span>
-            <span className="text-sm font-semibold text-accent">
-              +${selectedOption.additionalFee.toFixed(2)}
-            </span>
-          </div>
-
-          {/* Warning */}
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
-            <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-4 h-4 text-warning" />
-            </div>
-            <p className="text-xs text-muted-foreground flex-1">
-              加速交易将替换原交易，原交易将被丢弃
-            </p>
-          </div>
         </div>
 
         {/* Footer */}
