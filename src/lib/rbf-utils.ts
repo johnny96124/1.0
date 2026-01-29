@@ -40,16 +40,14 @@ export function getRbfSupport(tx: Transaction): RbfSupportInfo {
   if (tx.status !== 'pending') {
     return { 
       canSpeedUp: false, 
-      canCancel: false, 
-      reason: '交易已确认，无法加速或取消' 
+      canCancel: false
     };
   }
 
   if (tx.type !== 'send') {
     return { 
       canSpeedUp: false, 
-      canCancel: false, 
-      reason: '只有发送的交易可以加速或取消' 
+      canCancel: false
     };
   }
 
@@ -57,21 +55,19 @@ export function getRbfSupport(tx: Transaction): RbfSupportInfo {
   if (tx.replacedByTxHash) {
     return { 
       canSpeedUp: false, 
-      canCancel: false, 
-      reason: '此交易已被替换' 
+      canCancel: false
     };
   }
 
-  // Tron doesn't support RBF
+  // Tron and other unsupported chains - just hide RBF, no message needed
   if (RBF_UNSUPPORTED_CHAINS.includes(tx.network)) {
     return { 
       canSpeedUp: false, 
-      canCancel: false, 
-      reason: 'Tron 网络不支持交易加速，请耐心等待交易确认' 
+      canCancel: false
     };
   }
 
-  // Check EVM chains
+  // Check EVM chains - all EVM chains support RBF
   if (RBF_SUPPORTED_CHAINS.includes(tx.network)) {
     return { canSpeedUp: true, canCancel: true };
   }
@@ -88,11 +84,10 @@ export function getRbfSupport(tx: Transaction): RbfSupportInfo {
     return { canSpeedUp: true, canCancel: true };
   }
 
-  // Default: not supported
+  // Default: not supported, hide silently
   return { 
     canSpeedUp: false, 
-    canCancel: false, 
-    reason: '此网络不支持交易加速' 
+    canCancel: false
   };
 }
 
