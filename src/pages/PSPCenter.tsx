@@ -158,12 +158,7 @@ function PSPCard({ connection, onClick }: { connection: PSPConnection; onClick: 
 
       {/* PSP Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <h3 className="font-semibold text-foreground text-sm truncate">{psp.name}</h3>
-          {psp.isVerified && (
-            <Shield className="w-3.5 h-3.5 text-accent shrink-0" />
-          )}
-        </div>
+        <h3 className="font-semibold text-foreground text-sm truncate mb-0.5">{psp.name}</h3>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>交易 {stats.totalTransactions} 笔</span>
           <span>·</span>
@@ -199,12 +194,7 @@ function PendingPSPCard({ connection, onClick }: { connection: PSPConnection; on
 
         {/* PSP Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <h3 className="font-semibold text-foreground text-sm truncate">{psp.name}</h3>
-            {psp.isVerified && (
-              <Shield className="w-3.5 h-3.5 text-accent shrink-0" />
-            )}
-          </div>
+          <h3 className="font-semibold text-foreground text-sm truncate mb-0.5">{psp.name}</h3>
           <p className="text-xs text-muted-foreground">
             申请时间: {new Date(connection.connectedAt).toLocaleDateString('zh-CN')}
           </p>
@@ -273,12 +263,7 @@ function RejectedPSPCard({ connection, onClick, onReapply }: {
 
         {/* PSP Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <h3 className="font-semibold text-foreground text-sm truncate">{psp.name}</h3>
-            {psp.isVerified && (
-              <Shield className="w-3.5 h-3.5 text-accent shrink-0" />
-            )}
-          </div>
+          <h3 className="font-semibold text-foreground text-sm truncate mb-0.5">{psp.name}</h3>
           <p className="text-xs text-muted-foreground">
             申请时间: {new Date(connection.connectedAt).toLocaleDateString('zh-CN')}
           </p>
@@ -412,14 +397,14 @@ export default function PSPCenterPage() {
           </motion.div>
         )}
 
-        {/* Connect Button */}
+        {/* Connect Button - Full Width */}
         {pspConnections && pspConnections.length > 0 && (
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             onClick={handleConnect}
-            className="card-elevated p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors mt-4"
+            className="w-full card-elevated p-4 flex items-center gap-3 hover:bg-muted/30 transition-colors mt-4"
           >
             <div className="w-10 h-10 rounded-full gradient-accent flex items-center justify-center">
               <Plus className="w-5 h-5 text-accent-foreground" />
@@ -443,7 +428,6 @@ export default function PSPCenterPage() {
           <div className="mt-4 border-b border-border">
             <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {visibleTabs.map((tab) => {
-                const Icon = tab.icon;
                 const count = getTabCount(tab.id);
                 const isActive = activeTab === tab.id;
                 
@@ -458,18 +442,14 @@ export default function PSPCenterPage() {
                         : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
-                    <Icon className="w-3.5 h-3.5" />
                     {tab.label}
                     {count > 0 && (
-                      <span className={cn(
-                        'px-1.5 py-0.5 rounded-full text-xs',
-                        isActive ? 'bg-accent/20 text-accent' : 'bg-muted'
-                      )}>
+                      <span className="min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
                         {count}
                       </span>
                     )}
                     {isActive && (
-                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full" />
                     )}
                   </button>
                 );
