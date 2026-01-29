@@ -551,58 +551,86 @@ export default function SendPage() {
                   </div>
                 )}
 
-                {/* Contacts */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-foreground">最近交易</h3>
-                    {contacts.length > 3 && (
-                      <button
-                        onClick={() => setShowContactDrawer(true)}
-                        className="text-xs text-primary hover:text-primary/80"
-                      >
-                        查看全部
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    {contacts.slice(0, 3).map((contact) => (
-                      <button
-                        key={contact.id}
-                        onClick={() => handleSelectContact(contact)}
-                        className={cn(
-                          'w-full p-4 rounded-xl border text-left transition-colors',
-                          selectedContact?.id === contact.id 
-                            ? 'border-accent bg-accent/5' 
-                            : 'border-border hover:border-accent/50'
+                {/* Contacts - filtered by same chain family */}
+                {(() => {
+                  // Get chain label for display
+                  const getChainLabel = (network: string) => {
+                    if (network === 'ethereum' || network === 'bsc') return 'EVM';
+                    if (network === 'tron') return 'TRX';
+                    return network.toUpperCase();
+                  };
+
+                  // Check if contact matches current asset's chain family
+                  const isChainCompatible = (contactNetwork: string) => {
+                    if (!selectedAsset) return true;
+                    const assetNetwork = selectedAsset.network;
+                    // EVM chains (ethereum, bsc) are compatible with each other
+                    const evmChains = ['ethereum', 'bsc'];
+                    if (evmChains.includes(assetNetwork) && evmChains.includes(contactNetwork)) {
+                      return true;
+                    }
+                    // Other chains must match exactly
+                    return assetNetwork === contactNetwork;
+                  };
+
+                  const filteredContacts = contacts.filter(c => isChainCompatible(c.network));
+
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-medium text-foreground">最近交易</h3>
+                        {filteredContacts.length > 3 && (
+                          <button
+                            onClick={() => setShowContactDrawer(true)}
+                            className="text-xs text-primary hover:text-primary/80"
+                          >
+                            查看全部
+                          </button>
                         )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium text-foreground">
-                                {contact.name || `${contact.address.slice(0, 8)}...${contact.address.slice(-6)}`}
-                              </p>
-                              <ChainIcon chainId={contact.network as ChainId} size="xs" />
-                            </div>
-                            <p className="text-sm text-muted-foreground font-mono break-all mt-1">
-                              {contact.address}
-                            </p>
-                          </div>
-                          {selectedContact?.id === contact.id && (
-                            <CheckCircle2 className="w-5 h-5 text-accent" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                    
-                    {contacts.length === 0 && (
-                      <div className="w-full p-4 rounded-xl border border-dashed border-border text-center text-muted-foreground">
-                        <Users className="w-5 h-5 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">暂无最近交易</p>
                       </div>
-                    )}
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        {filteredContacts.slice(0, 3).map((contact) => (
+                          <button
+                            key={contact.id}
+                            onClick={() => handleSelectContact(contact)}
+                            className={cn(
+                              'w-full p-4 rounded-xl border text-left transition-colors',
+                              selectedContact?.id === contact.id 
+                                ? 'border-accent bg-accent/5' 
+                                : 'border-border hover:border-accent/50'
+                            )}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-foreground">
+                                    {contact.name || `${contact.address.slice(0, 8)}...${contact.address.slice(-6)}`}
+                                  </p>
+                                  <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
+                                    {getChainLabel(contact.network)}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-muted-foreground font-mono break-all mt-1">
+                                  {contact.address}
+                                </p>
+                              </div>
+                              {selectedContact?.id === contact.id && (
+                                <CheckCircle2 className="w-5 h-5 text-accent" />
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                        
+                        {filteredContacts.length === 0 && (
+                          <div className="w-full p-4 rounded-xl border border-dashed border-border text-center text-muted-foreground">
+                            <Users className="w-5 h-5 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">暂无最近交易</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
               </motion.div>
             )}
 
