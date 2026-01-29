@@ -665,15 +665,8 @@ export default function SendPage() {
                         <div className="px-3 py-2 rounded-lg border border-warning/30 bg-warning/10 flex items-center gap-2">
                           <Lightbulb className="w-3.5 h-3.5 text-warning shrink-0" />
                           <span className="text-xs text-foreground flex-1">首次转账建议先小额验证</span>
-                          <Button
-                            size="sm"
-                            className="h-6 px-2 text-xs bg-warning hover:bg-warning/90 text-warning-foreground"
-                            onClick={handleTestTransfer}
-                          >
-                            改为 1 {selectedAsset.symbol}
-                          </Button>
                           <button
-                            className="text-xs text-muted-foreground hover:text-foreground"
+                            className="text-xs text-muted-foreground hover:text-foreground ml-auto"
                             onClick={() => setTestTipDismissed(true)}
                           >
                             忽略
