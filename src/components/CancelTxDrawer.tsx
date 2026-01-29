@@ -50,9 +50,11 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
         </DrawerHeader>
 
         {/* Description */}
-        <p className="px-4 text-sm text-muted-foreground">
-          发送一笔替换交易以取消当前交易
-        </p>
+        <div className="mx-4 p-3 rounded-lg bg-muted/50 border border-border">
+          <p className="text-sm text-muted-foreground">
+            发送一笔替换交易以取消当前交易
+          </p>
+        </div>
 
         {/* Cancel Fee */}
         <div className="px-4 py-3">
