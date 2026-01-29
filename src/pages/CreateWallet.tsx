@@ -77,7 +77,7 @@ export default function CreateWalletPage() {
 
   return (
     <div className="h-full bg-background flex flex-col">
-      {/* Progress Header */}
+      {/* Header */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -95,7 +95,6 @@ export default function CreateWalletPage() {
             {steps[currentStep - 1].title}
           </span>
         </div>
-        <Progress value={progress} className="h-1" />
         
         {/* Step indicators */}
         <div className="flex items-center mt-6">
