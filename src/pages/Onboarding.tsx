@@ -366,7 +366,7 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 25 }}
-        className="absolute top-4 left-4 right-4 p-4 bg-warning/10 border border-warning/30 rounded-xl"
+        className="absolute top-4 left-4 right-4 p-4 bg-[#FCF5EA] border border-warning/30 rounded-xl"
       >
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
