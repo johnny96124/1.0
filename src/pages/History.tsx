@@ -632,7 +632,7 @@ export default function HistoryPage() {
                   </span>
                 </div>
 
-                {selectedTx.fee && (
+                {selectedTx.fee !== undefined && selectedTx.fee > 0 && (
                   <div className="flex justify-between items-center py-3 border-b border-border">
                     <span className="text-muted-foreground">网络费用</span>
                     <span className="font-medium text-foreground">${selectedTx.fee}</span>
