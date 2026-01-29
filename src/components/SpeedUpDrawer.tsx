@@ -137,9 +137,11 @@ export function SpeedUpDrawer({ open, onOpenChange, transaction, onConfirm }: Sp
           </div>
 
           {/* Warning */}
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-warning/10 border border-warning/20">
-            <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
-            <p className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
+            <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4 text-warning" />
+            </div>
+            <p className="text-xs text-muted-foreground flex-1">
               加速交易将替换原交易，原交易将被丢弃
             </p>
           </div>

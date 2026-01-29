@@ -25,10 +25,12 @@ export function RbfActionSection({ transaction, onSpeedUp, onCancel }: RbfAction
     // Show reason if it's a pending send tx on unsupported network
     if (transaction.status === 'pending' && transaction.type === 'send' && rbfSupport.reason) {
       return (
-        <div className="p-3 rounded-xl bg-muted/50 border border-border mb-4">
-          <div className="flex items-start gap-2">
-            <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-            <p className="text-sm text-muted-foreground">{rbfSupport.reason}</p>
+        <div className="p-4 rounded-xl bg-muted/50 border border-border mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+              <Info className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground flex-1">{rbfSupport.reason}</p>
           </div>
         </div>
       );
@@ -41,10 +43,12 @@ export function RbfActionSection({ transaction, onSpeedUp, onCancel }: RbfAction
   return (
     <div className="mb-4">
       {/* Info Card */}
-      <div className="p-3 rounded-xl bg-accent/5 border border-accent/20 mb-3">
-        <div className="flex items-start gap-2">
-          <Zap className="w-4 h-4 text-accent mt-0.5 shrink-0" />
-          <div>
+      <div className="p-4 rounded-xl bg-accent/5 border border-accent/20 mb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+            <Zap className="w-4 h-4 text-accent" />
+          </div>
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-foreground">交易等待确认中</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               已等待 {waitTime}，网络拥堵可能导致确认延迟
