@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 
@@ -49,27 +48,11 @@ export function AddressDisplay({
       <span className="font-mono text-xs text-foreground/80">
         {formatAddress(address)}
       </span>
-      <AnimatePresence mode="wait">
-        {copied ? (
-          <motion.div
-            key="check"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-          >
-            <Check className="w-3.5 h-3.5 text-success" />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="copy"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-          >
-            <Copy className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {copied ? (
+        <Check className="w-3.5 h-3.5 text-success" />
+      ) : (
+        <Copy className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+      )}
     </button>
   );
 }
