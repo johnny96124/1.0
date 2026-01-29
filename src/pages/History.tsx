@@ -1,10 +1,10 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   Search, Send, TrendingDown, 
   CheckCircle2, XCircle,
-  ExternalLink, Copy, ChevronRight, Clock,
-  Shield, ShieldAlert, AlertTriangle, RotateCcw,
+  ChevronRight, Clock,
+  Shield, ShieldAlert, AlertTriangle,
   ChevronDown
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +18,6 @@ import { PullToRefresh } from '@/components/PullToRefresh';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from '@/lib/toast';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SecurityCardSkeleton, TransactionListSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
 import {
@@ -27,10 +26,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { RbfActionSection } from '@/components/RbfActionSection';
-import { SpeedUpDrawer } from '@/components/SpeedUpDrawer';
-import { CancelTxDrawer } from '@/components/CancelTxDrawer';
-import { canSpeedUp, SpeedUpTier } from '@/lib/rbf-utils';
 
 type FilterType = 'all' | 'send' | 'receive' | 'risk';
 
@@ -91,14 +86,8 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<FilterType>('all');
   const [chainFilter, setChainFilter] = useState<ChainId>('all');
-  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [copiedHash, setCopiedHash] = useState(false);
-  const [copiedSender, setCopiedSender] = useState(false);
-  const [copiedReceiver, setCopiedReceiver] = useState(false);
-  const [speedUpDrawerOpen, setSpeedUpDrawerOpen] = useState(false);
-  const [cancelDrawerOpen, setCancelDrawerOpen] = useState(false);
-  const { transactions, getAccountRiskStatus, acknowledgeRiskTx, currentWallet } = useWallet();
+  const { transactions, getAccountRiskStatus } = useWallet();
 
   // Simulate initial loading
   useEffect(() => {
@@ -177,40 +166,6 @@ export default function HistoryPage() {
       case 'failed':
         return <XCircle className="w-4 h-4 text-destructive" />;
     }
-  };
-
-  const handleAcknowledge = (txId: string) => {
-    acknowledgeRiskTx(txId);
-    setSelectedTx(null);
-    toast.success('已标记为已知晓', '该交易已从待处置列表中移除');
-  };
-
-  const handleReturn = (txId: string) => {
-    setSelectedTx(null);
-    navigate(`/risk-management/return/${txId}`);
-  };
-
-  // RBF handlers
-  const handleSpeedUpClick = () => {
-    setSpeedUpDrawerOpen(true);
-  };
-
-  const handleCancelClick = () => {
-    setCancelDrawerOpen(true);
-  };
-
-  const handleSpeedUpConfirm = (tier: SpeedUpTier, newFee: number, newGasAmount: number) => {
-    setSpeedUpDrawerOpen(false);
-    // In a real app, this would call the blockchain API to submit the replacement tx
-    toast.success('加速请求已提交', '新交易正在广播中');
-    setSelectedTx(null);
-  };
-
-  const handleCancelConfirm = (cancelFee: number, cancelGasAmount: number) => {
-    setCancelDrawerOpen(false);
-    // In a real app, this would call the blockchain API to submit the cancellation tx
-    toast.success('取消请求已提交', '原交易将被替换');
-    setSelectedTx(null);
   };
 
   // Check if transaction is a pending risk transaction
@@ -394,7 +349,7 @@ export default function HistoryPage() {
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: 0.05 * index }}
-                          onClick={() => setSelectedTx(tx)}
+                          onClick={() => navigate(`/transaction/${tx.id}`)}
                         className={cn(
                           "w-full p-3 rounded-xl flex items-center justify-between text-left transition-all",
                           "hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50",
@@ -500,346 +455,6 @@ export default function HistoryPage() {
           )}
         </div>
       </PullToRefresh>
-
-      {/* Transaction Detail Drawer */}
-      <AnimatePresence>
-        {selectedTx && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-end"
-            onClick={() => setSelectedTx(null)}
-          >
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full bg-card rounded-t-2xl p-6 pb-8"
-            >
-              {/* Drawer Handle */}
-              <div className="flex justify-center mb-4">
-                <div className="w-10 h-1 bg-muted rounded-full" />
-              </div>
-
-              {/* Hero Section: Token Icon + Amount */}
-              <div className="relative mb-6">
-                <div className="flex justify-center mb-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted/80 to-muted flex items-center justify-center shadow-lg">
-                      <CryptoIcon symbol={selectedTx.symbol} size="xl" />
-                    </div>
-                    {/* Always show chain icon badge */}
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-card bg-card">
-                      <ChainIcon chainId={selectedTx.network} size="sm" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center">
-                  <p className={cn(
-                    'text-3xl font-bold tracking-tight',
-                    selectedTx.type === 'receive' ? 'text-success' : 'text-foreground'
-                  )}>
-                    {selectedTx.type === 'receive' ? '+' : '-'}{selectedTx.amount} {selectedTx.symbol}
-                  </p>
-                  <p className="text-muted-foreground text-sm mt-1">
-                    ≈ ${selectedTx.usdValue.toLocaleString()}
-                  </p>
-                </div>
-
-                {/* Status Tags */}
-                <div className="flex justify-center gap-2 mt-3 flex-wrap">
-                  <span className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",
-                    selectedTx.status === 'confirmed' && "bg-success/10 text-success",
-                    selectedTx.status === 'pending' && "bg-warning/10 text-warning",
-                    selectedTx.status === 'failed' && "bg-destructive/10 text-destructive"
-                  )}>
-                    {selectedTx.status === 'confirmed' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                    {selectedTx.status === 'pending' && <Clock className="w-3.5 h-3.5" />}
-                    {selectedTx.status === 'failed' && <XCircle className="w-3.5 h-3.5" />}
-                    {selectedTx.type === 'receive' ? '收款' : '转账'}
-                    {selectedTx.status === 'confirmed' && '已完成'}
-                    {selectedTx.status === 'pending' && '处理中'}
-                    {selectedTx.status === 'failed' && '失败'}
-                  </span>
-                  
-                  {isRiskTx(selectedTx) && selectedTx.riskScore && (
-                    <span className={cn(
-                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium",
-                      selectedTx.riskScore === 'red' && "bg-destructive/10 text-destructive",
-                      selectedTx.riskScore === 'yellow' && "bg-warning/10 text-warning"
-                    )}>
-                      {selectedTx.riskScore === 'red' && <ShieldAlert className="w-3.5 h-3.5" />}
-                      {selectedTx.riskScore === 'yellow' && <AlertTriangle className="w-3.5 h-3.5" />}
-                      {selectedTx.riskScore === 'red' ? '高风险' : '可疑'}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Risk Info Section */}
-              {isRiskTx(selectedTx) && selectedTx.riskReasons && (
-                <div className={cn(
-                  "p-3 rounded-xl border mb-4",
-                  selectedTx.riskScore === 'red' 
-                    ? "bg-destructive/10 border-destructive/30" 
-                    : "bg-warning/10 border-warning/30"
-                )}>
-                  <p className="text-sm font-medium text-foreground mb-2">风险原因</p>
-                  <ul className="text-sm text-muted-foreground space-y-1">
-                    {selectedTx.riskReasons.map((reason, i) => (
-                      <li key={i} className="flex items-start gap-1.5">
-                        <span className="text-muted-foreground/50">•</span>
-                        <span>{reason}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Failure Reason - for failed transactions */}
-              {selectedTx.status === 'failed' && selectedTx.failureReason && (
-                <div className="p-3 rounded-xl border bg-destructive/10 border-destructive/30 mb-4">
-                  <p className="text-sm font-medium text-destructive mb-1">失败原因</p>
-                  <p className="text-sm text-muted-foreground">{selectedTx.failureReason}</p>
-                </div>
-              )}
-
-              {/* Details */}
-              <div className="space-y-0">
-                {/* Sender Address */}
-                <div className="flex justify-between items-start py-3 border-b border-border">
-                  <span className="text-muted-foreground shrink-0">发送方</span>
-                  <div className="text-right flex-1 ml-4">
-                    {selectedTx.type === 'receive' && selectedTx.counterpartyLabel && (
-                      <p className="font-medium text-foreground">{selectedTx.counterpartyLabel}</p>
-                    )}
-                    <div className="flex items-center justify-end gap-1.5">
-                      <p className="text-sm text-muted-foreground font-mono break-all">
-                        {selectedTx.type === 'receive' 
-                          ? `${selectedTx.counterparty.slice(0, 10)}...${selectedTx.counterparty.slice(-8)}`
-                          : `${(currentWallet?.addresses?.[selectedTx.network as ChainId] || '').slice(0, 10)}...${(currentWallet?.addresses?.[selectedTx.network as ChainId] || '').slice(-8)}`
-                        }
-                      </p>
-                      <button 
-                        onClick={() => {
-                          const addr = selectedTx.type === 'receive' 
-                            ? selectedTx.counterparty 
-                            : (currentWallet?.addresses?.[selectedTx.network as ChainId] || '');
-                          navigator.clipboard.writeText(addr);
-                          setCopiedSender(true);
-                          toast.success('发送方地址已复制');
-                          setTimeout(() => setCopiedSender(false), 2000);
-                        }}
-                        className="p-1.5 hover:bg-muted rounded shrink-0"
-                      >
-                        {copiedSender ? (
-                          <CheckCircle2 className="w-4 h-4 text-success" />
-                        ) : (
-                          <Copy className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Receiver Address */}
-                <div className="flex justify-between items-start py-3 border-b border-border">
-                  <span className="text-muted-foreground shrink-0">收款方</span>
-                  <div className="text-right flex-1 ml-4">
-                    {selectedTx.type === 'send' && selectedTx.counterpartyLabel && (
-                      <p className="font-medium text-foreground">{selectedTx.counterpartyLabel}</p>
-                    )}
-                    <div className="flex items-center justify-end gap-1.5">
-                      <p className="text-sm text-muted-foreground font-mono break-all">
-                        {selectedTx.type === 'send' 
-                          ? `${selectedTx.counterparty.slice(0, 10)}...${selectedTx.counterparty.slice(-8)}`
-                          : `${(currentWallet?.addresses?.[selectedTx.network as ChainId] || '').slice(0, 10)}...${(currentWallet?.addresses?.[selectedTx.network as ChainId] || '').slice(-8)}`
-                        }
-                      </p>
-                      <button 
-                        onClick={() => {
-                          const addr = selectedTx.type === 'send' 
-                            ? selectedTx.counterparty 
-                            : (currentWallet?.addresses?.[selectedTx.network as ChainId] || '');
-                          navigator.clipboard.writeText(addr);
-                          setCopiedReceiver(true);
-                          toast.success('收款方地址已复制');
-                          setTimeout(() => setCopiedReceiver(false), 2000);
-                        }}
-                        className="p-1.5 hover:bg-muted rounded shrink-0"
-                      >
-                        {copiedReceiver ? (
-                          <CheckCircle2 className="w-4 h-4 text-success" />
-                        ) : (
-                          <Copy className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">网络</span>
-                  <div className="flex items-center gap-1.5">
-                    <ChainIcon chainId={selectedTx.network} size="sm" />
-                    <span className="font-medium text-foreground">
-                      {SUPPORTED_CHAINS.find(c => c.id === selectedTx.network)?.name}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">时间</span>
-                  <span className="font-medium text-foreground">
-                    {new Date(selectedTx.timestamp).toLocaleString('zh-CN')}
-                  </span>
-                </div>
-
-                {/* Network Fee with token amount + USD */}
-                {selectedTx.fee !== undefined && selectedTx.fee > 0 && (
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-muted-foreground">网络费用</span>
-                    <div className="text-right">
-                      {selectedTx.gasAmount && selectedTx.gasToken && (
-                        <p className="font-medium text-foreground">
-                          {selectedTx.gasAmount.toFixed(6)} {selectedTx.gasToken}
-                        </p>
-                      )}
-                      <p className={selectedTx.gasAmount ? "text-sm text-muted-foreground" : "font-medium text-foreground"}>
-                        ≈ ${selectedTx.fee.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Confirmations - for confirmed transactions */}
-                {selectedTx.status === 'confirmed' && selectedTx.confirmations !== undefined && (
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-muted-foreground">确认数</span>
-                    <span className="font-medium text-foreground">
-                      {selectedTx.confirmations >= 100 ? '100+' : selectedTx.confirmations} 次确认
-                    </span>
-                  </div>
-                )}
-
-                {/* Block Height - for confirmed transactions */}
-                {selectedTx.status === 'confirmed' && selectedTx.blockHeight && (
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-muted-foreground">区块高度</span>
-                    <span className="font-medium text-foreground font-mono">
-                      #{selectedTx.blockHeight.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-
-                {/* Nonce - for EVM transactions */}
-                {selectedTx.nonce !== undefined && (
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-muted-foreground">Nonce</span>
-                    <span className="font-medium text-foreground font-mono">
-                      {selectedTx.nonce}
-                    </span>
-                  </div>
-                )}
-
-                {/* Memo */}
-                {selectedTx.memo && (
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-muted-foreground">备注</span>
-                    <span className="font-medium text-foreground max-w-[60%] text-right truncate">
-                      {selectedTx.memo}
-                    </span>
-                  </div>
-                )}
-
-                {selectedTx.txHash && (
-                  <div className="flex justify-between items-center py-3 border-b border-border">
-                    <span className="text-muted-foreground">交易哈希</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-medium text-foreground font-mono">
-                        {selectedTx.txHash.slice(0, 8)}...{selectedTx.txHash.slice(-6)}
-                      </span>
-                      <button 
-                        onClick={() => {
-                          navigator.clipboard.writeText(selectedTx.txHash!);
-                          setCopiedHash(true);
-                          toast.success('已复制到剪贴板');
-                          setTimeout(() => setCopiedHash(false), 2000);
-                        }}
-                        className="p-1.5 hover:bg-muted rounded"
-                      >
-                        {copiedHash ? (
-                          <CheckCircle2 className="w-4 h-4 text-success" />
-                        ) : (
-                          <Copy className="w-4 h-4 text-muted-foreground" />
-                        )}
-                      </button>
-                      <button className="p-1.5 hover:bg-muted rounded">
-                        <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* RBF Action Section - for pending send transactions */}
-              {selectedTx.status === 'pending' && selectedTx.type === 'send' && !isRiskTx(selectedTx) && (
-                <div className="mt-4">
-                  <RbfActionSection
-                    transaction={selectedTx}
-                    onSpeedUp={handleSpeedUpClick}
-                    onCancel={handleCancelClick}
-                  />
-                </div>
-              )}
-
-              {/* Actions */}
-              {isRiskTx(selectedTx) ? (
-                <div className="space-y-2 mt-4">
-                  <Button
-                    variant="destructive"
-                    className="w-full gap-2 h-10"
-                    onClick={() => handleReturn(selectedTx.id)}
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    退回资金
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full h-10"
-                    onClick={() => handleAcknowledge(selectedTx.id)}
-                  >
-                    我已知晓风险，保留资金
-                  </Button>
-                </div>
-              ) : null}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* RBF Drawers */}
-      {selectedTx && (
-        <>
-          <SpeedUpDrawer
-            open={speedUpDrawerOpen}
-            onOpenChange={setSpeedUpDrawerOpen}
-            transaction={selectedTx}
-            onConfirm={handleSpeedUpConfirm}
-          />
-          <CancelTxDrawer
-            open={cancelDrawerOpen}
-            onOpenChange={setCancelDrawerOpen}
-            transaction={selectedTx}
-            onConfirm={handleCancelConfirm}
-          />
-        </>
-      )}
     </AppLayout>
   );
 }

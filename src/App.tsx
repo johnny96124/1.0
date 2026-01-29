@@ -46,6 +46,7 @@ import SetPassword from "./pages/SetPassword";
 import BindEmailDemo from "./pages/BindEmailDemo";
 import LockScreenDemo from "./pages/LockScreenDemo";
 import NotFound from "./pages/NotFound";
+import TransactionDetail from "./pages/TransactionDetail";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ function AppRoutes() {
       <Route path="/receive" element={<ProtectedRoute><Receive /></ProtectedRoute>} />
       <Route path="/asset/:symbol" element={<ProtectedRoute><AssetDetail /></ProtectedRoute>} />
       <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+      <Route path="/transaction/:id" element={<ProtectedRoute><TransactionDetail /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/profile/info" element={<ProtectedRoute><PersonalInfo /></ProtectedRoute>} />
       <Route path="/profile/wallets" element={<ProtectedRoute><WalletManagement /></ProtectedRoute>} />
