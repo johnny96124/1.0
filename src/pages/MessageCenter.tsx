@@ -210,7 +210,7 @@ export default function MessageCenter() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.03 }}
                                 className={`
-                                  p-4 rounded-xl bg-card border border-border/50
+                                  p-4 rounded-xl bg-card border border-border
                                   ${notification.isRead ? 'opacity-70' : ''}
                                   active:scale-[0.98] transition-transform
                                 `}
