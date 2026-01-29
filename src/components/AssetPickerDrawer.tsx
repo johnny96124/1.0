@@ -112,27 +112,22 @@ export function AssetPickerDrawer({
             </div>
           </div>
 
-          {/* Chain Filter - Underline style for secondary filters */}
-          <div className="border-b border-border">
-            <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {/* Chain Filter - Pill style */}
+          <div className="px-4 pb-3">
+            <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {SUPPORTED_CHAINS.map((chain) => (
                 <button
                   key={chain.id}
                   onClick={() => setActiveChain(chain.id)}
                   className={cn(
-                    "flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0",
                     activeChain === chain.id
-                      ? "text-accent"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-muted text-foreground"
+                      : "border border-border text-muted-foreground hover:bg-muted/30"
                   )}
                 >
-                  {chain.id !== 'all' && (
-                    <ChainIcon chainId={chain.id} size="sm" />
-                  )}
+                  <ChainIcon chainId={chain.id} size="sm" />
                   <span>{chain.shortName}</span>
-                  {activeChain === chain.id && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
-                  )}
                 </button>
               ))}
             </div>
