@@ -333,10 +333,17 @@ export default function SendPage() {
 
         {/* Limit Warning for unbacked wallet */}
         {isLimitedTransfer && step !== 'success' && step !== 'asset' && (
-          <div className="mx-4 mb-3 p-3 bg-warning/10 border border-warning/20 rounded-xl">
-            <p className="text-sm text-warning">
-              ⚠️ 未完成备份，单笔限额 {transferLimit} USDT
-            </p>
+          <div className="mx-4 mb-3 p-4 bg-warning-surface border border-warning/30 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4 text-warning" strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-foreground">
+                  未完成备份，单笔限额 {transferLimit} USDT
+                </p>
+              </div>
+            </div>
           </div>
         )}
 

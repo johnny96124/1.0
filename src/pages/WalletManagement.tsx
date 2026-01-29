@@ -10,7 +10,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -145,9 +145,11 @@ export default function WalletManagementPage() {
             
             {/* Warning if incomplete */}
             {!backupComplete && (
-              <div className="flex items-start gap-2 p-3 bg-warning/10 rounded-lg mb-4">
-                <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
-                <p className="text-xs text-warning">
+              <div className="flex items-center gap-3 p-4 bg-warning-surface border border-warning/30 rounded-xl mb-4">
+                <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-4 h-4 text-warning" strokeWidth={1.5} />
+                </div>
+                <p className="text-sm text-foreground flex-1">
                   建议同时完成云端和本地备份，确保账户安全
                 </p>
               </div>

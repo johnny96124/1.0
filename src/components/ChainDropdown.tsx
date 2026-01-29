@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 interface ChainDropdownProps {
   selectedChain: ChainId;

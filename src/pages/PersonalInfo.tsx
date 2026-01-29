@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/lib/toast';
 import { Badge } from '@/components/ui/badge';
 import { BindAccountDrawer } from '@/components/BindAccountDrawer';
 import { ChangePasswordDrawer } from '@/components/ChangePasswordDrawer';
@@ -54,9 +54,7 @@ export default function PersonalInfo() {
   const handleCopyUserId = () => {
     navigator.clipboard.writeText(userId);
     setCopied(true);
-    toast.success('已复制到剪贴板', {
-      description: '用户ID已复制',
-    });
+    toast.success('已复制到剪贴板', '用户ID已复制');
     setTimeout(() => setCopied(false), 2000);
   };
 

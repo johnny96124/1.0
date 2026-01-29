@@ -22,7 +22,7 @@ import { AnimatedBalance } from '@/components/AnimatedNumber';
 
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 
 // Empty state component when no wallet exists - guides user to create first wallet
 function EmptyWalletState() {
@@ -245,11 +245,13 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 p-3 rounded-xl bg-warning/10 border border-warning/30 flex items-center gap-3"
+            className="mb-4 p-4 rounded-xl bg-warning-surface border border-warning/30 flex items-center gap-3"
           >
-            <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
+            <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4 text-warning" strokeWidth={1.5} />
+            </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-warning">自托管钱包</p>
+              <p className="text-sm font-medium text-foreground">自托管钱包</p>
               <p className="text-xs text-muted-foreground">此钱包已脱离 MPC 保护，请妥善保管私钥</p>
             </div>
           </motion.div>
