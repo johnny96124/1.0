@@ -494,12 +494,12 @@ const mockContacts: Contact[] = [
   },
   {
     id: '3',
-    name: 'PSP Official Settlement',
-    address: '0xOFFICIAL1234567890abcdef1234567890abcd',
+    name: '',
+    address: '0x7a3F9c2B8e4D1f5A6b3C9e8D7f2A1b4C5d6E7f8A',
     network: 'ethereum',
-    tags: ['Official'],
-    isOfficial: true,
-    isWhitelisted: true,
+    tags: [],
+    isOfficial: false,
+    isWhitelisted: false,
   },
 ];
 
