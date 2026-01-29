@@ -365,6 +365,7 @@ export default function HomePage() {
                   className="flex-1 h-10 gradient-accent text-accent-foreground"
                   onClick={() => navigate('/send')}
                 >
+                  <Send className="w-4 h-4 mr-2" strokeWidth={1.5} />
                   转账
                 </Button>
                 <Button
@@ -372,6 +373,7 @@ export default function HomePage() {
                   className="flex-1 h-10"
                   onClick={() => navigate('/receive')}
                 >
+                  <QrCode className="w-4 h-4 mr-2" strokeWidth={1.5} />
                   收款
                 </Button>
               </div>
