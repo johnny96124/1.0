@@ -112,14 +112,18 @@ export default function RiskReturn() {
                 exit={{ opacity: 0, x: -20 }}
               >
                 {/* Warning */}
-                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30 mb-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="w-5 h-5 text-destructive" />
-                    <span className="font-medium text-destructive">退回操作不可撤销</span>
+                <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-xl mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-destructive/20 flex items-center justify-center shrink-0">
+                      <AlertTriangle className="w-4 h-4 text-destructive" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-destructive">退回操作不可撤销</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        资金将全额退回至原发送方地址，此操作一旦执行无法取消。网络费用由您承担。
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    资金将全额退回至原发送方地址，此操作一旦执行无法取消。网络费用由您承担。
-                  </p>
                 </div>
                 
                 {/* Amount Card */}

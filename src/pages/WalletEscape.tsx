@@ -145,7 +145,7 @@ export default function WalletEscapePage() {
       className="space-y-6"
     >
       {/* Danger Header */}
-      <div className="p-6 bg-destructive/10 border border-destructive/30 rounded-2xl text-center">
+      <div className="p-6 bg-destructive/10 border border-destructive/30 rounded-xl text-center">
         <div className="w-16 h-16 rounded-full bg-destructive/20 mx-auto mb-4 flex items-center justify-center">
           <ShieldOff className="w-8 h-8 text-destructive" />
         </div>
@@ -411,12 +411,14 @@ export default function WalletEscapePage() {
         </p>
       </div>
 
-      <div className="p-4 bg-warning/10 border border-warning/20 rounded-xl">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-warning mb-1">安全提示</p>
-            <p className="text-xs text-muted-foreground">
+      <div className="p-4 bg-warning-surface border border-warning/30 rounded-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground">安全提示</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
               请将私钥文件保存在安全的地方，切勿分享给他人。丢失私钥将导致资产无法找回。
             </p>
           </div>

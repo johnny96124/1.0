@@ -160,12 +160,14 @@ export default function AuthorizeDevicePage() {
         </div>
       )}
 
-      <div className="p-4 bg-warning/10 border border-warning/20 rounded-xl">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-warning mb-1">安全提示</p>
-            <p className="text-xs text-muted-foreground">
+      <div className="p-4 bg-warning-surface border border-warning/30 rounded-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4 h-4 text-warning" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-foreground">安全提示</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
               请确认是您本人在操作新设备。如非本人操作，请立即取消并检查账户安全。
             </p>
           </div>
