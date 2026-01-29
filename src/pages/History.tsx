@@ -94,6 +94,8 @@ export default function HistoryPage() {
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copiedHash, setCopiedHash] = useState(false);
+  const [copiedSender, setCopiedSender] = useState(false);
+  const [copiedReceiver, setCopiedReceiver] = useState(false);
   const [speedUpDrawerOpen, setSpeedUpDrawerOpen] = useState(false);
   const [cancelDrawerOpen, setCancelDrawerOpen] = useState(false);
   const { transactions, getAccountRiskStatus, acknowledgeRiskTx, currentWallet } = useWallet();
@@ -629,11 +631,17 @@ export default function HistoryPage() {
                             ? selectedTx.counterparty 
                             : (currentWallet?.addresses?.[selectedTx.network as ChainId] || '');
                           navigator.clipboard.writeText(addr);
+                          setCopiedSender(true);
                           toast.success('发送方地址已复制');
+                          setTimeout(() => setCopiedSender(false), 2000);
                         }}
                         className="p-1.5 hover:bg-muted rounded shrink-0"
                       >
-                        <Copy className="w-4 h-4 text-muted-foreground" />
+                        {copiedSender ? (
+                          <CheckCircle2 className="w-4 h-4 text-success" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-muted-foreground" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -659,11 +667,17 @@ export default function HistoryPage() {
                             ? selectedTx.counterparty 
                             : (currentWallet?.addresses?.[selectedTx.network as ChainId] || '');
                           navigator.clipboard.writeText(addr);
+                          setCopiedReceiver(true);
                           toast.success('收款方地址已复制');
+                          setTimeout(() => setCopiedReceiver(false), 2000);
                         }}
                         className="p-1.5 hover:bg-muted rounded shrink-0"
                       >
-                        <Copy className="w-4 h-4 text-muted-foreground" />
+                        {copiedReceiver ? (
+                          <CheckCircle2 className="w-4 h-4 text-success" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-muted-foreground" />
+                        )}
                       </button>
                     </div>
                   </div>
