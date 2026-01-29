@@ -603,8 +603,11 @@ export default function SendPage() {
                             <div className="flex items-center justify-between">
                               <div>
                                 <div className="flex items-center gap-2">
-                                  <p className="font-medium text-foreground">
-                                    {contact.name || `${contact.address.slice(0, 8)}...${contact.address.slice(-6)}`}
+                                  <p className={cn(
+                                    "font-medium",
+                                    contact.name ? "text-foreground" : "text-muted-foreground"
+                                  )}>
+                                    {contact.name || '未命名地址'}
                                   </p>
                                   <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
                                     {getChainLabel(contact.network)}
