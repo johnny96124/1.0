@@ -361,17 +361,26 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
         ))}
       </div>
 
-      {/* Warning message - do not close app */}
+      {/* Warning message - do not close app - positioned at top as full-width banner */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8 flex items-center gap-2 px-4 py-2.5 bg-warning/10 rounded-full"
+        transition={{ delay: 0.3 }}
+        className="absolute top-0 left-0 right-0 px-4 py-3 bg-warning/10"
       >
-        <AlertTriangle className="w-4 h-4 text-warning shrink-0" strokeWidth={1.5} />
-        <span className="text-xs text-warning font-medium">
-          创建过程中请勿关闭 App
-        </span>
+        <div className="flex items-start gap-3">
+          <div className="p-1.5 rounded-full bg-warning/20">
+            <AlertTriangle className="w-4 h-4 text-warning" strokeWidth={1.5} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-warning">
+              创建过程中请勿关闭 App
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              关闭可能导致创建失败
+            </p>
+          </div>
+        </div>
       </motion.div>
     </motion.div>
   );
