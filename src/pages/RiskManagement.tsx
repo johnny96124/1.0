@@ -145,9 +145,9 @@ export default function RiskManagement() {
                 <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", statusConfig.bg)}>
                   <StatusIcon className={cn("w-4 h-4", statusConfig.color)} />
                 </div>
-                <div>
-                  <p className={cn("font-semibold", statusConfig.color)}>{statusConfig.label}</p>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-sm font-medium", statusConfig.color)}>{statusConfig.label}</p>
+                  <p className="text-xs text-muted-foreground">
                     {riskStatus.pendingRiskCount > 0 
                       ? `${riskStatus.pendingRiskCount} 笔待处置交易`
                       : '暂无风险收款'

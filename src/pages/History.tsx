@@ -240,12 +240,12 @@ export default function HistoryPage() {
               )}
             >
               <div className="flex items-center gap-3">
-                <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", statusConfig.bg)}>
-                  <StatusIcon className={cn("w-5 h-5", statusConfig.color)} />
+                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", statusConfig.bg)}>
+                  <StatusIcon className={cn("w-4 h-4", statusConfig.color)} />
                 </div>
-                <div className="flex-1">
-                  <p className={cn("font-semibold", statusConfig.color)}>{statusConfig.label}</p>
-                  <p className="text-sm text-muted-foreground">{statusConfig.sublabel}</p>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-sm font-medium", statusConfig.color)}>{statusConfig.label}</p>
+                  <p className="text-xs text-muted-foreground">{statusConfig.sublabel}</p>
                 </div>
                 {riskStatus.pendingRiskCount > 0 && (
                   <div className="text-right flex items-center gap-2">

@@ -56,11 +56,13 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
         {/* Content */}
         <div className="p-4 space-y-4">
           {/* Warning Card */}
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
-            <AlertTriangle className="w-5 h-5 text-warning mt-0.5 shrink-0" />
-            <div>
-              <p className="font-medium text-foreground">确定要取消这笔交易吗？</p>
-              <p className="text-sm text-muted-foreground mt-1">
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-warning/10 border border-warning/20">
+            <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4 text-warning" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">确定要取消这笔交易吗？</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 取消将发送一笔替换交易使原交易失效，需支付网络费用。
               </p>
             </div>
@@ -106,14 +108,15 @@ export function CancelTxDrawer({ open, onOpenChange, transaction, onConfirm }: C
           </div>
 
           {/* Return Note */}
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-success/10 border border-success/20">
-            <Wallet className="w-4 h-4 text-success mt-0.5 shrink-0" />
-            <p className="text-xs text-muted-foreground">
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-success/10 border border-success/20">
+            <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
+              <Wallet className="w-4 h-4 text-success" />
+            </div>
+            <p className="text-xs text-muted-foreground flex-1">
               取消成功后，原资金将返回您的钱包
             </p>
           </div>
         </div>
-
         {/* Footer */}
         <DrawerFooter className="px-4 pb-6 gap-2">
           <Button 
