@@ -622,18 +622,11 @@ export default function SendPage() {
                               <p className="font-medium text-foreground">
                                 {contact.name || `${contact.address.slice(0, 8)}...${contact.address.slice(-6)}`}
                               </p>
-                              {contact.isWhitelisted && (
-                                <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">
-                                  白名单
-                                </span>
-                              )}
+                              <ChainIcon chainId={contact.network as ChainId} size="xs" />
                             </div>
-                            <div className="flex items-start gap-2 mt-1">
-                              <ChainIcon chainId={contact.network as ChainId} size="xs" className="mt-0.5 shrink-0" />
-                              <p className="text-sm text-muted-foreground font-mono break-all">
-                                {contact.address}
-                              </p>
-                            </div>
+                            <p className="text-sm text-muted-foreground font-mono break-all mt-1">
+                              {contact.address}
+                            </p>
                           </div>
                           {selectedContact?.id === contact.id && (
                             <CheckCircle2 className="w-5 h-5 text-accent" />
