@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { WalletProvider, useWallet } from "@/contexts/WalletContext";
 import { AppLockProvider } from "@/contexts/AppLockContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { PhoneFrame } from "@/components/layout/PhoneFrame";
 import { AppLockScreen } from "@/components/AppLockScreen";
 import Splash from "./pages/Splash";
@@ -118,19 +119,21 @@ function AppRoutes() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      <WalletProvider>
-        <AppLockProvider>
-          <TooltipProvider>
-            <BrowserRouter>
-              <PhoneFrame>
-                <Toaster />
-                <AppLockScreen />
-                <AppRoutes />
-              </PhoneFrame>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AppLockProvider>
-      </WalletProvider>
+      <LanguageProvider>
+        <WalletProvider>
+          <AppLockProvider>
+            <TooltipProvider>
+              <BrowserRouter>
+                <PhoneFrame>
+                  <Toaster />
+                  <AppLockScreen />
+                  <AppRoutes />
+                </PhoneFrame>
+              </BrowserRouter>
+            </TooltipProvider>
+          </AppLockProvider>
+        </WalletProvider>
+      </LanguageProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
