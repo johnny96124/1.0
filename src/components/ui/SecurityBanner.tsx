@@ -85,49 +85,31 @@ export function SecurityBanner() {
         initial={{ height: 0, opacity: 0 }}
         animate={{ height: 'auto', opacity: 1 }}
         exit={{ height: 0, opacity: 0 }}
-        className={cn(
-          'px-4 py-3',
-          config.type === 'error' && 'bg-destructive/10 border-b border-destructive/20',
-          config.type === 'warning' && 'bg-warning/10 border-b border-warning/20'
-        )}
+        className="px-4 py-3"
       >
-        <div className="flex items-start gap-3">
-          <div className={cn(
-            'p-1.5 rounded-full',
-            config.type === 'error' && 'bg-destructive/20',
-            config.type === 'warning' && 'bg-warning/20'
-          )}>
-            <Icon className={cn(
-              'w-4 h-4',
-              config.type === 'error' && 'text-destructive',
-              config.type === 'warning' && 'text-warning'
-            )} />
+        <div className="p-4 bg-warning-surface border border-warning/30 rounded-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+              <Icon className="w-4 h-4 text-warning" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground">
+                {config.title}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {config.description}
+              </p>
+            </div>
+            {config.action && (
+              <button 
+                onClick={() => config.actionPath && navigate(config.actionPath)}
+                className="flex items-center gap-1 text-sm font-medium shrink-0 text-warning"
+              >
+                {config.action}
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className={cn(
-              'text-sm font-medium',
-              config.type === 'error' && 'text-destructive',
-              config.type === 'warning' && 'text-warning'
-            )}>
-              {config.title}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {config.description}
-            </p>
-          </div>
-          {config.action && (
-            <button 
-              onClick={() => config.actionPath && navigate(config.actionPath)}
-              className={cn(
-                'flex items-center gap-1 text-sm font-medium shrink-0',
-                config.type === 'error' && 'text-destructive',
-                config.type === 'warning' && 'text-warning'
-              )}
-            >
-              {config.action}
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </motion.div>
     </AnimatePresence>
