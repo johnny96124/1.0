@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Smartphone, Monitor, Tablet, MapPin, Clock, X, Shield
+  Smartphone, Monitor, Tablet, MapPin, Clock, X, Shield, Info
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -166,14 +166,17 @@ export default function DeviceManagementPage() {
           </div>
         </motion.div>
 
-        {/* Security Note */}
+        {/* Security Note - Orange Tier Alert */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="px-3 py-3 bg-accent/5 rounded-lg border border-accent/10"
+          className="p-4 bg-warning-surface rounded-xl border border-warning/30 flex items-center gap-3"
         >
-          <p className="text-xs text-muted-foreground leading-relaxed">
+          <div className="w-8 h-8 rounded-full bg-warning/10 flex items-center justify-center flex-shrink-0">
+            <Info className="w-4 h-4 text-warning" strokeWidth={1.5} />
+          </div>
+          <p className="text-xs text-foreground leading-relaxed">
             为了账户安全，同一账户仅允许一台设备在线。在新设备登录时，当前设备将自动退出。
           </p>
         </motion.div>
