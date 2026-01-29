@@ -361,22 +361,22 @@ function CreateWalletStep({ onComplete }: { onComplete: () => void }) {
         ))}
       </div>
 
-      {/* Warning message - toast style notification */}
+      {/* Warning message - toast style notification matching "请务必牢记密码" style */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 25 }}
-        className="absolute top-4 left-4 right-4 px-4 py-3 bg-warning rounded-xl shadow-lg"
+        className="absolute top-4 left-4 right-4 p-4 bg-warning/10 border border-warning/30 rounded-xl"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-4 h-4 text-warning-foreground" strokeWidth={1.5} />
+          <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-4 h-4 text-warning" strokeWidth={1.5} />
           </div>
           <div className="flex-1 min-w-0 text-left">
-            <p className="text-sm font-medium text-warning-foreground">
+            <p className="text-sm font-medium text-foreground">
               创建过程中请勿关闭 App
             </p>
-            <p className="text-xs text-warning-foreground/70 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               关闭可能导致创建失败
             </p>
           </div>
