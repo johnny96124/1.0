@@ -68,13 +68,18 @@ export function SpeedUpDrawer({ open, onOpenChange, transaction, onConfirm }: Sp
           </DrawerClose>
         </DrawerHeader>
 
-        {/* Current Fee */}
-        <div className="px-4 py-2">
+        {/* Description */}
+        <p className="px-4 text-sm text-muted-foreground">
+          提高手续费可加快交易确认速度
+        </p>
+
+        {/* Speed Up Fee */}
+        <div className="px-4 py-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">当前费用</span>
+            <span className="text-muted-foreground">加速费用</span>
             <div className="text-right">
-              <span className="font-medium text-foreground">{currentGasAmount.toFixed(5)} {gasToken}</span>
-              <span className="text-muted-foreground ml-2">≈ ${currentFee.toFixed(2)}</span>
+              <span className="font-medium text-foreground">{selectedOption.newGasAmount.toFixed(5)} {gasToken}</span>
+              <span className="text-muted-foreground ml-2">≈ ${selectedOption.newFee.toFixed(2)}</span>
             </div>
           </div>
         </div>
