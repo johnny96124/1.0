@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ShieldOff, Settings, Lock, Fingerprint, ChevronRight, ArrowLeft } from 'lucide-react';
+import { ShieldOff, Settings, Lock, Fingerprint, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function SecurityRequiredPage() {
   const navigate = useNavigate();
@@ -18,20 +19,7 @@ export default function SecurityRequiredPage() {
   };
 
   return (
-    <div className="h-full bg-background flex flex-col">
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={() => navigate(-1)}
-            className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <span className="text-sm font-medium text-foreground">安全认证</span>
-          <div className="w-5" /> {/* Spacer */}
-        </div>
-      </div>
+    <AppLayout showNav={false} showBack title="安全认证" showSecurityBanner={false}>
 
       {/* Content */}
       <div className="flex-1 px-4 flex flex-col">
@@ -134,6 +122,6 @@ export default function SecurityRequiredPage() {
           </Button>
         </motion.div>
       </div>
-    </div>
+    </AppLayout>
   );
 }

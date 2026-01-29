@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, Fingerprint, Lock, CloudUpload,
-  CheckCircle2, Loader2, ArrowLeft, Eye, EyeOff,
+  CheckCircle2, Loader2, ChevronLeft, Eye, EyeOff,
   AlertTriangle, Cloud, HardDrive, Upload, Wallet, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -85,7 +85,7 @@ export default function CreateWalletPage() {
               onClick={handleBack}
               className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ChevronLeft className="w-6 h-6" />
             </button>
             <span className="text-sm text-muted-foreground">
               步骤 {currentStep} / {steps.length}

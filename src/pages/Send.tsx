@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ArrowLeft, Scan, Users, AlertTriangle, 
+  ChevronLeft, Scan, Users, AlertTriangle, 
   CheckCircle2, Loader2, Search, X, Shield,
   Info, ChevronRight, ShieldAlert, Lightbulb
 } from 'lucide-react';
@@ -325,7 +325,7 @@ export default function SendPage() {
             onClick={handleBack}
             className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-foreground" />
+            <ChevronLeft className="w-6 h-6 text-foreground" />
           </button>
           <h1 className="text-lg font-semibold text-foreground">{getStepTitle()}</h1>
           <div className="w-10" />

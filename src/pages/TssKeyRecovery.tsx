@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Shield, Cloud, HardDrive, 
-  AlertTriangle, CheckCircle2, Loader2, ArrowLeft,
+  AlertTriangle, CheckCircle2, Loader2, ChevronLeft,
   Lock, Eye, EyeOff, Upload, FileText, MessageCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -159,7 +159,7 @@ export default function TSSRecoveryPage() {
               onClick={handleBack}
               className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
+              <ChevronLeft className="w-6 h-6" strokeWidth={1.5} />
             </button>
             {/* Show step counter only for local file recovery flow */}
             {selectedMethod === 'local_file' && step !== 'method' && step !== 'success' && (

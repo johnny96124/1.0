@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Mail, Phone, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Mail, Phone, CheckCircle2, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -73,21 +73,7 @@ export default function BindEmailDemo() {
   };
 
   return (
-    <AppLayout showNav={false}>
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3 px-4 py-4"
-      >
-        <button
-          onClick={() => navigate(-1)}
-          className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-foreground" />
-        </button>
-        <h1 className="text-xl font-bold text-foreground">账号绑定演示</h1>
-      </motion.div>
+    <AppLayout showNav={false} showBack title="账号绑定演示">
 
       {/* Content */}
       <div className="flex-1 px-4 pb-12 space-y-4">

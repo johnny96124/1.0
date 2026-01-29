@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CloudOff, ArrowLeft, Smartphone } from 'lucide-react';
+import { CloudOff, Smartphone } from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function CloudRecoveryUnavailable() {
   const navigate = useNavigate();
@@ -37,19 +38,7 @@ export default function CloudRecoveryUnavailable() {
   ];
 
   return (
-    <div className="h-full bg-background flex flex-col">
-      {/* Header */}
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center">
-          <button 
-            onClick={handleBack}
-            className="p-1 -ml-1 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" strokeWidth={1.5} />
-          </button>
-        </div>
-      </div>
-
+    <AppLayout showNav={false} showBack onBack={handleBack} showSecurityBanner={false}>
       {/* Content */}
       <div className="flex-1 px-4 overflow-auto">
         <motion.div
@@ -111,6 +100,6 @@ export default function CloudRecoveryUnavailable() {
           </div>
         </motion.div>
       </div>
-    </div>
+    </AppLayout>
   );
 }
