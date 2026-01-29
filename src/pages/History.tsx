@@ -303,22 +303,38 @@ export default function HistoryPage() {
                 </DropdownMenu>
               </div>
 
-              {/* Filter Tabs */}
-              <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterType)} className="mb-4">
-                <TabsList className="w-full grid grid-cols-4 h-9">
-                  <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
-                  <TabsTrigger value="send" className="text-xs">转出</TabsTrigger>
-                  <TabsTrigger value="receive" className="text-xs">收入</TabsTrigger>
-                  <TabsTrigger value="risk" className="text-xs">
-                    风险
-                    {riskCount > 0 && (
-                      <span className="ml-1 min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
-                        {riskCount}
-                      </span>
-                    )}
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+              {/* Filter Tabs - Underline style for secondary filters */}
+              <div className="border-b border-border mb-4">
+                <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {[
+                    { value: 'all', label: '全部' },
+                    { value: 'send', label: '转出' },
+                    { value: 'receive', label: '收入' },
+                    { value: 'risk', label: '风险', badge: riskCount },
+                  ].map((tab) => (
+                    <button
+                      key={tab.value}
+                      onClick={() => setFilter(tab.value as FilterType)}
+                      className={cn(
+                        "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative flex items-center gap-1.5",
+                        filter === tab.value
+                          ? "text-accent"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {tab.label}
+                      {tab.badge && tab.badge > 0 && (
+                        <span className="min-w-4 h-4 px-1 bg-destructive text-destructive-foreground text-[10px] rounded-full inline-flex items-center justify-center">
+                          {tab.badge}
+                        </span>
+                      )}
+                      {filter === tab.value && (
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </>
           )}
 

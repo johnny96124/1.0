@@ -201,16 +201,32 @@ export default function RiskManagement() {
             </motion.div>
           ) : (
             <>
-              {/* Tabs */}
-              <div className="mt-4">
-                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
-                  <TabsList className="w-full grid grid-cols-4 h-9">
-                    <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
-                    <TabsTrigger value="red" className="text-xs">高风险</TabsTrigger>
-                    <TabsTrigger value="yellow" className="text-xs">可疑</TabsTrigger>
-                    <TabsTrigger value="handled" className="text-xs">已处置</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+              {/* Tabs - Underline style for secondary filters */}
+              <div className="mt-4 border-b border-border">
+                <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {[
+                    { value: 'all', label: '全部' },
+                    { value: 'red', label: '高风险' },
+                    { value: 'yellow', label: '可疑' },
+                    { value: 'handled', label: '已处置' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.value}
+                      onClick={() => setActiveTab(tab.value as TabValue)}
+                      className={cn(
+                        "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative",
+                        activeTab === tab.value
+                          ? "text-accent"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {tab.label}
+                      {activeTab === tab.value && (
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
               
               {/* Transaction List */}
