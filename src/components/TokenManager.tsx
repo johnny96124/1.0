@@ -147,7 +147,7 @@ export function TokenManager({ addedSymbols, addedAssets, onAddToken, onRemoveTo
 
           {/* Category Filter */}
           <div className="px-4 py-2 border-b border-border">
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
