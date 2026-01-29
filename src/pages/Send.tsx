@@ -171,22 +171,17 @@ export default function SendPage() {
     toast.success('已改为测试金额');
   };
 
-  // Scan address risk when address changes
-  useEffect(() => {
-    const scan = async () => {
-      if (address.length > 10) {
-        setIsScanning(true);
-        const result = await scanAddressRisk(address);
-        setRiskScore(result);
-        setIsScanning(false);
-        
-        if (result.score === 'yellow' || !contacts.find(c => c.address.includes(address.slice(0, 10)))) {
-          setShowSatoshiTest(true);
-        }
-      }
-    };
-    scan();
-  }, [address, scanAddressRisk, contacts]);
+  // Simple address validation (basic format check)
+  const isAddressValid = useMemo(() => {
+    if (!address || address.length < 20) return false;
+    // ETH/BSC address format
+    if (address.startsWith('0x') && address.length === 42) return true;
+    // TRON address format
+    if (address.startsWith('T') && address.length === 34) return true;
+    // BTC address formats
+    if ((address.startsWith('1') || address.startsWith('3') || address.startsWith('bc1')) && address.length >= 26) return true;
+    return false;
+  }, [address]);
 
   const handleSelectAsset = (asset: Asset) => {
     setSelectedAsset(asset);
@@ -220,7 +215,7 @@ export default function SendPage() {
   };
 
   const handleContinue = () => {
-    if (step === 'address' && address && (!riskScore || riskScore.score !== 'red')) {
+    if (step === 'address' && address && isAddressValid) {
       setStep('amount');
     } else if (step === 'amount' && parseFloat(amount) > 0 && limitCheck.allowed && selectedAsset) {
       // Check PSP address and account risk status before confirming
@@ -548,47 +543,12 @@ export default function SendPage() {
                   </div>
                 </div>
 
-                {/* Risk Score */}
-                {address && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                  >
-                    {isScanning ? (
-                      <div className="flex items-center gap-2 text-muted-foreground p-4">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">风险评估中…</span>
-                      </div>
-                    ) : riskScore && (
-                      <div className={cn(
-                        'p-4 rounded-xl border',
-                        riskScore.score === 'green' && 'bg-success/5 border-success/20',
-                        riskScore.score === 'yellow' && 'bg-warning/5 border-warning/20',
-                        riskScore.score === 'red' && 'bg-destructive/5 border-destructive/20'
-                      )}>
-                        <div className="flex items-center gap-2">
-                          {riskScore.score === 'green' && (
-                            <>
-                              <CheckCircle2 className="w-4 h-4 text-success" />
-                              <span className="text-sm text-success">该地址信誉良好</span>
-                            </>
-                          )}
-                          {riskScore.score === 'yellow' && (
-                            <>
-                              <AlertTriangle className="w-4 h-4 text-warning" />
-                              <span className="text-sm text-warning">该地址缺少足够记录，请谨慎</span>
-                            </>
-                          )}
-                          {riskScore.score === 'red' && (
-                            <>
-                              <Shield className="w-4 h-4 text-destructive" />
-                              <span className="text-sm text-destructive">该地址存在高风险，已阻止转账</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
+                {/* Address Validation Status */}
+                {address && !isAddressValid && (
+                  <div className="flex items-center gap-2 text-destructive p-2">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="text-sm">请输入有效的钱包地址</span>
+                  </div>
                 )}
 
                 {/* Contacts */}
@@ -899,8 +859,7 @@ export default function SendPage() {
               className="w-full h-12"
               onClick={handleContinue}
               disabled={
-                (step === 'address' && (!address || isScanning || !riskScore || riskScore.score === 'red')) ||
-                (step === 'confirm' && (riskScore?.score === 'yellow' && !confirmRisk)) ||
+                (step === 'address' && (!address || !isAddressValid)) ||
                 isLoading
               }
             >
