@@ -155,13 +155,13 @@ export function TokenManager({ addedSymbols, addedAssets, onAddToken, onRemoveTo
                   className={cn(
                     "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative",
                     categoryFilter === cat.id
-                      ? "text-foreground"
+                      ? "text-accent"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {cat.label}
                   {categoryFilter === cat.id && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-foreground rounded-full" />
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
                   )}
                 </button>
               ))}
