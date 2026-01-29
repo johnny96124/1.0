@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Copy, Download, CheckCircle2, ChevronDown, Info, Search } from 'lucide-react';
+import { Copy, Download, Check, CheckCircle2, ChevronDown, Info, Search } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SwipeBack } from '@/components/SwipeBack';
@@ -309,7 +309,7 @@ export default function ReceivePage() {
               onClick={handleCopy}
             >
               {copied ? (
-                <CheckCircle2 className="w-4 h-4 mr-2 text-success" />
+                <Check className="w-4 h-4 mr-2 text-success" />
               ) : (
                 <Copy className="w-4 h-4 mr-2" />
               )}

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Send, TrendingDown, 
-  CheckCircle2, XCircle, Clock,
+  CheckCircle2, XCircle, Clock, Check,
   ExternalLink, Copy,
   Shield, ShieldAlert, AlertTriangle, RotateCcw
 } from 'lucide-react';
@@ -237,7 +237,7 @@ export default function TransactionDetail() {
                       className="p-1.5 hover:bg-muted rounded shrink-0"
                     >
                       {copiedSender ? (
-                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        <Check className="w-4 h-4 text-success" />
                       ) : (
                         <Copy className="w-4 h-4 text-muted-foreground" />
                       )}
@@ -262,7 +262,7 @@ export default function TransactionDetail() {
                       className="p-1.5 hover:bg-muted rounded shrink-0"
                     >
                       {copiedReceiver ? (
-                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        <Check className="w-4 h-4 text-success" />
                       ) : (
                         <Copy className="w-4 h-4 text-muted-foreground" />
                       )}
@@ -360,7 +360,7 @@ export default function TransactionDetail() {
                       className="p-1.5 hover:bg-muted rounded"
                     >
                       {copiedHash ? (
-                        <CheckCircle2 className="w-4 h-4 text-success" />
+                        <Check className="w-4 h-4 text-success" />
                       ) : (
                         <Copy className="w-4 h-4 text-muted-foreground" />
                       )}
