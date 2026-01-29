@@ -5,7 +5,7 @@
  * can be accelerated or cancelled via RBF.
  */
 
-import { Rocket, X, Zap, Info } from 'lucide-react';
+import { Rocket, X, Zap, Info, Ban } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Transaction } from '@/types/wallet';
 import { getRbfSupport, formatWaitTime } from '@/lib/rbf-utils';
@@ -45,6 +45,7 @@ export function RbfActionSection({ transaction, onSpeedUp, onCancel }: RbfAction
           className="flex-1 h-10"
           onClick={onSpeedUp}
         >
+          <Rocket className="w-4 h-4" />
           加速交易
         </Button>
         <Button
@@ -52,6 +53,7 @@ export function RbfActionSection({ transaction, onSpeedUp, onCancel }: RbfAction
           className="flex-1 h-10"
           onClick={onCancel}
         >
+          <Ban className="w-4 h-4" />
           取消交易
         </Button>
       </div>
