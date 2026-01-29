@@ -37,7 +37,7 @@ export function RbfActionSection({ transaction, onSpeedUp, onCancel }: RbfAction
   const waitTime = formatWaitTime(transaction.timestamp);
 
   return (
-    <div className="mb-4">
+    <div className="mb-6 mt-4">
       {/* Action Buttons */}
       <div className="flex gap-2">
         <Button
