@@ -202,10 +202,7 @@ export default function TSSBackupManagement() {
 
         {/* Cloud Backup Section */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Cloud className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">云端备份</span>
-          </div>
+          <span className="text-xs text-muted-foreground">云端备份</span>
           
           <Card 
             className="p-4 cursor-pointer hover:bg-muted/50 active:bg-muted/50 transition-colors"
@@ -243,10 +240,7 @@ export default function TSSBackupManagement() {
 
         {/* Local Backup Section */}
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <HardDrive className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">本地备份</span>
-          </div>
+          <span className="text-xs text-muted-foreground">本地备份</span>
           
           <Card 
             className="p-4 cursor-pointer hover:bg-muted/50 active:bg-muted/50 transition-colors"
