@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Copy, Check } from 'lucide-react';
+import { Trash2, Copy, Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -232,10 +232,11 @@ export function ContactDetailDrawer({
                 <Drawer open={showNetworkDrawer} onOpenChange={setShowNetworkDrawer}>
                   <button 
                     onClick={() => setShowNetworkDrawer(true)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50"
+                    className="w-full flex items-center gap-3 h-12 px-3 rounded-xl bg-background border border-input hover:bg-muted/50 transition-colors"
                   >
                     <ChainIcon chainId={network} size="sm" />
-                    <span className="flex-1 text-left">{selectedChain.name}</span>
+                    <span className="flex-1 text-left font-medium">{selectedChain.name}</span>
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
                   </button>
                   <DrawerContent>
                     <DrawerHeader>
