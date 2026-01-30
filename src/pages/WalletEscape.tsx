@@ -128,12 +128,12 @@ export default function WalletEscapePage() {
     setIsProcessing(true);
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsProcessing(false);
-    toast.success('私钥文件已生成');
+    toast.success('私钥文件已生成', '请立即下载并妥善保管');
     setStep(5);
   };
 
   const handleComplete = () => {
-    toast.success('MPC 逃逸完成，钱包已转为自托管模式');
+    toast.success('MPC 逃逸完成', '钱包已转为自托管模式');
     navigate('/profile/wallets');
   };
 

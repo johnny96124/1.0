@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useWallet } from '@/contexts/WalletContext';
-import { cn } from '@/lib/utils';
+import { cn, formatAddressShort, formatTxHashShort } from '@/lib/utils';
 import { Transaction, SUPPORTED_CHAINS, ChainId } from '@/types/wallet';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
@@ -84,7 +84,7 @@ export default function TransactionDetail() {
       : (currentWallet?.addresses?.[transaction.network as ChainId] || '');
     navigator.clipboard.writeText(addr);
     setCopiedSender(true);
-    toast.success('发送方地址已复制');
+    toast.success('已复制', formatAddressShort(addr));
     setTimeout(() => setCopiedSender(false), 2000);
   }, [transaction, currentWallet]);
 
@@ -95,7 +95,7 @@ export default function TransactionDetail() {
       : (currentWallet?.addresses?.[transaction.network as ChainId] || '');
     navigator.clipboard.writeText(addr);
     setCopiedReceiver(true);
-    toast.success('收款方地址已复制');
+    toast.success('已复制', formatAddressShort(addr));
     setTimeout(() => setCopiedReceiver(false), 2000);
   }, [transaction, currentWallet]);
 
@@ -103,7 +103,7 @@ export default function TransactionDetail() {
     if (!transaction?.txHash) return;
     navigator.clipboard.writeText(transaction.txHash);
     setCopiedHash(true);
-    toast.success('已复制到剪贴板');
+    toast.success('已复制', formatTxHashShort(transaction.txHash));
     setTimeout(() => setCopiedHash(false), 2000);
   }, [transaction]);
 
