@@ -187,7 +187,7 @@ export function ContactDetailDrawer({
       } else if (contact) {
         updateContact(contact.id, contactData);
         toast.success('联系人已更新', `${name} 的信息已保存`);
-        setHasChanges(false);
+        onOpenChange(false);
       }
     } catch (error) {
       toast.error('保存失败', '请稍后重试');
