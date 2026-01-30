@@ -286,22 +286,17 @@ export function ContactDetailDrawer({
                     placeholder={getAddressPlaceholder(network)}
                     value={address}
                     onChange={(e) => setAddress(e.target.value.trim())}
-                    className={cn(
-                      "font-mono text-sm",
-                      isAddMode ? "pr-12" : "pr-24"
-                    )}
+                    className="font-mono text-sm pr-24"
                   />
                   <div className="absolute right-1 top-1/2 -translate-y-1/2 flex">
-                    {isAddMode && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-9 w-9"
-                        onClick={() => setShowQRScanner(true)}
-                      >
-                        <Scan className="w-5 h-5 text-muted-foreground" />
-                      </Button>
-                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9"
+                      onClick={() => setShowQRScanner(true)}
+                    >
+                      <Scan className="w-5 h-5 text-muted-foreground" />
+                    </Button>
                     {!isAddMode && address && (
                       <Button
                         variant="ghost"
@@ -395,14 +390,12 @@ export function ContactDetailDrawer({
         </AlertDialog>
       )}
 
-      {/* QR Scanner - Only for add mode */}
-      {isAddMode && (
-        <QRScanner
-          isOpen={showQRScanner}
-          onClose={() => setShowQRScanner(false)}
-          onScan={handleQRScan}
-        />
-      )}
+      {/* QR Scanner */}
+      <QRScanner
+        isOpen={showQRScanner}
+        onClose={() => setShowQRScanner(false)}
+        onScan={handleQRScan}
+      />
     </>
   );
 }
