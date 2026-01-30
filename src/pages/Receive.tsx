@@ -192,10 +192,7 @@ export default function ReceivePage() {
       <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
         <ChainIcon chainId={network.id} size="lg" />
       </div>
-      <div className="flex flex-col items-start flex-1">
-        <span className="font-semibold text-foreground">{network.name}</span>
-        <span className="text-xs text-muted-foreground">{network.shortName}</span>
-      </div>
+      <span className="font-semibold text-foreground flex-1 text-left">{network.name}</span>
       {selectedNetwork.id === network.id && (
         <CheckCircle2 className="w-5 h-5 text-accent" />
       )}
@@ -223,10 +220,7 @@ export default function ReceivePage() {
                     <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center">
                       <ChainIcon chainId={selectedNetwork.id} size="lg" />
                     </div>
-                    <div className="flex flex-col items-start">
-                      <span className="font-semibold text-foreground">{selectedNetwork.name}</span>
-                      <span className="text-xs text-muted-foreground">{selectedNetwork.shortName}</span>
-                    </div>
+                    <span className="font-semibold text-foreground">{selectedNetwork.name}</span>
                   </div>
                   <ChevronDown className="w-5 h-5 text-muted-foreground" />
                 </button>
