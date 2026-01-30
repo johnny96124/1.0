@@ -7,24 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ContactCard } from '@/components/ContactCard';
 import { useWallet } from '@/contexts/WalletContext';
-import { cn } from '@/lib/utils';
-
-const TAG_FILTERS = [
-  { id: 'all', label: '全部' },
-  { id: 'whitelist', label: '白名单' },
-  { id: '客户', label: '客户' },
-  { id: '供应商', label: '供应商' },
-  { id: '官方', label: '官方' },
-];
 
 export default function ContactsPage() {
   const navigate = useNavigate();
   const { contacts } = useWallet();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
 
+  // Sort by lastUsed (most recent first)
   const filteredContacts = useMemo(() => {
-    let result = contacts;
+    let result = [...contacts];
 
     // Apply search filter
     if (searchQuery) {
@@ -36,17 +27,16 @@ export default function ContactsPage() {
       );
     }
 
-    // Apply tag filter
-    if (activeFilter === 'whitelist') {
-      result = result.filter(contact => contact.isWhitelisted);
-    } else if (activeFilter === '官方') {
-      result = result.filter(contact => contact.isOfficial);
-    } else if (activeFilter !== 'all') {
-      result = result.filter(contact => contact.tags.includes(activeFilter));
-    }
+    // Sort by lastUsed
+    result.sort((a, b) => {
+      if (!a.lastUsed && !b.lastUsed) return 0;
+      if (!a.lastUsed) return 1;
+      if (!b.lastUsed) return -1;
+      return new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime();
+    });
 
     return result;
-  }, [contacts, searchQuery, activeFilter]);
+  }, [contacts, searchQuery]);
 
   return (
     <AppLayout
@@ -82,29 +72,6 @@ export default function ContactsPage() {
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             )}
-          </div>
-        </div>
-
-        {/* Filter Tags - Underline style for secondary filters */}
-        <div className="border-b border-border">
-          <div className="flex overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {TAG_FILTERS.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => setActiveFilter(filter.id)}
-                className={cn(
-                  "px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors relative",
-                  activeFilter === filter.id
-                    ? "text-accent"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {filter.label}
-                {activeFilter === filter.id && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-accent rounded-full" />
-                )}
-              </button>
-            ))}
           </div>
         </div>
 
