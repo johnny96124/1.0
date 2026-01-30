@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Lock } from 'lucide-react';
-import { UnlockDrawer } from '@/components/UnlockDrawer';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, Fingerprint } from 'lucide-react';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import coboLogo from '@/assets/cobo-logo.svg';
 
 export default function LockScreenDemo() {
@@ -10,8 +13,17 @@ export default function LockScreenDemo() {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const navigate = useNavigate();
 
+  // Local unlock drawer state
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordInput, setShowPasswordInput] = useState(false);
+
   const handleIconClick = () => {
     setShowUnlockDrawer(true);
+    setShowPasswordInput(false);
+    setPassword('');
+    setError('');
   };
 
   const handleUnlock = () => {
@@ -22,6 +34,40 @@ export default function LockScreenDemo() {
     setTimeout(() => {
       navigate('/home');
     }, 600);
+  };
+
+  const handleBiometricAuth = async () => {
+    setIsLoading(true);
+    setError('');
+    
+    // Simulate biometric authentication
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    setIsLoading(false);
+    handleUnlock();
+  };
+
+  const handlePasswordSubmit = async () => {
+    if (!password.trim()) {
+      setError('请输入密码');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    // Simulate password verification
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // For demo, accept any 6+ character password
+    if (password.length >= 6) {
+      setIsLoading(false);
+      setPassword('');
+      handleUnlock();
+    } else {
+      setIsLoading(false);
+      setError('密码错误，请重试');
+    }
   };
 
   return (
@@ -178,12 +224,100 @@ export default function LockScreenDemo() {
         </motion.div>
       </motion.div>
 
-      {/* Unlock Drawer */}
-      <UnlockDrawer
-        open={showUnlockDrawer}
-        onOpenChange={setShowUnlockDrawer}
-        onUnlock={handleUnlock}
-      />
+      {/* Inline Unlock Drawer - doesn't depend on WalletContext */}
+      <Drawer open={showUnlockDrawer} onOpenChange={() => {}}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="pb-2">
+            <DrawerTitle className="text-center">身份验证</DrawerTitle>
+          </DrawerHeader>
+          
+          <div className="px-6 pb-8 space-y-6">
+            <AnimatePresence mode="wait">
+              {!showPasswordInput ? (
+                <motion.div
+                  key="biometric"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="flex flex-col items-center space-y-6"
+                >
+                  <button
+                    onClick={handleBiometricAuth}
+                    disabled={isLoading}
+                    className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors disabled:opacity-50"
+                  >
+                    <Fingerprint className={cn(
+                      "w-10 h-10 text-primary",
+                      isLoading && "animate-pulse"
+                    )} />
+                  </button>
+                  
+                  <p className="text-sm text-muted-foreground text-center">
+                    点击使用生物识别解锁
+                  </p>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowPasswordInput(true)}
+                    className="text-muted-foreground"
+                  >
+                    使用密码解锁
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="password"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-4"
+                >
+                  <div className="flex justify-center mb-4">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Lock className="w-8 h-8 text-primary" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Input
+                      type="password"
+                      placeholder="请输入支付密码"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setError('');
+                      }}
+                      onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                      className={cn(error && "border-destructive")}
+                    />
+                    {error && (
+                      <p className="text-xs text-destructive">{error}</p>
+                    )}
+                  </div>
+
+                  <Button
+                    className="w-full"
+                    onClick={handlePasswordSubmit}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? '验证中...' : '确认'}
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowPasswordInput(false)}
+                    className="w-full text-muted-foreground"
+                  >
+                    使用生物识别
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
