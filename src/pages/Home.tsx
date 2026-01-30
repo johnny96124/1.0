@@ -505,10 +505,7 @@ export default function HomePage() {
                   >
                     <ChevronDown className="w-4 h-4" />
                   </motion.div>
-                  {showAllAssets 
-                    ? '收起' 
-                    : `展开更多 (${displayAssets.length - INITIAL_ASSETS_COUNT} 个)`
-                  }
+                  {showAllAssets ? '收起' : '展开全部'}
                 </motion.button>
               )}
             </div>
