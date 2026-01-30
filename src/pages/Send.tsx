@@ -367,31 +367,20 @@ export default function SendPage() {
 
                 {/* Chain Filter */}
                 <div className="px-4 pb-3">
-                  <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1">
+                  <div className="flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] py-1">
                     {SUPPORTED_CHAINS.map((chain) => (
                       <button
                         key={chain.id}
                         onClick={() => setAssetFilterChain(chain.id)}
                         className={cn(
-                          "relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all",
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap shrink-0 transition-colors",
                           assetFilterChain === chain.id
-                            ? "text-foreground"
-                            : "bg-muted text-muted-foreground hover:bg-muted/50"
+                            ? "bg-muted text-foreground"
+                            : "border border-border text-muted-foreground hover:bg-muted/30"
                         )}
                       >
-                        {assetFilterChain === chain.id && (
-                          <motion.div
-                            layoutId="sendAssetChainSelector"
-                            className="absolute inset-0 bg-muted rounded-full"
-                            transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                          />
-                        )}
-                        {chain.id !== 'all' && (
-                          <span className="relative z-10">
-                            <ChainIcon chainId={chain.id} size="sm" />
-                          </span>
-                        )}
-                        <span className="relative z-10">{chain.shortName}</span>
+                        <ChainIcon chainId={chain.id} size="sm" />
+                        <span>{chain.name}</span>
                       </button>
                     ))}
                   </div>
