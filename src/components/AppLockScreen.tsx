@@ -10,15 +10,15 @@ export function AppLockScreen() {
   const [showUnlockDrawer, setShowUnlockDrawer] = useState(false);
 
   const handleIconClick = () => {
+    console.log('[AppLock] icon click -> open unlock drawer');
     setShowUnlockDrawer(true);
   };
 
   const handleUnlock = () => {
+    console.log('[AppLock] onUnlock received -> calling unlock()');
     setShowUnlockDrawer(false);
-    // Small delay to let drawer close first, then unlock
-    setTimeout(() => {
-      unlock();
-    }, 100);
+    // Unlock immediately; the overlay will unmount and AnimatePresence will run exit animation.
+    unlock();
   };
 
   return (
