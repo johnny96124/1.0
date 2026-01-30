@@ -134,6 +134,7 @@ export default function ContactFormPage() {
 
   return (
     <AppLayout
+      showNav={false}
       title={isEditing ? '编辑联系人' : '添加联系人'}
       showBack
       onBack={() => navigate('/profile/contacts')}

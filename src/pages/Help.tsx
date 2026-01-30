@@ -122,7 +122,7 @@ export default function HelpPage() {
     : faqItems;
 
   return (
-    <AppLayout title="帮助与支持" showBack>
+    <AppLayout showNav={false} title="帮助与支持" showBack>
       <div className="px-4 py-4 space-y-4">
         {/* Search */}
         <motion.div

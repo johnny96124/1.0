@@ -40,6 +40,7 @@ export default function ContactsPage() {
 
   return (
     <AppLayout
+      showNav={false}
       title="地址簿"
       showBack
       onBack={() => navigate('/profile')}

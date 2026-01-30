@@ -42,7 +42,7 @@ export default function ContactDetailPage() {
 
   if (!contact) {
     return (
-      <AppLayout title="联系人详情" showBack onBack={() => navigate('/profile/contacts')}>
+      <AppLayout showNav={false} title="联系人详情" showBack onBack={() => navigate('/profile/contacts')}>
         <div className="flex items-center justify-center h-full">
           <p className="text-muted-foreground">联系人不存在</p>
         </div>
@@ -83,6 +83,7 @@ export default function ContactDetailPage() {
 
   return (
     <AppLayout
+      showNav={false}
       title="联系人详情"
       showBack
       onBack={() => navigate('/profile/contacts')}

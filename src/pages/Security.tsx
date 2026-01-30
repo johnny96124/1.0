@@ -86,7 +86,7 @@ export default function SecurityPage() {
   };
 
   return (
-    <AppLayout title="安全与风控" showBack>
+    <AppLayout showNav={false} title="安全与风控" showBack>
       <div className="px-4 py-4 space-y-4">
         {/* Security Score Card */}
         <motion.div
