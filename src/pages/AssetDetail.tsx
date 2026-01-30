@@ -134,12 +134,14 @@ export default function AssetDetailPage() {
               </div>
             </div>
           </div>
-          {/* Chain Selector moved to header */}
-          <ChainSelector
-            selectedChain={selectedChain}
-            onSelectChain={setSelectedChain}
-            className="px-0"
-          />
+          {/* Chain Selector - only show if asset exists on multiple chains */}
+          {assetData.chains.length > 1 && (
+            <ChainSelector
+              selectedChain={selectedChain}
+              onSelectChain={setSelectedChain}
+              className="px-0"
+            />
+          )}
         </div>
 
         <div className="flex-1 overflow-auto px-4 py-4">
