@@ -1,213 +1,216 @@
 
-# 地址簿功能简化与优化计划
+# 隐藏底部导航栏 - 账户设置子页面修改计划
 
-## 当前状态分析
+## 问题分析
 
-地址簿功能目前包含以下特性：
-- 分类筛选标签（全部、白名单、客户、供应商、官方）
-- 彩色头像（基于名称首字母）
-- 白名单标记与逻辑
-- 官方标记
-- 标签系统
-- 风险扫描
+从截图中可以看到，账户设置页面（/profile）显示底部导航栏是正确的，因为它是主导航入口之一。但当用户点击进入任何子功能页面时，应该隐藏底部导航栏，让用户专注于当前功能。
 
-根据你的建议，需要进行简化。
+根据 `AppLayout` 组件的设计，`showNav` 默认值为 `true`，因此未显式设置 `showNav={false}` 的页面会默认显示导航栏。
 
 ---
 
-## 计划修改内容
+## 当前状态检查结果
 
-### 1. 移除分类筛选
+### 已正确设置 `showNav={false}` 的页面
 
-**文件**: `src/pages/Contacts.tsx`
+| 页面 | 路由 | 状态 |
+|------|------|------|
+| PersonalInfo | /profile/info | 已设置 |
+| WalletManagement | /profile/wallets | 已设置 |
 
-- 删除 `TAG_FILTERS` 常量和分类标签栏
-- 删除 `activeFilter` 状态
-- 简化 `filteredContacts` 逻辑（仅保留搜索过滤）
+### 需要添加 `showNav={false}` 的页面
 
-### 2. 移除头像
+以下页面从 Profile 页面导航进入，但未设置 `showNav={false}`：
 
-**文件**: `src/components/ContactCard.tsx`
+| 页面 | 路由 | 当前设置 | 问题 |
+|------|------|----------|------|
+| Security | /profile/security | 无 showNav | 显示导航栏 |
+| DeviceManagement | /profile/devices | 无 showNav | 显示导航栏 |
+| Contacts | /profile/contacts | 无 showNav | 显示导航栏 |
+| ContactDetail | /profile/contacts/:id | 无 showNav | 显示导航栏 |
+| ContactForm | /profile/contacts/add, /profile/contacts/edit/:id | 无 showNav | 显示导航栏 |
+| Notifications | /profile/notifications | 无 showNav | 显示导航栏 |
+| Help | /profile/help | 无 showNav | 显示导航栏 |
+| TSSBackupManagement | /profile/security/tss-backup | 未使用 AppLayout | 无导航栏（正确） |
+| PSPCenter | /psp | 无 showNav | 显示导航栏 |
+| PSPDetail | /psp/:id | 无 showNav | 显示导航栏 |
+| PSPConnect | /psp/connect | 无 showNav | 显示导航栏 |
+| PSPPermissions | /psp/:id/permissions | 无 showNav | 显示导航栏 |
+| Receive | /receive | 无 showNav | 显示导航栏 |
 
-- 删除彩色圆形头像
-- 调整布局为纯文本左对齐样式
+---
 
-**文件**: `src/pages/ContactDetail.tsx`
+## 修改计划
 
-- 删除详情页顶部的大头像
+### 1. Security.tsx
+**行 89**
+```tsx
+// 改前
+<AppLayout title="安全与风控" showBack>
 
-### 3. 统一展示格式（与转账页保持一致）
-
-参考 `Send.tsx` 中最近交易的布局：
-
-```text
-联系人名称        链标签（EVM/TRX/BSC）
-0x1234567890abcdef...（完整地址换行）
+// 改后  
+<AppLayout showNav={false} title="安全与风控" showBack>
 ```
 
-**文件**: `src/components/ContactCard.tsx`
+### 2. DeviceManagement.tsx
+**行 134**
+```tsx
+// 改前
+<AppLayout title="登录历史" showBack>
 
-修改后的结构：
-- 第一行：名称 + 链标签（文字形式：EVM / TRX / BSC）
-- 第二行：完整地址（`break-all`）
-- 移除最近使用时间
+// 改后
+<AppLayout showNav={false} title="登录历史" showBack>
+```
 
-### 4. 移除白名单逻辑
+### 3. Contacts.tsx
+**行 42-45**
+```tsx
+// 改前
+<AppLayout
+  title="地址簿"
+  showBack
 
-**文件**: `src/types/wallet.ts`
+// 改后
+<AppLayout
+  showNav={false}
+  title="地址簿"
+  showBack
+```
 
-- `Contact` 接口中 `isWhitelisted` 字段保留但不再使用（避免破坏性修改）
+### 4. ContactDetail.tsx
+**行 45** 和 **行 85-88**
+```tsx
+// 改前（两处）
+<AppLayout title="联系人详情" showBack ...
 
-**文件**: `src/components/ContactCard.tsx`
+// 改后
+<AppLayout showNav={false} title="联系人详情" showBack ...
+```
 
-- 移除白名单标签显示
+### 5. ContactForm.tsx
+**行 136-139**
+```tsx
+// 改前
+<AppLayout
+  title={isEditing ? '编辑联系人' : '添加联系人'}
+  showBack
 
-**文件**: `src/pages/Contacts.tsx`
+// 改后
+<AppLayout
+  showNav={false}
+  title={isEditing ? '编辑联系人' : '添加联系人'}
+  showBack
+```
 
-- 移除白名单筛选逻辑
+### 6. Notifications.tsx
+**行 68**
+```tsx
+// 改前
+<AppLayout title="通知设置" showBack>
 
-**文件**: `src/pages/ContactDetail.tsx`
+// 改后
+<AppLayout showNav={false} title="通知设置" showBack>
+```
 
-- 移除白名单标签显示
-- 移除"添加到白名单/从白名单移除"按钮
+### 7. Help.tsx
+**行 125**
+```tsx
+// 改前
+<AppLayout title="帮助与支持" showBack>
 
-**文件**: `src/pages/ContactForm.tsx`
+// 改后
+<AppLayout showNav={false} title="帮助与支持" showBack>
+```
 
-- 移除白名单开关（Switch）
+### 8. PSPCenter.tsx
+**行 357-360**
+```tsx
+// 改前
+<AppLayout 
+  title="服务商管理" 
+  showBack 
+  onBack={() => navigate(-1)}
 
-### 5. 简化联系人表单
+// 改后
+<AppLayout 
+  showNav={false}
+  title="服务商管理" 
+  showBack 
+  onBack={() => navigate(-1)}
+```
 
-**文件**: `src/pages/ContactForm.tsx`
+### 9. PSPDetail.tsx
+**行 52** 和 **行 116-119**
+```tsx
+// 改前（两处）
+<AppLayout title="服务商详情" showBack ...
 
-- 移除标签选择（tags）
-- 移除白名单开关
-- 保留：名称、网络选择、地址、备注
+// 改后
+<AppLayout showNav={false} title="服务商详情" showBack ...
+```
 
-### 6. 简化联系人详情页
+### 10. PSPConnect.tsx
+**行 662-665**
+```tsx
+// 改前
+<AppLayout 
+  title={getTitle()}
+  showBack={currentStep !== 'submitted'}
+  onBack={handleBack}
 
-**文件**: `src/pages/ContactDetail.tsx`
+// 改后
+<AppLayout 
+  showNav={false}
+  title={getTitle()}
+  showBack={currentStep !== 'submitted'}
+  onBack={handleBack}
+```
 
-- 移除头像
-- 移除白名单相关按钮和显示
-- 移除官方星标显示
-- 移除标签显示
-- 简化布局：名称 + 链标签 + 地址 + 备注 + 交易记录
-- 保留底部"转账给 TA"和"删除联系人"
+### 11. PSPPermissions.tsx
+**行 77** 和 **行 103-106**
+```tsx
+// 改前（两处）
+<AppLayout title="权限管理" showBack ...
 
-### 7. 清理 mock 数据
+// 改后
+<AppLayout showNav={false} title="权限管理" showBack ...
+```
 
-**文件**: `src/contexts/WalletContext.tsx`
+### 12. Receive.tsx
+**行 205**
+```tsx
+// 改前
+<AppLayout showBack title="收款" onBack={handleBack}>
 
-- 简化 `mockContacts` 数据，移除 `tags`、`isWhitelisted`、`isOfficial` 等字段的有效值
-
----
-
-## 额外建议（可选）
-
-| 功能 | 价值 | 建议 |
-|------|------|------|
-| 最近使用排序 | 让常用联系人更容易找到 | 保留 `lastUsed` 字段，列表按最近使用排序 |
-| 地址复制功能 | 方便用户快速复制 | 保留卡片可点击复制地址 |
-| 搜索功能 | 快速定位联系人 | 保留 |
-| 网络筛选 | 转账时只显示兼容地址 | 考虑在转账地址选择时按当前资产网络筛选 |
-| 从交易记录添加 | 快速保存新地址 | 可在交易详情页添加"保存到地址簿"入口 |
-| 批量删除 | 清理无用地址 | 暂不添加，保持简洁 |
+// 改后
+<AppLayout showNav={false} showBack title="收款" onBack={handleBack}>
+```
 
 ---
 
 ## 文件变更汇总
 
-| 文件 | 修改类型 | 描述 |
-|------|----------|------|
-| `src/pages/Contacts.tsx` | 简化 | 移除分类筛选栏 |
-| `src/components/ContactCard.tsx` | 重构 | 移除头像，统一为左对齐文本格式 |
-| `src/pages/ContactDetail.tsx` | 简化 | 移除头像、白名单、标签、官方标记 |
-| `src/pages/ContactForm.tsx` | 简化 | 移除标签选择、白名单开关 |
-| `src/contexts/WalletContext.tsx` | 清理 | 简化 mock 数据 |
+| 文件 | 修改位置数 | 描述 |
+|------|-----------|------|
+| `src/pages/Security.tsx` | 1 | 添加 showNav={false} |
+| `src/pages/DeviceManagement.tsx` | 1 | 添加 showNav={false} |
+| `src/pages/Contacts.tsx` | 1 | 添加 showNav={false} |
+| `src/pages/ContactDetail.tsx` | 2 | 添加 showNav={false}（两处 AppLayout） |
+| `src/pages/ContactForm.tsx` | 1 | 添加 showNav={false} |
+| `src/pages/Notifications.tsx` | 1 | 添加 showNav={false} |
+| `src/pages/Help.tsx` | 1 | 添加 showNav={false} |
+| `src/pages/PSPCenter.tsx` | 1 | 添加 showNav={false} |
+| `src/pages/PSPDetail.tsx` | 2 | 添加 showNav={false}（两处 AppLayout） |
+| `src/pages/PSPConnect.tsx` | 1 | 添加 showNav={false} |
+| `src/pages/PSPPermissions.tsx` | 2 | 添加 showNav={false}（两处 AppLayout） |
+| `src/pages/Receive.tsx` | 1 | 添加 showNav={false} |
+
+共 **12 个文件**，**15 处修改**
 
 ---
 
-## 视觉效果预览
+## 说明
 
-### 地址簿列表（简化后）
-
-```text
-┌────────────────────────────────────────┐
-│ ← 地址簿                          [+]  │
-├────────────────────────────────────────┤
-│ 🔍 搜索名称或地址                       │
-├────────────────────────────────────────┤
-│ ABC Trading Co.              EVM      │
-│ 0x1234567890abcdef1234567890abcdef...  │
-│                                    >   │
-├────────────────────────────────────────┤
-│ Supplier XYZ                  TRX      │
-│ T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb    │
-│                                    >   │
-└────────────────────────────────────────┘
-```
-
-### 联系人详情（简化后）
-
-```text
-┌────────────────────────────────────────┐
-│ ← 联系人详情                      [✏]  │
-├────────────────────────────────────────┤
-│ ABC Trading Co.                        │
-├────────────────────────────────────────┤
-│ 🔷 Ethereum                            │
-│ ┌──────────────────────────────────┐   │
-│ │ 0x1234567890abcdef123456789...   │   │
-│ │                            [复制] │   │
-│ └──────────────────────────────────┘   │
-├────────────────────────────────────────┤
-│ 备注                                   │
-│ 长期合作客户                            │
-├────────────────────────────────────────┤
-│ 交易记录                               │
-│ 转出 500 USDT              已确认      │
-│ 3小时前                                │
-├────────────────────────────────────────┤
-│ [🗑 删除联系人]                         │
-├────────────────────────────────────────┤
-│ [       转账给 TA       ]              │
-└────────────────────────────────────────┘
-```
-
----
-
-## 技术细节
-
-### ContactCard 新结构
-
-```tsx
-<button className="w-full p-4 rounded-xl border text-left">
-  <div className="flex items-center justify-between">
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-2">
-        <span className="font-medium">{name || '未命名地址'}</span>
-        <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
-          {chainLabel}
-        </span>
-      </div>
-      <p className="text-sm text-muted-foreground font-mono break-all mt-1">
-        {address}
-      </p>
-    </div>
-    <ChevronRight className="w-5 h-5" />
-  </div>
-</button>
-```
-
-### 链标签映射
-
-```typescript
-const getChainLabel = (network: string) => {
-  switch (network) {
-    case 'ethereum': return 'EVM';
-    case 'tron': return 'TRX';
-    case 'bsc': return 'BSC';
-    default: return network.toUpperCase();
-  }
-};
-```
+- **主页面**（Home, History, Profile）应保留底部导航栏
+- **所有子页面**进入后应隐藏导航栏，用户通过返回按钮导航
+- 这符合移动端应用的标准导航模式
