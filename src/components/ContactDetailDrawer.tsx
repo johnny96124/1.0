@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Send, Trash2, Copy, Check, Scan, AlertTriangle, Loader2 } from 'lucide-react';
+import { Trash2, Copy, Check, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,7 +36,6 @@ interface ContactDetailDrawerProps {
 }
 
 export function ContactDetailDrawer({ contact, open, onOpenChange }: ContactDetailDrawerProps) {
-  const navigate = useNavigate();
   const { contacts, updateContact, removeContact, scanAddressRisk } = useWallet();
 
   const [name, setName] = useState('');
@@ -168,16 +166,6 @@ export function ContactDetailDrawer({ contact, open, onOpenChange }: ContactDeta
     toast.success('联系人已删除', `${contact.name || '未命名地址'} 已从地址簿移除`);
     onOpenChange(false);
     setShowDeleteDialog(false);
-  };
-
-  const handleTransfer = () => {
-    onOpenChange(false);
-    navigate('/send', { 
-      state: { 
-        prefilledAddress: address,
-        prefilledNetwork: network 
-      } 
-    });
   };
 
   const selectedChain = AVAILABLE_CHAINS.find(c => c.id === network) || AVAILABLE_CHAINS[0];
@@ -341,25 +329,14 @@ export function ContactDetailDrawer({ contact, open, onOpenChange }: ContactDeta
             </div>
 
             {/* Bottom Actions */}
-            <div className="p-4 border-t border-border/50 space-y-3">
-              {hasChanges && (
-                <Button
-                  onClick={handleSave}
-                  disabled={isSaving || !name || !address || !isValidAddress}
-                  size="lg"
-                  className="w-full"
-                >
-                  {isSaving ? '保存中...' : '确认修改'}
-                </Button>
-              )}
+            <div className="p-4 border-t border-border/50">
               <Button
-                variant={hasChanges ? "outline" : "default"}
-                onClick={handleTransfer}
+                onClick={handleSave}
+                disabled={isSaving || !name || !address || !isValidAddress || !hasChanges}
                 size="lg"
-                className="w-full gap-2"
+                className="w-full"
               >
-                <Send className="w-5 h-5" />
-                转账给 TA
+                {isSaving ? '保存中...' : '确认修改'}
               </Button>
             </div>
           </div>
