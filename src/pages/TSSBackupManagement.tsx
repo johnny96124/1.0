@@ -335,22 +335,22 @@ export default function TSSBackupManagement() {
               onSubmit={handleCloudBackup}
               submitLabel="备份到 iCloud"
               showBackButton={false}
-            />
-            
-            {/* Cloud Backup Tips */}
-            <div className="mt-6 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
-              <div className="flex gap-3">
-                <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <h4 className="text-sm font-medium">重要提示</h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• 备份将加密存储在您的 iCloud 账户中</li>
-                    <li>• 备份密码无法找回，请务必牢记</li>
-                    <li>• 换机时使用相同 Apple ID 登录即可恢复</li>
-                  </ul>
+            >
+              {/* Cloud Backup Tips */}
+              <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                <div className="flex gap-3">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-medium">重要提示</h4>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• 备份将加密存储在您的 iCloud 账户中</li>
+                      <li>• 备份密码无法找回，请务必牢记</li>
+                      <li>• 换机时使用相同 Apple ID 登录即可恢复</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
+            </PasswordForm>
           </div>
         </DrawerContent>
       </Drawer>
@@ -376,22 +376,22 @@ export default function TSSBackupManagement() {
               onConfirmedChange={setConfirmed}
               onSubmit={handleLocalBackup}
               submitLabel="导出备份文件"
-            />
-            
-            {/* Local Backup Tips */}
-            <div className="mt-6 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
-              <div className="flex gap-3">
-                <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <h4 className="text-sm font-medium">重要提示</h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>• 备份文件将导出到您的设备</li>
-                    <li>• 备份密码无法找回，请务必牢记</li>
-                    <li>• 请将备份文件保存在安全位置（如电脑或 U 盘）</li>
-                  </ul>
+            >
+              {/* Local Backup Tips */}
+              <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                <div className="flex gap-3">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <h4 className="text-sm font-medium">重要提示</h4>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>• 备份文件将导出到您的设备</li>
+                      <li>• 备份密码无法找回，请务必牢记</li>
+                      <li>• 请将备份文件保存在安全位置（如电脑或 U 盘）</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
+            </PasswordForm>
           </div>
         </DrawerContent>
       </Drawer>
@@ -415,6 +415,7 @@ interface PasswordFormProps {
   onBack?: () => void;
   submitLabel: string;
   showBackButton?: boolean;
+  children?: React.ReactNode;
 }
 
 function PasswordForm({
@@ -432,6 +433,7 @@ function PasswordForm({
   onBack,
   submitLabel,
   showBackButton,
+  children,
 }: PasswordFormProps) {
   const isValid = password.length >= 8 && 
     /[a-zA-Z]/.test(password) && 
@@ -489,7 +491,13 @@ function PasswordForm({
         </label>
       </div>
       
-      <div className={`flex gap-3 pt-2 ${showBackButton ? '' : 'pt-4'}`}>
+      {children && (
+        <div className="pt-4">
+          {children}
+        </div>
+      )}
+      
+      <div className={`flex gap-3 pt-4 ${showBackButton ? '' : ''}`}>
         {showBackButton && onBack && (
           <Button variant="outline" className="flex-1" onClick={onBack}>
             返回
