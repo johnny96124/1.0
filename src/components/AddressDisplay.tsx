@@ -38,21 +38,28 @@ export function AddressDisplay({
     <button
       onClick={handleCopy}
       className={cn(
-        "flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors group",
+        "flex items-start gap-2 px-3 py-2.5 rounded-xl bg-muted/50 hover:bg-muted transition-colors group w-full text-left",
         className
       )}
     >
-      {label && (
-        <span className="text-xs text-muted-foreground">{label}</span>
-      )}
-      <span className="font-mono text-xs text-foreground/80">
-        {formatAddress(address)}
-      </span>
-      {copied ? (
-        <Check className="w-3.5 h-3.5 text-success" />
-      ) : (
-        <Copy className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
-      )}
+      <div className="flex-1 min-w-0">
+        {label && (
+          <span className="text-xs text-muted-foreground block mb-1">{label}</span>
+        )}
+        <span className={cn(
+          "font-mono text-sm text-foreground/80 break-all",
+          showFull ? "block" : ""
+        )}>
+          {formatAddress(address)}
+        </span>
+      </div>
+      <div className="flex-shrink-0 pt-0.5">
+        {copied ? (
+          <Check className="w-4 h-4 text-success" />
+        ) : (
+          <Copy className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+        )}
+      </div>
     </button>
   );
 }
