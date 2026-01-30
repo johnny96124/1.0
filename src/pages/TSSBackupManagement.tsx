@@ -282,20 +282,6 @@ export default function TSSBackupManagement() {
           </Card>
         </div>
 
-        {/* Tips Card */}
-        <Card className="p-4 bg-amber-500/5 border-amber-500/20">
-          <div className="flex gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium">重要提示</h4>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• 建议同时完成云端和本地备份，确保双重保障</li>
-                <li>• 备份密码无法找回，请务必牢记</li>
-                <li>• 重新备份会使用新密码，旧备份仍可使用旧密码恢复</li>
-              </ul>
-            </div>
-          </div>
-        </Card>
       </div>
 
       {/* Re-backup Confirmation Dialog */}
@@ -350,6 +336,21 @@ export default function TSSBackupManagement() {
               submitLabel="备份到 iCloud"
               showBackButton={false}
             />
+            
+            {/* Cloud Backup Tips */}
+            <div className="mt-6 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+              <div className="flex gap-3">
+                <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-medium">重要提示</h4>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• 备份将加密存储在您的 iCloud 账户中</li>
+                    <li>• 备份密码无法找回，请务必牢记</li>
+                    <li>• 换机时使用相同 Apple ID 登录即可恢复</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
@@ -376,6 +377,21 @@ export default function TSSBackupManagement() {
               onSubmit={handleLocalBackup}
               submitLabel="导出备份文件"
             />
+            
+            {/* Local Backup Tips */}
+            <div className="mt-6 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+              <div className="flex gap-3">
+                <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-medium">重要提示</h4>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• 备份文件将导出到您的设备</li>
+                    <li>• 备份密码无法找回，请务必牢记</li>
+                    <li>• 请将备份文件保存在安全位置（如电脑或 U 盘）</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
