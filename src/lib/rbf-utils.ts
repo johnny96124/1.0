@@ -11,7 +11,7 @@ import { Transaction, ChainId } from '@/types/wallet';
 const RBF_SUPPORTED_CHAINS = ['ethereum', 'bsc'];
 
 // Chains that don't support RBF
-const RBF_UNSUPPORTED_CHAINS = ['tron'];
+const RBF_UNSUPPORTED_CHAINS = ['tron', 'solana'];
 
 export type SpeedUpTier = 'low' | 'medium' | 'high';
 
@@ -156,6 +156,8 @@ export function getGasToken(network: string): string {
       return 'BNB';
     case 'tron':
       return 'TRX';
+    case 'solana':
+      return 'SOL';
     case 'bitcoin':
       return 'BTC';
     default:

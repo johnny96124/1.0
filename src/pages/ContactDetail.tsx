@@ -21,15 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
-const getChainName = (network: string) => {
-  switch (network) {
-    case 'ethereum': return 'Ethereum';
-    case 'tron': return 'Tron';
-    case 'bsc': return 'BNB Chain';
-    default: return network;
-  }
-};
+import { getChainName } from '@/lib/chain-utils';
 
 export default function ContactDetailPage() {
   const navigate = useNavigate();
@@ -115,7 +107,7 @@ export default function ContactDetailPage() {
             <div className="p-4 rounded-2xl bg-card border border-border/50">
               <div className="flex items-center gap-2 mb-3">
                 <ChainIcon chainId={contact.network as ChainId} size="sm" />
-                <span className="text-sm font-medium">{getChainName(contact.network)}</span>
+                <span className="text-sm font-medium">{getChainName(contact.network as ChainId)}</span>
               </div>
               <button
                 onClick={handleCopyAddress}

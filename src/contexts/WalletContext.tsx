@@ -23,7 +23,8 @@ const mockAssetsWallet1: Asset[] = [
   // BSC chain
   { symbol: 'USDT', name: 'Tether USD', balance: 1580.00, usdValue: 1580.00, change24h: 0.01, icon: 'USDT', network: 'bsc' },
   { symbol: 'BNB', name: 'BNB', balance: 3.5, usdValue: 2100.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
-  { symbol: 'SOL', name: 'Solana', balance: 12.5, usdValue: 2312.50, change24h: 3.2, icon: 'SOL', network: 'ethereum' },
+  { symbol: 'SOL', name: 'Solana', balance: 12.5, usdValue: 2312.50, change24h: 3.2, icon: 'SOL', network: 'solana' },
+  { symbol: 'USDT', name: 'Tether USD', balance: 1000.00, usdValue: 1000.00, change24h: 0.01, icon: 'USDT', network: 'solana' },
   { symbol: 'MATIC', name: 'Polygon', balance: 2500, usdValue: 1300.00, change24h: 2.8, icon: 'MATIC', network: 'ethereum' },
   { symbol: 'DOGE', name: 'Dogecoin', balance: 5000, usdValue: 1900.00, change24h: 5.2, icon: 'DOGE', network: 'bsc' },
 ];
@@ -61,6 +62,9 @@ const mockAssetsNewWallet: Asset[] = [
   // BSC chain
   { symbol: 'USDT', name: 'Tether USD', balance: 1200.00, usdValue: 1200.00, change24h: 0.01, icon: 'USDT', network: 'bsc' },
   { symbol: 'BNB', name: 'BNB', balance: 2.0, usdValue: 1200.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
+  // Solana chain
+  { symbol: 'SOL', name: 'Solana', balance: 5.0, usdValue: 925.00, change24h: 3.2, icon: 'SOL', network: 'solana' },
+  { symbol: 'USDT', name: 'Tether USD', balance: 800.00, usdValue: 800.00, change24h: 0.01, icon: 'USDT', network: 'solana' },
 ];
 
 // Wallet ID to assets mapping
@@ -994,6 +998,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
           tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
           bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+          solana: `${Array.from({length: 44}, () => '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 58)]).join('')}`,
         },
         createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
@@ -1014,6 +1019,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
           tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
           bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+          solana: `${Array.from({length: 44}, () => '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 58)]).join('')}`,
         },
         createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
@@ -1034,6 +1040,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
           tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
           bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+          solana: `${Array.from({length: 44}, () => '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 58)]).join('')}`,
         },
         createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
@@ -1215,6 +1222,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
         tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
         bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
+        solana: `${Array.from({length: 44}, () => '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 58)]).join('')}`,
       },
       createdAt: new Date(),
       isBackedUp: false,
@@ -1317,6 +1325,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       ethereum: { token: 'ETH', amount: 0.00072, feeUsd: 2.5 },
       tron: { token: 'TRX', amount: 22.5, feeUsd: 2.5 },
       bsc: { token: 'BNB', amount: 0.0012, feeUsd: 0.5 },
+      solana: { token: 'SOL', amount: 0.00025, feeUsd: 0.05 },
       all: { token: 'ETH', amount: 0.00072, feeUsd: 2.5 },
     };
     
@@ -1341,7 +1350,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       gasAmount: gas.amount,
       gasToken: gas.token,
       nonce: Math.floor(Math.random() * 100),
-      isRbfEnabled: network !== 'tron',
+      isRbfEnabled: network !== 'tron' && network !== 'solana',
       memo,
       riskScore: 'green',
     };

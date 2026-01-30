@@ -12,16 +12,16 @@ export interface TokenInfo {
 
 // Comprehensive list of popular tokens
 export const AVAILABLE_TOKENS: TokenInfo[] = [
-  // Stablecoins
-  { symbol: 'USDT', name: 'Tether USD', networks: ['ethereum', 'tron', 'bsc'], price: 1.00, change24h: 0.01, category: 'stablecoin' },
-  { symbol: 'USDC', name: 'USD Coin', networks: ['ethereum', 'bsc'], price: 1.00, change24h: 0.00, category: 'stablecoin' },
+// Stablecoins
+  { symbol: 'USDT', name: 'Tether USD', networks: ['ethereum', 'tron', 'bsc', 'solana'], price: 1.00, change24h: 0.01, category: 'stablecoin' },
+  { symbol: 'USDC', name: 'USD Coin', networks: ['ethereum', 'bsc', 'solana'], price: 1.00, change24h: 0.00, category: 'stablecoin' },
   { symbol: 'DAI', name: 'Dai Stablecoin', networks: ['ethereum'], price: 1.00, change24h: 0.02, category: 'stablecoin' },
   
   // Layer 1
   { symbol: 'BTC', name: 'Bitcoin', networks: ['ethereum'], price: 97500.00, change24h: 1.85, category: 'layer1' },
   { symbol: 'ETH', name: 'Ethereum', networks: ['ethereum'], price: 3500.00, change24h: 2.34, category: 'layer1' },
   { symbol: 'BNB', name: 'BNB', networks: ['bsc'], price: 600.00, change24h: 1.5, category: 'layer1' },
-  { symbol: 'SOL', name: 'Solana', networks: ['ethereum'], price: 185.00, change24h: 3.2, category: 'layer1' },
+  { symbol: 'SOL', name: 'Solana', networks: ['solana'], price: 185.00, change24h: 3.2, category: 'layer1' },
   { symbol: 'TRX', name: 'Tron', networks: ['tron'], price: 0.11, change24h: -1.2, category: 'layer1' },
   { symbol: 'ADA', name: 'Cardano', networks: ['ethereum'], price: 0.95, change24h: 2.1, category: 'layer1' },
   { symbol: 'AVAX', name: 'Avalanche', networks: ['ethereum'], price: 42.50, change24h: 4.2, category: 'layer1' },
