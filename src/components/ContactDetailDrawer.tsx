@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Trash2, Copy, Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +9,7 @@ import { toast } from '@/lib/toast';
 import { Contact, ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
+import { validateAddress, getAddressPlaceholder, getChainName, isEVMChain } from '@/lib/chain-utils';
 import {
   Drawer,
   DrawerContent,
@@ -90,18 +90,6 @@ export function ContactDetailDrawer({
     }
   }, [name, address, network, notes, contact, isAddMode]);
 
-  // Validate address format
-  const validateAddress = (addr: string, chain: ChainId): boolean => {
-    if (!addr) return false;
-    if (chain === 'ethereum' || chain === 'bsc') {
-      return /^0x[a-fA-F0-9]{40}$/.test(addr);
-    }
-    if (chain === 'tron') {
-      return /^T[a-zA-Z0-9]{33}$/.test(addr);
-    }
-    return false;
-  };
-
   const isValidAddress = validateAddress(address, network);
 
   // Show validation error only when user has entered something
@@ -134,7 +122,7 @@ export function ContactDetailDrawer({
     }
 
     if (!isValidAddress) {
-      toast.error('地址格式不正确', `请输入有效的 ${network === 'tron' ? 'Tron' : 'EVM'} 地址`);
+      toast.error('地址格式不正确', `请输入有效的 ${getChainName(network)} 地址`);
       return;
     }
 
@@ -246,15 +234,16 @@ export function ContactDetailDrawer({
                       {AVAILABLE_CHAINS.map((chain) => (
                         <button
                           key={chain.id}
-                          onClick={() => {
-                            setNetwork(chain.id);
-                            setShowNetworkDrawer(false);
-                            // Clear address if switching between incompatible networks
-                            if ((chain.id === 'tron' && address.startsWith('0x')) ||
-                                ((chain.id === 'ethereum' || chain.id === 'bsc') && address.startsWith('T'))) {
-                              setAddress('');
-                            }
-                          }}
+                        onClick={() => {
+                          setNetwork(chain.id);
+                          setShowNetworkDrawer(false);
+                          // Clear address if switching between incompatible networks
+                          const currentIsEVM = isEVMChain(network);
+                          const newIsEVM = isEVMChain(chain.id);
+                          if (currentIsEVM !== newIsEVM && address) {
+                            setAddress('');
+                          }
+                        }}
                           className={cn(
                             "w-full flex items-center gap-3 p-4 rounded-xl transition-colors",
                             network === chain.id
@@ -278,10 +267,10 @@ export function ContactDetailDrawer({
               <div className="space-y-2">
                 <Label htmlFor="drawer-address">地址 *</Label>
                 <div className="flex items-center gap-2">
-                  <Input
-                    id="drawer-address"
-                    placeholder={network === 'tron' ? 'T...' : '0x...'}
-                    value={address}
+                <Input
+                  id="drawer-address"
+                  placeholder={getAddressPlaceholder(network)}
+                  value={address}
                     onChange={(e) => setAddress(e.target.value.trim())}
                     className="flex-1 font-mono text-sm"
                   />

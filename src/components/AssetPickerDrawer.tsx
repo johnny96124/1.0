@@ -6,6 +6,7 @@ import { Asset, ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
+import { getChainShortName } from '@/lib/chain-utils';
 import {
   Drawer,
   DrawerContent,
@@ -76,11 +77,6 @@ export function AssetPickerDrawer({
         setActiveChain('all');
       }, 300);
     }
-  };
-
-  const getChainName = (chainId: ChainId): string => {
-    const chain = SUPPORTED_CHAINS.find(c => c.id === chainId);
-    return chain?.shortName || chainId;
   };
 
   return (
@@ -195,7 +191,7 @@ export function AssetPickerDrawer({
                               {asset.symbol}
                             </span>
                             <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                              {getChainName(asset.network)}
+                              {getChainShortName(asset.network)}
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground truncate mt-0.5">

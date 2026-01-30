@@ -31,6 +31,7 @@ const MOCK_ADDRESSES: Record<Exclude<ChainId, 'all'>, string> = {
   ethereum: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD91',
   tron: 'TN7qZLpmCvTnfbXnYFMBEZAjuZwKyxqvMb',
   bsc: '0x8B4c5A9d3E7f1C2b0A6D8E9F4C3B2A1E7D6C5B4A',
+  solana: '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV',
 };
 
 export default function ReceivePage() {

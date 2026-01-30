@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
 import { RiskColor, SUPPORTED_CHAINS, ChainId, Asset } from '@/types/wallet';
+import { getChainShortName, getChainName, validateAddress as validateChainAddress } from '@/lib/chain-utils';
 import { QRScanner } from '@/components/QRScanner';
 import { ParsedQRData } from '@/lib/qr-parser';
 import { NumericKeypad } from '@/components/NumericKeypad';
@@ -171,17 +172,11 @@ export default function SendPage() {
     toast.success('已改为测试金额');
   };
 
-  // Simple address validation (basic format check)
+  // Simple address validation using unified chain-utils
   const isAddressValid = useMemo(() => {
-    if (!address || address.length < 20) return false;
-    // ETH/BSC address format
-    if (address.startsWith('0x') && address.length === 42) return true;
-    // TRON address format
-    if (address.startsWith('T') && address.length === 34) return true;
-    // BTC address formats
-    if ((address.startsWith('1') || address.startsWith('3') || address.startsWith('bc1')) && address.length >= 26) return true;
-    return false;
-  }, [address]);
+    if (!address || address.length < 20 || !selectedAsset) return false;
+    return validateChainAddress(address, selectedAsset.network);
+  }, [address, selectedAsset]);
 
   const handleSelectAsset = (asset: Asset) => {
     setSelectedAsset(asset);
@@ -305,10 +300,6 @@ export default function SendPage() {
     }
   };
 
-  const getChainName = (chainId: ChainId): string => {
-    const chain = SUPPORTED_CHAINS.find(c => c.id === chainId);
-    return chain?.shortName || chainId;
-  };
 
   return (
     <AppLayout showNav={false} showSecurityBanner={false}>

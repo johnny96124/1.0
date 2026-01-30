@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Contact } from '@/types/wallet';
+import { Contact, ChainId } from '@/types/wallet';
+import { getChainLabel } from '@/lib/chain-utils';
 
 interface ContactCardProps {
   contact: Contact;
@@ -9,15 +10,6 @@ interface ContactCardProps {
   className?: string;
   showArrow?: boolean;
 }
-
-const getChainLabel = (network: string) => {
-  switch (network) {
-    case 'ethereum': return 'EVM';
-    case 'tron': return 'TRX';
-    case 'bsc': return 'BSC';
-    default: return network.toUpperCase();
-  }
-};
 
 export function ContactCard({ 
   contact, 
@@ -43,7 +35,7 @@ export function ContactCard({
             {contact.name || '未命名地址'}
           </span>
           <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded flex-shrink-0">
-            {getChainLabel(contact.network)}
+            {getChainLabel(contact.network as ChainId)}
           </span>
         </div>
         <p className="font-mono text-sm text-muted-foreground break-all mt-1">

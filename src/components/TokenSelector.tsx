@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { ChevronDown, Check } from 'lucide-react';
-import { Asset, ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
+import { Asset, ChainId } from '@/types/wallet';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
+import { getChainShortName } from '@/lib/chain-utils';
 import {
   Drawer,
   DrawerContent,
@@ -21,11 +22,6 @@ interface TokenSelectorProps {
 export function TokenSelector({ assets, selectedAsset, onSelect }: TokenSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const getChainName = (chainId: ChainId): string => {
-    const chain = SUPPORTED_CHAINS.find(c => c.id === chainId);
-    return chain?.shortName || chainId;
-  };
-
   return (
     <>
       {/* Trigger Button - Logo + Symbol + Network */}
@@ -38,7 +34,7 @@ export function TokenSelector({ assets, selectedAsset, onSelect }: TokenSelector
         <div className="flex flex-col items-start">
           <span className="font-semibold text-foreground leading-tight">{selectedAsset.symbol}</span>
           <span className="text-xs text-muted-foreground leading-tight">
-            {getChainName(selectedAsset.network)}
+            {getChainShortName(selectedAsset.network)}
           </span>
         </div>
         <ChevronDown className="w-4 h-4 text-muted-foreground ml-1" />
@@ -78,7 +74,7 @@ export function TokenSelector({ assets, selectedAsset, onSelect }: TokenSelector
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-foreground">{asset.symbol}</span>
                     <span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                      {getChainName(asset.network)}
+                      {getChainShortName(asset.network)}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground truncate">{asset.name}</p>

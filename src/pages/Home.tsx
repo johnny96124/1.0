@@ -23,6 +23,7 @@ import { AnimatedBalance } from '@/components/AnimatedNumber';
 import { ChainId, SUPPORTED_CHAINS, Transaction } from '@/types/wallet';
 import { TokenInfo } from '@/lib/tokens';
 import { toast } from '@/lib/toast';
+import { getChainShortName } from '@/lib/chain-utils';
 
 // Empty state component when no wallet exists - guides user to create first wallet
 function EmptyWalletState() {
@@ -224,9 +225,6 @@ export default function HomePage() {
     return transactions.filter(tx => tx.network === selectedChain);
   }, [transactions, selectedChain]);
 
-  const getChainName = (chainId: ChainId) => {
-    return SUPPORTED_CHAINS.find(c => c.id === chainId)?.shortName || chainId;
-  };
 
   const balanceParts = formatBalanceParts(totalBalance);
 
@@ -331,8 +329,8 @@ export default function HomePage() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    {selectedChain === 'all' ? '总资产' : `${getChainName(selectedChain)} 资产`}
+                <span className="text-sm text-muted-foreground">
+                    {selectedChain === 'all' ? '总资产' : `${getChainShortName(selectedChain)} 资产`}
                   </span>
                   <button onClick={() => setHideBalance(!hideBalance)}>
                     {hideBalance ? (

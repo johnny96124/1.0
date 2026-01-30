@@ -13,6 +13,7 @@ import { ChainId, SUPPORTED_CHAINS, RiskColor } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import { QRScanner } from '@/components/QRScanner';
 import { cn } from '@/lib/utils';
+import { validateAddress, getAddressPlaceholder, getChainName } from '@/lib/chain-utils';
 import {
   Drawer,
   DrawerContent,
@@ -41,18 +42,6 @@ export default function ContactFormPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [riskResult, setRiskResult] = useState<{ score: RiskColor; reasons: string[] } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Validate address format
-  const validateAddress = (addr: string, chain: ChainId): boolean => {
-    if (!addr) return false;
-    if (chain === 'ethereum' || chain === 'bsc') {
-      return /^0x[a-fA-F0-9]{40}$/.test(addr);
-    }
-    if (chain === 'tron') {
-      return /^T[a-zA-Z0-9]{33}$/.test(addr);
-    }
-    return false;
-  };
 
   const isValidAddress = validateAddress(address, network);
 
@@ -88,7 +77,7 @@ export default function ContactFormPage() {
     }
 
     if (!isValidAddress) {
-      toast.error('地址格式不正确', `请输入有效的 ${network === 'tron' ? 'Tron' : 'EVM'} 地址`);
+      toast.error('地址格式不正确', `请输入有效的 ${getChainName(network)} 地址`);
       return;
     }
 
@@ -203,7 +192,7 @@ export default function ContactFormPage() {
             <div className="relative">
               <Input
                 id="address"
-                placeholder={network === 'tron' ? 'T...' : '0x...'}
+                placeholder={getAddressPlaceholder(network)}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 className="pr-12 font-mono text-sm"
