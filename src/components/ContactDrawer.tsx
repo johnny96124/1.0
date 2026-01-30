@@ -48,12 +48,12 @@ export function ContactDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[70vh]">
-        <DrawerHeader className="border-b border-border/50 pb-3">
+      <DrawerContent className="max-h-[70vh] flex flex-col">
+        <DrawerHeader className="border-b border-border/50 pb-3 flex-shrink-0">
           <DrawerTitle>选择联系人</DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex-1 overflow-y-auto px-4 py-3">
+        <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
           <AnimatePresence mode="wait">
             {filteredContacts.length === 0 ? (
               <motion.div
