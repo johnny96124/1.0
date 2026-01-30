@@ -1,0 +1,391 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Send, Trash2, Copy, Check, Scan, AlertTriangle, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { useWallet } from '@/contexts/WalletContext';
+import { toast } from '@/lib/toast';
+import { Contact, ChainId, SUPPORTED_CHAINS, RiskColor } from '@/types/wallet';
+import { ChainIcon } from '@/components/ChainIcon';
+import { cn } from '@/lib/utils';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+const AVAILABLE_CHAINS = SUPPORTED_CHAINS.filter(c => c.id !== 'all');
+
+interface ContactDetailDrawerProps {
+  contact: Contact | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function ContactDetailDrawer({ contact, open, onOpenChange }: ContactDetailDrawerProps) {
+  const navigate = useNavigate();
+  const { contacts, updateContact, removeContact, scanAddressRisk } = useWallet();
+
+  const [name, setName] = useState('');
+  const [address, setAddress] = useState('');
+  const [network, setNetwork] = useState<ChainId>('ethereum');
+  const [notes, setNotes] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showNetworkDrawer, setShowNetworkDrawer] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const [isScanning, setIsScanning] = useState(false);
+  const [riskResult, setRiskResult] = useState<{ score: RiskColor; reasons: string[] } | null>(null);
+
+  // Reset form when contact changes
+  useEffect(() => {
+    if (contact) {
+      setName(contact.name || '');
+      setAddress(contact.address);
+      setNetwork(contact.network as ChainId);
+      setNotes(contact.notes || '');
+      setHasChanges(false);
+      setRiskResult(null);
+    }
+  }, [contact]);
+
+  // Track changes
+  useEffect(() => {
+    if (contact) {
+      const changed = 
+        name !== (contact.name || '') ||
+        address !== contact.address ||
+        network !== contact.network ||
+        notes !== (contact.notes || '');
+      setHasChanges(changed);
+    }
+  }, [name, address, network, notes, contact]);
+
+  // Validate address format
+  const validateAddress = (addr: string, chain: ChainId): boolean => {
+    if (!addr) return false;
+    if (chain === 'ethereum' || chain === 'bsc') {
+      return /^0x[a-fA-F0-9]{40}$/.test(addr);
+    }
+    if (chain === 'tron') {
+      return /^T[a-zA-Z0-9]{33}$/.test(addr);
+    }
+    return false;
+  };
+
+  const isValidAddress = validateAddress(address, network);
+
+  // Scan address risk when address changes
+  useEffect(() => {
+    if (isValidAddress && address && contact && address !== contact.address) {
+      setIsScanning(true);
+      const timer = setTimeout(async () => {
+        const result = await scanAddressRisk(address);
+        setRiskResult({ score: result.score, reasons: result.reasons });
+        setIsScanning(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    } else if (address === contact?.address) {
+      setRiskResult(null);
+    }
+  }, [address, isValidAddress, scanAddressRisk, contact]);
+
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      toast.success('已复制', '地址已复制到剪贴板');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error('复制失败');
+    }
+  };
+
+  const handleSave = async () => {
+    if (!contact) return;
+
+    if (!name.trim()) {
+      toast.error('请输入联系人名称');
+      return;
+    }
+
+    if (!address.trim()) {
+      toast.error('请输入地址');
+      return;
+    }
+
+    if (!isValidAddress) {
+      toast.error('地址格式不正确', `请输入有效的 ${network === 'tron' ? 'Tron' : 'EVM'} 地址`);
+      return;
+    }
+
+    // Check for duplicate address
+    const duplicate = contacts.find(
+      c => c.address.toLowerCase() === address.toLowerCase() && c.id !== contact.id
+    );
+    if (duplicate) {
+      toast.error('地址已存在', `该地址已保存为 "${duplicate.name || '未命名地址'}"`);
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      updateContact(contact.id, {
+        name: name.trim(),
+        address: address.trim(),
+        network,
+        notes: notes.trim(),
+      });
+      toast.success('联系人已更新', `${name} 的信息已保存`);
+      setHasChanges(false);
+    } catch (error) {
+      toast.error('保存失败', '请稍后重试');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = () => {
+    if (!contact) return;
+    removeContact(contact.id);
+    toast.success('联系人已删除', `${contact.name || '未命名地址'} 已从地址簿移除`);
+    onOpenChange(false);
+    setShowDeleteDialog(false);
+  };
+
+  const handleTransfer = () => {
+    onOpenChange(false);
+    navigate('/send', { 
+      state: { 
+        prefilledAddress: address,
+        prefilledNetwork: network 
+      } 
+    });
+  };
+
+  const selectedChain = AVAILABLE_CHAINS.find(c => c.id === network) || AVAILABLE_CHAINS[0];
+
+  if (!contact) return null;
+
+  return (
+    <>
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="text-left">
+            <DrawerTitle>联系人详情</DrawerTitle>
+          </DrawerHeader>
+
+          <div className="flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+              {/* Name */}
+              <div className="space-y-2">
+                <Label htmlFor="drawer-name">名称</Label>
+                <Input
+                  id="drawer-name"
+                  placeholder="输入联系人名称"
+                  value={name}
+                  onChange={(e) => setName(e.target.value.slice(0, 20))}
+                  maxLength={20}
+                />
+              </div>
+
+              {/* Network */}
+              <div className="space-y-2">
+                <Label>网络</Label>
+                <Drawer open={showNetworkDrawer} onOpenChange={setShowNetworkDrawer}>
+                  <button 
+                    onClick={() => setShowNetworkDrawer(true)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50"
+                  >
+                    <ChainIcon chainId={network} size="sm" />
+                    <span className="flex-1 text-left">{selectedChain.name}</span>
+                  </button>
+                  <DrawerContent>
+                    <DrawerHeader>
+                      <DrawerTitle>选择网络</DrawerTitle>
+                    </DrawerHeader>
+                    <div className="p-4 space-y-2">
+                      {AVAILABLE_CHAINS.map((chain) => (
+                        <button
+                          key={chain.id}
+                          onClick={() => {
+                            setNetwork(chain.id);
+                            setShowNetworkDrawer(false);
+                          }}
+                          className={cn(
+                            "w-full flex items-center gap-3 p-4 rounded-xl transition-colors",
+                            network === chain.id
+                              ? "bg-primary/10 border border-primary"
+                              : "bg-muted/50 border border-transparent hover:bg-muted"
+                          )}
+                        >
+                          <ChainIcon chainId={chain.id} size="sm" />
+                          <span className="flex-1 text-left font-medium">{chain.name}</span>
+                          {network === chain.id && (
+                            <Check className="w-5 h-5 text-primary" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </DrawerContent>
+                </Drawer>
+              </div>
+
+              {/* Address */}
+              <div className="space-y-2">
+                <Label htmlFor="drawer-address">地址</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="drawer-address"
+                    placeholder={network === 'tron' ? 'T...' : '0x...'}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="flex-1 font-mono text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleCopyAddress}
+                    className="flex-shrink-0"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-success" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </Button>
+                </div>
+
+                {/* Address validation & risk */}
+                {address && address !== contact.address && (
+                  <div className="space-y-2">
+                    {!isValidAddress && (
+                      <p className="text-xs text-destructive">
+                        地址格式不正确
+                      </p>
+                    )}
+                    {isScanning && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        正在扫描地址风险...
+                      </div>
+                    )}
+                    {riskResult && !isScanning && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={cn(
+                          "p-3 rounded-lg text-sm",
+                          riskResult.score === 'green' && "bg-success/10 text-success",
+                          riskResult.score === 'yellow' && "bg-warning/10 text-warning",
+                          riskResult.score === 'red' && "bg-destructive/10 text-destructive"
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          {riskResult.score === 'green' ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            <AlertTriangle className="w-4 h-4" />
+                          )}
+                          <span className="font-medium">
+                            {riskResult.score === 'green' && '地址安全'}
+                            {riskResult.score === 'yellow' && '中等风险'}
+                            {riskResult.score === 'red' && '高风险地址'}
+                          </span>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label htmlFor="drawer-notes">备注</Label>
+                <Textarea
+                  id="drawer-notes"
+                  placeholder="添加备注信息（可选）"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value.slice(0, 200))}
+                  rows={2}
+                  maxLength={200}
+                />
+              </div>
+
+              {/* Delete Button */}
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="w-5 h-5" />
+                删除联系人
+              </Button>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="p-4 border-t border-border/50 space-y-3">
+              {hasChanges && (
+                <Button
+                  onClick={handleSave}
+                  disabled={isSaving || !name || !address || !isValidAddress}
+                  size="lg"
+                  className="w-full"
+                >
+                  {isSaving ? '保存中...' : '确认修改'}
+                </Button>
+              )}
+              <Button
+                variant={hasChanges ? "outline" : "default"}
+                onClick={handleTransfer}
+                size="lg"
+                className="w-full gap-2"
+              >
+                <Send className="w-5 h-5" />
+                转账给 TA
+              </Button>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定要删除联系人 "{contact.name || '未命名地址'}" 吗？此操作无法撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
