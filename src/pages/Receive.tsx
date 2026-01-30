@@ -113,14 +113,17 @@ export default function ReceivePage() {
       const svg = qrRef.current.querySelector('svg');
       if (!svg) throw new Error('QR code not found');
       
-      // Canvas dimensions
-      const canvasWidth = 380;
-      const padding = 32;
-      const logoHeight = 32;
-      const qrSize = 200;
-      const contentWidth = canvasWidth - padding * 2;
+      // High DPI scale for crisp output (3x for retina quality)
+      const scale = 3;
       
-      // Create canvas
+      // Base dimensions (will be multiplied by scale)
+      const baseWidth = 380;
+      const basePadding = 32;
+      const baseLogoHeight = 32;
+      const baseQrSize = 200;
+      const baseContentWidth = baseWidth - basePadding * 2;
+      
+      // Create canvas with high DPI
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas context not available');
@@ -136,15 +139,16 @@ export default function ReceivePage() {
         });
       };
 
-      // Helper to wrap text into lines
-      const wrapText = (text: string, maxWidth: number): string[] => {
+      // Helper to wrap text into lines (using scaled font)
+      const wrapText = (text: string, maxWidth: number, fontSize: number): string[] => {
+        ctx.font = `${fontSize * scale}px ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace`;
         const lines: string[] = [];
         let currentLine = '';
         
         for (const char of text) {
           const testLine = currentLine + char;
           const metrics = ctx.measureText(testLine);
-          if (metrics.width > maxWidth && currentLine) {
+          if (metrics.width > maxWidth * scale && currentLine) {
             lines.push(currentLine);
             currentLine = char;
           } else {
@@ -170,43 +174,46 @@ export default function ReceivePage() {
       ]);
 
       // Calculate address lines height
-      ctx.font = '13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace';
-      const addressLines = wrapText(fullAddress, contentWidth);
-      const addressLineHeight = 18;
-      const addressBlockHeight = addressLines.length * addressLineHeight;
+      const addressLines = wrapText(fullAddress, baseContentWidth, 13);
+      const baseAddressLineHeight = 18;
+      const baseAddressBlockHeight = addressLines.length * baseAddressLineHeight;
 
-      // Calculate total canvas height
-      const logoSection = logoHeight + 24; // logo + margin
-      const qrSection = qrSize + 20; // QR + margin
-      const networkSection = 28; // network badge
-      const divider1 = 20; // space + line
-      const addressSection = addressBlockHeight + 16;
-      const divider2 = 16;
-      const warningSection = 40;
-      const bottomPadding = 24;
+      // Calculate total canvas height (base dimensions)
+      const baseLogoSection = baseLogoHeight + 24;
+      const baseQrSection = baseQrSize + 20;
+      const baseNetworkSection = 28;
+      const baseDivider1 = 20;
+      const baseAddressSection = baseAddressBlockHeight + 16;
+      const baseDivider2 = 16;
+      const baseWarningSection = 40;
+      const baseBottomPadding = 24;
       
-      const canvasHeight = padding + logoSection + qrSection + networkSection + divider1 + addressSection + divider2 + warningSection + bottomPadding;
+      const baseHeight = basePadding + baseLogoSection + baseQrSection + baseNetworkSection + baseDivider1 + baseAddressSection + baseDivider2 + baseWarningSection + baseBottomPadding;
       
-      canvas.width = canvasWidth;
-      canvas.height = canvasHeight;
+      // Set canvas size with scale
+      canvas.width = baseWidth * scale;
+      canvas.height = baseHeight * scale;
+      
+      // Scale all drawing operations
+      ctx.scale(scale, scale);
       
       // Fill white background
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, baseWidth, baseHeight);
       
-      let yOffset = padding;
+      let yOffset = basePadding;
       
       // 1. Draw Logo (centered)
       const logoAspect = logoImg.width / logoImg.height;
-      const logoDrawHeight = logoHeight;
+      const logoDrawHeight = baseLogoHeight;
       const logoDrawWidth = logoDrawHeight * logoAspect;
-      ctx.drawImage(logoImg, (canvasWidth - logoDrawWidth) / 2, yOffset, logoDrawWidth, logoDrawHeight);
-      yOffset += logoSection;
+      ctx.drawImage(logoImg, (baseWidth - logoDrawWidth) / 2, yOffset, logoDrawWidth, logoDrawHeight);
+      yOffset += baseLogoSection;
       
       // 2. Draw QR Code (centered)
-      const qrX = (canvasWidth - qrSize) / 2;
-      ctx.drawImage(qrImg, qrX, yOffset, qrSize, qrSize);
-      yOffset += qrSection;
+      const qrX = (baseWidth - baseQrSize) / 2;
+      ctx.drawImage(qrImg, qrX, yOffset, baseQrSize, baseQrSize);
+      yOffset += baseQrSection;
       
       // 3. Draw Network Badge (centered)
       const networkName = selectedNetwork.name;
@@ -217,7 +224,7 @@ export default function ReceivePage() {
       const badgeGap = 6;
       const badgeWidth = chainIconSize + badgeGap + networkTextWidth + badgePadding * 2;
       const badgeHeight = 28;
-      const badgeX = (canvasWidth - badgeWidth) / 2;
+      const badgeX = (baseWidth - badgeWidth) / 2;
       
       // Badge background
       ctx.fillStyle = '#f3f4f6';
@@ -235,14 +242,14 @@ export default function ReceivePage() {
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.fillText(networkName, badgeX + badgePadding + chainIconSize + badgeGap, yOffset + badgeHeight / 2);
-      yOffset += networkSection + divider1;
+      yOffset += baseNetworkSection + baseDivider1;
       
       // 4. Draw divider line
       ctx.strokeStyle = '#e5e7eb';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(padding, yOffset - 10);
-      ctx.lineTo(canvasWidth - padding, yOffset - 10);
+      ctx.moveTo(basePadding, yOffset - 10);
+      ctx.lineTo(baseWidth - basePadding, yOffset - 10);
       ctx.stroke();
       
       // 5. Draw Full Address
@@ -252,14 +259,14 @@ export default function ReceivePage() {
       ctx.textBaseline = 'top';
       
       addressLines.forEach((line, index) => {
-        ctx.fillText(line, canvasWidth / 2, yOffset + index * addressLineHeight);
+        ctx.fillText(line, baseWidth / 2, yOffset + index * baseAddressLineHeight);
       });
-      yOffset += addressBlockHeight + divider2;
+      yOffset += baseAddressBlockHeight + baseDivider2;
       
       // 6. Draw divider line
       ctx.beginPath();
-      ctx.moveTo(padding, yOffset);
-      ctx.lineTo(canvasWidth - padding, yOffset);
+      ctx.moveTo(basePadding, yOffset);
+      ctx.lineTo(baseWidth - basePadding, yOffset);
       ctx.stroke();
       yOffset += 16;
       
@@ -267,7 +274,7 @@ export default function ReceivePage() {
       ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
       ctx.fillStyle = '#f59e0b';
       ctx.textAlign = 'center';
-      ctx.fillText(`⚠️ 请确认使用 ${networkName} 网络转账`, canvasWidth / 2, yOffset);
+      ctx.fillText(`⚠️ 请确认使用 ${networkName} 网络转账`, baseWidth / 2, yOffset);
       
       // Download the image
       const link = document.createElement('a');
