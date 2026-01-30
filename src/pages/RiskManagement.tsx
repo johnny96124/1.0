@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
-import { cn } from '@/lib/utils';
+import { cn, formatAddressShort } from '@/lib/utils';
 import { CryptoIcon } from '@/components/CryptoIcon';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -106,7 +106,7 @@ export default function RiskManagement() {
   
   const handleCopyAddress = (address: string) => {
     navigator.clipboard.writeText(address);
-    toast.success('地址已复制');
+    toast.success('已复制', formatAddressShort(address));
   };
   
   const handleAcknowledge = (txId: string) => {

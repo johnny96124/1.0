@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, formatAddressShort } from '@/lib/utils';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from '@/lib/toast';
@@ -39,8 +39,7 @@ export function ChainDropdown({
     e.stopPropagation();
     navigator.clipboard.writeText(address);
     setCopiedChain(chainId);
-    const chainName = SUPPORTED_CHAINS.find(c => c.id === chainId)?.shortName || chainId;
-    toast.success(`${chainName} 地址已复制`);
+    toast.success('已复制', formatAddressShort(address));
     setTimeout(() => setCopiedChain(null), 2000);
   };
 
