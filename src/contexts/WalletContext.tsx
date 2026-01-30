@@ -23,8 +23,11 @@ const mockAssetsWallet1: Asset[] = [
   // BSC chain
   { symbol: 'USDT', name: 'Tether USD', balance: 1580.00, usdValue: 1580.00, change24h: 0.01, icon: 'USDT', network: 'bsc' },
   { symbol: 'BNB', name: 'BNB', balance: 3.5, usdValue: 2100.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
+  // Solana chain
   { symbol: 'SOL', name: 'Solana', balance: 12.5, usdValue: 2312.50, change24h: 3.2, icon: 'SOL', network: 'solana' },
   { symbol: 'USDT', name: 'Tether USD', balance: 1000.00, usdValue: 1000.00, change24h: 0.01, icon: 'USDT', network: 'solana' },
+  { symbol: 'USDC', name: 'USD Coin', balance: 1500.00, usdValue: 1500.00, change24h: 0.00, icon: 'USDC', network: 'solana' },
+  // Other
   { symbol: 'MATIC', name: 'Polygon', balance: 2500, usdValue: 1300.00, change24h: 2.8, icon: 'MATIC', network: 'ethereum' },
   { symbol: 'DOGE', name: 'Dogecoin', balance: 5000, usdValue: 1900.00, change24h: 5.2, icon: 'DOGE', network: 'bsc' },
 ];
@@ -48,6 +51,7 @@ const mockAssetsWallet3: Asset[] = [
   { symbol: 'USDC', name: 'USD Coin', balance: 1500.00, usdValue: 1500.00, change24h: 0.00, icon: 'USDC', network: 'ethereum' },
   { symbol: 'BNB', name: 'BNB', balance: 2.3, usdValue: 1380.00, change24h: 1.5, icon: 'BNB', network: 'bsc' },
   { symbol: 'USDT', name: 'Tether USD', balance: 800.00, usdValue: 800.00, change24h: 0.01, icon: 'USDT', network: 'tron' },
+  { symbol: 'USDC', name: 'USD Coin', balance: 800.00, usdValue: 800.00, change24h: 0.00, icon: 'USDC', network: 'solana' },
 ];
 
 // Mock assets for newly created wallets - with sample balances for testing
@@ -65,6 +69,7 @@ const mockAssetsNewWallet: Asset[] = [
   // Solana chain
   { symbol: 'SOL', name: 'Solana', balance: 5.0, usdValue: 925.00, change24h: 3.2, icon: 'SOL', network: 'solana' },
   { symbol: 'USDT', name: 'Tether USD', balance: 800.00, usdValue: 800.00, change24h: 0.01, icon: 'USDT', network: 'solana' },
+  { symbol: 'USDC', name: 'USD Coin', balance: 1200.00, usdValue: 1200.00, change24h: 0.00, icon: 'USDC', network: 'solana' },
 ];
 
 // Wallet ID to assets mapping
