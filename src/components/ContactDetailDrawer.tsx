@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Copy, Check, ChevronDown } from 'lucide-react';
+import { Trash2, Copy, Check, ChevronDown, Scan } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,8 @@ import { Contact, ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
 import { validateAddress, getAddressPlaceholder, getChainName, isEVMChain } from '@/lib/chain-utils';
+import { QRScanner } from '@/components/QRScanner';
+import { ParsedQRData } from '@/lib/qr-parser';
 import {
   Drawer,
   DrawerContent,
@@ -53,6 +55,7 @@ export function ContactDetailDrawer({
   const [copied, setCopied] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showNetworkDrawer, setShowNetworkDrawer] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -176,7 +179,18 @@ export function ContactDetailDrawer({
     // Reset state when closing
     setShowDeleteDialog(false);
     setShowNetworkDrawer(false);
+    setShowQRScanner(false);
     onOpenChange(false);
+  };
+
+  const handleQRScan = (data: ParsedQRData) => {
+    if (data.address) {
+      setAddress(data.address);
+      // Auto-detect network from QR if available
+      if (data.network) {
+        setNetwork(data.network as ChainId);
+      }
+    }
   };
 
   const selectedChain = AVAILABLE_CHAINS.find(c => c.id === network) || AVAILABLE_CHAINS[0];
@@ -266,28 +280,43 @@ export function ContactDetailDrawer({
               {/* Address */}
               <div className="space-y-2">
                 <Label htmlFor="drawer-address">地址 *</Label>
-                <div className="flex items-center gap-2">
-                <Input
-                  id="drawer-address"
-                  placeholder={getAddressPlaceholder(network)}
-                  value={address}
+                <div className="relative">
+                  <Input
+                    id="drawer-address"
+                    placeholder={getAddressPlaceholder(network)}
+                    value={address}
                     onChange={(e) => setAddress(e.target.value.trim())}
-                    className="flex-1 font-mono text-sm"
+                    className={cn(
+                      "font-mono text-sm",
+                      isAddMode ? "pr-12" : "pr-24"
+                    )}
                   />
-                  {!isAddMode && address && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleCopyAddress}
-                      className="flex-shrink-0"
-                    >
-                      {copied ? (
-                        <Check className="w-4 h-4 text-success" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                  )}
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex">
+                    {isAddMode && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-9 w-9"
+                        onClick={() => setShowQRScanner(true)}
+                      >
+                        <Scan className="w-5 h-5 text-muted-foreground" />
+                      </Button>
+                    )}
+                    {!isAddMode && address && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9"
+                        onClick={handleCopyAddress}
+                      >
+                        {copied ? (
+                          <Check className="w-4 h-4 text-success" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Address validation error */}
@@ -364,6 +393,15 @@ export function ContactDetailDrawer({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+      )}
+
+      {/* QR Scanner - Only for add mode */}
+      {isAddMode && (
+        <QRScanner
+          isOpen={showQRScanner}
+          onClose={() => setShowQRScanner(false)}
+          onScan={handleQRScan}
+        />
       )}
     </>
   );
