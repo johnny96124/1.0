@@ -11,6 +11,8 @@ import { useWallet } from '@/contexts/WalletContext';
 import { toast } from '@/lib/toast';
 import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
+import { getChainIconUrl } from '@/lib/crypto-icons';
+import coboLogoSvg from '@/assets/cobo-logo.svg';
 import {
   Drawer,
   DrawerContent,
@@ -111,70 +113,176 @@ export default function ReceivePage() {
       const svg = qrRef.current.querySelector('svg');
       if (!svg) throw new Error('QR code not found');
       
+      // Canvas dimensions
+      const canvasWidth = 380;
+      const padding = 32;
+      const logoHeight = 32;
+      const qrSize = 200;
+      const contentWidth = canvasWidth - padding * 2;
+      
       // Create canvas
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas context not available');
       
-      // Set canvas size with padding and space for text
-      const padding = 40;
-      const qrSize = 300;
-      const textAreaHeight = 100;
-      canvas.width = qrSize + padding * 2;
-      canvas.height = qrSize + padding * 2 + textAreaHeight;
+      // Helper to load image
+      const loadImage = (src: string): Promise<HTMLImageElement> => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+        });
+      };
+
+      // Helper to wrap text into lines
+      const wrapText = (text: string, maxWidth: number): string[] => {
+        const lines: string[] = [];
+        let currentLine = '';
+        
+        for (const char of text) {
+          const testLine = currentLine + char;
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = char;
+          } else {
+            currentLine = testLine;
+          }
+        }
+        if (currentLine) lines.push(currentLine);
+        return lines;
+      };
+
+      // Load all assets
+      const [logoImg, chainIconImg, qrImg] = await Promise.all([
+        loadImage(coboLogoSvg),
+        loadImage(getChainIconUrl(selectedNetwork.id)).catch(() => null),
+        (async () => {
+          const svgData = new XMLSerializer().serializeToString(svg);
+          const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+          const svgUrl = URL.createObjectURL(svgBlob);
+          const img = await loadImage(svgUrl);
+          URL.revokeObjectURL(svgUrl);
+          return img;
+        })(),
+      ]);
+
+      // Calculate address lines height
+      ctx.font = '13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace';
+      const addressLines = wrapText(fullAddress, contentWidth);
+      const addressLineHeight = 18;
+      const addressBlockHeight = addressLines.length * addressLineHeight;
+
+      // Calculate total canvas height
+      const logoSection = logoHeight + 24; // logo + margin
+      const qrSection = qrSize + 20; // QR + margin
+      const networkSection = 28; // network badge
+      const divider1 = 20; // space + line
+      const addressSection = addressBlockHeight + 16;
+      const divider2 = 16;
+      const warningSection = 40;
+      const bottomPadding = 24;
+      
+      const canvasHeight = padding + logoSection + qrSection + networkSection + divider1 + addressSection + divider2 + warningSection + bottomPadding;
+      
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
       
       // Fill white background
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
-      // Convert SVG to image
-      const svgData = new XMLSerializer().serializeToString(svg);
-      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
+      let yOffset = padding;
       
-      const img = new Image();
-      img.onload = () => {
-        // Draw QR code
-        ctx.drawImage(img, padding, padding, qrSize, qrSize);
-        URL.revokeObjectURL(svgUrl);
-        
-        // Draw network name
-        ctx.fillStyle = '#1a1a1a';
-        ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(selectedNetwork.name, canvas.width / 2, qrSize + padding + 35);
-        
-        // Draw address (split into two lines if too long)
-        ctx.fillStyle = '#666666';
-        ctx.font = '12px monospace';
-        const midPoint = Math.ceil(fullAddress.length / 2);
-        const line1 = fullAddress.slice(0, midPoint);
-        const line2 = fullAddress.slice(midPoint);
-        ctx.fillText(line1, canvas.width / 2, qrSize + padding + 60);
-        ctx.fillText(line2, canvas.width / 2, qrSize + padding + 78);
-        
-        // Download the image
-        const link = document.createElement('a');
-        link.download = `${selectedNetwork.name}_收款码_${fullAddress.slice(0, 8)}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        setSaving(false);
-        toast.success('保存成功', '二维码已保存到本地');
-      };
+      // 1. Draw Logo (centered)
+      const logoAspect = logoImg.width / logoImg.height;
+      const logoDrawHeight = logoHeight;
+      const logoDrawWidth = logoDrawHeight * logoAspect;
+      ctx.drawImage(logoImg, (canvasWidth - logoDrawWidth) / 2, yOffset, logoDrawWidth, logoDrawHeight);
+      yOffset += logoSection;
       
-      img.onerror = () => {
-        URL.revokeObjectURL(svgUrl);
-        setSaving(false);
-        toast.error('保存失败', '请重试或截图保存');
-      };
+      // 2. Draw QR Code (centered)
+      const qrX = (canvasWidth - qrSize) / 2;
+      ctx.drawImage(qrImg, qrX, yOffset, qrSize, qrSize);
+      yOffset += qrSection;
       
-      img.src = svgUrl;
+      // 3. Draw Network Badge (centered)
+      const networkName = selectedNetwork.name;
+      ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const networkTextWidth = ctx.measureText(networkName).width;
+      const chainIconSize = 18;
+      const badgePadding = 12;
+      const badgeGap = 6;
+      const badgeWidth = chainIconSize + badgeGap + networkTextWidth + badgePadding * 2;
+      const badgeHeight = 28;
+      const badgeX = (canvasWidth - badgeWidth) / 2;
+      
+      // Badge background
+      ctx.fillStyle = '#f3f4f6';
+      ctx.beginPath();
+      ctx.roundRect(badgeX, yOffset, badgeWidth, badgeHeight, 14);
+      ctx.fill();
+      
+      // Chain icon
+      if (chainIconImg) {
+        ctx.drawImage(chainIconImg, badgeX + badgePadding, yOffset + (badgeHeight - chainIconSize) / 2, chainIconSize, chainIconSize);
+      }
+      
+      // Network name
+      ctx.fillStyle = '#1f2937';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(networkName, badgeX + badgePadding + chainIconSize + badgeGap, yOffset + badgeHeight / 2);
+      yOffset += networkSection + divider1;
+      
+      // 4. Draw divider line
+      ctx.strokeStyle = '#e5e7eb';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding, yOffset - 10);
+      ctx.lineTo(canvasWidth - padding, yOffset - 10);
+      ctx.stroke();
+      
+      // 5. Draw Full Address
+      ctx.font = '13px ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace';
+      ctx.fillStyle = '#374151';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      
+      addressLines.forEach((line, index) => {
+        ctx.fillText(line, canvasWidth / 2, yOffset + index * addressLineHeight);
+      });
+      yOffset += addressBlockHeight + divider2;
+      
+      // 6. Draw divider line
+      ctx.beginPath();
+      ctx.moveTo(padding, yOffset);
+      ctx.lineTo(canvasWidth - padding, yOffset);
+      ctx.stroke();
+      yOffset += 16;
+      
+      // 7. Draw Warning
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillStyle = '#f59e0b';
+      ctx.textAlign = 'center';
+      ctx.fillText(`⚠️ 请确认使用 ${networkName} 网络转账`, canvasWidth / 2, yOffset);
+      
+      // Download the image
+      const link = document.createElement('a');
+      link.download = `收款码_${selectedNetwork.name}_${fullAddress.slice(0, 8)}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      setSaving(false);
+      toast.success('保存成功', '收款码已保存到本地');
     } catch (error) {
+      console.error('Save QR code error:', error);
       setSaving(false);
       toast.error('保存失败', '请重试或截图保存');
     }
-  }, [selectedNetwork.name, fullAddress]);
+  }, [selectedNetwork, fullAddress]);
 
   const handleSelectNetwork = (network: typeof networks[0]) => {
     setSelectedNetwork(network);
