@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Fingerprint, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useWallet } from '@/contexts/WalletContext';
@@ -72,6 +72,9 @@ export function UnlockDrawer({ open, onOpenChange, onUnlock }: UnlockDrawerProps
       <DrawerContent className="max-h-[85vh]">
         <DrawerHeader className="pb-2">
           <DrawerTitle className="text-center">身份验证</DrawerTitle>
+          <DrawerDescription className="sr-only">
+            使用生物识别或支付密码验证身份以解锁应用。
+          </DrawerDescription>
         </DrawerHeader>
         
         <div className="px-6 pb-8 space-y-6">
