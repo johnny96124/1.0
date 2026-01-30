@@ -43,7 +43,7 @@ export function ChainSelector({
           <span className="relative z-10 flex items-center">
             <ChainIcon chainId={chain.icon} size="sm" />
           </span>
-          <span className="relative z-10">{chain.shortName}</span>
+          <span className="relative z-10">{chain.name}</span>
         </button>
       ))}
     </div>
