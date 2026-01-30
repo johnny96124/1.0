@@ -208,7 +208,7 @@ export default function TSSBackupManagement() {
           </div>
           
           <Card 
-            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+            className="p-4 cursor-pointer hover:bg-muted/50 active:bg-muted/50 transition-colors"
             onClick={() => handleStartBackup('cloud')}
           >
             <div className="flex items-center justify-between">
@@ -249,7 +249,7 @@ export default function TSSBackupManagement() {
           </div>
           
           <Card 
-            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+            className="p-4 cursor-pointer hover:bg-muted/50 active:bg-muted/50 transition-colors"
             onClick={() => handleStartBackup('local')}
           >
             <div className="flex items-center justify-between">
