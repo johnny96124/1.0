@@ -129,26 +129,26 @@ export default function AssetDetailPage() {
             <div className="flex items-center gap-2">
               <CryptoIcon symbol={assetData.symbol} size="lg" />
               <div>
-                <h1 className="text-lg font-bold text-foreground">{assetData.symbol}</h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-lg font-bold text-foreground">{assetData.symbol}</h1>
+                  {/* Single chain tag - show next to symbol */}
+                  {assetData.chains.length === 1 && (
+                    <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
+                      {SUPPORTED_CHAINS.find(c => c.id === assetData.chains[0].network)?.name}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground">{assetData.name}</p>
               </div>
             </div>
           </div>
           {/* Chain Selector - only show if asset exists on multiple chains */}
-          {assetData.chains.length > 1 ? (
+          {assetData.chains.length > 1 && (
             <ChainSelector
               selectedChain={selectedChain}
               onSelectChain={setSelectedChain}
               className="px-0"
             />
-          ) : (
-            /* Single chain label */
-            <div className="flex items-center gap-2 py-1">
-              <ChainIcon chainId={assetData.chains[0].network} size="sm" />
-              <span className="text-sm text-muted-foreground">
-                {SUPPORTED_CHAINS.find(c => c.id === assetData.chains[0].network)?.name}
-              </span>
-            </div>
           )}
         </div>
 
@@ -286,7 +286,8 @@ export default function AssetDetailPage() {
                   selectedChain !== 'all' 
                     ? currentAddress! 
                     : currentWallet?.addresses?.[assetData.chains[0].network] || ''
-                } 
+                }
+                showFull
               />
             </motion.div>
           ) : null}
