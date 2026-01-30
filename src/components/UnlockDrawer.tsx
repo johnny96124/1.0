@@ -21,6 +21,7 @@ export function UnlockDrawer({ open, onOpenChange, onUnlock }: UnlockDrawerProps
   const [showPasswordInput, setShowPasswordInput] = useState(!hasBiometric);
 
   const handleBiometricAuth = async () => {
+    console.log('[AppLock] biometric auth start');
     setIsLoading(true);
     setError('');
     
@@ -29,11 +30,13 @@ export function UnlockDrawer({ open, onOpenChange, onUnlock }: UnlockDrawerProps
     
     // For demo, always succeed
     setIsLoading(false);
+    console.log('[AppLock] biometric auth success -> unlock');
     onUnlock();
     onOpenChange(false);
   };
 
   const handlePasswordSubmit = async () => {
+    console.log('[AppLock] password submit start');
     if (!password.trim()) {
       setError('请输入密码');
       return;
@@ -49,6 +52,7 @@ export function UnlockDrawer({ open, onOpenChange, onUnlock }: UnlockDrawerProps
     if (password.length >= 6) {
       setIsLoading(false);
       setPassword('');
+      console.log('[AppLock] password verify success -> unlock');
       onUnlock();
       onOpenChange(false);
     } else {
@@ -57,12 +61,14 @@ export function UnlockDrawer({ open, onOpenChange, onUnlock }: UnlockDrawerProps
     }
   };
 
-  const handleClose = () => {
-    // Don't allow closing without authentication
+  const handleOpenChange = (nextOpen: boolean) => {
+    // Block user-initiated closing (e.g. swipe down / click overlay) until authenticated.
+    // Allow opening interactions to flow through.
+    if (nextOpen) onOpenChange(true);
   };
 
   return (
-    <Drawer open={open} onOpenChange={handleClose}>
+    <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerContent className="max-h-[85vh]">
         <DrawerHeader className="pb-2">
           <DrawerTitle className="text-center">身份验证</DrawerTitle>

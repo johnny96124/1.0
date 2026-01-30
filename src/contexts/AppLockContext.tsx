@@ -48,11 +48,13 @@ export function AppLockProvider({ children }: AppLockProviderProps) {
   }, [isAuthenticated, backgroundTimestamp, lockTimeout]);
 
   const unlock = useCallback(() => {
+    console.log('[AppLock] context.unlock()');
     setIsLocked(false);
   }, []);
 
   const lock = useCallback(() => {
     if (isAuthenticated) {
+      console.log('[AppLock] context.lock()');
       setIsLocked(true);
     }
   }, [isAuthenticated]);
