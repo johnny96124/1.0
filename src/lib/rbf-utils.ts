@@ -114,9 +114,9 @@ export function calculateSpeedUpFees(
   gasToken: string = 'ETH'
 ): SpeedUpOption[] {
   const tiers: { tier: SpeedUpTier; multiplier: number; label: string; time: string }[] = [
-    { tier: 'low', multiplier: 1.2, label: '+20% 加速', time: '~20分钟' },
-    { tier: 'medium', multiplier: 1.5, label: '+50% 加速', time: '~5分钟' },
-    { tier: 'high', multiplier: 2.0, label: '+100% 加速', time: '~1分钟' },
+    { tier: 'low', multiplier: 1.2, label: '慢速', time: '~20分钟' },
+    { tier: 'medium', multiplier: 1.5, label: '标准', time: '~5分钟' },
+    { tier: 'high', multiplier: 2.0, label: '快速', time: '~1分钟' },
   ];
 
   return tiers.map(({ tier, multiplier, label, time }) => ({
