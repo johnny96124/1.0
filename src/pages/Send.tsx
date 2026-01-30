@@ -309,7 +309,7 @@ export default function SendPage() {
         <div className="flex items-center justify-between px-4 py-3 shrink-0">
           <button
             onClick={handleBack}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+            className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
           >
             <ChevronLeft className="w-6 h-6 text-foreground" />
           </button>

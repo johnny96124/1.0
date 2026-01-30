@@ -58,7 +58,7 @@ export function AppLayout({
                 variant="ghost"
                 size="icon"
                 onClick={handleBack}
-                className="h-10 w-10 -ml-2 rounded-full hover:bg-muted"
+                className="h-10 w-10 -ml-2 rounded-lg hover:bg-muted"
               >
                 <ChevronLeft className="w-6 h-6" />
               </Button>
