@@ -131,7 +131,7 @@ export default function DeviceManagementPage() {
   const CurrentDeviceIcon = currentDevice ? getDeviceIcon(currentDevice.model) : Smartphone;
 
   return (
-    <AppLayout title="登录历史" showBack>
+    <AppLayout showNav={false} title="登录历史" showBack>
       <div className="px-4 py-4 space-y-4">
         {/* Current Device Info */}
         <motion.div

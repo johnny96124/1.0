@@ -74,7 +74,7 @@ export default function PSPPermissionsPage() {
 
   if (!connection) {
     return (
-      <AppLayout title="权限管理" showBack onBack={() => navigate(-1)}>
+      <AppLayout showNav={false} title="权限管理" showBack onBack={() => navigate(-1)}>
         <div className="flex flex-col items-center justify-center h-64">
           <Info className="w-12 h-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground">服务商不存在</p>
@@ -101,6 +101,7 @@ export default function PSPPermissionsPage() {
 
   return (
     <AppLayout 
+      showNav={false}
       title="权限管理" 
       showBack 
       onBack={() => navigate(-1)}

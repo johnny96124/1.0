@@ -65,7 +65,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <AppLayout title="通知设置" showBack>
+    <AppLayout showNav={false} title="通知设置" showBack>
       <div className="px-4 py-4 space-y-4">
         {/* Transaction Notifications */}
         <motion.div

@@ -49,7 +49,7 @@ export default function PSPDetailPage() {
 
   if (!connection) {
     return (
-      <AppLayout title="服务商详情" showBack onBack={() => navigate(-1)}>
+      <AppLayout showNav={false} title="服务商详情" showBack onBack={() => navigate(-1)}>
         <div className="flex flex-col items-center justify-center h-64">
           <AlertCircle className="w-12 h-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground">服务商不存在</p>
@@ -114,6 +114,7 @@ export default function PSPDetailPage() {
 
   return (
     <AppLayout 
+      showNav={false}
       title="服务商详情" 
       showBack 
       onBack={() => navigate(-1)}

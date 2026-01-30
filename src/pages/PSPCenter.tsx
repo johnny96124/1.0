@@ -355,6 +355,7 @@ export default function PSPCenterPage() {
 
   return (
     <AppLayout 
+      showNav={false}
       title="服务商管理" 
       showBack 
       onBack={() => navigate(-1)}

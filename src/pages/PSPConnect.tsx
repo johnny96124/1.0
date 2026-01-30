@@ -660,6 +660,7 @@ export default function PSPConnectPage() {
 
   return (
     <AppLayout 
+      showNav={false}
       title={getTitle()}
       showBack={currentStep !== 'submitted'}
       onBack={handleBack}

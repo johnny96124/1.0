@@ -202,7 +202,7 @@ export default function ReceivePage() {
   );
 
   return (
-    <AppLayout showBack title="收款" onBack={handleBack}>
+    <AppLayout showNav={false} showBack title="收款" onBack={handleBack}>
       <SwipeBack>
       <div className="px-4 py-4">
         <motion.div
