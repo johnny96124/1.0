@@ -1,216 +1,313 @@
 
-# 隐藏底部导航栏 - 账户设置子页面修改计划
 
-## 问题分析
+## 链名称定义全局审计与统一方案
 
-从截图中可以看到，账户设置页面（/profile）显示底部导航栏是正确的，因为它是主导航入口之一。但当用户点击进入任何子功能页面时，应该隐藏底部导航栏，让用户专注于当前功能。
+### 需求明确
 
-根据 `AppLayout` 组件的设计，`showNav` 默认值为 `true`，因此未显式设置 `showNav={false}` 的页面会默认显示导航栏。
-
----
-
-## 当前状态检查结果
-
-### 已正确设置 `showNav={false}` 的页面
-
-| 页面 | 路由 | 状态 |
-|------|------|------|
-| PersonalInfo | /profile/info | 已设置 |
-| WalletManagement | /profile/wallets | 已设置 |
-
-### 需要添加 `showNav={false}` 的页面
-
-以下页面从 Profile 页面导航进入，但未设置 `showNav={false}`：
-
-| 页面 | 路由 | 当前设置 | 问题 |
-|------|------|----------|------|
-| Security | /profile/security | 无 showNav | 显示导航栏 |
-| DeviceManagement | /profile/devices | 无 showNav | 显示导航栏 |
-| Contacts | /profile/contacts | 无 showNav | 显示导航栏 |
-| ContactDetail | /profile/contacts/:id | 无 showNav | 显示导航栏 |
-| ContactForm | /profile/contacts/add, /profile/contacts/edit/:id | 无 showNav | 显示导航栏 |
-| Notifications | /profile/notifications | 无 showNav | 显示导航栏 |
-| Help | /profile/help | 无 showNav | 显示导航栏 |
-| TSSBackupManagement | /profile/security/tss-backup | 未使用 AppLayout | 无导航栏（正确） |
-| PSPCenter | /psp | 无 showNav | 显示导航栏 |
-| PSPDetail | /psp/:id | 无 showNav | 显示导航栏 |
-| PSPConnect | /psp/connect | 无 showNav | 显示导航栏 |
-| PSPPermissions | /psp/:id/permissions | 无 showNav | 显示导航栏 |
-| Receive | /receive | 无 showNav | 显示导航栏 |
+用户希望统一支持以下4条链：
+- **Ethereum** (主链代币: ETH)
+- **Tron** (主链代币: TRX)
+- **Solana** (主链代币: SOL)
+- **BNB Chain** (主链代币: BNB)
 
 ---
 
-## 修改计划
+### 当前问题分析
 
-### 1. Security.tsx
-**行 89**
-```tsx
-// 改前
-<AppLayout title="安全与风控" showBack>
+#### 1. 核心定义缺少 Solana
 
-// 改后  
-<AppLayout showNav={false} title="安全与风控" showBack>
-```
+**文件:** `src/types/wallet.ts` (第46-61行)
 
-### 2. DeviceManagement.tsx
-**行 134**
-```tsx
-// 改前
-<AppLayout title="登录历史" showBack>
+当前 `ChainId` 类型和 `SUPPORTED_CHAINS` 数组只支持3条链，缺少 Solana：
 
-// 改后
-<AppLayout showNav={false} title="登录历史" showBack>
-```
+```typescript
+// 当前定义
+export type ChainId = 'all' | 'ethereum' | 'tron' | 'bsc';  // 缺少 'solana'
 
-### 3. Contacts.tsx
-**行 42-45**
-```tsx
-// 改前
-<AppLayout
-  title="地址簿"
-  showBack
-
-// 改后
-<AppLayout
-  showNav={false}
-  title="地址簿"
-  showBack
-```
-
-### 4. ContactDetail.tsx
-**行 45** 和 **行 85-88**
-```tsx
-// 改前（两处）
-<AppLayout title="联系人详情" showBack ...
-
-// 改后
-<AppLayout showNav={false} title="联系人详情" showBack ...
-```
-
-### 5. ContactForm.tsx
-**行 136-139**
-```tsx
-// 改前
-<AppLayout
-  title={isEditing ? '编辑联系人' : '添加联系人'}
-  showBack
-
-// 改后
-<AppLayout
-  showNav={false}
-  title={isEditing ? '编辑联系人' : '添加联系人'}
-  showBack
-```
-
-### 6. Notifications.tsx
-**行 68**
-```tsx
-// 改前
-<AppLayout title="通知设置" showBack>
-
-// 改后
-<AppLayout showNav={false} title="通知设置" showBack>
-```
-
-### 7. Help.tsx
-**行 125**
-```tsx
-// 改前
-<AppLayout title="帮助与支持" showBack>
-
-// 改后
-<AppLayout showNav={false} title="帮助与支持" showBack>
-```
-
-### 8. PSPCenter.tsx
-**行 357-360**
-```tsx
-// 改前
-<AppLayout 
-  title="服务商管理" 
-  showBack 
-  onBack={() => navigate(-1)}
-
-// 改后
-<AppLayout 
-  showNav={false}
-  title="服务商管理" 
-  showBack 
-  onBack={() => navigate(-1)}
-```
-
-### 9. PSPDetail.tsx
-**行 52** 和 **行 116-119**
-```tsx
-// 改前（两处）
-<AppLayout title="服务商详情" showBack ...
-
-// 改后
-<AppLayout showNav={false} title="服务商详情" showBack ...
-```
-
-### 10. PSPConnect.tsx
-**行 662-665**
-```tsx
-// 改前
-<AppLayout 
-  title={getTitle()}
-  showBack={currentStep !== 'submitted'}
-  onBack={handleBack}
-
-// 改后
-<AppLayout 
-  showNav={false}
-  title={getTitle()}
-  showBack={currentStep !== 'submitted'}
-  onBack={handleBack}
-```
-
-### 11. PSPPermissions.tsx
-**行 77** 和 **行 103-106**
-```tsx
-// 改前（两处）
-<AppLayout title="权限管理" showBack ...
-
-// 改后
-<AppLayout showNav={false} title="权限管理" showBack ...
-```
-
-### 12. Receive.tsx
-**行 205**
-```tsx
-// 改前
-<AppLayout showBack title="收款" onBack={handleBack}>
-
-// 改后
-<AppLayout showNav={false} showBack title="收款" onBack={handleBack}>
+export const SUPPORTED_CHAINS: ChainInfo[] = [
+  { id: 'all', name: '全部网络', shortName: 'All', icon: 'all', color: '...' },
+  { id: 'ethereum', name: 'Ethereum', shortName: 'ETH', icon: 'ethereum', color: '...' },
+  { id: 'tron', name: 'Tron', shortName: 'TRX', icon: 'tron', color: '...' },
+  { id: 'bsc', name: 'BNB Chain', shortName: 'BNB', icon: 'bsc', color: '...' },
+  // 缺少 Solana
+];
 ```
 
 ---
 
-## 文件变更汇总
+#### 2. 地址验证逻辑缺少 Solana
 
-| 文件 | 修改位置数 | 描述 |
-|------|-----------|------|
-| `src/pages/Security.tsx` | 1 | 添加 showNav={false} |
-| `src/pages/DeviceManagement.tsx` | 1 | 添加 showNav={false} |
-| `src/pages/Contacts.tsx` | 1 | 添加 showNav={false} |
-| `src/pages/ContactDetail.tsx` | 2 | 添加 showNav={false}（两处 AppLayout） |
-| `src/pages/ContactForm.tsx` | 1 | 添加 showNav={false} |
-| `src/pages/Notifications.tsx` | 1 | 添加 showNav={false} |
-| `src/pages/Help.tsx` | 1 | 添加 showNav={false} |
-| `src/pages/PSPCenter.tsx` | 1 | 添加 showNav={false} |
-| `src/pages/PSPDetail.tsx` | 2 | 添加 showNav={false}（两处 AppLayout） |
-| `src/pages/PSPConnect.tsx` | 1 | 添加 showNav={false} |
-| `src/pages/PSPPermissions.tsx` | 2 | 添加 showNav={false}（两处 AppLayout） |
-| `src/pages/Receive.tsx` | 1 | 添加 showNav={false} |
+**涉及文件:**
+- `src/components/ContactDetailDrawer.tsx` (第94-103行)
+- `src/pages/ContactForm.tsx`
+- `src/pages/Send.tsx` (第175-181行)
 
-共 **12 个文件**，**15 处修改**
+当前只验证 EVM 和 Tron 地址格式：
+
+```typescript
+// 当前验证逻辑
+const validateAddress = (addr: string, chain: ChainId): boolean => {
+  if (chain === 'ethereum' || chain === 'bsc') {
+    return /^0x[a-fA-F0-9]{40}$/.test(addr);  // EVM
+  }
+  if (chain === 'tron') {
+    return /^T[a-zA-Z0-9]{33}$/.test(addr);    // Tron
+  }
+  return false;  // Solana 会返回 false
+};
+```
+
+Solana 地址格式需要添加：Base58 编码，32-44 字符长度
 
 ---
 
-## 说明
+#### 3. Mock 地址数据缺少 Solana
 
-- **主页面**（Home, History, Profile）应保留底部导航栏
-- **所有子页面**进入后应隐藏导航栏，用户通过返回按钮导航
-- 这符合移动端应用的标准导航模式
+**文件:** `src/pages/Receive.tsx` (第30-34行)
+
+```typescript
+const MOCK_ADDRESSES: Record<Exclude<ChainId, 'all'>, string> = {
+  ethereum: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD91',
+  tron: 'TN7qZLpmCvTnfbXnYFMBEZAjuZwKyxqvMb',
+  bsc: '0x8B4c5A9d3E7f1C2b0A6D8E9F4C3B2A1E7D6C5B4A',
+  // 缺少 solana
+};
+```
+
+---
+
+#### 4. 图标映射缺少完整配置
+
+**文件:** `src/lib/crypto-icons.ts` (第35-49行)
+
+当前 `CHAIN_ICON_MAP` 已有 `solana: 'sol'` 映射，但需要确保图标可用。
+
+---
+
+#### 5. Mock 资产数据不一致
+
+**文件:** `src/contexts/WalletContext.tsx` (第13-64行)
+
+SOL 代币被错误地归类到 `ethereum` 网络：
+
+```typescript
+// 错误: SOL 应该在 solana 网络，而非 ethereum
+{ symbol: 'SOL', name: 'Solana', balance: 12.5, usdValue: 2312.50, change24h: 3.2, icon: 'SOL', network: 'ethereum' },
+```
+
+---
+
+#### 6. Token 配置中 networks 数组错误
+
+**文件:** `src/lib/tokens.ts` (第24行)
+
+```typescript
+// 错误: SOL 的 networks 应该是 ['solana']，不是 ['ethereum']
+{ symbol: 'SOL', name: 'Solana', networks: ['ethereum'], price: 185.00, change24h: 3.2, category: 'layer1' },
+```
+
+---
+
+#### 7. RBF 工具缺少 Solana 处理
+
+**文件:** `src/lib/rbf-utils.ts` (第11-14行)
+
+需要将 Solana 添加到不支持 RBF 的链列表：
+
+```typescript
+const RBF_SUPPORTED_CHAINS = ['ethereum', 'bsc'];
+const RBF_UNSUPPORTED_CHAINS = ['tron'];  // 需要添加 'solana'
+```
+
+并在 `getGasToken` 函数中添加 Solana case：
+
+```typescript
+case 'solana':
+  return 'SOL';
+```
+
+---
+
+#### 8. chainLabel/getChainLabel 不一致
+
+多个文件中有重复的链名称获取逻辑：
+
+| 文件 | 函数名 | 返回值 |
+|------|--------|--------|
+| `ContactCard.tsx` | `getChainLabel` | EVM / TRX / BSC |
+| `ContactDetail.tsx` | `getChainName` | Ethereum / Tron / BNB Chain |
+| `Send.tsx` | `getChainLabel` | EVM / TRX / 默认大写 |
+| `TokenSelector.tsx` | `getChainName` | shortName from SUPPORTED_CHAINS |
+
+建议统一为一个工具函数。
+
+---
+
+### 修改计划
+
+#### 步骤 1: 更新核心类型定义
+
+**文件:** `src/types/wallet.ts`
+
+```typescript
+// 添加 solana 到 ChainId
+export type ChainId = 'all' | 'ethereum' | 'tron' | 'bsc' | 'solana';
+
+// 添加 Solana 到 SUPPORTED_CHAINS
+export const SUPPORTED_CHAINS: ChainInfo[] = [
+  { id: 'all', name: '全部网络', shortName: 'All', icon: 'all', color: 'hsl(var(--accent))' },
+  { id: 'ethereum', name: 'Ethereum', shortName: 'ETH', icon: 'ethereum', color: 'hsl(217 91% 60%)' },
+  { id: 'tron', name: 'Tron', shortName: 'TRX', icon: 'tron', color: 'hsl(0 84% 60%)' },
+  { id: 'bsc', name: 'BNB Chain', shortName: 'BNB', icon: 'bsc', color: 'hsl(38 92% 50%)' },
+  { id: 'solana', name: 'Solana', shortName: 'SOL', icon: 'solana', color: 'hsl(280 80% 60%)' },
+];
+```
+
+#### 步骤 2: 创建统一的链工具函数
+
+**新建文件:** `src/lib/chain-utils.ts`
+
+```typescript
+import { ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
+
+// 获取链全称
+export function getChainName(chainId: ChainId): string {
+  return SUPPORTED_CHAINS.find(c => c.id === chainId)?.name || chainId;
+}
+
+// 获取链简称
+export function getChainShortName(chainId: ChainId): string {
+  return SUPPORTED_CHAINS.find(c => c.id === chainId)?.shortName || chainId;
+}
+
+// 获取链标签（用于地址簿等场景）
+export function getChainLabel(chainId: ChainId): string {
+  if (chainId === 'ethereum' || chainId === 'bsc') return 'EVM';
+  if (chainId === 'tron') return 'TRX';
+  if (chainId === 'solana') return 'SOL';
+  return chainId.toUpperCase();
+}
+
+// 验证地址格式
+export function validateAddress(address: string, chainId: ChainId): boolean {
+  if (!address) return false;
+  
+  if (chainId === 'ethereum' || chainId === 'bsc') {
+    return /^0x[a-fA-F0-9]{40}$/.test(address);
+  }
+  if (chainId === 'tron') {
+    return /^T[a-zA-Z0-9]{33}$/.test(address);
+  }
+  if (chainId === 'solana') {
+    return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
+  }
+  return false;
+}
+
+// 获取地址占位符
+export function getAddressPlaceholder(chainId: ChainId): string {
+  if (chainId === 'tron') return 'T...';
+  if (chainId === 'solana') return '1-9A-HJ...';
+  return '0x...';
+}
+
+// 获取 Gas Token
+export function getGasToken(chainId: ChainId): string {
+  switch (chainId) {
+    case 'ethereum': return 'ETH';
+    case 'bsc': return 'BNB';
+    case 'tron': return 'TRX';
+    case 'solana': return 'SOL';
+    default: return chainId.toUpperCase();
+  }
+}
+```
+
+#### 步骤 3: 更新 Mock 数据
+
+**文件:** `src/pages/Receive.tsx`
+
+```typescript
+const MOCK_ADDRESSES: Record<Exclude<ChainId, 'all'>, string> = {
+  ethereum: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD91',
+  tron: 'TN7qZLpmCvTnfbXnYFMBEZAjuZwKyxqvMb',
+  bsc: '0x8B4c5A9d3E7f1C2b0A6D8E9F4C3B2A1E7D6C5B4A',
+  solana: '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV',
+};
+```
+
+**文件:** `src/contexts/WalletContext.tsx`
+
+修正 SOL 资产归属并添加 Solana 原生资产：
+
+```typescript
+// 将 SOL 从 ethereum 移到 solana 网络
+{ symbol: 'SOL', name: 'Solana', balance: 12.5, usdValue: 2312.50, change24h: 3.2, icon: 'SOL', network: 'solana' },
+// 添加 Solana 链的 USDT/USDC
+{ symbol: 'USDT', name: 'Tether USD', balance: 1000.00, usdValue: 1000.00, change24h: 0.01, icon: 'USDT', network: 'solana' },
+```
+
+#### 步骤 4: 更新 tokens.ts
+
+**文件:** `src/lib/tokens.ts`
+
+修正 SOL 和其他代币的 networks：
+
+```typescript
+{ symbol: 'SOL', name: 'Solana', networks: ['solana'], price: 185.00, change24h: 3.2, category: 'layer1' },
+{ symbol: 'USDT', name: 'Tether USD', networks: ['ethereum', 'tron', 'bsc', 'solana'], ... },
+{ symbol: 'USDC', name: 'USD Coin', networks: ['ethereum', 'bsc', 'solana'], ... },
+```
+
+#### 步骤 5: 更新 RBF 工具
+
+**文件:** `src/lib/rbf-utils.ts`
+
+```typescript
+const RBF_UNSUPPORTED_CHAINS = ['tron', 'solana'];
+
+export function getGasToken(network: string): string {
+  switch (network) {
+    case 'ethereum': return 'ETH';
+    case 'bsc': return 'BNB';
+    case 'tron': return 'TRX';
+    case 'solana': return 'SOL';
+    default: return 'ETH';
+  }
+}
+```
+
+#### 步骤 6: 重构组件使用统一工具函数
+
+需更新以下组件以使用 `chain-utils.ts`：
+- `src/components/ContactCard.tsx` - 删除本地 `getChainLabel`
+- `src/components/ContactDetailDrawer.tsx` - 使用统一验证和占位符
+- `src/pages/ContactDetail.tsx` - 删除本地 `getChainName`
+- `src/pages/ContactForm.tsx` - 使用统一验证
+- `src/pages/Send.tsx` - 删除本地 `getChainLabel` 和 `getChainName`
+- `src/components/TokenSelector.tsx` - 删除本地 `getChainName`
+- `src/components/AssetPickerDrawer.tsx` - 删除本地 `getChainName`
+- `src/pages/Home.tsx` - 删除本地 `getChainName`
+
+---
+
+### 修改文件清单
+
+| 文件 | 修改类型 | 说明 |
+|------|----------|------|
+| `src/types/wallet.ts` | 修改 | 添加 `solana` 到 ChainId 和 SUPPORTED_CHAINS |
+| `src/lib/chain-utils.ts` | 新建 | 统一的链工具函数 |
+| `src/lib/tokens.ts` | 修改 | 修正 SOL 的 networks 配置 |
+| `src/lib/rbf-utils.ts` | 修改 | 添加 Solana 支持 |
+| `src/lib/crypto-icons.ts` | 检查 | 确认 solana 图标映射正确 |
+| `src/contexts/WalletContext.tsx` | 修改 | 修正 Mock 资产数据 |
+| `src/pages/Receive.tsx` | 修改 | 添加 Solana 地址 |
+| `src/components/ContactCard.tsx` | 修改 | 使用统一工具函数 |
+| `src/components/ContactDetailDrawer.tsx` | 修改 | 使用统一工具函数和验证 |
+| `src/pages/ContactForm.tsx` | 修改 | 使用统一工具函数和验证 |
+| `src/pages/ContactDetail.tsx` | 修改 | 使用统一工具函数 |
+| `src/pages/Send.tsx` | 修改 | 使用统一工具函数 |
+| `src/components/TokenSelector.tsx` | 修改 | 使用统一工具函数 |
+| `src/components/AssetPickerDrawer.tsx` | 修改 | 使用统一工具函数 |
+| `src/pages/Home.tsx` | 修改 | 使用统一工具函数 |
+
