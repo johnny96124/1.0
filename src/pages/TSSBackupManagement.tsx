@@ -310,14 +310,18 @@ export default function TSSBackupManagement() {
           </DrawerHeader>
           
           <div className="px-4 pb-8">
-            {/* iCloud indicator */}
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/20 mb-6">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                <Cloud className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <p className="font-medium text-sm">iCloud</p>
-                <p className="text-xs text-muted-foreground">使用 Apple ID 安全存储</p>
+            {/* Cloud Backup Tips */}
+            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 mb-6">
+              <div className="flex gap-3">
+                <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-medium">重要提示</h4>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• 备份将加密存储在您的 iCloud 账户中</li>
+                    <li>• 备份密码无法找回，请务必牢记</li>
+                    <li>• 换机时使用相同 Apple ID 登录即可恢复</li>
+                  </ul>
+                </div>
               </div>
             </div>
             
@@ -335,22 +339,7 @@ export default function TSSBackupManagement() {
               onSubmit={handleCloudBackup}
               submitLabel="备份到 iCloud"
               showBackButton={false}
-            >
-              {/* Cloud Backup Tips */}
-              <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
-                <div className="flex gap-3">
-                  <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-medium">重要提示</h4>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 备份将加密存储在您的 iCloud 账户中</li>
-                      <li>• 备份密码无法找回，请务必牢记</li>
-                      <li>• 换机时使用相同 Apple ID 登录即可恢复</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </PasswordForm>
+            />
           </div>
         </DrawerContent>
       </Drawer>
@@ -363,6 +352,21 @@ export default function TSSBackupManagement() {
           </DrawerHeader>
           
           <div className="px-4 pb-8">
+            {/* Local Backup Tips */}
+            <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 mb-6">
+              <div className="flex gap-3">
+                <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h4 className="text-sm font-medium">重要提示</h4>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• 备份文件将导出到您的设备</li>
+                    <li>• 备份密码无法找回，请务必牢记</li>
+                    <li>• 请将备份文件保存在安全位置（如电脑或 U 盘）</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
             <PasswordForm
               password={password}
               confirmPassword={confirmPassword}
@@ -376,22 +380,7 @@ export default function TSSBackupManagement() {
               onConfirmedChange={setConfirmed}
               onSubmit={handleLocalBackup}
               submitLabel="导出备份文件"
-            >
-              {/* Local Backup Tips */}
-              <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
-                <div className="flex gap-3">
-                  <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-medium">重要提示</h4>
-                    <ul className="text-xs text-muted-foreground space-y-1">
-                      <li>• 备份文件将导出到您的设备</li>
-                      <li>• 备份密码无法找回，请务必牢记</li>
-                      <li>• 请将备份文件保存在安全位置（如电脑或 U 盘）</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </PasswordForm>
+            />
           </div>
         </DrawerContent>
       </Drawer>
