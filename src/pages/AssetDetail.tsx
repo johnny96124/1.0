@@ -135,12 +135,20 @@ export default function AssetDetailPage() {
             </div>
           </div>
           {/* Chain Selector - only show if asset exists on multiple chains */}
-          {assetData.chains.length > 1 && (
+          {assetData.chains.length > 1 ? (
             <ChainSelector
               selectedChain={selectedChain}
               onSelectChain={setSelectedChain}
               className="px-0"
             />
+          ) : (
+            /* Single chain label */
+            <div className="flex items-center gap-2 py-1">
+              <ChainIcon chainId={assetData.chains[0].network} size="sm" />
+              <span className="text-sm text-muted-foreground">
+                {SUPPORTED_CHAINS.find(c => c.id === assetData.chains[0].network)?.name}
+              </span>
+            </div>
           )}
         </div>
 
@@ -262,8 +270,8 @@ export default function AssetDetailPage() {
             </motion.div>
           )}
 
-          {/* Address for selected chain */}
-          {selectedChain !== 'all' && currentAddress && (
+          {/* Address for selected chain or single chain */}
+          {(selectedChain !== 'all' && currentAddress) || (assetData.chains.length === 1) ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -273,9 +281,15 @@ export default function AssetDetailPage() {
               <h2 className="font-semibold text-foreground text-sm mb-2">
                 收款地址
               </h2>
-              <AddressDisplay address={currentAddress} showFull />
+              <AddressDisplay 
+                address={
+                  selectedChain !== 'all' 
+                    ? currentAddress! 
+                    : currentWallet?.addresses?.[assetData.chains[0].network] || ''
+                } 
+              />
             </motion.div>
-          )}
+          ) : null}
 
           {/* Transactions */}
           <motion.div
