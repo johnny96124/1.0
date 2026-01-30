@@ -26,15 +26,13 @@ export function getChainShortName(chainId: ChainId): string {
 
 /**
  * Get chain label for address book and compact displays
- * - EVM chains (Ethereum, BSC) -> "EVM"
- * - Tron -> "TRX"
- * - Solana -> "SOL"
+ * Uses full chain names instead of abbreviations
  */
 export function getChainLabel(chainId: ChainId): string {
   if (chainId === 'ethereum' || chainId === 'bsc') return 'EVM';
-  if (chainId === 'tron') return 'TRX';
-  if (chainId === 'solana') return 'SOL';
-  return chainId.toUpperCase();
+  if (chainId === 'tron') return 'Tron';
+  if (chainId === 'solana') return 'Solana';
+  return getChainName(chainId);
 }
 
 /**
