@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Copy, Check, AlertTriangle, Loader2 } from 'lucide-react';
+import { Trash2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useWallet } from '@/contexts/WalletContext';
 import { toast } from '@/lib/toast';
-import { Contact, ChainId, SUPPORTED_CHAINS, RiskColor } from '@/types/wallet';
+import { Contact, ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
 import {
@@ -42,7 +42,7 @@ export function ContactDetailDrawer({
   onOpenChange,
   mode = 'view'
 }: ContactDetailDrawerProps) {
-  const { contacts, addContact, updateContact, removeContact, scanAddressRisk } = useWallet();
+  const { contacts, addContact, updateContact, removeContact } = useWallet();
 
   const isAddMode = mode === 'add';
 
@@ -56,8 +56,6 @@ export function ContactDetailDrawer({
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const [isScanning, setIsScanning] = useState(false);
-  const [riskResult, setRiskResult] = useState<{ score: RiskColor; reasons: string[] } | null>(null);
 
   // Reset form when drawer opens or contact changes
   useEffect(() => {
@@ -69,7 +67,6 @@ export function ContactDetailDrawer({
         setNetwork('ethereum');
         setNotes('');
         setHasChanges(false);
-        setRiskResult(null);
       } else if (contact) {
         // Populate with contact data for edit mode
         setName(contact.name || '');
@@ -77,7 +74,6 @@ export function ContactDetailDrawer({
         setNetwork(contact.network as ChainId);
         setNotes(contact.notes || '');
         setHasChanges(false);
-        setRiskResult(null);
       }
     }
   }, [open, contact, isAddMode]);
@@ -111,22 +107,6 @@ export function ContactDetailDrawer({
   // Show validation error only when user has entered something
   const showAddressError = address.length > 0 && !isValidAddress;
 
-  // Scan address risk when address changes (only for new/changed addresses)
-  useEffect(() => {
-    const shouldScan = isValidAddress && address && (isAddMode || (contact && address !== contact.address));
-    
-    if (shouldScan) {
-      setIsScanning(true);
-      const timer = setTimeout(async () => {
-        const result = await scanAddressRisk(address);
-        setRiskResult({ score: result.score, reasons: result.reasons });
-        setIsScanning(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    } else if (!isAddMode && address === contact?.address) {
-      setRiskResult(null);
-    }
-  }, [address, isValidAddress, scanAddressRisk, contact, isAddMode]);
 
   const handleCopyAddress = async () => {
     if (!address) return;
@@ -272,7 +252,6 @@ export function ContactDetailDrawer({
                             if ((chain.id === 'tron' && address.startsWith('0x')) ||
                                 ((chain.id === 'ethereum' || chain.id === 'bsc') && address.startsWith('T'))) {
                               setAddress('');
-                              setRiskResult(null);
                             }
                           }}
                           className={cn(
@@ -328,47 +307,6 @@ export function ContactDetailDrawer({
                   </p>
                 )}
 
-                {/* Risk scanning indicator */}
-                {isScanning && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    正在扫描地址风险...
-                  </div>
-                )}
-
-                {/* Risk result */}
-                {riskResult && !isScanning && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn(
-                      "p-3 rounded-lg text-sm",
-                      riskResult.score === 'green' && "bg-success/10 text-success",
-                      riskResult.score === 'yellow' && "bg-warning/10 text-warning",
-                      riskResult.score === 'red' && "bg-destructive/10 text-destructive"
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      {riskResult.score === 'green' ? (
-                        <Check className="w-4 h-4" />
-                      ) : (
-                        <AlertTriangle className="w-4 h-4" />
-                      )}
-                      <span className="font-medium">
-                        {riskResult.score === 'green' && '地址安全'}
-                        {riskResult.score === 'yellow' && '中等风险'}
-                        {riskResult.score === 'red' && '高风险地址'}
-                      </span>
-                    </div>
-                    {riskResult.reasons.length > 0 && (
-                      <ul className="mt-2 space-y-1 text-xs opacity-80">
-                        {riskResult.reasons.map((reason, i) => (
-                          <li key={i}>• {reason}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </motion.div>
-                )}
               </div>
 
               {/* Notes */}
