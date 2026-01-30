@@ -147,6 +147,7 @@ export default function AssetDetailPage() {
             <ChainSelector
               selectedChain={selectedChain}
               onSelectChain={setSelectedChain}
+              availableChains={assetData.chains.map(c => c.network)}
               className="px-0"
             />
           )}

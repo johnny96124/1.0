@@ -7,6 +7,8 @@ interface ChainSelectorProps {
   selectedChain: ChainId;
   onSelectChain: (chain: ChainId) => void;
   showAll?: boolean;
+  /** Custom list of chain IDs to show (if provided, overrides showAll) */
+  availableChains?: ChainId[];
   className?: string;
 }
 
@@ -14,11 +16,17 @@ export function ChainSelector({
   selectedChain, 
   onSelectChain, 
   showAll = true,
+  availableChains,
   className 
 }: ChainSelectorProps) {
-  const chains = showAll 
-    ? SUPPORTED_CHAINS 
-    : SUPPORTED_CHAINS.filter(c => c.id !== 'all');
+  // If availableChains is provided, filter to only those chains (always include 'all' at the start if showAll is true)
+  const chains = availableChains 
+    ? (showAll 
+        ? [SUPPORTED_CHAINS.find(c => c.id === 'all')!, ...SUPPORTED_CHAINS.filter(c => availableChains.includes(c.id) && c.id !== 'all')]
+        : SUPPORTED_CHAINS.filter(c => availableChains.includes(c.id) && c.id !== 'all'))
+    : (showAll 
+        ? SUPPORTED_CHAINS 
+        : SUPPORTED_CHAINS.filter(c => c.id !== 'all'));
 
   return (
     <div className={cn("flex gap-2 overflow-x-auto scrollbar-hide py-1", className)}>
