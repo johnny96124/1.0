@@ -6,7 +6,6 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useWallet } from '@/contexts/WalletContext';
 import { toast } from '@/lib/toast';
@@ -22,8 +21,6 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 
-const PRESET_TAGS = ['客户', '供应商', '个人', '交易所', '其他'];
-
 const AVAILABLE_CHAINS = SUPPORTED_CHAINS.filter(c => c.id !== 'all');
 
 export default function ContactFormPage() {
@@ -37,8 +34,6 @@ export default function ContactFormPage() {
   const [name, setName] = useState(existingContact?.name || '');
   const [address, setAddress] = useState(existingContact?.address || '');
   const [network, setNetwork] = useState<ChainId>(existingContact?.network as ChainId || 'ethereum');
-  const [selectedTags, setSelectedTags] = useState<string[]>(existingContact?.tags || []);
-  const [isWhitelisted, setIsWhitelisted] = useState(existingContact?.isWhitelisted || false);
   const [notes, setNotes] = useState(existingContact?.notes || '');
 
   const [showQRScanner, setShowQRScanner] = useState(false);
@@ -81,16 +76,7 @@ export default function ContactFormPage() {
     setShowQRScanner(false);
   };
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev =>
-      prev.includes(tag)
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    );
-  };
-
   const handleSave = async () => {
-    // Validation
     if (!name.trim()) {
       toast.error('请输入联系人名称');
       return;
@@ -111,7 +97,7 @@ export default function ContactFormPage() {
       c => c.address.toLowerCase() === address.toLowerCase() && c.id !== id
     );
     if (duplicate) {
-      toast.error('地址已存在', `该地址已保存为 "${duplicate.name}"`);
+      toast.error('地址已存在', `该地址已保存为 "${duplicate.name || '未命名地址'}"`);
       return;
     }
 
@@ -122,8 +108,8 @@ export default function ContactFormPage() {
         name: name.trim(),
         address: address.trim(),
         network,
-        tags: selectedTags,
-        isWhitelisted,
+        tags: [],
+        isWhitelisted: false,
         isOfficial: false,
         notes: notes.trim(),
       };
@@ -277,44 +263,6 @@ export default function ContactFormPage() {
                 )}
               </div>
             )}
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label>标签</Label>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_TAGS.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-full text-sm transition-colors",
-                    selectedTags.includes(tag)
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                  )}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Whitelist */}
-          <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30">
-            <div className="space-y-0.5">
-              <Label htmlFor="whitelist" className="text-sm font-medium">
-                添加到白名单
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                白名单地址可跳过部分安全验证
-              </p>
-            </div>
-            <Switch
-              id="whitelist"
-              checked={isWhitelisted}
-              onCheckedChange={setIsWhitelisted}
-            />
           </div>
 
           {/* Notes */}
