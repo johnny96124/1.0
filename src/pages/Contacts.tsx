@@ -16,6 +16,7 @@ export default function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'view' | 'add'>('view');
 
   // Sort by lastUsed (most recent first)
   const filteredContacts = useMemo(() => {
@@ -44,6 +45,13 @@ export default function ContactsPage() {
 
   const handleContactClick = (contact: Contact) => {
     setSelectedContact(contact);
+    setDrawerMode('view');
+    setDrawerOpen(true);
+  };
+
+  const handleAddClick = () => {
+    setSelectedContact(null);
+    setDrawerMode('add');
     setDrawerOpen(true);
   };
 
@@ -58,7 +66,7 @@ export default function ContactsPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/profile/contacts/add')}
+            onClick={handleAddClick}
           >
             <Plus className="w-5 h-5" />
           </Button>
@@ -107,9 +115,7 @@ export default function ContactsPage() {
                     {searchQuery ? '尝试其他搜索词' : '添加常用地址，转账更便捷'}
                   </p>
                   {!searchQuery && (
-                    <Button
-                      onClick={() => navigate('/profile/contacts/add')}
-                    >
+                    <Button onClick={handleAddClick}>
                       添加第一个联系人
                     </Button>
                   )}
@@ -146,6 +152,7 @@ export default function ContactsPage() {
         contact={selectedContact}
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
+        mode={drawerMode}
       />
     </>
   );
