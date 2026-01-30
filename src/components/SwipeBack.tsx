@@ -87,7 +87,7 @@ export function SwipeBack({
           scale,
         }}
       >
-        <div className="w-10 h-10 rounded-full bg-muted/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
+        <div className="w-10 h-10 rounded-lg bg-muted/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
           <svg 
             width="20" 
             height="20" 
