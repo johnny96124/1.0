@@ -24,7 +24,6 @@ import { CryptoIcon } from '@/components/CryptoIcon';
 import { ChainIcon } from '@/components/ChainIcon';
 import { NetworkFeeSelector, FeeTier } from '@/components/NetworkFeeSelector';
 import { ContactDrawer } from '@/components/ContactDrawer';
-import { AssetPickerDrawer } from '@/components/AssetPickerDrawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   AlertDialog,
@@ -112,7 +111,6 @@ export default function SendPage() {
   const [showPSPBlockedDialog, setShowPSPBlockedDialog] = useState(false);
   const [pspInfo, setPspInfo] = useState<{ isPSP: boolean; pspName?: string } | null>(null);
   const [testTipDismissed, setTestTipDismissed] = useState(false);
-  const [showAssetPicker, setShowAssetPicker] = useState(false);
   
 
   // Asset selection step states
@@ -462,8 +460,15 @@ export default function SendPage() {
                 {/* Selected Asset Display */}
                 {selectedAsset && (
                   <button
-                    onClick={() => setShowAssetPicker(true)}
-                    className="w-full p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-3 hover:bg-muted/80 transition-colors"
+                    onClick={() => {
+                      if (!assetFromUrl) {
+                        setStep('asset');
+                      }
+                    }}
+                    className={cn(
+                      "w-full p-3 rounded-xl bg-muted/50 border border-border/50 flex items-center gap-3",
+                      !assetFromUrl && "hover:bg-muted/80 transition-colors"
+                    )}
                   >
                     <div className="relative shrink-0">
                       <CryptoIcon symbol={selectedAsset.symbol} size="md" />
@@ -477,7 +482,9 @@ export default function SendPage() {
                         余额: {selectedAsset.balance.toLocaleString()} {selectedAsset.symbol}
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    {!assetFromUrl && (
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    )}
                   </button>
                 )}
 
@@ -941,15 +948,6 @@ export default function SendPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Asset Picker Drawer */}
-      <AssetPickerDrawer
-        open={showAssetPicker}
-        onOpenChange={setShowAssetPicker}
-        assets={assets}
-        onSelect={setSelectedAsset}
-        selectedAsset={selectedAsset || undefined}
-      />
     </AppLayout>
   );
 }
