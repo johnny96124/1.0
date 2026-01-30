@@ -1,100 +1,84 @@
 
-# 统一回退按钮样式方案
+# Toast 两层信息优化方案（精简版）
 
-## 问题分析
+## 设计原则
 
-当前产品中存在多种回退按钮样式，需要统一为带圆角矩形版本（非圆形遮罩版本）：
+### 需要两层信息的场景
+1. **复制操作** - 第二层显示具体复制的内容（截断显示）
+2. **重要操作完成** - 需要额外说明后续影响或下一步
+3. **错误提示** - 需要提供解决方案
 
-### 当前存在圆形回退按钮的位置
-
-| 文件 | 位置 | 当前样式 |
-|------|------|----------|
-| `AppLayout.tsx` | 第61行 | `h-10 w-10 rounded-full` |
-| `Send.tsx` | 第312行 | `w-10 h-10 rounded-full bg-muted` |
-| `SwipeBack.tsx` | 第90行 | `w-10 h-10 rounded-full` (滑动指示器) |
-
-### 当前已经是正确样式的按钮（无需修改）
-
-| 文件 | 样式 | 说明 |
-|------|------|------|
-| `TokenManager.tsx` | `Button variant="ghost" size="icon"` | 使用按钮组件默认圆角 |
-| `AssetDetail.tsx` | `Button variant="ghost" size="icon"` | 使用按钮组件默认圆角 |
-| `RiskReturn.tsx` | `Button variant="ghost" size="icon"` | 使用按钮组件默认圆角 |
-| `WalletEscape.tsx` | `Button variant="ghost" size="icon"` | 使用按钮组件默认圆角 |
-| `CreateWallet.tsx` | `p-1 -ml-1` 无圆形 | 极简样式，无背景 |
-| `TssKeyRecovery.tsx` | `p-1 -ml-1` 无圆形 | 极简样式，无背景 |
+### 保持单层信息的场景
+1. **简单状态切换** - 手电筒开/关、语言切换
+2. **表单验证错误** - 错误信息本身已足够清晰
+3. **功能预告** - "即将上线"类提示
+4. **操作确认** - 简单的"已完成"类确认
 
 ---
 
-## 修改方案
+## 具体修改清单
 
-### 1. AppLayout.tsx（核心布局组件）
+### 1. 复制操作（显示具体内容）
 
-**当前代码：**
-```tsx
-<Button
-  variant="ghost"
-  size="icon"
-  onClick={handleBack}
-  className="h-10 w-10 -ml-2 rounded-full hover:bg-muted"
->
-```
+| 文件 | 当前 | 修改后 |
+|------|------|--------|
+| `TransactionDetail.tsx` | `toast.success('发送方地址已复制')` | `toast.success('已复制', formatAddress(addr))` |
+| `TransactionDetail.tsx` | `toast.success('收款方地址已复制')` | `toast.success('已复制', formatAddress(addr))` |
+| `TransactionDetail.tsx` | `toast.success('已复制到剪贴板')` | `toast.success('已复制', formatTxHash(txHash))` |
+| `ChainDropdown.tsx` | `toast.success('${chainName} 地址已复制')` | `toast.success('已复制', formatAddress(address))` |
+| `RiskManagement.tsx` | `toast.success('地址已复制')` | `toast.success('已复制', formatAddress(address))` |
 
-**修改为：**
-```tsx
-<Button
-  variant="ghost"
-  size="icon"
-  onClick={handleBack}
-  className="h-10 w-10 -ml-2 rounded-lg hover:bg-muted"
->
-```
-
-### 2. Send.tsx（转账页面）
-
-**当前代码：**
-```tsx
-<button
-  onClick={handleBack}
-  className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
->
-```
-
-**修改为：**
-```tsx
-<button
-  onClick={handleBack}
-  className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
->
-```
-
-### 3. SwipeBack.tsx（滑动返回指示器）
-
-**当前代码：**
-```tsx
-<div className="w-10 h-10 rounded-full bg-muted/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
-```
-
-**修改为：**
-```tsx
-<div className="w-10 h-10 rounded-lg bg-muted/80 backdrop-blur-sm flex items-center justify-center shadow-lg">
-```
+地址格式化函数：显示前6位...后4位，如 `0x1234...5678`
 
 ---
 
-## 技术细节
+### 2. 重要操作（需补充说明）
 
-修改非常简单，只需将三个文件中的 `rounded-full` 替换为 `rounded-lg`：
-- `rounded-full` = 完全圆形（border-radius: 9999px）
-- `rounded-lg` = 圆角矩形（border-radius: 0.5rem / 8px）
-
-这将使所有回退按钮与 Button 组件的默认圆角保持一致（按钮组件默认使用 `rounded-lg`）。
+| 文件 | 当前 | 修改后 | 原因 |
+|------|------|--------|------|
+| `WalletEscape.tsx` | `toast.success('私钥文件已生成')` | `toast.success('私钥文件已生成', '请立即下载并妥善保管')` | 关键安全提示 |
+| `WalletEscape.tsx` | `toast.success('MPC 逃逸完成，钱包已转为自托管模式')` | `toast.success('MPC 逃逸完成', '钱包已转为自托管模式')` | 信息分层更清晰 |
 
 ---
 
-## 影响范围
+### 3. 保持单层（无需修改）
 
-修改这三个文件后，以下页面的回退按钮样式将统一：
-- 所有使用 `AppLayout` 的页面（收款、历史、个人设置等）
-- 转账页面
-- 所有支持滑动返回手势的页面指示器
+以下场景信息已足够完整，保持单层：
+
+- `Home.tsx`: `余额已刷新` - 简单确认
+- `Home.tsx`: `已添加 ${symbol}` / `已删除 ${symbol}` - 操作对象已明确
+- `PersonalInfo.tsx`: `邮箱绑定成功` / `手机号绑定成功` / `密码设置成功` - 简洁明了
+- `LanguageSelectDrawer.tsx`: `语言已切换` - 简单状态
+- `QRScanner.tsx`: `已识别收款地址` / `手电筒已打开/关闭` - 即时反馈
+- `WalletManagement.tsx`: `钱包已重命名为 "${name}"` - 结果已在消息中
+- `PSPPermissions.tsx`: `权限已开启/关闭` - 简单切换
+
+---
+
+## 技术实现
+
+### 新增地址格式化工具函数
+
+在 `src/lib/utils.ts` 中添加：
+
+```typescript
+export function formatAddressShort(address: string, prefixLen = 6, suffixLen = 4): string {
+  if (!address || address.length <= prefixLen + suffixLen) return address;
+  return `${address.slice(0, prefixLen)}...${address.slice(-suffixLen)}`;
+}
+
+export function formatTxHashShort(hash: string): string {
+  if (!hash || hash.length <= 14) return hash;
+  return `${hash.slice(0, 10)}...${hash.slice(-4)}`;
+}
+```
+
+### 文件修改列表
+
+1. **src/lib/utils.ts** - 添加格式化函数
+2. **src/pages/TransactionDetail.tsx** - 3处复制Toast
+3. **src/components/ChainDropdown.tsx** - 1处复制Toast  
+4. **src/pages/RiskManagement.tsx** - 1处复制Toast
+5. **src/pages/WalletEscape.tsx** - 2处重要操作Toast
+
+共计 **6个文件**，**8处修改**
