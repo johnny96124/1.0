@@ -155,7 +155,7 @@ export default function ProfilePage() {
               )}
             </div>
             <span className="flex-1 font-medium text-foreground text-sm">
-              {language === 'zh-CN' ? '深色模式' : 'Dark Mode'}
+              深色模式
             </span>
             <Switch
               checked={isDark}
@@ -174,7 +174,7 @@ export default function ProfilePage() {
               <Globe className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <span className="flex-1 text-left font-medium text-foreground text-sm">
-              {language === 'zh-CN' ? '语言' : 'Language'}
+              语言
             </span>
             <span className="text-sm text-muted-foreground mr-1">
               {getLabel(language)}
