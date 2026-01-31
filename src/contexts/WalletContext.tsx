@@ -7,6 +7,11 @@ import {
   AccountRiskStatus, AccountRiskSummary, Notification,
   AuthResult, UserType
 } from '@/types/wallet';
+import { 
+  MOCK_WALLET_ADDRESSES, 
+  MOCK_PSP_ADDRESSES,
+  generateMultiChainAddresses 
+} from '@/lib/mock-addresses';
 
 // Mock data for demonstration - wallet-specific assets
 // Each wallet has its own assets
@@ -100,7 +105,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'ETH',
     usdValue: 3500,
     status: 'pending',
-    counterparty: '0x1234567890abcdef1234567890abcdef12345678',
+    counterparty: '0x7a3F9c2B8e4D1f5A6b3C9e8D7f2A1b4C5d6E7f8A',
     counterpartyLabel: '',
     timestamp: new Date(),
     txHash: '0x17f65d9a2b3c4e5f6a7b8c9d0e1f2a3b4c5d6e7917af',
@@ -121,7 +126,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 500,
     status: 'pending',
-    counterparty: '0xBSC1234567890abcdef1234567890abcdef1234',
+    counterparty: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
     counterpartyLabel: 'Exchange Wallet',
     timestamp: new Date(Date.now() - 300000), // 5 mins ago
     txHash: '0xbsc17f65d9a2b3c4e5f6a7b8c9d0e1f2a3b4c5d6e7',
@@ -141,7 +146,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 2500,
     status: 'confirmed',
-    counterparty: '0x1234567890abcdef1234567890abcdef12345678',
+    counterparty: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
     counterpartyLabel: 'ABC Trading Co.',
     timestamp: new Date(Date.now() - 3600000),
     txHash: '0xabc123def456789012345678901234567890abcdef',
@@ -162,7 +167,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 800,
     status: 'confirmed',
-    counterparty: 'T9yD14Nj9j7xAB4dbGeiX9h8unkKHxuWwb',
+    counterparty: 'TJRabPrwbZy45sbavfcjinPJC18kjpRTv8',
     counterpartyLabel: 'Supplier XYZ',
     timestamp: new Date(Date.now() - 86400000),
     txHash: 'abc123def456789012345678901234567890',
@@ -183,7 +188,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 15000,
     status: 'confirmed',
-    counterparty: '0xSANCTIONED123456789012345678901234567890',
+    counterparty: '0x8B3392483BA26D65E331dB86D4F430E9B3814E5e',
     timestamp: new Date(Date.now() - 7200000),
     txHash: '0xrisktx123456789012345678901234567890abcd',
     network: 'ethereum',
@@ -200,7 +205,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'ETH',
     usdValue: 29750,
     status: 'confirmed',
-    counterparty: '0xDARKNET789012345678901234567890abcdef12',
+    counterparty: '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8',
     timestamp: new Date(Date.now() - 5400000),
     txHash: '0xhighrisk789012345678901234567890abcdef',
     network: 'ethereum',
@@ -217,7 +222,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDC',
     usdValue: 5000,
     status: 'confirmed',
-    counterparty: '0x9999888877776666555544443333222211110000',
+    counterparty: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     timestamp: new Date(Date.now() - 1800000),
     txHash: '0xsuspicious1234567890abcdef1234567890ab',
     network: 'ethereum',
@@ -234,7 +239,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 3200,
     status: 'confirmed',
-    counterparty: '0xUNKNOWN456789012345678901234567890abcd',
+    counterparty: '0x2B5634C42055806a59e9107ED44D43c426E58258',
     counterpartyLabel: '未知来源',
     timestamp: new Date(Date.now() - 4800000),
     txHash: '0xyellowrisk456789012345678901234567890',
@@ -252,7 +257,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 1200,
     status: 'confirmed',
-    counterparty: '0xACKNOWLEDGED123456789012345678901234567',
+    counterparty: 'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE',
     timestamp: new Date(Date.now() - 259200000),
     txHash: '0xacknowledged123456789012345678901234567',
     network: 'tron',
@@ -269,7 +274,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDC',
     usdValue: 25000,
     status: 'confirmed',
-    counterparty: '0xRETURNED789012345678901234567890abcdef',
+    counterparty: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     timestamp: new Date(Date.now() - 345600000),
     txHash: '0xreturned789012345678901234567890abcdef',
     network: 'ethereum',
@@ -286,7 +291,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'BNB',
     usdValue: 900,
     status: 'confirmed',
-    counterparty: '0xBnb123456789012345678901234567890abcdef',
+    counterparty: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
     timestamp: new Date(Date.now() - 172800000),
     txHash: '0xbnbtx123456789012345678901234567890abcd',
     network: 'bsc',
@@ -300,7 +305,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'TRX',
     usdValue: 55,
     status: 'confirmed',
-    counterparty: 'T1234567890abcdef1234567890abcdef12',
+    counterparty: 'TPbBpRXkoxJdQVCLt7jfmCEXXZJxr1ySfL',
     counterpartyLabel: '日常收款',
     timestamp: new Date(Date.now() - 432000000),
     txHash: 'trxtx123456789012345678901234567890abcd',
@@ -315,7 +320,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 1000,
     status: 'failed',
-    counterparty: '0xFailed123456789012345678901234567890abcd',
+    counterparty: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2',
     counterpartyLabel: 'External Wallet',
     timestamp: new Date(Date.now() - 3600000), // 1 hour ago
     txHash: '0xfailedtx1234567890abcdef1234567890abcd',
@@ -333,7 +338,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'ETH',
     usdValue: 8750,
     status: 'failed',
-    counterparty: '0xNetworkErr789012345678901234567890abcdef',
+    counterparty: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     timestamp: new Date(Date.now() - 10800000), // 3 hours ago
     txHash: '0xfailedtx2345678901234567890abcdef12345',
     network: 'ethereum',
@@ -350,7 +355,7 @@ const mockTransactionsWallet1: Transaction[] = [
     symbol: 'USDT',
     usdValue: 500,
     status: 'failed',
-    counterparty: 'TFailedAddr1234567890abcdef12345678',
+    counterparty: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
     counterpartyLabel: 'Partner Ltd.',
     timestamp: new Date(Date.now() - 90000000), // ~1 day ago
     txHash: 'failedhash789012345678901234567890abcd',
@@ -484,7 +489,7 @@ const mockContacts: Contact[] = [
   {
     id: '1',
     name: 'ABC Trading Co.',
-    address: '0x1234567890abcdef1234567890abcdef12345678',
+    address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
     network: 'ethereum',
     tags: [],
     isOfficial: false,
@@ -514,7 +519,7 @@ const mockContacts: Contact[] = [
   {
     id: '4',
     name: 'BSC Partner',
-    address: '0xBnb123456789012345678901234567890abcdef',
+    address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
     network: 'bsc',
     tags: [],
     isOfficial: false,
@@ -546,7 +551,7 @@ const mockContacts: Contact[] = [
   {
     id: '7',
     name: '',
-    address: '0xABC789DEF012345678901234567890abcdef1234',
+    address: '0x2B5634C42055806a59e9107ED44D43c426E58258',
     network: 'bsc',
     tags: [],
     isOfficial: false,
@@ -556,7 +561,7 @@ const mockContacts: Contact[] = [
   {
     id: '8',
     name: '合作方 A 公司财务部',
-    address: '0xDEF456789012345678901234567890abcdef5678',
+    address: '0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B',
     network: 'ethereum',
     tags: [],
     isOfficial: false,
@@ -567,7 +572,7 @@ const mockContacts: Contact[] = [
   {
     id: '9',
     name: 'SOL NFT Marketplace',
-    address: '3Kz9Xm8vNqW2yR5tP7uJ4mL6nB8cD0fG1hI2jK4lM5nO',
+    address: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263',
     network: 'solana',
     tags: [],
     isOfficial: false,
@@ -673,8 +678,8 @@ const mockPSPConnections: PSPConnection[] = [
       lastTransactionAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
     },
     addresses: [
-      { network: 'ethereum', address: '0xPAYGLOBAL1234567890abcdef1234567890ab' },
-      { network: 'tron', address: 'TPAYGLOBALxxxxxxxxxxxxxxxxxxxxxxxxxxx' },
+      { network: 'ethereum', address: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2' },
+      { network: 'tron', address: 'TPbBpRXkoxJdQVCLt7jfmCEXXZJxr1ySfL' },
     ],
   },
   {
@@ -715,8 +720,8 @@ const mockPSPConnections: PSPConnection[] = [
       lastTransactionAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
     },
     addresses: [
-      { network: 'ethereum', address: '0xFASTPAY1234567890abcdef1234567890abcd' },
-      { network: 'bsc', address: '0xFASTPAYBSC1234567890abcdef12345678ab' },
+      { network: 'ethereum', address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' },
+      { network: 'bsc', address: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c' },
     ],
   },
   {
@@ -833,7 +838,7 @@ const mockNotifications: Notification[] = [
     category: 'transaction',
     priority: 'normal',
     title: '收到 500 USDT',
-    content: '来自 0x1234...5678 的转账已确认到账。',
+    content: '来自 0x1f98...F984 的转账已确认到账。',
     timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
     isRead: false,
     action: { label: '查看交易', route: '/history' },
@@ -1050,13 +1055,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       {
         id: 'wallet-1',
         name: '我的钱包',
-        addresses: {
-          all: '',
-          ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-          tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
-          bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-          solana: `${Array.from({length: 44}, () => '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 58)]).join('')}`,
-        },
+        addresses: MOCK_WALLET_ADDRESSES.wallet1,
         createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
         isBiometricEnabled: true,
@@ -1071,13 +1070,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       {
         id: 'wallet-2',
         name: '商务钱包',
-        addresses: {
-          all: '',
-          ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-          tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
-          bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-          solana: `${Array.from({length: 44}, () => '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 58)]).join('')}`,
-        },
+        addresses: MOCK_WALLET_ADDRESSES.wallet2,
         createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
         isBiometricEnabled: false,
@@ -1092,13 +1085,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       {
         id: 'wallet-3',
         name: '自托管钱包',
-        addresses: {
-          all: '',
-          ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-          tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
-          bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-          solana: `${Array.from({length: 44}, () => '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 58)]).join('')}`,
-        },
+        addresses: MOCK_WALLET_ADDRESSES.wallet3,
         createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         isBackedUp: true,
         isBiometricEnabled: true,
@@ -1274,13 +1261,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const newWallet: Wallet = {
       id: `wallet-${Date.now()}`,
       name,
-      addresses: {
-        all: '',
-        ethereum: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-        tron: `T${Math.random().toString(36).slice(2, 35).toUpperCase()}`,
-        bsc: `0x${Math.random().toString(16).slice(2, 42).padEnd(40, '0')}`,
-        solana: `${Array.from({length: 44}, () => '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random() * 58)]).join('')}`,
-      },
+      addresses: generateMultiChainAddresses(),
       createdAt: new Date(),
       isBackedUp: false,
       isBiometricEnabled: hasBiometric,
