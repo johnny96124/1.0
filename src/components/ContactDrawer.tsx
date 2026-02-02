@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
-import { Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Users, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Contact, ChainId } from '@/types/wallet';
 import { getChainLabel } from '@/lib/chain-utils';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 import {
   Drawer,
   DrawerContent,
@@ -26,32 +27,76 @@ export function ContactDrawer({
   onSelect,
   selectedNetwork,
 }: ContactDrawerProps) {
-  // Filter contacts by network compatibility
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter contacts by network compatibility and search query
   const filteredContacts = useMemo(() => {
-    if (!selectedNetwork || selectedNetwork === 'all') {
-      return contacts;
+    let result = contacts;
+
+    // Apply network filter
+    if (selectedNetwork && selectedNetwork !== 'all') {
+      // EVM compatible networks
+      const evmNetworks = ['ethereum', 'bsc'];
+      if (evmNetworks.includes(selectedNetwork)) {
+        result = result.filter(contact => evmNetworks.includes(contact.network));
+      } else {
+        result = result.filter(contact => contact.network === selectedNetwork);
+      }
     }
 
-    // EVM compatible networks
-    const evmNetworks = ['ethereum', 'bsc'];
-    if (evmNetworks.includes(selectedNetwork)) {
-      return contacts.filter(contact => evmNetworks.includes(contact.network));
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        contact =>
+          contact.name.toLowerCase().includes(query) ||
+          contact.address.toLowerCase().includes(query)
+      );
     }
 
-    return contacts.filter(contact => contact.network === selectedNetwork);
-  }, [contacts, selectedNetwork]);
+    return result;
+  }, [contacts, selectedNetwork, searchQuery]);
 
   const handleSelect = (contact: Contact) => {
     onSelect(contact);
     onOpenChange(false);
   };
 
+  // Reset search when drawer closes
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setSearchQuery('');
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerContent className="max-h-[70vh] flex flex-col">
         <DrawerHeader className="border-b border-border/50 pb-3 flex-shrink-0">
           <DrawerTitle>选择联系人</DrawerTitle>
         </DrawerHeader>
+
+        {/* Search Bar */}
+        <div className="px-4 pt-3 pb-2 flex-shrink-0">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="搜索名称或地址"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-9 bg-muted/50 border-0 h-10"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+        </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
           <AnimatePresence mode="wait">
