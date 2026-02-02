@@ -23,6 +23,9 @@ import Security from "./pages/Security";
 import DeviceManagement from "./pages/DeviceManagement";
 import Notifications from "./pages/Notifications";
 import Help from "./pages/Help";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import About from "./pages/About";
 import PersonalInfo from "./pages/PersonalInfo";
 import Contacts from "./pages/Contacts";
 import ContactForm from "./pages/ContactForm";
@@ -89,6 +92,9 @@ function AppRoutes() {
       <Route path="/profile/devices" element={<ProtectedRoute><DeviceManagement /></ProtectedRoute>} />
       <Route path="/profile/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
       <Route path="/profile/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/about" element={<About />} />
       <Route path="/profile/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
       <Route path="/profile/contacts/add" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />
       <Route path="/profile/contacts/edit/:id" element={<ProtectedRoute><ContactForm /></ProtectedRoute>} />
