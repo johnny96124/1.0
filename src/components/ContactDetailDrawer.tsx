@@ -6,10 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useWallet } from '@/contexts/WalletContext';
 import { toast } from '@/lib/toast';
-import { Contact, ChainId, SUPPORTED_CHAINS } from '@/types/wallet';
+import { Contact, AddressBookChainId, ADDRESS_BOOK_CHAINS } from '@/types/wallet';
 import { ChainIcon } from '@/components/ChainIcon';
 import { cn } from '@/lib/utils';
-import { validateAddress, getAddressPlaceholder, getChainName, isEVMChain } from '@/lib/chain-utils';
+import { validateAddress, getAddressPlaceholder, getChainName } from '@/lib/chain-utils';
 import { QRScanner } from '@/components/QRScanner';
 import { ParsedQRData } from '@/lib/qr-parser';
 import {
@@ -28,8 +28,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-
-const AVAILABLE_CHAINS = SUPPORTED_CHAINS.filter(c => c.id !== 'all');
 
 interface ContactDetailDrawerProps {
   contact: Contact | null;
@@ -50,7 +48,7 @@ export function ContactDetailDrawer({
 
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [network, setNetwork] = useState<ChainId>('ethereum');
+  const [network, setNetwork] = useState<AddressBookChainId>('evm');
   const [notes, setNotes] = useState('');
   const [copied, setCopied] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -60,6 +58,12 @@ export function ContactDetailDrawer({
   const [hasChanges, setHasChanges] = useState(false);
 
 
+  // Helper to normalize chain to address book format
+  const normalizeChainForAddressBook = (chainId: string): AddressBookChainId => {
+    if (chainId === 'ethereum' || chainId === 'bsc') return 'evm';
+    return chainId as AddressBookChainId;
+  };
+
   // Reset form when drawer opens or contact changes
   useEffect(() => {
     if (open) {
@@ -67,14 +71,14 @@ export function ContactDetailDrawer({
         // Reset to empty state for add mode
         setName('');
         setAddress('');
-        setNetwork('ethereum');
+        setNetwork('evm');
         setNotes('');
         setHasChanges(false);
       } else if (contact) {
         // Populate with contact data for edit mode
         setName(contact.name || '');
         setAddress(contact.address);
-        setNetwork(contact.network as ChainId);
+        setNetwork(normalizeChainForAddressBook(contact.network));
         setNotes(contact.notes || '');
         setHasChanges(false);
       }
@@ -186,14 +190,14 @@ export function ContactDetailDrawer({
   const handleQRScan = (data: ParsedQRData) => {
     if (data.address) {
       setAddress(data.address);
-      // Auto-detect network from QR if available
+      // Auto-detect network from QR if available, normalize to address book format
       if (data.network) {
-        setNetwork(data.network as ChainId);
+        setNetwork(normalizeChainForAddressBook(data.network));
       }
     }
   };
 
-  const selectedChain = AVAILABLE_CHAINS.find(c => c.id === network) || AVAILABLE_CHAINS[0];
+  const selectedChain = ADDRESS_BOOK_CHAINS.find(c => c.id === network) || ADDRESS_BOOK_CHAINS[0];
 
   // For view mode, don't render if no contact
   if (!isAddMode && !contact) return null;
@@ -245,19 +249,19 @@ export function ContactDetailDrawer({
                       <DrawerTitle>选择网络</DrawerTitle>
                     </DrawerHeader>
                     <div className="p-4 space-y-2">
-                      {AVAILABLE_CHAINS.map((chain) => (
+                      {ADDRESS_BOOK_CHAINS.map((chain) => (
                         <button
                           key={chain.id}
-                        onClick={() => {
-                          setNetwork(chain.id);
-                          setShowNetworkDrawer(false);
-                          // Clear address if switching between incompatible networks
-                          const currentIsEVM = isEVMChain(network);
-                          const newIsEVM = isEVMChain(chain.id);
-                          if (currentIsEVM !== newIsEVM && address) {
-                            setAddress('');
-                          }
-                        }}
+                          onClick={() => {
+                            const oldIsEVM = network === 'evm';
+                            const newIsEVM = chain.id === 'evm';
+                            setNetwork(chain.id);
+                            setShowNetworkDrawer(false);
+                            // Clear address if switching between incompatible networks
+                            if (oldIsEVM !== newIsEVM && address) {
+                              setAddress('');
+                            }
+                          }}
                           className={cn(
                             "w-full flex items-center gap-3 p-4 rounded-xl transition-colors",
                             network === chain.id

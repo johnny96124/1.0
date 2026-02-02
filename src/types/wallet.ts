@@ -45,8 +45,19 @@ export type RiskColor = 'green' | 'yellow' | 'red';
 // Supported chains
 export type ChainId = 'all' | 'ethereum' | 'tron' | 'bsc' | 'solana';
 
+// Extended chain type that includes unified EVM for address book
+export type AddressBookChainId = 'evm' | 'tron' | 'solana';
+
 export interface ChainInfo {
   id: ChainId;
+  name: string;
+  shortName: string;
+  icon: string;
+  color: string;
+}
+
+export interface AddressBookChainInfo {
+  id: AddressBookChainId;
   name: string;
   shortName: string;
   icon: string;
@@ -58,6 +69,13 @@ export const SUPPORTED_CHAINS: ChainInfo[] = [
   { id: 'ethereum', name: 'Ethereum', shortName: 'ETH', icon: 'ethereum', color: 'hsl(217 91% 60%)' },
   { id: 'tron', name: 'Tron', shortName: 'TRX', icon: 'tron', color: 'hsl(0 84% 60%)' },
   { id: 'bsc', name: 'BNB Chain', shortName: 'BNB', icon: 'bsc', color: 'hsl(38 92% 50%)' },
+  { id: 'solana', name: 'Solana', shortName: 'SOL', icon: 'solana', color: 'hsl(280 80% 60%)' },
+];
+
+// Chains available for address book network selection (EVM unified)
+export const ADDRESS_BOOK_CHAINS: AddressBookChainInfo[] = [
+  { id: 'evm', name: 'EVM', shortName: 'EVM', icon: 'evm', color: 'hsl(217 91% 60%)' },
+  { id: 'tron', name: 'Tron', shortName: 'TRX', icon: 'tron', color: 'hsl(0 84% 60%)' },
   { id: 'solana', name: 'Solana', shortName: 'SOL', icon: 'solana', color: 'hsl(280 80% 60%)' },
 ];
 
