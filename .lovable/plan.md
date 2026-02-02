@@ -1,177 +1,294 @@
 
-# 交易列表页面懒加载实现方案
+# 帮助与支持页面 - 未实现功能需求设计
 
-## 目标
-为交易历史页面（`/history`）实现懒加载（无限滚动）效果，当用户滚动到列表底部时，自动加载更多交易记录。
+## 概述
 
-## 实现方案
+当前帮助与支持页面的核心 UI 框架已完成，但多数交互功能尚未实现。本文档详细设计各未实现功能的需求规格。
 
-### 核心技术
-使用 **react-intersection-observer** 库实现懒加载，这是一个轻量级的库，提供简洁的 `useInView` Hook 来检测元素是否进入视口。
+---
 
-### 实现步骤
+## 1. 联系方式交互功能
 
-#### 1. 安装依赖
-```bash
-npm install react-intersection-observer
-```
+### 1.1 在线客服
 
-#### 2. 创建自定义 Hook：useInfiniteTransactions
-创建一个可复用的 Hook 来管理懒加载逻辑：
+**功能描述**：用户点击后打开在线客服聊天界面
 
-- 维护当前页码（`page`）
-- 维护是否还有更多数据（`hasMore`）
-- 维护加载状态（`isLoadingMore`）
-- 提供加载更多的方法
-
-#### 3. 修改 History.tsx 页面
-
-**状态管理变更：**
-- 添加 `displayedCount` 状态：控制当前显示的交易数量
-- 添加 `isLoadingMore` 状态：显示加载更多时的状态
-- 使用 `useInView` Hook 监听滚动触发器
-
-**分页逻辑：**
-- 每页显示 10 条交易记录
-- 当滚动触发器进入视口时，增加 `displayedCount`
-- 使用 `useMemo` 根据 `displayedCount` 切片显示数据
-
-**UI 变更：**
-- 在交易列表底部添加滚动触发器元素
-- 添加加载更多的 Loading 状态显示
-- 当没有更多数据时显示"已加载全部"提示
-
-### 代码结构示意
-
+**交互流程**：
 ```text
-┌──────────────────────────────────┐
-│         交易列表页面              │
-├──────────────────────────────────┤
-│  [搜索框] [链筛选]               │
-│  [全部] [转出] [收入] [风险]      │
-├──────────────────────────────────┤
-│  今天                            │
-│  ┌─────────────────────────┐    │
-│  │ 交易项 1                │    │
-│  └─────────────────────────┘    │
-│  ┌─────────────────────────┐    │
-│  │ 交易项 2                │    │
-│  └─────────────────────────┘    │
-│         ...                      │
-│  ┌─────────────────────────┐    │
-│  │ 交易项 10               │    │
-│  └─────────────────────────┘    │
-├──────────────────────────────────┤
-│  [滚动触发器 - 不可见]           │◄── useInView 监听
-│  [加载中...] 或 [已加载全部]     │
-└──────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│  用户点击"在线客服"                          │
+│         ↓                                    │
+│  ┌─ 工作时间内 ────────────────────────────┐ │
+│  │  打开客服聊天 Drawer                     │ │
+│  │  - 显示欢迎消息                          │ │
+│  │  - 提供快捷问题按钮                      │ │
+│  │  - 支持发送文字消息                      │ │
+│  └─────────────────────────────────────────┘ │
+│  ┌─ 非工作时间 ────────────────────────────┐ │
+│  │  显示提示弹窗                            │ │
+│  │  - "当前为非工作时间"                    │ │
+│  │  - 提供"留言"选项                       │ │
+│  │  - 显示工作时间说明                      │ │
+│  └─────────────────────────────────────────┘ │
+└─────────────────────────────────────────────┘
+```
+
+**UI 设计要点**：
+- 使用 Drawer 组件从底部弹出
+- 聊天界面高度占屏幕 80%
+- 顶部显示客服头像和名称
+- 消息气泡区分用户/客服样式
+- 底部输入框 + 发送按钮
+- 支持发送文字消息（暂不支持图片）
+
+**数据结构**：
+```typescript
+interface ChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'support';
+  timestamp: Date;
+}
+```
+
+**MVP 方案**：由于暂无后端支持，可先实现：
+- 打开聊天界面
+- 显示预设的自动回复消息
+- 用户可输入消息（仅本地展示）
+- 提供快捷问题按钮，点击后显示对应答案
+
+---
+
+### 1.2 发送邮件
+
+**功能描述**：点击后调用系统邮件客户端
+
+**实现方式**：
+```typescript
+// 使用 mailto 链接
+const handleEmailClick = () => {
+  window.location.href = 'mailto:support@example.com?subject=用户咨询';
+};
+```
+
+**用户体验优化**：
+- 预填邮件主题
+- 添加 Toast 提示"正在打开邮件应用..."
+- 考虑复制邮箱地址的备用方案（长按复制）
+
+---
+
+### 1.3 电话支持
+
+**功能描述**：点击后调用系统拨号功能
+
+**实现方式**：
+```typescript
+// 使用 tel 链接
+const handlePhoneClick = () => {
+  window.location.href = 'tel:400-xxx-xxxx';
+};
+```
+
+**用户体验优化**：
+- 点击前显示确认弹窗（可选）
+- 添加 Toast 提示"正在打开拨号..."
+- 考虑复制电话号码的备用方案
+
+---
+
+## 2. 法律文档页面
+
+### 2.1 用户协议页面
+
+**路由**：`/terms`
+
+**页面结构**：
+```text
+┌──────────────────────────────────────┐
+│  ← 返回        用户协议              │
+├──────────────────────────────────────┤
+│                                      │
+│  最后更新：2026年2月1日               │
+│                                      │
+│  一、服务条款                         │
+│  ────────────────────────────────── │
+│  [协议内容文本...]                   │
+│                                      │
+│  二、用户责任                         │
+│  ────────────────────────────────── │
+│  [协议内容文本...]                   │
+│                                      │
+│  三、隐私保护                         │
+│  ────────────────────────────────── │
+│  [协议内容文本...]                   │
+│                                      │
+└──────────────────────────────────────┘
+```
+
+**内容要点**：
+- 服务条款
+- 用户责任与义务
+- 账户安全
+- 知识产权
+- 免责声明
+- 争议解决
+- 协议修改
+
+---
+
+### 2.2 隐私政策页面
+
+**路由**：`/privacy`
+
+**页面结构**：与用户协议类似的滚动文档页面
+
+**内容要点**：
+- 信息收集范围
+- 信息使用目的
+- 信息存储与保护
+- 信息共享规则
+- 用户权利（访问、更正、删除）
+- Cookie 使用说明
+- 未成年人保护
+- 政策更新通知
+
+---
+
+### 2.3 关于我们页面
+
+**路由**：`/about`
+
+**页面结构**：
+```text
+┌──────────────────────────────────────┐
+│  ← 返回        关于我们              │
+├──────────────────────────────────────┤
+│                                      │
+│         [LOGO]                       │
+│       Cobo Wallet                    │
+│      版本 1.0.0 (Build 100)          │
+│                                      │
+│  ┌────────────────────────────────┐  │
+│  │  公司简介                       │  │
+│  │  [简介文本...]                  │  │
+│  └────────────────────────────────┘  │
+│                                      │
+│  ┌────────────────────────────────┐  │
+│  │  🌐 官方网站         →         │  │
+│  │  📱 关注我们         →         │  │
+│  │  ⭐ 给我们评分        →         │  │
+│  └────────────────────────────────┘  │
+│                                      │
+│        © 2026 Cobo. All rights       │
+│              reserved.               │
+│                                      │
+└──────────────────────────────────────┘
+```
+
+**功能点**：
+- 显示 App Logo
+- 显示版本信息
+- 公司简介
+- 官方网站链接
+- 社交媒体链接
+- 应用商店评分入口
+
+---
+
+## 3. FAQ 文章反馈功能
+
+**功能描述**：用户查看 FAQ 答案后可评价是否有帮助
+
+**交互流程**：
+```text
+用户展开 FAQ 答案
+    ↓
+答案底部显示反馈区域
+"这篇文章对您有帮助吗？"  [👍 有帮助]  [👎 无帮助]
+    ↓
+┌─ 点击"有帮助" ───────────────────┐
+│  显示感谢提示                      │
+│  按钮变为已选中状态                │
+└───────────────────────────────────┘
+┌─ 点击"无帮助" ───────────────────┐
+│  展开反馈输入框                    │
+│  "请告诉我们如何改进："            │
+│  [输入框] [提交]                   │
+│  提交后显示感谢提示                │
+└───────────────────────────────────┘
+```
+
+**UI 设计要点**：
+- 反馈按钮置于答案底部
+- 使用图标 + 文字组合
+- 点击后状态变化明显
+- 负面反馈时提供可选的补充说明
+
+**数据结构**：
+```typescript
+interface FaqFeedback {
+  faqId: string;
+  helpful: boolean;
+  comment?: string;
+  timestamp: Date;
+}
+```
+
+**MVP 方案**：
+- 本地状态管理，记录用户已反馈的问题
+- 显示感谢 Toast
+- 暂不持久化到后端
+
+---
+
+## 4. 技术实现概要
+
+### 4.1 需新增的文件
+
+| 文件路径 | 说明 |
+|---------|------|
+| `src/pages/Terms.tsx` | 用户协议页面 |
+| `src/pages/Privacy.tsx` | 隐私政策页面 |
+| `src/pages/About.tsx` | 关于我们页面 |
+| `src/components/CustomerServiceDrawer.tsx` | 在线客服聊天抽屉 |
+
+### 4.2 需修改的文件
+
+| 文件路径 | 修改内容 |
+|---------|---------|
+| `src/App.tsx` | 添加 /terms、/privacy、/about 路由 |
+| `src/pages/Help.tsx` | 添加联系方式点击处理、FAQ 反馈 UI |
+
+### 4.3 路由配置
+
+```typescript
+// App.tsx 新增路由
+<Route path="/terms" element={<Terms />} />
+<Route path="/privacy" element={<Privacy />} />
+<Route path="/about" element={<About />} />
 ```
 
 ---
 
-## 技术细节
+## 5. 实施优先级建议
 
-### 文件变更
-
-| 文件 | 变更类型 | 说明 |
-|-----|---------|------|
-| `package.json` | 修改 | 添加 `react-intersection-observer` 依赖 |
-| `src/hooks/useInfiniteScroll.tsx` | 新建 | 创建可复用的无限滚动 Hook |
-| `src/pages/History.tsx` | 修改 | 集成懒加载逻辑 |
-
-### useInfiniteScroll Hook 设计
-
-```typescript
-interface UseInfiniteScrollOptions<T> {
-  data: T[];                    // 完整数据
-  pageSize?: number;            // 每页数量，默认 10
-  initialCount?: number;        // 初始显示数量
-}
-
-interface UseInfiniteScrollReturn<T> {
-  displayedData: T[];           // 当前显示的数据
-  hasMore: boolean;             // 是否有更多
-  isLoadingMore: boolean;       // 是否正在加载
-  loadMore: () => void;         // 加载更多方法
-  scrollTriggerRef: (node?: Element | null) => void;  // 触发器 ref
-}
-```
-
-### History.tsx 关键修改
-
-1. **导入新依赖**
-```typescript
-import { useInView } from 'react-intersection-observer';
-```
-
-2. **添加状态**
-```typescript
-const [displayedCount, setDisplayedCount] = useState(10);
-const [isLoadingMore, setIsLoadingMore] = useState(false);
-const { ref: scrollTriggerRef, inView } = useInView({ threshold: 0 });
-```
-
-3. **加载更多逻辑**
-```typescript
-useEffect(() => {
-  if (inView && displayedCount < filteredTransactions.length) {
-    setIsLoadingMore(true);
-    // 模拟加载延迟，实际项目可移除
-    setTimeout(() => {
-      setDisplayedCount(prev => Math.min(prev + 10, filteredTransactions.length));
-      setIsLoadingMore(false);
-    }, 300);
-  }
-}, [inView, displayedCount, filteredTransactions.length]);
-```
-
-4. **修改数据切片**
-```typescript
-const displayedTransactions = useMemo(() => {
-  return filteredTransactions.slice(0, displayedCount);
-}, [filteredTransactions, displayedCount]);
-```
-
-5. **添加滚动触发器 UI**
-```typescript
-{/* 滚动触发器 */}
-<div ref={scrollTriggerRef} className="h-4" />
-
-{/* 加载状态 */}
-{isLoadingMore && (
-  <div className="flex justify-center py-4">
-    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-  </div>
-)}
-
-{/* 已加载全部 */}
-{!hasMore && displayedCount > 0 && (
-  <p className="text-center text-sm text-muted-foreground py-4">
-    已加载全部
-  </p>
-)}
-```
-
-### 筛选重置逻辑
-当筛选条件（搜索、链、类型）变化时，需要重置 `displayedCount` 到初始值：
-
-```typescript
-useEffect(() => {
-  setDisplayedCount(10);
-}, [filter, chainFilter, searchQuery]);
-```
+| 优先级 | 功能 | 工作量 | 说明 |
+|-------|------|-------|------|
+| P0 | 邮件/电话链接 | 小 | 简单实现，体验提升明显 |
+| P0 | 用户协议/隐私政策 | 中 | 法律合规必需 |
+| P1 | 关于我们页面 | 小 | 提升品牌信任感 |
+| P2 | 在线客服聊天 | 大 | 需要设计完整聊天 UI |
+| P3 | FAQ 反馈功能 | 中 | 需要后端支持才能发挥价值 |
 
 ---
 
-## 用户体验优化
+## 6. 设计规范遵循
 
-1. **平滑加载动画**：新加载的交易项带有渐入动画
-2. **防抖处理**：避免快速滚动时重复触发加载
-3. **加载状态反馈**：显示旋转的加载图标
-4. **完成提示**：所有数据加载完毕后显示"已加载全部"
-
-## 注意事项
-
-- 当前项目使用 Mock 数据，所有交易数据都在内存中，懒加载主要是分批渲染优化
-- 如果后续接入真实 API，可以修改为真正的分页请求
-- 筛选条件变化时需要重置分页状态
+所有新页面应遵循现有设计系统：
+- 使用 `AppLayout` 组件包装
+- 卡片使用 `card-elevated` 样式
+- 按钮高度保持 48px
+- 列表项使用 `border-b border-border` 分隔
+- 动画使用 framer-motion 保持一致
+- 图标使用 lucide-react 图标库
