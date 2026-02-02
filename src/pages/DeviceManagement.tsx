@@ -1,18 +1,10 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Smartphone, Monitor, Tablet, MapPin, Clock, X, Shield, Info
+  Smartphone, Monitor, Tablet, MapPin, Shield
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Button } from '@/components/ui/button';
 import { useWallet } from '@/contexts/WalletContext';
 import { cn } from '@/lib/utils';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 
@@ -100,7 +92,6 @@ const mockLoginHistory: LoginRecord[] = [
 
 export default function DeviceManagementPage() {
   const { devices } = useWallet();
-  const [showHistoryDrawer, setShowHistoryDrawer] = useState(false);
   
   const currentDevice = devices.find(d => d.isCurrent);
   
@@ -184,24 +175,16 @@ export default function DeviceManagementPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="flex items-center justify-between mb-2 px-1">
-            <h3 className="text-xs font-medium text-muted-foreground">近期登录记录</h3>
-            <button 
-              className="text-xs text-accent"
-              onClick={() => setShowHistoryDrawer(true)}
-            >
-              查看全部
-            </button>
-          </div>
+          <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">近期登录记录</h3>
           <div className="card-elevated overflow-hidden">
-            {mockLoginHistory.slice(0, 4).map((record, index) => {
+            {mockLoginHistory.map((record, index) => {
               const Icon = getDeviceIcon(record.deviceModel);
               return (
                 <div 
                   key={record.id}
                   className={cn(
                     'p-3 flex items-center gap-3',
-                    index !== 3 && 'border-b border-border'
+                    index !== mockLoginHistory.length - 1 && 'border-b border-border'
                   )}
                 >
                   <div className={cn(
@@ -234,85 +217,6 @@ export default function DeviceManagementPage() {
         </motion.div>
       </div>
 
-      {/* Login History Drawer */}
-      <Drawer open={showHistoryDrawer} onOpenChange={setShowHistoryDrawer}>
-        <DrawerContent className="max-h-[50%] flex flex-col">
-          <DrawerHeader className="border-b border-border flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <DrawerTitle>登录历史</DrawerTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setShowHistoryDrawer(false)}
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-          </DrawerHeader>
-          <div className="overflow-y-auto flex-1 px-4 py-2">
-            {mockLoginHistory.map((record, index) => {
-              const Icon = getDeviceIcon(record.deviceModel);
-              return (
-                <motion.div
-                  key={record.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={cn(
-                    'py-4',
-                    index !== mockLoginHistory.length - 1 && 'border-b border-border'
-                  )}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
-                      record.isSuccess ? "bg-muted" : "bg-destructive/10"
-                    )}>
-                      <Icon className={cn(
-                        "w-5 h-5",
-                        record.isSuccess ? "text-muted-foreground" : "text-destructive"
-                      )} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-foreground text-sm">{record.deviceName}</h4>
-                          {!record.isSuccess && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-destructive/10 text-destructive rounded">
-                              登录失败
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {formatRecordTime(record.timestamp)}
-                        </span>
-                      </div>
-                      <div className="mt-2 space-y-1">
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <MapPin className="w-3 h-3" />
-                          <span>{record.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span className="w-3 h-3 text-center">🌐</span>
-                          <span>IP: {record.ipAddress}</span>
-                        </div>
-                        {record.os && (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="w-3 h-3 text-center">💻</span>
-                            <span>{record.os}</span>
-                            {record.browser && <span>· {record.browser}</span>}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </DrawerContent>
-      </Drawer>
     </AppLayout>
   );
 }
