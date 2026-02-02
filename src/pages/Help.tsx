@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Search, CreditCard, Send, Shield, Coins, Clock,
@@ -12,6 +13,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { CustomerServiceDrawer } from '@/components/CustomerServiceDrawer';
+import { FaqFeedback } from '@/components/FaqFeedback';
+import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 
 const faqItems = [
@@ -83,35 +87,11 @@ const faqItems = [
   },
 ];
 
-const contactItems = [
-  {
-    icon: MessageCircle,
-    title: '在线客服',
-    description: '工作时间 9:00-21:00',
-    action: '立即咨询',
-  },
-  {
-    icon: Mail,
-    title: '发送邮件',
-    description: 'support@example.com',
-    action: '发送',
-  },
-  {
-    icon: Phone,
-    title: '电话支持',
-    description: '400-xxx-xxxx',
-    action: '拨打',
-  },
-];
-
-const moreItems = [
-  { icon: FileText, label: '用户协议', path: '/terms' },
-  { icon: Lock, label: '隐私政策', path: '/privacy' },
-  { icon: Info, label: '关于我们', path: '/about' },
-];
-
 export default function HelpPage() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [customerServiceOpen, setCustomerServiceOpen] = useState(false);
+  const [faqFeedback, setFaqFeedback] = useState<Record<string, 'helpful' | 'not_helpful' | undefined>>({});
   
   const filteredFaq = searchQuery
     ? faqItems.filter(
@@ -120,6 +100,50 @@ export default function HelpPage() {
           item.answer.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : faqItems;
+
+  const handleFeedback = (faqId: string, helpful: boolean) => {
+    setFaqFeedback(prev => ({
+      ...prev,
+      [faqId]: helpful ? 'helpful' : 'not_helpful',
+    }));
+  };
+
+  const handleEmailClick = () => {
+    toast.info('正在打开邮件应用...');
+    window.location.href = 'mailto:support@example.com?subject=用户咨询';
+  };
+
+  const handlePhoneClick = () => {
+    toast.info('正在打开拨号...');
+    window.location.href = 'tel:400-xxx-xxxx';
+  };
+
+  const contactItems = [
+    {
+      icon: MessageCircle,
+      title: '在线客服',
+      description: '工作时间 9:00-21:00',
+      action: () => setCustomerServiceOpen(true),
+    },
+    {
+      icon: Mail,
+      title: '发送邮件',
+      description: 'support@example.com',
+      action: handleEmailClick,
+    },
+    {
+      icon: Phone,
+      title: '电话支持',
+      description: '400-xxx-xxxx',
+      action: handlePhoneClick,
+    },
+  ];
+
+  const moreItems = [
+    { icon: FileText, label: '用户协议', path: '/terms' },
+    { icon: Lock, label: '隐私政策', path: '/privacy' },
+    { icon: Info, label: '关于我们', path: '/about' },
+  ];
 
   return (
     <AppLayout showNav={false} title="帮助与支持" showBack>
@@ -171,6 +195,11 @@ export default function HelpPage() {
                     <AccordionContent className="px-3 pb-4">
                       <div className="pl-11 text-sm text-muted-foreground whitespace-pre-line">
                         {item.answer}
+                        <FaqFeedback
+                          faqId={item.id}
+                          feedbackGiven={faqFeedback}
+                          onFeedback={handleFeedback}
+                        />
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -199,6 +228,7 @@ export default function HelpPage() {
               return (
                 <button
                   key={item.title}
+                  onClick={item.action}
                   className={cn(
                     'w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors',
                     index !== contactItems.length - 1 && 'border-b border-border'
@@ -231,6 +261,7 @@ export default function HelpPage() {
               return (
                 <button
                   key={item.label}
+                  onClick={() => navigate(item.path)}
                   className={cn(
                     'w-full p-3 flex items-center gap-3 hover:bg-muted/50 transition-colors',
                     index !== moreItems.length - 1 && 'border-b border-border'
@@ -257,6 +288,12 @@ export default function HelpPage() {
           <p className="text-xs text-muted-foreground">版本 1.0.0 (Build 100)</p>
         </motion.div>
       </div>
+
+      {/* Customer Service Drawer */}
+      <CustomerServiceDrawer
+        open={customerServiceOpen}
+        onOpenChange={setCustomerServiceOpen}
+      />
     </AppLayout>
   );
 }
