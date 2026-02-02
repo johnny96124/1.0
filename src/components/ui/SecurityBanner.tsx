@@ -17,7 +17,7 @@ export function SecurityBanner() {
     // Also check current wallet backup status
     const isWalletBackedUp = currentWallet?.isBackedUp || false;
     
-    // If both TSS Node is backed up AND wallet is backed up, don't show banner
+    // If TSS Node is backed up OR wallet is backed up, don't show backup banner
     const isFullyBackedUp = hasTSSNodeBackup || isWalletBackedUp;
 
     switch (walletStatus) {
@@ -57,8 +57,9 @@ export function SecurityBanner() {
         // Already backed up, don't show banner
         return { show: false };
       default:
-        // Check if TSS Node needs backup (only for wallets that exist but aren't backed up)
-        if (!isFullyBackedUp && tssNodeInfo.status !== 'not_created') {
+        // For any other wallet status (including normal wallets), check if backup is needed
+        // Show backup banner if wallet exists but not backed up
+        if (!isFullyBackedUp) {
           return {
             type: 'error' as const,
             icon: ShieldAlert,
