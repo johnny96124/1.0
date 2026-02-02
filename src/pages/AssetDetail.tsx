@@ -432,7 +432,7 @@ export default function AssetDetailPage() {
                     className="w-full text-muted-foreground text-sm h-10"
                     onClick={() => navigate('/history')}
                   >
-                    查看更多交易记录
+                    查看全部
                     <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 )}
