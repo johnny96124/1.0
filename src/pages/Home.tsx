@@ -520,18 +520,10 @@ export default function HomePage() {
         >
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-semibold text-foreground text-sm">最近交易</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-muted-foreground text-xs h-7"
-              onClick={() => navigate('/history')}
-            >
-              查看全部
-            </Button>
           </div>
 
           {isLoading ? (
-            <TransactionListSkeleton count={3} showDateHeader={false} />
+            <TransactionListSkeleton count={5} showDateHeader={false} />
           ) : filteredTransactions.length === 0 ? (
             <EmptyState
               icon={Send}
@@ -540,7 +532,7 @@ export default function HomePage() {
             />
           ) : (
             <div className="space-y-1.5">
-              {filteredTransactions.slice(0, 3).map((tx, index) => (
+              {filteredTransactions.slice(0, 5).map((tx, index) => (
                 <motion.button
                   key={tx.id}
                   initial={{ opacity: 0, x: -20 }}
@@ -601,6 +593,15 @@ export default function HomePage() {
                   </div>
                 </motion.button>
               ))}
+              
+              {/* View All Button - positioned below the list */}
+              <motion.button
+                onClick={() => navigate('/history')}
+                className="w-full py-3 flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted/30"
+              >
+                查看全部
+                <ChevronRight className="w-4 h-4" />
+              </motion.button>
             </div>
           )}
         </motion.div>
