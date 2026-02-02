@@ -424,6 +424,18 @@ export default function AssetDetailPage() {
                     </div>
                   </div>
                 ))}
+                
+                {/* View More Button */}
+                {hasMoreTransactions && (
+                  <Button
+                    variant="ghost"
+                    className="w-full text-muted-foreground text-sm h-10"
+                    onClick={() => navigate('/history')}
+                  >
+                    查看全部
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                )}
               </div>
             ) : (
               <EmptyState
