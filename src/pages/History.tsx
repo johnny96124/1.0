@@ -483,7 +483,7 @@ export default function HistoryPage() {
                   )}
                   
                   {!hasMore && displayedTransactions.length > 0 && (
-                    <p className="text-center text-sm text-muted-foreground py-4">
+                    <p className="text-center text-sm text-muted-foreground py-2">
                       已加载全部
                     </p>
                   )}
