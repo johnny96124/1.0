@@ -1,84 +1,177 @@
 
-# Toast 两层信息优化方案（精简版）
+# 交易列表页面懒加载实现方案
 
-## 设计原则
+## 目标
+为交易历史页面（`/history`）实现懒加载（无限滚动）效果，当用户滚动到列表底部时，自动加载更多交易记录。
 
-### 需要两层信息的场景
-1. **复制操作** - 第二层显示具体复制的内容（截断显示）
-2. **重要操作完成** - 需要额外说明后续影响或下一步
-3. **错误提示** - 需要提供解决方案
+## 实现方案
 
-### 保持单层信息的场景
-1. **简单状态切换** - 手电筒开/关、语言切换
-2. **表单验证错误** - 错误信息本身已足够清晰
-3. **功能预告** - "即将上线"类提示
-4. **操作确认** - 简单的"已完成"类确认
+### 核心技术
+使用 **react-intersection-observer** 库实现懒加载，这是一个轻量级的库，提供简洁的 `useInView` Hook 来检测元素是否进入视口。
+
+### 实现步骤
+
+#### 1. 安装依赖
+```bash
+npm install react-intersection-observer
+```
+
+#### 2. 创建自定义 Hook：useInfiniteTransactions
+创建一个可复用的 Hook 来管理懒加载逻辑：
+
+- 维护当前页码（`page`）
+- 维护是否还有更多数据（`hasMore`）
+- 维护加载状态（`isLoadingMore`）
+- 提供加载更多的方法
+
+#### 3. 修改 History.tsx 页面
+
+**状态管理变更：**
+- 添加 `displayedCount` 状态：控制当前显示的交易数量
+- 添加 `isLoadingMore` 状态：显示加载更多时的状态
+- 使用 `useInView` Hook 监听滚动触发器
+
+**分页逻辑：**
+- 每页显示 10 条交易记录
+- 当滚动触发器进入视口时，增加 `displayedCount`
+- 使用 `useMemo` 根据 `displayedCount` 切片显示数据
+
+**UI 变更：**
+- 在交易列表底部添加滚动触发器元素
+- 添加加载更多的 Loading 状态显示
+- 当没有更多数据时显示"已加载全部"提示
+
+### 代码结构示意
+
+```text
+┌──────────────────────────────────┐
+│         交易列表页面              │
+├──────────────────────────────────┤
+│  [搜索框] [链筛选]               │
+│  [全部] [转出] [收入] [风险]      │
+├──────────────────────────────────┤
+│  今天                            │
+│  ┌─────────────────────────┐    │
+│  │ 交易项 1                │    │
+│  └─────────────────────────┘    │
+│  ┌─────────────────────────┐    │
+│  │ 交易项 2                │    │
+│  └─────────────────────────┘    │
+│         ...                      │
+│  ┌─────────────────────────┐    │
+│  │ 交易项 10               │    │
+│  └─────────────────────────┘    │
+├──────────────────────────────────┤
+│  [滚动触发器 - 不可见]           │◄── useInView 监听
+│  [加载中...] 或 [已加载全部]     │
+└──────────────────────────────────┘
+```
 
 ---
 
-## 具体修改清单
+## 技术细节
 
-### 1. 复制操作（显示具体内容）
+### 文件变更
 
-| 文件 | 当前 | 修改后 |
-|------|------|--------|
-| `TransactionDetail.tsx` | `toast.success('发送方地址已复制')` | `toast.success('已复制', formatAddress(addr))` |
-| `TransactionDetail.tsx` | `toast.success('收款方地址已复制')` | `toast.success('已复制', formatAddress(addr))` |
-| `TransactionDetail.tsx` | `toast.success('已复制到剪贴板')` | `toast.success('已复制', formatTxHash(txHash))` |
-| `ChainDropdown.tsx` | `toast.success('${chainName} 地址已复制')` | `toast.success('已复制', formatAddress(address))` |
-| `RiskManagement.tsx` | `toast.success('地址已复制')` | `toast.success('已复制', formatAddress(address))` |
+| 文件 | 变更类型 | 说明 |
+|-----|---------|------|
+| `package.json` | 修改 | 添加 `react-intersection-observer` 依赖 |
+| `src/hooks/useInfiniteScroll.tsx` | 新建 | 创建可复用的无限滚动 Hook |
+| `src/pages/History.tsx` | 修改 | 集成懒加载逻辑 |
 
-地址格式化函数：显示前6位...后4位，如 `0x1234...5678`
-
----
-
-### 2. 重要操作（需补充说明）
-
-| 文件 | 当前 | 修改后 | 原因 |
-|------|------|--------|------|
-| `WalletEscape.tsx` | `toast.success('私钥文件已生成')` | `toast.success('私钥文件已生成', '请立即下载并妥善保管')` | 关键安全提示 |
-| `WalletEscape.tsx` | `toast.success('MPC 逃逸完成，钱包已转为自托管模式')` | `toast.success('MPC 逃逸完成', '钱包已转为自托管模式')` | 信息分层更清晰 |
-
----
-
-### 3. 保持单层（无需修改）
-
-以下场景信息已足够完整，保持单层：
-
-- `Home.tsx`: `余额已刷新` - 简单确认
-- `Home.tsx`: `已添加 ${symbol}` / `已删除 ${symbol}` - 操作对象已明确
-- `PersonalInfo.tsx`: `邮箱绑定成功` / `手机号绑定成功` / `密码设置成功` - 简洁明了
-- `LanguageSelectDrawer.tsx`: `语言已切换` - 简单状态
-- `QRScanner.tsx`: `已识别收款地址` / `手电筒已打开/关闭` - 即时反馈
-- `WalletManagement.tsx`: `钱包已重命名为 "${name}"` - 结果已在消息中
-- `PSPPermissions.tsx`: `权限已开启/关闭` - 简单切换
-
----
-
-## 技术实现
-
-### 新增地址格式化工具函数
-
-在 `src/lib/utils.ts` 中添加：
+### useInfiniteScroll Hook 设计
 
 ```typescript
-export function formatAddressShort(address: string, prefixLen = 6, suffixLen = 4): string {
-  if (!address || address.length <= prefixLen + suffixLen) return address;
-  return `${address.slice(0, prefixLen)}...${address.slice(-suffixLen)}`;
+interface UseInfiniteScrollOptions<T> {
+  data: T[];                    // 完整数据
+  pageSize?: number;            // 每页数量，默认 10
+  initialCount?: number;        // 初始显示数量
 }
 
-export function formatTxHashShort(hash: string): string {
-  if (!hash || hash.length <= 14) return hash;
-  return `${hash.slice(0, 10)}...${hash.slice(-4)}`;
+interface UseInfiniteScrollReturn<T> {
+  displayedData: T[];           // 当前显示的数据
+  hasMore: boolean;             // 是否有更多
+  isLoadingMore: boolean;       // 是否正在加载
+  loadMore: () => void;         // 加载更多方法
+  scrollTriggerRef: (node?: Element | null) => void;  // 触发器 ref
 }
 ```
 
-### 文件修改列表
+### History.tsx 关键修改
 
-1. **src/lib/utils.ts** - 添加格式化函数
-2. **src/pages/TransactionDetail.tsx** - 3处复制Toast
-3. **src/components/ChainDropdown.tsx** - 1处复制Toast  
-4. **src/pages/RiskManagement.tsx** - 1处复制Toast
-5. **src/pages/WalletEscape.tsx** - 2处重要操作Toast
+1. **导入新依赖**
+```typescript
+import { useInView } from 'react-intersection-observer';
+```
 
-共计 **6个文件**，**8处修改**
+2. **添加状态**
+```typescript
+const [displayedCount, setDisplayedCount] = useState(10);
+const [isLoadingMore, setIsLoadingMore] = useState(false);
+const { ref: scrollTriggerRef, inView } = useInView({ threshold: 0 });
+```
+
+3. **加载更多逻辑**
+```typescript
+useEffect(() => {
+  if (inView && displayedCount < filteredTransactions.length) {
+    setIsLoadingMore(true);
+    // 模拟加载延迟，实际项目可移除
+    setTimeout(() => {
+      setDisplayedCount(prev => Math.min(prev + 10, filteredTransactions.length));
+      setIsLoadingMore(false);
+    }, 300);
+  }
+}, [inView, displayedCount, filteredTransactions.length]);
+```
+
+4. **修改数据切片**
+```typescript
+const displayedTransactions = useMemo(() => {
+  return filteredTransactions.slice(0, displayedCount);
+}, [filteredTransactions, displayedCount]);
+```
+
+5. **添加滚动触发器 UI**
+```typescript
+{/* 滚动触发器 */}
+<div ref={scrollTriggerRef} className="h-4" />
+
+{/* 加载状态 */}
+{isLoadingMore && (
+  <div className="flex justify-center py-4">
+    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+  </div>
+)}
+
+{/* 已加载全部 */}
+{!hasMore && displayedCount > 0 && (
+  <p className="text-center text-sm text-muted-foreground py-4">
+    已加载全部
+  </p>
+)}
+```
+
+### 筛选重置逻辑
+当筛选条件（搜索、链、类型）变化时，需要重置 `displayedCount` 到初始值：
+
+```typescript
+useEffect(() => {
+  setDisplayedCount(10);
+}, [filter, chainFilter, searchQuery]);
+```
+
+---
+
+## 用户体验优化
+
+1. **平滑加载动画**：新加载的交易项带有渐入动画
+2. **防抖处理**：避免快速滚动时重复触发加载
+3. **加载状态反馈**：显示旋转的加载图标
+4. **完成提示**：所有数据加载完毕后显示"已加载全部"
+
+## 注意事项
+
+- 当前项目使用 Mock 数据，所有交易数据都在内存中，懒加载主要是分批渲染优化
+- 如果后续接入真实 API，可以修改为真正的分页请求
+- 筛选条件变化时需要重置分页状态
