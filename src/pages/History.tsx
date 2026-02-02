@@ -5,7 +5,7 @@ import {
   CheckCircle2, XCircle,
   ChevronRight, Clock,
   Shield, ShieldAlert, AlertTriangle,
-  ChevronDown
+  ChevronDown, Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -20,6 +20,7 @@ import { ChainIcon } from '@/components/ChainIcon';
 import { toast } from '@/lib/toast';
 import { SecurityCardSkeleton, TransactionListSkeleton } from '@/components/skeletons';
 import { EmptyState } from '@/components/EmptyState';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -137,9 +138,27 @@ export default function HistoryPage() {
     });
   }, [transactions, filter, chainFilter, searchQuery]);
 
-  // Group by date
+  // Use infinite scroll hook
+  const {
+    displayedData: displayedTransactions,
+    hasMore,
+    isLoadingMore,
+    scrollTriggerRef,
+    reset: resetInfiniteScroll,
+  } = useInfiniteScroll({
+    data: filteredTransactions,
+    pageSize: 10,
+    initialCount: 10,
+  });
+
+  // Reset infinite scroll when filters change
+  useEffect(() => {
+    resetInfiniteScroll();
+  }, [filter, chainFilter, searchQuery, resetInfiniteScroll]);
+
+  // Group by date using displayed transactions
   const groupedTransactions = useMemo(() => {
-    return filteredTransactions.reduce((groups, tx) => {
+    return displayedTransactions.reduce((groups, tx) => {
       const date = new Date(tx.timestamp).toLocaleDateString('zh-CN', {
         year: 'numeric',
         month: 'long',
@@ -149,7 +168,7 @@ export default function HistoryPage() {
       groups[date].push(tx);
       return groups;
     }, {} as Record<string, Transaction[]>);
-  }, [filteredTransactions]);
+  }, [displayedTransactions]);
 
   // Pull to refresh handler
   const handleRefresh = useCallback(async () => {
@@ -450,6 +469,25 @@ export default function HistoryPage() {
                   description={filter === 'risk' ? '账户安全状态良好' : undefined}
                   variant={filter === 'risk' ? 'success' : 'default'}
                 />
+              )}
+
+              {/* Scroll trigger for infinite loading */}
+              {filteredTransactions.length > 0 && (
+                <>
+                  <div ref={scrollTriggerRef} className="h-4" />
+                  
+                  {isLoadingMore && (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
+                  
+                  {!hasMore && displayedTransactions.length > 0 && (
+                    <p className="text-center text-sm text-muted-foreground py-4">
+                      已加载全部
+                    </p>
+                  )}
+                </>
               )}
             </div>
           )}
