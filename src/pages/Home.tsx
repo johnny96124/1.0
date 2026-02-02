@@ -221,9 +221,49 @@ export default function HomePage() {
 
   // Filter transactions based on selected chain
   const filteredTransactions = useMemo(() => {
-    if (selectedChain === 'all') return transactions;
-    return transactions.filter(tx => tx.network === selectedChain);
+    let filtered = selectedChain === 'all' 
+      ? transactions 
+      : transactions.filter(tx => tx.network === selectedChain);
+    // Sort by timestamp descending (newest first)
+    return filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }, [transactions, selectedChain]);
+
+  // Group transactions by date and limit to 5 items
+  const groupedTransactions = useMemo(() => {
+    const MAX_DISPLAY = 5;
+    const displayTxs = filteredTransactions.slice(0, MAX_DISPLAY);
+    
+    const groups: { date: string; dateLabel: string; transactions: Transaction[] }[] = [];
+    
+    displayTxs.forEach(tx => {
+      const txDate = new Date(tx.timestamp);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      let dateLabel: string;
+      const dateKey = txDate.toDateString();
+      
+      if (txDate.toDateString() === today.toDateString()) {
+        dateLabel = '今天';
+      } else if (txDate.toDateString() === yesterday.toDateString()) {
+        dateLabel = '昨天';
+      } else {
+        dateLabel = `${txDate.getMonth() + 1}月${txDate.getDate()}日`;
+      }
+      
+      const existingGroup = groups.find(g => g.date === dateKey);
+      if (existingGroup) {
+        existingGroup.transactions.push(tx);
+      } else {
+        groups.push({ date: dateKey, dateLabel, transactions: [tx] });
+      }
+    });
+    
+    return groups;
+  }, [filteredTransactions]);
+
+  const hasMoreTransactions = filteredTransactions.length > 5;
 
 
   const balanceParts = formatBalanceParts(totalBalance);
@@ -523,85 +563,97 @@ export default function HomePage() {
           </div>
 
           {isLoading ? (
-            <TransactionListSkeleton count={5} showDateHeader={false} />
-          ) : filteredTransactions.length === 0 ? (
+            <TransactionListSkeleton count={5} showDateHeader={true} />
+          ) : groupedTransactions.length === 0 ? (
             <EmptyState
               icon={Send}
               title="暂无交易记录"
               description="您的交易记录将在此显示"
             />
           ) : (
-            <div className="space-y-1.5">
-              {filteredTransactions.slice(0, 5).map((tx, index) => (
-                <motion.button
-                  key={tx.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 * index }}
-                  onClick={() => navigate(`/transaction/${tx.id}`)}
-                  className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50 transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className={cn(
-                      'w-8 h-8 rounded-full flex items-center justify-center',
-                      tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
-                    )}>
-                      {tx.type === 'receive' ? (
-                        <TrendingDown className="w-4 h-4 text-success rotate-180" />
-                      ) : (
-                        <Send className="w-4 h-4 text-accent" />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-foreground text-sm">
-                        {tx.type === 'receive' ? '转入' : '转出'}
-                      </p>
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                          {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
-                        </span>
-                        <span className="text-xs text-muted-foreground/60">·</span>
-                        <span className="text-xs text-muted-foreground">
-                          {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
-                        </span>
-                        {tx.status === 'pending' && (
-                          <span className="text-xs text-warning flex items-center gap-0.5">
-                            <Clock className="w-3 h-3" />
-                          </span>
-                        )}
-                        {tx.status === 'confirmed' && (
-                          <span className="text-xs text-success flex items-center gap-0.5">
-                            <CheckCircle2 className="w-3 h-3" />
-                          </span>
-                        )}
-                      </div>
-                    </div>
+            <div className="space-y-3">
+              {groupedTransactions.map((group) => (
+                <div key={group.date}>
+                  {/* Date Header */}
+                  <p className="text-xs text-muted-foreground mb-1.5 px-1">
+                    {group.dateLabel}
+                  </p>
+                  <div className="space-y-1.5">
+                    {group.transactions.map((tx, index) => (
+                      <motion.button
+                        key={tx.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.05 * index }}
+                        onClick={() => navigate(`/transaction/${tx.id}`)}
+                        className="w-full card-elevated p-3 flex items-center justify-between text-left hover:bg-muted/30 active:scale-[0.98] active:bg-muted/50 transition-all"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={cn(
+                            'w-8 h-8 rounded-full flex items-center justify-center',
+                            tx.type === 'receive' ? 'bg-success/10' : 'bg-accent/10'
+                          )}>
+                            {tx.type === 'receive' ? (
+                              <TrendingDown className="w-4 h-4 text-success rotate-180" />
+                            ) : (
+                              <Send className="w-4 h-4 text-accent" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium text-foreground text-sm">
+                              {tx.type === 'receive' ? '转入' : '转出'}
+                            </p>
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                                {tx.counterpartyLabel || `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`}
+                              </span>
+                              <span className="text-xs text-muted-foreground/60">·</span>
+                              <span className="text-xs text-muted-foreground">
+                                {SUPPORTED_CHAINS.find(c => c.id === tx.network)?.shortName || tx.network}
+                              </span>
+                              {tx.status === 'pending' && (
+                                <span className="text-xs text-warning flex items-center gap-0.5">
+                                  <Clock className="w-3 h-3" />
+                                </span>
+                              )}
+                              {tx.status === 'confirmed' && (
+                                <span className="text-xs text-success flex items-center gap-0.5">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right flex items-center gap-2">
+                          <div>
+                            <p className={cn(
+                              'font-medium text-sm',
+                              tx.type === 'receive' ? 'text-success' : 'text-foreground'
+                            )}>
+                              {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              ${tx.usdValue.toLocaleString()}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      </motion.button>
+                    ))}
                   </div>
-                  <div className="text-right flex items-center gap-2">
-                    <div>
-                      <p className={cn(
-                        'font-medium text-sm',
-                        tx.type === 'receive' ? 'text-success' : 'text-foreground'
-                      )}>
-                        {tx.type === 'receive' ? '+' : '-'}{tx.amount} {tx.symbol}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        ${tx.usdValue.toLocaleString()}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                </motion.button>
+                </div>
               ))}
               
               {/* View All Button - positioned below the list */}
-              <motion.button
-                onClick={() => navigate('/history')}
-                className="w-full py-3 flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted/30"
-              >
-                查看全部
-                <ChevronRight className="w-4 h-4" />
-              </motion.button>
+              {hasMoreTransactions && (
+                <motion.button
+                  onClick={() => navigate('/history')}
+                  className="w-full py-3 flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted/30"
+                >
+                  查看全部
+                  <ChevronRight className="w-4 h-4" />
+                </motion.button>
+              )}
             </div>
           )}
         </motion.div>
