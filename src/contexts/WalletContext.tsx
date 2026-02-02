@@ -841,8 +841,8 @@ const mockNotifications: Notification[] = [
     content: '来自 0x1f98...F984 的转账已确认到账。',
     timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
     isRead: false,
-    action: { label: '查看交易', route: '/history' },
-    metadata: { amount: 500, symbol: 'USDT' },
+    action: { label: '查看交易', route: '/transaction/1' },
+    metadata: { amount: 500, symbol: 'USDT', txId: '1' },
   },
   {
     id: 'notif-4',
@@ -865,8 +865,8 @@ const mockNotifications: Notification[] = [
     content: '您发起的 10,000 USDT 转账已成功发送至 0xabcd...efgh。',
     timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
     isRead: true,
-    action: { label: '查看交易', route: '/history' },
-    metadata: { amount: 10000, symbol: 'USDT' },
+    action: { label: '查看交易', route: '/transaction/4' },
+    metadata: { amount: 10000, symbol: 'USDT', txId: '4' },
   },
   {
     id: 'notif-6',
@@ -897,8 +897,8 @@ const mockNotifications: Notification[] = [
     content: '向 0x9876...4321 转账 200 USDT 已成功。',
     timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
     isRead: true,
-    action: { label: '查看交易', route: '/history' },
-    metadata: { amount: 200, symbol: 'USDT' },
+    action: { label: '查看交易', route: '/transaction/2' },
+    metadata: { amount: 200, symbol: 'USDT', txId: '2' },
   },
 ];
 export function aggregateAssets(assets: Asset[]): AggregatedAsset[] {
