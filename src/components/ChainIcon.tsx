@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getChainIconUrl } from '@/lib/crypto-icons';
 import { cn } from '@/lib/utils';
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, Layers } from 'lucide-react';
 
 interface ChainIconProps {
   chainId: string;
@@ -24,6 +24,15 @@ export function ChainIcon({ chainId, size = 'md', className }: ChainIconProps) {
     return (
       <div className={cn(sizeMap[size], 'flex items-center justify-center', className)}>
         <LayoutGrid className="w-full h-full" />
+      </div>
+    );
+  }
+  
+  // For 'evm' unified chain, show a Layers icon with primary color
+  if (chainId === 'evm') {
+    return (
+      <div className={cn(sizeMap[size], 'flex items-center justify-center text-primary', className)}>
+        <Layers className="w-full h-full" />
       </div>
     );
   }
