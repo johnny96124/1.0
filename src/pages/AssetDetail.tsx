@@ -427,13 +427,14 @@ export default function AssetDetailPage() {
                 
                 {/* View More Button */}
                 {hasMoreTransactions && (
-                  <motion.button
+                  <Button
+                    variant="ghost"
+                    className="w-full text-muted-foreground text-sm h-10"
                     onClick={() => navigate('/history')}
-                    className="w-full py-3 flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-xl hover:bg-muted/30"
                   >
-                    查看全部
-                    <ChevronRight className="w-4 h-4" />
-                  </motion.button>
+                    查看更多交易记录
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
                 )}
               </div>
             ) : (
