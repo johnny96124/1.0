@@ -7,27 +7,21 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { AppLayout } from '@/components/layout/AppLayout';
 
-type PasswordStrength = 'weak' | 'medium' | 'strong';
+interface PasswordRequirement {
+  id: string;
+  label: string;
+  check: (password: string) => boolean;
+}
 
-const getPasswordStrength = (password: string): PasswordStrength => {
-  if (!password) return 'weak';
-  
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-  if (/\d/.test(password)) score++;
-  if (/[^a-zA-Z0-9]/.test(password)) score++;
-  
-  if (score >= 4) return 'strong';
-  if (score >= 2) return 'medium';
-  return 'weak';
-};
+const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
+  { id: 'length', label: '最少16个字符', check: (p) => p.length >= 16 },
+  { id: 'uppercase', label: '最少一个大写字母', check: (p) => /[A-Z]/.test(p) },
+  { id: 'number', label: '最少一个数字', check: (p) => /\d/.test(p) },
+  { id: 'special', label: '最少一个特殊字符', check: (p) => /[^a-zA-Z0-9]/.test(p) },
+];
 
-const strengthConfig = {
-  weak: { label: '弱', color: 'bg-destructive', segments: 1 },
-  medium: { label: '中', color: 'bg-warning', segments: 2 },
-  strong: { label: '强', color: 'bg-success', segments: 3 },
+const checkAllRequirements = (password: string): boolean => {
+  return PASSWORD_REQUIREMENTS.every(req => req.check(password));
 };
 
 export default function SetPassword() {
@@ -43,15 +37,13 @@ export default function SetPassword() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState('');
 
-  const strength = getPasswordStrength(password);
-  const strengthInfo = strengthConfig[strength];
-  
-  const isValid = password.length >= 8 && password === confirmPassword;
+  const allRequirementsMet = checkAllRequirements(password);
+  const isValid = allRequirementsMet && password === confirmPassword;
 
   const handleSetPassword = async () => {
     if (!isValid) {
-      if (password.length < 8) {
-        setError('密码长度至少为8位');
+      if (!allRequirementsMet) {
+        setError('请满足所有密码要求');
       } else if (password !== confirmPassword) {
         setError('两次输入的密码不一致');
       }
@@ -275,35 +267,35 @@ export default function SetPassword() {
           </div>
 
           {/* Password Strength Indicator */}
+          {/* Password Requirements Checklist */}
           {password && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="space-y-2"
+              className="space-y-2 bg-muted/50 rounded-lg p-3"
             >
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">密码强度:</span>
-                <div className="flex gap-1 flex-1">
-                  {[1, 2, 3].map((segment) => (
-                    <div
-                      key={segment}
-                      className={cn(
-                        "h-1.5 flex-1 rounded-full transition-colors",
-                        segment <= strengthInfo.segments
-                          ? strengthInfo.color
-                          : "bg-muted"
-                      )}
-                    />
-                  ))}
-                </div>
-                <span className={cn(
-                  "text-sm font-medium",
-                  strength === 'weak' && "text-destructive",
-                  strength === 'medium' && "text-warning",
-                  strength === 'strong' && "text-success"
-                )}>
-                  {strengthInfo.label}
-                </span>
+              <span className="text-sm text-muted-foreground">密码要求:</span>
+              <div className="grid grid-cols-2 gap-2">
+                {PASSWORD_REQUIREMENTS.map((req) => {
+                  const isMet = req.check(password);
+                  return (
+                    <div key={req.id} className="flex items-center gap-2">
+                      <CheckCircle2 
+                        className={cn(
+                          "w-4 h-4 transition-colors",
+                          isMet ? "text-success" : "text-muted-foreground/40"
+                        )} 
+                        strokeWidth={1.5} 
+                      />
+                      <span className={cn(
+                        "text-xs transition-colors",
+                        isMet ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                        {req.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </motion.div>
           )}
