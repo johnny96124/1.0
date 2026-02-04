@@ -393,30 +393,19 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
   const [confirmed, setConfirmed] = useState(false);
   const { completeCloudBackup } = useWallet();
 
-  // Password strength calculation
-  const getPasswordStrength = (pwd: string): { level: 0 | 1 | 2 | 3; label: string; color: string } => {
-    if (!pwd) return { level: 0, label: '', color: '' };
-    
-    let score = 0;
-    if (pwd.length >= 8) score++;
-    if (pwd.length >= 12) score++;
-    if (/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^a-zA-Z0-9]/.test(pwd)) score++;
-    
-    if (score <= 2) return { level: 1, label: '弱', color: 'bg-destructive' };
-    if (score <= 3) return { level: 2, label: '中', color: 'bg-warning' };
-    return { level: 3, label: '强', color: 'bg-success' };
-  };
+  // Password requirements check
+  const passwordRequirements = [
+    { label: '最少16个字符', met: password.length >= 16 },
+    { label: '最少一个大写', met: /[A-Z]/.test(password) },
+    { label: '最少一个数字', met: /[0-9]/.test(password) },
+    { label: '最少一个特殊字符', met: /[^a-zA-Z0-9]/.test(password) },
+  ];
 
-  const passwordStrength = getPasswordStrength(password);
+  const allRequirementsMet = passwordRequirements.every(req => req.met);
 
   const validatePassword = () => {
-    if (password.length < 8 || password.length > 32) {
-      return '密码需要 8-32 位';
-    }
-    if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
-      return '密码必须包含字母和数字';
+    if (!allRequirementsMet) {
+      return '密码不符合要求';
     }
     if (password !== confirmPassword) {
       return '两次输入的密码不一致';
@@ -542,7 +531,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
             <div className="relative">
               <Input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="设置密码（8-32位，含字母和数字）"
+                placeholder="设置密码"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
@@ -559,30 +548,25 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
               </button>
             </div>
             
-            {/* Password strength indicator */}
-            {password && (
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1 flex-1">
-                  {[1, 2, 3].map((level) => (
-                    <div
-                      key={level}
-                      className={cn(
-                        'h-1.5 flex-1 rounded-full transition-all',
-                        passwordStrength.level >= level ? passwordStrength.color : 'bg-muted'
-                      )}
-                    />
-                  ))}
+            {/* Password requirements checklist */}
+            <div className="space-y-1.5 mt-2">
+              {passwordRequirements.map((req, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className={cn(
+                    'w-4 h-4 rounded-full flex items-center justify-center transition-colors',
+                    req.met ? 'bg-success' : 'bg-muted'
+                  )}>
+                    {req.met && <CheckCircle2 className="w-3 h-3 text-success-foreground" strokeWidth={2} />}
+                  </div>
+                  <span className={cn(
+                    'text-sm transition-colors',
+                    req.met ? 'text-foreground' : 'text-muted-foreground'
+                  )}>
+                    {req.label}
+                  </span>
                 </div>
-                <span className={cn(
-                  'text-xs font-medium',
-                  passwordStrength.level === 1 && 'text-destructive',
-                  passwordStrength.level === 2 && 'text-warning',
-                  passwordStrength.level === 3 && 'text-success'
-                )}>
-                  {passwordStrength.label}
-                </span>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
 
           <Input
@@ -641,7 +625,7 @@ function CloudBackupStep({ onComplete, onBackupSuccess }: { onComplete: () => vo
           size="lg"
           className="w-full h-12 text-base font-medium"
           onClick={handleBackup}
-          disabled={isLoading || !password || !confirmPassword || !confirmed}
+          disabled={isLoading || !allRequirementsMet || !confirmPassword || !confirmed}
         >
           {isLoading ? '备份中...' : '备份到 iCloud'}
         </Button>
