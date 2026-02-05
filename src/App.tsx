@@ -48,6 +48,7 @@ import BindEmailDemo from "./pages/BindEmailDemo";
 import LockScreenDemo from "./pages/LockScreenDemo";
 import NotFound from "./pages/NotFound";
 import TransactionDetail from "./pages/TransactionDetail";
+import EmailPreview from "./pages/EmailPreview";
 
 const queryClient = new QueryClient();
 
@@ -111,6 +112,7 @@ function AppRoutes() {
       <Route path="/set-password" element={<ProtectedRoute><SetPassword /></ProtectedRoute>} />
       <Route path="/bind-email-demo" element={<BindEmailDemo />} />
       <Route path="/lock-screen-demo" element={<LockScreenDemo />} />
+      <Route path="/email-preview" element={<EmailPreview />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
