@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { WalletProvider, useWallet } from "@/contexts/WalletContext";
 import { AppLockProvider } from "@/contexts/AppLockContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -120,6 +120,31 @@ function AppRoutes() {
   );
 }
 
+// Routes that should NOT be wrapped in PhoneFrame
+const FULLSCREEN_ROUTES = ['/email-preview-fullscreen'];
+
+function AppContent() {
+  const location = useLocation();
+  const isFullscreenRoute = FULLSCREEN_ROUTES.includes(location.pathname);
+
+  if (isFullscreenRoute) {
+    return (
+      <>
+        <Toaster />
+        <AppRoutes />
+      </>
+    );
+  }
+
+  return (
+    <PhoneFrame>
+      <Toaster />
+      <AppLockScreen />
+      <AppRoutes />
+    </PhoneFrame>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
@@ -128,11 +153,7 @@ const App = () => (
           <AppLockProvider>
             <TooltipProvider>
               <BrowserRouter>
-                <PhoneFrame>
-                  <Toaster />
-                  <AppLockScreen />
-                  <AppRoutes />
-                </PhoneFrame>
+                <AppContent />
               </BrowserRouter>
             </TooltipProvider>
           </AppLockProvider>
