@@ -49,6 +49,7 @@ import LockScreenDemo from "./pages/LockScreenDemo";
 import NotFound from "./pages/NotFound";
 import TransactionDetail from "./pages/TransactionDetail";
 import EmailPreview from "./pages/EmailPreview";
+import EmailPreviewFullscreen from "./pages/EmailPreviewFullscreen";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,7 @@ function AppRoutes() {
       <Route path="/bind-email-demo" element={<BindEmailDemo />} />
       <Route path="/lock-screen-demo" element={<LockScreenDemo />} />
       <Route path="/email-preview" element={<EmailPreview />} />
+      <Route path="/email-preview-fullscreen" element={<EmailPreviewFullscreen />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
