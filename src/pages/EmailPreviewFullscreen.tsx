@@ -128,7 +128,7 @@ const EmailPreviewFullscreen: React.FC = () => {
               transition={{ delay: 0.2, duration: 0.4 }}
               style={{ textAlign: 'center', marginBottom: '24px' }}
             >
-              <img src={coboLogo} alt="Cobo" style={{ height: '32px', width: 'auto' }} />
+              <img src={coboLogo} alt="Cobo" style={{ height: '32px', width: 'auto', display: 'inline-block' }} />
             </motion.div>
 
             {/* 主内容卡片 */}
