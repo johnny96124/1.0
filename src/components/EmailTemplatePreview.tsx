@@ -2,6 +2,7 @@
  import { Shield, ChevronDown } from 'lucide-react';
  import { cn } from '@/lib/utils';
  import coboLogo from '@/assets/cobo-logo.svg';
+import { Monitor } from 'lucide-react';
  import {
    Select,
    SelectContent,
@@ -53,7 +54,7 @@
    return (
      <div
        style={{
-         backgroundColor: '#F9FAFB',
+        background: 'linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)',
          padding: '40px 20px',
          fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
        }}
@@ -71,6 +72,7 @@
            style={{
              height: '32px',
              width: 'auto',
+            display: 'inline-block',
            }}
          />
        </div>
@@ -79,17 +81,17 @@
        <div
          style={{
            backgroundColor: '#FFFFFF',
-           borderRadius: '12px',
+          borderRadius: '16px',
            padding: '32px',
            maxWidth: '480px',
            margin: '0 auto',
-           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05)',
          }}
        >
          {/* 标题 */}
          <h1
            style={{
-             fontSize: '20px',
+            fontSize: '22px',
              fontWeight: '600',
              color: '#1C1C1E',
              margin: '0 0 8px 0',
@@ -104,7 +106,7 @@
            style={{
              fontSize: '14px',
              color: '#6B7280',
-             margin: '0 0 24px 0',
+            margin: '0 0 28px 0',
              textAlign: 'center',
            }}
          >
@@ -114,20 +116,22 @@
          {/* 验证码区域 */}
          <div
            style={{
-             backgroundColor: '#F4F4F5',
-             borderRadius: '8px',
-             padding: '20px 32px',
+            background: 'linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%)',
+            borderRadius: '12px',
+            padding: '24px 32px',
              textAlign: 'center',
              marginBottom: '16px',
+            border: '1px solid rgba(0, 0, 0, 0.04)',
            }}
          >
            <div
              style={{
-               fontSize: '32px',
+              fontSize: '36px',
                fontWeight: '700',
-               fontFamily: "'Courier New', monospace",
-               letterSpacing: '8px',
-               color: '#1C1C1E',
+              fontFamily: "'SF Mono', 'Courier New', monospace",
+              letterSpacing: '12px',
+              color: '#1F32D6',
+              textShadow: '0 1px 2px rgba(31, 50, 214, 0.1)',
              }}
            >
              {code}
@@ -143,15 +147,15 @@
              textAlign: 'center',
            }}
          >
-           验证码 {expiresIn} 分钟内有效
+          验证码 <span style={{ fontWeight: 600, color: '#374151' }}>{expiresIn} 分钟</span>内有效
          </p>
  
          {/* 安全提示区域 */}
          <div
            style={{
-             backgroundColor: '#FEF3C7',
-             border: '1px solid rgba(245, 158, 11, 0.3)',
-             borderRadius: '8px',
+            background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)',
+            border: '1px solid rgba(245, 158, 11, 0.2)',
+            borderRadius: '12px',
              padding: '16px',
            }}
          >
@@ -164,21 +168,22 @@
            >
              <div
                style={{
-                 width: '24px',
-                 height: '24px',
-                 borderRadius: '50%',
-                 backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)',
                  display: 'flex',
                  alignItems: 'center',
                  justifyContent: 'center',
                  flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)',
                }}
              >
                <Shield
                  style={{
                    width: '14px',
                    height: '14px',
-                   color: '#F59E0B',
+                  color: '#FFFFFF',
                  }}
                />
              </div>
@@ -186,7 +191,7 @@
                <p
                  style={{
                    fontSize: '13px',
-                   fontWeight: '500',
+                  fontWeight: '600',
                    color: '#92400E',
                    margin: '0 0 4px 0',
                  }}
@@ -198,7 +203,7 @@
                    fontSize: '12px',
                    color: '#A16207',
                    margin: '0',
-                   lineHeight: '1.5',
+                  lineHeight: '1.6',
                  }}
                >
                  请勿将验证码分享给任何人，包括 Cobo 工作人员。我们不会以任何方式索取您的验证码。
@@ -244,15 +249,20 @@
    const [code] = useState('835927');
  
    return (
-     <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
        {/* 控制面板 */}
-       <div className="sticky top-0 z-10 bg-card border-b border-border p-4">
+      <div className="sticky top-0 z-10 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 p-4">
          <div className="max-w-[480px] mx-auto">
-           <h2 className="text-lg font-semibold text-foreground mb-3">邮件模版预览</h2>
-           <div className="flex items-center gap-3">
-             <span className="text-sm text-muted-foreground">验证类型:</span>
+          <h2 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            邮件模版预览
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-full">
+              移动端
+            </span>
+          </h2>
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50/80 rounded-xl border border-gray-200/50">
+            <span className="text-sm text-gray-600">验证类型:</span>
              <Select value={type} onValueChange={(v) => setType(v as VerificationType)}>
-               <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[140px] bg-white border-gray-200 shadow-sm">
                  <SelectValue />
                </SelectTrigger>
                <SelectContent>
@@ -268,9 +278,20 @@
        </div>
  
        {/* 邮件预览 */}
-       <div className="py-6">
+      <div className="py-4">
          <EmailTemplate code={code} type={type} expiresIn={10} />
        </div>
+
+      {/* 切换到桌面端 */}
+      <div className="pb-6 text-center">
+        <a
+          href="/email-preview-fullscreen"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-500 hover:text-gray-700 bg-white/60 hover:bg-white/80 rounded-full border border-gray-200/50 backdrop-blur-sm transition-all duration-200"
+        >
+          <Monitor className="w-4 h-4" />
+          切换到桌面端预览
+        </a>
+      </div>
      </div>
    );
  };
